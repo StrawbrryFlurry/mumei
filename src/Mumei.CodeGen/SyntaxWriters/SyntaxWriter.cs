@@ -7,51 +7,58 @@ public class SyntaxWriter {
   internal const int IndentSpacing = 2;
 
   private readonly StringBuilder _code = new();
-  private int _indentLevel;
+  private int _indentLevelLevel;
 
   private string _indentString = "";
 
-  protected internal int IndentLevel {
-    get => _indentLevel;
+  protected internal int IndentLevelLevel {
+    get => _indentLevelLevel;
     set {
-      _indentLevel = value > 0 ? value : 0;
+      _indentLevelLevel = value > 0 ? value : 0;
       RecalculateIndent();
     }
   }
 
+  public SyntaxWriter() {
+  }
+
+  protected SyntaxWriter(int indentLevel) {
+    IndentLevelLevel = indentLevel;
+  }
+
   private void RecalculateIndent() {
-    var indentationCharCount = IndentLevel * IndentSpacing;
+    var indentationCharCount = IndentLevelLevel * IndentSpacing;
     _indentString = new string(IndentChar, indentationCharCount);
   }
 
   protected internal void Indent() {
-    IndentLevel++;
+    IndentLevelLevel++;
   }
 
   protected internal void UnIndent() {
-    IndentLevel--;
+    IndentLevelLevel--;
   }
 
   protected internal void SetIndentLevel(int level) {
-    IndentLevel = level;
+    IndentLevelLevel = level;
   }
 
   /// <summary>
-  ///   Writes the specified text to the code buffer
+  ///   Writes the specified text to the line
   ///   adding the indentation before the text.
   /// </summary>
   /// <param name="text"></param>
-  protected internal void WriteWithIndent(string text) {
+  protected internal void WriteLineStart(string text) {
     _code.Append(GetIndent());
     _code.Append(text);
   }
 
   /// <summary>
-  ///   Writes the specified text to the code buffer
-  ///   without any indentation. Adds a newline after the text.
+  ///   Appends text to the current line.
+  ///   Adds a newline after the text.
   /// </summary>
   /// <param name="line"></param>
-  protected internal void WriteNewLine(string line) {
+  protected internal void WriteLineEnd(string line) {
     _code.AppendLine(line);
   }
 
@@ -64,8 +71,9 @@ public class SyntaxWriter {
   }
 
   /// <summary>
-  ///   Adds a new line to the code buffer adding the
-  ///   current indentation at the beginning.
+  ///   Writes a new line to the code buffer
+  ///   adding indentation at the start. Ends
+  ///   the line with a newline.
   /// </summary>
   /// <param name="line"></param>
   protected internal void WriteLine(string line) {
@@ -77,7 +85,7 @@ public class SyntaxWriter {
     return _indentString;
   }
 
-  public override string ToString() {
+  public virtual string ToSyntax() {
     return _code.ToString();
   }
 }

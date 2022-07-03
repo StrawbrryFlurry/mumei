@@ -65,15 +65,15 @@ public class ClassSyntaxBuilder : SyntaxWriter {
 
   public override string ToString() {
     var visibility = _visibility.ToVisibilityString();
-    WriteWithIndent($"{visibility} class {_name} ");
+    WriteLineStart($"{visibility} class {_name} ");
 
     if (HasBaseTypes) {
       WriteDerivedTypesToClassDefinition();
     }
 
-    WriteNewLine("{");
+    WriteLineEnd("{");
     WriteLine("}");
-    return base.ToString();
+    return base.ToSyntax();
   }
 
   private void WriteDerivedTypesToClassDefinition() {

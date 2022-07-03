@@ -28,11 +28,11 @@ public class SyntaxWriterTest {
   public void Indent_IncreasesTheIndentationByOne() {
     var sut = new SyntaxWriter();
 
-    sut.IndentLevel.Should().Be(0);
+    sut.IndentLevelLevel.Should().Be(0);
 
     sut.Indent();
 
-    sut.IndentLevel.Should().Be(1);
+    sut.IndentLevelLevel.Should().Be(1);
   }
 
   [Fact]
@@ -41,49 +41,49 @@ public class SyntaxWriterTest {
 
     sut.Indent();
 
-    sut.IndentLevel.Should().Be(1);
+    sut.IndentLevelLevel.Should().Be(1);
 
     sut.UnIndent();
 
-    sut.IndentLevel.Should().Be(0);
+    sut.IndentLevelLevel.Should().Be(0);
   }
 
   [Fact]
   public void UnIndent_DoesNothing_WhenIndentLevelIsZero() {
     var sut = new SyntaxWriter();
 
-    sut.IndentLevel.Should().Be(0);
+    sut.IndentLevelLevel.Should().Be(0);
 
     sut.UnIndent();
 
-    sut.IndentLevel.Should().Be(0);
+    sut.IndentLevelLevel.Should().Be(0);
   }
 
   [Fact]
   public void IndentLevel_DoesNotAllowValuesBelowZero_WhenTheyAreSet() {
     var sut = new SyntaxWriter();
 
-    sut.IndentLevel = -1;
+    sut.IndentLevelLevel = -1;
 
-    sut.IndentLevel.Should().Be(0);
+    sut.IndentLevelLevel.Should().Be(0);
   }
 
   [Fact]
   public void SetIndentLevel_SetsIndentLevel() {
     var sut = new SyntaxWriter();
 
-    sut.IndentLevel.Should().Be(0);
+    sut.IndentLevelLevel.Should().Be(0);
 
     sut.SetIndentLevel(1);
 
-    sut.IndentLevel.Should().Be(1);
+    sut.IndentLevelLevel.Should().Be(1);
   }
 
   [Fact]
   public void SettingIndentLevel_RecalculatesTheIndent_WhenItIsCalled() {
     var sut = new SyntaxWriter();
 
-    sut.IndentLevel = 2;
+    sut.IndentLevelLevel = 2;
 
     sut.GetIndent().Should().Be(IndentationString(2));
   }
@@ -93,7 +93,7 @@ public class SyntaxWriterTest {
     var sut = new SyntaxWriter();
 
     sut.WriteLine("line");
-    var code = sut.ToString();
+    var code = sut.ToSyntax();
 
     code.Should().Be(Line("line"));
   }
@@ -113,7 +113,7 @@ public class SyntaxWriterTest {
 
     sut.WriteLine("}");
 
-    var code = sut.ToString();
+    var code = sut.ToSyntax();
 
     var expected = Line("class Foo {") +
                    IndentedLine("public void Bar() {", 1) +
@@ -128,8 +128,8 @@ public class SyntaxWriterTest {
     var sut = new SyntaxWriter();
 
     sut.Write("class Foo ");
-    sut.WriteNewLine("{");
-    var code = sut.ToString();
+    sut.WriteLineEnd("{");
+    var code = sut.ToSyntax();
 
     code.Should().Be(Line("class Foo {"));
   }
@@ -139,7 +139,7 @@ public class SyntaxWriterTest {
     var sut = new SyntaxWriter();
 
     sut.Write("class Foo ");
-    var code = sut.ToString();
+    var code = sut.ToSyntax();
 
     code.Should().Be("class Foo ");
   }
