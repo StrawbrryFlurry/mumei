@@ -12,7 +12,7 @@ public class AttributeSyntaxWriterTest {
 
     sut.WriteAttribute(typeof(StateMachineAttribute));
 
-    sut.ToString().Should().Be(Line("[StateMachine()]"));
+    sut.ToSyntax().Should().Be(Line("[StateMachine()]"));
   }
 
   [Fact]
@@ -21,7 +21,7 @@ public class AttributeSyntaxWriterTest {
 
     sut.WriteAttribute(typeof(StateMachineAttribute), "StateMachine");
 
-    sut.ToString().Should().Be(Line("[StateMachine(\"StateMachine\")]"));
+    sut.ToSyntax().Should().Be(Line("[StateMachine(\"StateMachine\")]"));
   }
 
   [Fact]
@@ -30,7 +30,7 @@ public class AttributeSyntaxWriterTest {
 
     sut.WriteAttribute(typeof(StateMachineAttribute), "StateMachine", typeof(IEnumerable<string>));
 
-    sut.ToString().Should().Be(Line("[StateMachine(\"StateMachine\", typeof(IEnumerable<String>))]"));
+    sut.ToSyntax().Should().Be(Line("[StateMachine(\"StateMachine\", typeof(IEnumerable<String>))]"));
   }
 
   [Fact]

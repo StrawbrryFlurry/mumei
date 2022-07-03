@@ -6,15 +6,18 @@ public class AttributeSyntaxWriter : TypeAwareSyntaxWriter {
   public AttributeSyntaxWriter(WriterTypeContext ctx) : base(ctx) {
   }
 
+  public AttributeSyntaxWriter(int indentLevel, WriterTypeContext ctx) : base(indentLevel, ctx) {
+  }
+
   public void WriteAttribute(Type attributeType, params object[] arguments) {
     IncludeTypeNamespace(attributeType);
-    Write($"[{attributeType.GetAttributeName()}(");
+    WriteLineStart($"[{attributeType.GetAttributeName()}(");
 
     if (arguments.Any()) {
       WriteAttributeArguments(arguments);
     }
 
-    WriteNewLine(")]");
+    WriteLineEnd(")]");
   }
 
   private void WriteAttributeArguments(object[] arguments) {

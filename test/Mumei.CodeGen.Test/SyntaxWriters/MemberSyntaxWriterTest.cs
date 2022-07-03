@@ -3,10 +3,10 @@ using static Mumei.Test.Utils.StringExtensions;
 
 namespace Mumei.Test.SyntaxWriters;
 
-public class MemberCodeBuilderTest {
+public class MemberSyntaxWriterTest {
   [Fact]
   public void WriteBlock_CreatesABlockWithTheSpecifiedStatements() {
-    var builder = new MemberSyntaxWriter();
+    var builder = new MemberSyntaxWriter(0, null);
 
     builder.WriteBlock(() => {
       builder.WriteLine("line 1");
