@@ -10,6 +10,7 @@ public class SyntaxWriter {
   private int _indentLevelLevel;
 
   private string _indentString = "";
+  internal string NewLine = Environment.NewLine;
 
   protected internal int IndentLevelLevel {
     get => _indentLevelLevel;
@@ -17,13 +18,6 @@ public class SyntaxWriter {
       _indentLevelLevel = value > 0 ? value : 0;
       RecalculateIndent();
     }
-  }
-
-  public SyntaxWriter() {
-  }
-
-  protected SyntaxWriter(int indentLevel) {
-    IndentLevelLevel = indentLevel;
   }
 
   private void RecalculateIndent() {

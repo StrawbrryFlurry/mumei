@@ -1,10 +1,11 @@
 ﻿// ReSharper disable once CheckNamespace
 
+using Mumei.CodeGen.Syntax;
 using Mumei.CodeGen.SyntaxWriters;
 
 namespace Mumei.CodeGen.SyntaxBuilders;
 
-public abstract class TypeSyntax : Syntax {
+public abstract class TypeSyntax : Syntax.Syntax {
   private readonly List<MemberSyntax> _members = new();
 
   public Type[] TypeArguments;

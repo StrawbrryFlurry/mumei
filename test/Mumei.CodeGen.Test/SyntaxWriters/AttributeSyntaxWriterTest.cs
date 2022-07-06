@@ -1,8 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using FluentAssertions;
-using Mumei.CodeGen.SyntaxBuilders;
+using Mumei.CodeGen.Syntax;
 using Mumei.CodeGen.SyntaxWriters;
-using static Mumei.Test.Utils.StringExtensions;
 
 namespace Mumei.Test.SyntaxWriters;
 
@@ -14,7 +13,7 @@ public class AttributeSyntaxWriterTest {
 
     sut.WriteAttribute(attribute);
 
-    sut.ToSyntax().Should().Be(Line("[StateMachine()]"));
+    sut.ToSyntax().Should().Be("[StateMachine()]");
   }
 
   [Fact]
@@ -24,7 +23,7 @@ public class AttributeSyntaxWriterTest {
 
     sut.WriteAttribute(attribute);
 
-    sut.ToSyntax().Should().Be(Line("[StateMachine(\"StateMachine\")]"));
+    sut.ToSyntax().Should().Be("[StateMachine(\"StateMachine\")]");
   }
 
   [Fact]
@@ -34,7 +33,7 @@ public class AttributeSyntaxWriterTest {
 
     sut.WriteAttribute(attribute);
 
-    sut.ToSyntax().Should().Be(Line("[StateMachine(\"StateMachine\", typeof(IEnumerable<String>))]"));
+    sut.ToSyntax().Should().Be("[StateMachine(\"StateMachine\", typeof(IEnumerable<String>))]");
   }
 
   [Fact]
@@ -46,7 +45,7 @@ public class AttributeSyntaxWriterTest {
 
     sut.WriteAttribute(attribute);
 
-    sut.ToSyntax().Should().Be(Line("[StateMachine(Parameter: \"StateMachine\")]"));
+    sut.ToSyntax().Should().Be("[StateMachine(Parameter: \"StateMachine\")]");
   }
 
   [Fact]
@@ -60,7 +59,7 @@ public class AttributeSyntaxWriterTest {
 
     sut.WriteAttribute(attribute);
 
-    sut.ToSyntax().Should().Be(Line("[StateMachine(Field = \"StateMachine\")]"));
+    sut.ToSyntax().Should().Be("[StateMachine(Field = \"StateMachine\")]");
   }
 
   [Fact]
@@ -78,7 +77,7 @@ public class AttributeSyntaxWriterTest {
 
     sut.ToSyntax()
        .Should()
-       .Be(Line("[StateMachine(\"StateMachine\", NamedParameter: \"State\", NamedField = \"Machine\")]"));
+       .Be("[StateMachine(\"StateMachine\", NamedParameter: \"State\", NamedField = \"Machine\")]");
   }
 
   [Fact]

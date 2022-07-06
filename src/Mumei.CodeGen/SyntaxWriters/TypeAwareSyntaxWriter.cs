@@ -11,11 +11,7 @@ public class TypeAwareSyntaxWriter : SyntaxWriter {
     _ctx = ctx;
   }
 
-  public TypeAwareSyntaxWriter(int indentLevel, SyntaxTypeContext ctx) : base(indentLevel) {
-    _ctx = ctx;
-  }
-
-  protected internal void IncludeTypeNamespace(Type type) {
+  public void IncludeTypeNamespace(Type type) {
     var ns = type.Namespace;
 
     if (ns is not null) {

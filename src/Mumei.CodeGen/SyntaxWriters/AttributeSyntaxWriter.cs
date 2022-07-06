@@ -1,6 +1,5 @@
-﻿using System.Runtime.CompilerServices;
-using Mumei.CodeGen.Extensions;
-using Mumei.CodeGen.SyntaxBuilders;
+﻿using Mumei.CodeGen.Extensions;
+using Mumei.CodeGen.Syntax;
 
 namespace Mumei.CodeGen.SyntaxWriters;
 
@@ -8,10 +7,21 @@ public class AttributeSyntaxWriter : TypeAwareSyntaxWriter {
   public AttributeSyntaxWriter(SyntaxTypeContext ctx) : base(ctx) {
   }
 
-  public AttributeSyntaxWriter(int indentLevel, SyntaxTypeContext ctx) : base(indentLevel, ctx) {
+  public void WriteAttributes(AttributeUsage[] attributes, bool sameLine = false) {
+    var separator = sameLine ? " " : NewLine;
+
+    for (var i = 0; i < attributes.Length; i++) {
+      var attribute = attributes[i];
+      WriteAttribute(attribute);
+
+      var shouldNotAppendSpace = i == attributes.Length - 1 && sameLine;
+
+      if (!shouldNotAppendSpace) {
+        Write(separator);
+      }
+    }
   }
 
-  [StateMachine(typeof(string))]
   public void WriteAttribute(AttributeUsage attribute) {
     var attributeType = attribute.Type;
     var positionalArguments = attribute.Arguments;
@@ -34,7 +44,7 @@ public class AttributeSyntaxWriter : TypeAwareSyntaxWriter {
       WriteNamedAttributeArguments(namedArguments);
     }
 
-    WriteLineEnd(")]");
+    Write(")]");
   }
 
   private void WritePositionalAttributeArguments(object[] arguments) {
