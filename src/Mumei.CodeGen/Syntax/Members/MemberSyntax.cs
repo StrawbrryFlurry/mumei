@@ -1,4 +1,4 @@
-﻿namespace Mumei.CodeGen.SyntaxBuilders;
+﻿namespace Mumei.CodeGen.Syntax;
 
 public abstract class MemberSyntax : Syntax {
   public readonly string Name;

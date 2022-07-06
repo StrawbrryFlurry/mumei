@@ -1,4 +1,5 @@
-﻿using Mumei.CodeGen.SyntaxWriters;
+﻿using Mumei.CodeGen.Syntax;
+using Mumei.CodeGen.SyntaxWriters;
 
 // ReSharper disable once CheckNamespace
 namespace Mumei.CodeGen.SyntaxBuilders;

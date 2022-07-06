@@ -1,5 +1,5 @@
 ﻿using FluentAssertions;
-using Mumei.CodeGen.SyntaxBuilders;
+using Mumei.CodeGen.Syntax;
 using Mumei.CodeGen.SyntaxWriters;
 using static Mumei.Test.Utils.StringExtensions;
 

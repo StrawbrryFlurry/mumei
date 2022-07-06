@@ -1,4 +1,4 @@
-﻿namespace Mumei.CodeGen.SyntaxBuilders;
+﻿namespace Mumei.CodeGen.Syntax;
 
-public class FieldSyntaxBuilder {
+public class FieldSyntaxBuilder : ISyntaxBuilder {
 }
