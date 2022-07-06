@@ -2,11 +2,11 @@
 
 namespace Mumei.CodeGen.SyntaxBuilders;
 
-public abstract class MemberSyntaxBuilder : MemberSyntaxWriter, ISyntaxBuilder {
-  private readonly WriterTypeContext _ctx;
+public abstract class MemberSyntaxBuilder {
+  private readonly SyntaxTypeContext _ctx;
   protected readonly List<Tuple<Type, object[]>> Attributes = new();
 
-  public MemberSyntaxBuilder(int indentLevel, WriterTypeContext ctx) : base(indentLevel, ctx) {
+  public MemberSyntaxBuilder(int indentLevel, SyntaxTypeContext ctx) {
     _ctx = ctx;
   }
 
@@ -21,10 +21,10 @@ public abstract class MemberSyntaxBuilder : MemberSyntaxWriter, ISyntaxBuilder {
   }
 
   protected internal string GetAttributeString() {
-    var writer = new AttributeSyntaxWriter(BaseIndentLevel, _ctx);
+    var writer = new AttributeSyntaxWriter(0, _ctx);
 
     foreach (var (attributeType, arguments) in Attributes) {
-      writer.WriteAttribute(attributeType, arguments);
+      // writer.WriteAttribute(attributeType, arguments);
     }
 
     return writer.ToSyntax();

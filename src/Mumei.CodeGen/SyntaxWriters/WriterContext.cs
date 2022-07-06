@@ -1,6 +1,6 @@
 ﻿namespace Mumei.CodeGen.SyntaxWriters;
 
-public class WriterTypeContext {
+public class SyntaxTypeContext {
   private readonly HashSet<string> _usedNamespaces = new();
   internal IEnumerable<string> UsedNamespaces => _usedNamespaces;
 

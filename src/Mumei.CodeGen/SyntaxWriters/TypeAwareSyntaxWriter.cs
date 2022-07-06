@@ -5,13 +5,13 @@ using Mumei.CodeGen.Extensions;
 namespace Mumei.CodeGen.SyntaxWriters;
 
 public class TypeAwareSyntaxWriter : SyntaxWriter {
-  private readonly WriterTypeContext _ctx;
+  private readonly SyntaxTypeContext _ctx;
 
-  public TypeAwareSyntaxWriter(WriterTypeContext ctx) {
+  public TypeAwareSyntaxWriter(SyntaxTypeContext ctx) {
     _ctx = ctx;
   }
 
-  public TypeAwareSyntaxWriter(int indentLevel, WriterTypeContext ctx) : base(indentLevel) {
+  public TypeAwareSyntaxWriter(int indentLevel, SyntaxTypeContext ctx) : base(indentLevel) {
     _ctx = ctx;
   }
 
@@ -33,31 +33,31 @@ public class TypeAwareSyntaxWriter : SyntaxWriter {
     }
   }
 
-  protected internal string ConvertValueToStringRepresentation(object value) {
+  protected internal string ConvertExpressionValueToSyntax(object value) {
     return value switch {
       bool b => b ? "true" : "false",
       Enum e => $"{e.GetType().Name}.{e}",
-      Type {IsGenericType: true} type => $"typeof({GetGenericTypeValueAsString(type)})",
-      Type type => $"typeof({GetTypeValueAsString(type)})",
-      _ => GetUnknownValueAsString(value)
+      Type {IsGenericType: true} type => $"typeof({GetGenericTypeofExpressionAsString(type)})",
+      Type type => $"typeof({GetTypeofExpressionAsString(type)})",
+      _ => GetUnknownExpressionValueAsString(value)
     };
   }
 
-  private string GetGenericTypeValueAsString(Type type) {
-    var genericName = GetTypeValueAsString(type);
+  private string GetGenericTypeofExpressionAsString(Type type) {
+    var genericName = GetTypeofExpressionAsString(type);
     var typeName = Regex.Replace(genericName, "`.*", "");
     var genericArguments = type.GetGenericArguments();
 
-    var genericArgumentString = genericArguments.Select(GetTypeValueAsString).JoinBy(", ");
+    var genericArgumentString = genericArguments.Select(GetTypeofExpressionAsString).JoinBy(", ");
     return $"{typeName}<{genericArgumentString}>";
   }
 
-  private string GetTypeValueAsString(Type type) {
+  private string GetTypeofExpressionAsString(Type type) {
     IncludeTypeNamespace(type);
     return type.Name;
   }
 
-  private string GetUnknownValueAsString(object value) {
+  private string GetUnknownExpressionValueAsString(object value) {
     return Expression.Constant(value).ToString();
   }
 }

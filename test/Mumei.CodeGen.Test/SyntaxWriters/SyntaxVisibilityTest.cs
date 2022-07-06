@@ -6,7 +6,7 @@ namespace Mumei.Test.SyntaxWriters;
 public class SyntaxVisibilityTest {
   [Fact]
   public void Tostring_ReturnsSingleVisibilityAsString() {
-    var sut = MemberVisibility.Public;
+    var sut = SyntaxVisibility.Public;
 
     var actual = sut.ToVisibilityString();
 
@@ -15,7 +15,7 @@ public class SyntaxVisibilityTest {
 
   [Fact]
   public void ToString_ReturnsAllVisibilitiesSeparatedBySpaces_WhenVisibilityHasMultipleFlagsSet() {
-    var sut = MemberVisibility.Internal | MemberVisibility.Protected;
+    var sut = SyntaxVisibility.Internal | SyntaxVisibility.Protected;
 
     var actual = sut.ToVisibilityString();
 

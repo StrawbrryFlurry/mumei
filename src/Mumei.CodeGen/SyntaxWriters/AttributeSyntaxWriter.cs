@@ -1,27 +1,60 @@
-﻿using Mumei.CodeGen.Extensions;
+﻿using System.Runtime.CompilerServices;
+using Mumei.CodeGen.Extensions;
+using Mumei.CodeGen.SyntaxBuilders;
 
 namespace Mumei.CodeGen.SyntaxWriters;
 
 public class AttributeSyntaxWriter : TypeAwareSyntaxWriter {
-  public AttributeSyntaxWriter(WriterTypeContext ctx) : base(ctx) {
+  public AttributeSyntaxWriter(SyntaxTypeContext ctx) : base(ctx) {
   }
 
-  public AttributeSyntaxWriter(int indentLevel, WriterTypeContext ctx) : base(indentLevel, ctx) {
+  public AttributeSyntaxWriter(int indentLevel, SyntaxTypeContext ctx) : base(indentLevel, ctx) {
   }
 
-  public void WriteAttribute(Type attributeType, params object[] arguments) {
+  [StateMachine(typeof(string))]
+  public void WriteAttribute(AttributeUsage attribute) {
+    var attributeType = attribute.Type;
+    var positionalArguments = attribute.Arguments;
+    var namedArguments = attribute.NamedArguments;
+
     IncludeTypeNamespace(attributeType);
     WriteLineStart($"[{attributeType.GetAttributeName()}(");
 
-    if (arguments.Any()) {
-      WriteAttributeArguments(arguments);
+    var hasPositionalArguments = positionalArguments.Any();
+
+    if (hasPositionalArguments) {
+      WritePositionalAttributeArguments(positionalArguments);
+    }
+
+    if (namedArguments.Any()) {
+      if (hasPositionalArguments) {
+        Write(", ");
+      }
+
+      WriteNamedAttributeArguments(namedArguments);
     }
 
     WriteLineEnd(")]");
   }
 
-  private void WriteAttributeArguments(object[] arguments) {
-    var argumentString = arguments.Select(ConvertValueToStringRepresentation).JoinBy(", ");
+  private void WritePositionalAttributeArguments(object[] arguments) {
+    var argumentString = arguments.Select(ConvertExpressionValueToSyntax).JoinBy(", ");
     Write(argumentString);
+  }
+
+  private void WriteNamedAttributeArguments(Dictionary<NamedAttributeParameter, object> arguments) {
+    var argumentString = arguments.Select(e => {
+      var parameter = e.Key;
+      var separator = GetNamedParameterSeparator(parameter);
+      var value = ConvertExpressionValueToSyntax(e.Value);
+
+      return $"{parameter.Name}{separator} {value}";
+    }).JoinBy(", ");
+
+    Write(argumentString);
+  }
+
+  private string GetNamedParameterSeparator(NamedAttributeParameter parameter) {
+    return parameter.IsField ? " =" : ":";
   }
 }
