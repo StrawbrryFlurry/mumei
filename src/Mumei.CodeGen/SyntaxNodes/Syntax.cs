@@ -9,6 +9,8 @@ public abstract class Syntax {
   public SyntaxVisibility Visibility { get; init; } = SyntaxVisibility.None;
   public AttributeUsage[] Attributes { get; init; } = Array.Empty<AttributeUsage>();
 
+  public bool HasAttributes => Attributes.Length > 0;
+
   protected Syntax(string name) {
     Name = name;
     TypeContext = new SyntaxTypeContext();

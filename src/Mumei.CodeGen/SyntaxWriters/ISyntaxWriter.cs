@@ -15,26 +15,34 @@ public interface ISyntaxWriter {
   ///   adding the indentation before the text.
   /// </summary>
   /// <param name="text"></param>
-  public void WriteLineStart(string text);
+  public ISyntaxWriter WriteLineStart(string text);
 
   /// <summary>
   ///   Appends text to the current line.
   ///   Adds a newline after the text.
   /// </summary>
   /// <param name="line"></param>
-  public void WriteLineEnd(string line);
+  public ISyntaxWriter WriteLineEnd(string line);
 
   /// <summary>
   ///   Appends text to the current line.
   /// </summary>
   /// <param name="text"></param>
-  public void Write(string text);
+  public ISyntaxWriter Write(string text);
 
   /// <summary>
   ///   Appends the syntax to the current line
   /// </summary>
   /// <param name="syntax"></param>
-  public void Write(Syntax syntax);
+  public ISyntaxWriter Write(Syntax syntax);
+
+  /// <summary>
+  ///   Appends the string value of the
+  ///   visibility with a space at the end
+  ///   to the current line.
+  /// </summary>
+  /// <param name="visibility"></param>
+  public ISyntaxWriter Write(SyntaxVisibility visibility);
 
   /// <summary>
   ///   Writes a new line to the code buffer
@@ -42,7 +50,7 @@ public interface ISyntaxWriter {
   ///   the line with a newline.
   /// </summary>
   /// <param name="line"></param>
-  public void WriteLine(string line);
+  public ISyntaxWriter WriteLine(string line);
 
   public string GetIndent();
   public string ToSyntax();

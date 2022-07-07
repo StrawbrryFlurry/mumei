@@ -155,6 +155,16 @@ public class SyntaxWriterTest {
     code.Should().Be("Foo");
   }
 
+  [Fact]
+  public void Write_AppendsSyntaxVisibilityToLine_WhenArgumentIsSyntaxVisibility() {
+    var sut = new SyntaxWriter();
+
+    sut.Write(SyntaxVisibility.Public | SyntaxVisibility.New);
+    var code = sut.ToSyntax();
+
+    code.Should().Be("public new ");
+  }
+
   private class FooSyntax : Syntax {
     public FooSyntax(string name) : base(name) {
     }

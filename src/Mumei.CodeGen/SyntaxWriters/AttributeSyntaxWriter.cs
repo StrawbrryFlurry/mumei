@@ -48,7 +48,7 @@ public class AttributeSyntaxWriter : TypeAwareSyntaxWriter {
   }
 
   private void WritePositionalAttributeArguments(object[] arguments) {
-    var argumentString = arguments.Select(ConvertExpressionValueToSyntax).JoinBy(", ");
+    var argumentString = arguments.Select(GetValueAsExpressionSyntax).JoinBy(", ");
     Write(argumentString);
   }
 
@@ -56,7 +56,7 @@ public class AttributeSyntaxWriter : TypeAwareSyntaxWriter {
     var argumentString = arguments.Select(e => {
       var parameter = e.Key;
       var separator = GetNamedParameterSeparator(parameter);
-      var value = ConvertExpressionValueToSyntax(e.Value);
+      var value = GetValueAsExpressionSyntax(e.Value);
 
       return $"{parameter.Name}{separator} {value}";
     }).JoinBy(", ");

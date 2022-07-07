@@ -16,7 +16,7 @@ public interface ITypeAwareSyntaxWriter : ISyntaxWriter {
   /// </summary>
   /// <param name="value"></param>
   /// <returns></returns>
-  public string ConvertExpressionValueToSyntax(object value);
+  public void WriteValueAsExpressionSyntax(object value);
 
   /// <summary>
   ///   Returns the name of a type as it is used in the syntax.
@@ -24,5 +24,5 @@ public interface ITypeAwareSyntaxWriter : ISyntaxWriter {
   /// </summary>
   /// <param name="type"></param>
   /// <returns></returns>
-  public string GetTypeNameAsString(Type type);
+  public void WriteTypeName(Type type);
 }

@@ -29,16 +29,24 @@ public class TypeAwareSyntaxWriter : SyntaxWriter, ITypeAwareSyntaxWriter {
     }
   }
 
-  public string ConvertExpressionValueToSyntax(object value) {
+  public void WriteValueAsExpressionSyntax(object value) {
+    Write(GetValueAsExpressionSyntax(value));
+  }
+
+  public void WriteTypeName(Type type) {
+    Write(GetTypeName(type));
+  }
+
+  protected internal string GetValueAsExpressionSyntax(object value) {
     return value switch {
       bool b => b ? "true" : "false",
       Enum e => $"{e.GetType().Name}.{e}",
-      Type type => $"typeof({GetTypeNameAsString(type)})",
+      Type type => $"typeof({GetTypeName(type)})",
       _ => GetUnknownExpressionValueAsString(value)
     };
   }
 
-  public string GetTypeNameAsString(Type type) {
+  protected internal string GetTypeName(Type type) {
     if (type.IsGenericType) {
       return GetGenericTypeAsString(type);
     }
@@ -51,7 +59,7 @@ public class TypeAwareSyntaxWriter : SyntaxWriter, ITypeAwareSyntaxWriter {
     var typeName = Regex.Replace(genericName, "`.*", "");
     var genericArguments = type.GetGenericArguments();
 
-    var genericArgumentString = genericArguments.Select(GetTypeNameAsString).JoinBy(", ");
+    var genericArgumentString = genericArguments.Select(GetTypeName).JoinBy(", ");
     return $"{typeName}<{genericArgumentString}>";
   }
 

@@ -30,6 +30,10 @@ public enum TypeDeclarationVisibility {
 
 public static class VisibilityExtensions {
   public static string ToVisibilityString(this SyntaxVisibility visibility) {
+    if (visibility == SyntaxVisibility.None) {
+      return "";
+    }
+
     var flags = visibility.GetFlags();
 
     var visibilities = flags.Select(f => f.ToString().ToLower());

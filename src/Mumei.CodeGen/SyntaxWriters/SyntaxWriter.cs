@@ -21,39 +21,8 @@ public class SyntaxWriter : ISyntaxWriter {
     }
   }
 
-  public void Indent() {
-    IndentLevelLevel++;
-  }
-
-  public void UnIndent() {
-    IndentLevelLevel--;
-  }
-
   public void SetIndentLevel(int level) {
     IndentLevelLevel = level;
-  }
-
-  public void WriteLineStart(string text) {
-    _code.Append(GetIndent());
-    _code.Append(text);
-  }
-
-
-  public void WriteLineEnd(string line) {
-    _code.AppendLine(line);
-  }
-
-  public void Write(string text) {
-    _code.Append(text);
-  }
-
-  public void Write(Syntax syntax) {
-    Write(syntax.GetIdentifier());
-  }
-
-  public void WriteLine(string line) {
-    _code.Append(GetIndent());
-    _code.AppendLine(line);
   }
 
   public string GetIndent() {
@@ -62,6 +31,53 @@ public class SyntaxWriter : ISyntaxWriter {
 
   public virtual string ToSyntax() {
     return _code.ToString();
+  }
+
+  public void Indent() {
+    IndentLevelLevel++;
+  }
+
+  public void UnIndent() {
+    IndentLevelLevel--;
+  }
+
+  public ISyntaxWriter WriteLineStart(string text) {
+    _code.Append(GetIndent());
+    _code.Append(text);
+    return this;
+  }
+
+  public ISyntaxWriter WriteLineEnd(string line) {
+    _code.AppendLine(line);
+    return this;
+  }
+
+  public ISyntaxWriter Write(string text) {
+    _code.Append(text);
+    return this;
+  }
+
+  public ISyntaxWriter Write(Syntax syntax) {
+    Write(syntax.GetIdentifier());
+    return this;
+  }
+
+  public ISyntaxWriter Write(SyntaxVisibility visibility) {
+    if (visibility == SyntaxVisibility.None) {
+      return this;
+    }
+
+    Write(visibility.ToVisibilityString());
+    Write(" ");
+
+    return this;
+  }
+
+  public ISyntaxWriter WriteLine(string line) {
+    _code.Append(GetIndent());
+    _code.AppendLine(line);
+
+    return this;
   }
 
   private void RecalculateIndent() {

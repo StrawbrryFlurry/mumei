@@ -30,23 +30,23 @@ public class TypeAwareSyntaxWriterTest {
     var ctx = new SyntaxTypeContext();
     var sut = new TypeAwareSyntaxWriter(ctx);
 
-    sut.ConvertExpressionValueToSyntax(SyntaxVisibility.Internal)
+    sut.GetValueAsExpressionSyntax(SyntaxVisibility.Internal)
        .Should()
        .Be($"{nameof(SyntaxVisibility)}.Internal");
 
-    sut.ConvertExpressionValueToSyntax(1).Should().Be("1");
-    sut.ConvertExpressionValueToSyntax(1.2).Should().Be("1.2");
-    sut.ConvertExpressionValueToSyntax("foo").Should().Be("\"foo\"");
-    sut.ConvertExpressionValueToSyntax(true).Should().Be("true");
-    sut.ConvertExpressionValueToSyntax(false).Should().Be("false");
-    sut.ConvertExpressionValueToSyntax(null).Should().Be("null");
+    sut.GetValueAsExpressionSyntax(1).Should().Be("1");
+    sut.GetValueAsExpressionSyntax(1.2).Should().Be("1.2");
+    sut.GetValueAsExpressionSyntax("foo").Should().Be("\"foo\"");
+    sut.GetValueAsExpressionSyntax(true).Should().Be("true");
+    sut.GetValueAsExpressionSyntax(false).Should().Be("false");
+    sut.GetValueAsExpressionSyntax(null).Should().Be("null");
 
-    sut.ConvertExpressionValueToSyntax(SyntaxVisibility.Internal)
+    sut.GetValueAsExpressionSyntax(SyntaxVisibility.Internal)
        .Should()
        .Be($"{nameof(SyntaxVisibility)}.Internal");
-    sut.ConvertExpressionValueToSyntax(typeof(StateMachineAttribute)).Should()
+    sut.GetValueAsExpressionSyntax(typeof(StateMachineAttribute)).Should()
        .Be($"typeof({nameof(StateMachineAttribute)})");
-    sut.ConvertExpressionValueToSyntax(typeof(IEnumerable<string>)).Should().Be("typeof(IEnumerable<String>)");
+    sut.GetValueAsExpressionSyntax(typeof(IEnumerable<string>)).Should().Be("typeof(IEnumerable<String>)");
   }
 
   [Fact]
@@ -54,7 +54,7 @@ public class TypeAwareSyntaxWriterTest {
     var ctx = new SyntaxTypeContext();
     var sut = new TypeAwareSyntaxWriter(ctx);
 
-    sut.ConvertExpressionValueToSyntax(typeof(string));
+    sut.WriteValueAsExpressionSyntax(typeof(string));
 
     ctx.UsedNamespaces.Should().ContainInOrder(typeof(string).Namespace);
   }
@@ -65,7 +65,7 @@ public class TypeAwareSyntaxWriterTest {
     var ctx = new SyntaxTypeContext();
     var sut = new TypeAwareSyntaxWriter(ctx);
 
-    sut.ConvertExpressionValueToSyntax(typeof(IEnumerable<string>));
+    sut.WriteValueAsExpressionSyntax(typeof(IEnumerable<string>));
 
     ctx.UsedNamespaces.Should().ContainInOrder(typeof(IEnumerable<>).Namespace, typeof(string).Namespace);
   }
