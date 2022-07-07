@@ -4,7 +4,7 @@ using Mumei.CodeGen.Extensions;
 
 namespace Mumei.CodeGen.SyntaxWriters;
 
-public class TypeAwareSyntaxWriter : SyntaxWriter {
+public class TypeAwareSyntaxWriter : SyntaxWriter, ITypeAwareSyntaxWriter {
   private readonly SyntaxTypeContext _ctx;
 
   public TypeAwareSyntaxWriter(SyntaxTypeContext ctx) {
@@ -29,26 +29,33 @@ public class TypeAwareSyntaxWriter : SyntaxWriter {
     }
   }
 
-  protected internal string ConvertExpressionValueToSyntax(object value) {
+  public string ConvertExpressionValueToSyntax(object value) {
     return value switch {
       bool b => b ? "true" : "false",
       Enum e => $"{e.GetType().Name}.{e}",
-      Type {IsGenericType: true} type => $"typeof({GetGenericTypeofExpressionAsString(type)})",
-      Type type => $"typeof({GetTypeofExpressionAsString(type)})",
+      Type type => $"typeof({GetTypeNameAsString(type)})",
       _ => GetUnknownExpressionValueAsString(value)
     };
   }
 
-  private string GetGenericTypeofExpressionAsString(Type type) {
-    var genericName = GetTypeofExpressionAsString(type);
+  public string GetTypeNameAsString(Type type) {
+    if (type.IsGenericType) {
+      return GetGenericTypeAsString(type);
+    }
+
+    return GetNonGenericTypeAsString(type);
+  }
+
+  private string GetGenericTypeAsString(Type type) {
+    var genericName = GetNonGenericTypeAsString(type);
     var typeName = Regex.Replace(genericName, "`.*", "");
     var genericArguments = type.GetGenericArguments();
 
-    var genericArgumentString = genericArguments.Select(GetTypeofExpressionAsString).JoinBy(", ");
+    var genericArgumentString = genericArguments.Select(GetTypeNameAsString).JoinBy(", ");
     return $"{typeName}<{genericArgumentString}>";
   }
 
-  private string GetTypeofExpressionAsString(Type type) {
+  private string GetNonGenericTypeAsString(Type type) {
     IncludeTypeNamespace(type);
     return type.Name;
   }

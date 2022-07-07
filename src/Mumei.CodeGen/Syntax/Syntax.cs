@@ -27,6 +27,13 @@ public abstract class Syntax {
     return writer.ToSyntax();
   }
 
+  /// <summary>
+  ///   Returns the identifier for the member.
+  /// </summary>
+  /// <returns></returns>
+  public virtual string GetIdentifier() {
+    return Name;
+  }
 
-  public abstract string WriteAsSyntax(TypeAwareSyntaxWriter writer);
+  public abstract void WriteAsSyntax(ITypeAwareSyntaxWriter writer);
 }

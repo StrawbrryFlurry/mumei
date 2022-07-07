@@ -8,7 +8,7 @@ namespace Mumei.CodeGen.SyntaxBuilders;
 public abstract class TypeSyntax : Syntax.Syntax {
   private readonly List<MemberSyntax> _members = new();
 
-  public Type[] TypeArguments;
+  public readonly Type[] TypeArguments;
   public bool IsGenericType => TypeArguments.Length > 0;
 
   public IEnumerable<MemberSyntax> Members => _members;
@@ -40,6 +40,6 @@ public abstract class TypeSyntax : Syntax.Syntax {
   ///   Writes all members of the type to the syntax writer.
   /// </summary>
   /// <param name="writer"></param>
-  protected void WriteMembers(SyntaxWriter writer) {
+  protected void WriteMembers(ITypeAwareSyntaxWriter writer) {
   }
 }

@@ -2,7 +2,7 @@
 
 namespace Mumei.CodeGen.SyntaxWriters;
 
-public class SyntaxWriter {
+public class SyntaxWriter : ISyntaxWriter {
   internal const char IndentChar = ' ';
   internal const int IndentSpacing = 2;
 
@@ -12,7 +12,7 @@ public class SyntaxWriter {
   private string _indentString = "";
   internal string NewLine = Environment.NewLine;
 
-  protected internal int IndentLevelLevel {
+  public int IndentLevelLevel {
     get => _indentLevelLevel;
     set {
       _indentLevelLevel = value > 0 ? value : 0;
@@ -20,66 +20,51 @@ public class SyntaxWriter {
     }
   }
 
-  private void RecalculateIndent() {
-    var indentationCharCount = IndentLevelLevel * IndentSpacing;
-    _indentString = new string(IndentChar, indentationCharCount);
-  }
-
-  protected internal void Indent() {
+  public void Indent() {
     IndentLevelLevel++;
   }
 
-  protected internal void UnIndent() {
+  public void UnIndent() {
     IndentLevelLevel--;
   }
 
-  protected internal void SetIndentLevel(int level) {
+  public void SetIndentLevel(int level) {
     IndentLevelLevel = level;
   }
 
-  /// <summary>
-  ///   Writes the specified text to the line
-  ///   adding the indentation before the text.
-  /// </summary>
-  /// <param name="text"></param>
-  protected internal void WriteLineStart(string text) {
+  public void WriteLineStart(string text) {
     _code.Append(GetIndent());
     _code.Append(text);
   }
 
-  /// <summary>
-  ///   Appends text to the current line.
-  ///   Adds a newline after the text.
-  /// </summary>
-  /// <param name="line"></param>
-  protected internal void WriteLineEnd(string line) {
+
+  public void WriteLineEnd(string line) {
     _code.AppendLine(line);
   }
 
-  /// <summary>
-  ///   Appends text to the current line.
-  /// </summary>
-  /// <param name="text"></param>
-  protected internal void Write(string text) {
+  public void Write(string text) {
     _code.Append(text);
   }
 
-  /// <summary>
-  ///   Writes a new line to the code buffer
-  ///   adding indentation at the start. Ends
-  ///   the line with a newline.
-  /// </summary>
-  /// <param name="line"></param>
-  protected internal void WriteLine(string line) {
+  public void Write(Syntax.Syntax syntax) {
+    Write(syntax.GetIdentifier());
+  }
+
+  public void WriteLine(string line) {
     _code.Append(GetIndent());
     _code.AppendLine(line);
   }
 
-  protected internal string GetIndent() {
+  public string GetIndent() {
     return _indentString;
   }
 
   public virtual string ToSyntax() {
     return _code.ToString();
+  }
+
+  private void RecalculateIndent() {
+    var indentationCharCount = IndentLevelLevel * IndentSpacing;
+    _indentString = new string(IndentChar, indentationCharCount);
   }
 }

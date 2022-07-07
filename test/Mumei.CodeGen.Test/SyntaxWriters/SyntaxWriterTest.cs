@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Mumei.CodeGen.Syntax;
 using Mumei.CodeGen.SyntaxWriters;
 using static Mumei.Test.Utils.StringExtensions;
 
@@ -142,5 +143,24 @@ public class SyntaxWriterTest {
     var code = sut.ToSyntax();
 
     code.Should().Be("class Foo ");
+  }
+
+  [Fact]
+  public void Write_AppendsSyntaxIdentifierToLine_WhenArgumentIsSyntax() {
+    var sut = new SyntaxWriter();
+
+    var config = new SyntaxConfiguration("Foo");
+    sut.Write(new FooSyntax(config));
+    var code = sut.ToSyntax();
+
+    code.Should().Be("Foo");
+  }
+
+  private class FooSyntax : CodeGen.Syntax.Syntax {
+    public FooSyntax(SyntaxConfiguration config) : base(config) {
+    }
+
+    public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {
+    }
   }
 }

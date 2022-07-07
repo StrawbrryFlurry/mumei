@@ -8,7 +8,7 @@ public class ClassSyntax : TypeSyntax {
   public ClassSyntax(TypeSyntaxConfiguration config) : base(config) {
   }
 
-  public override string WriteAsSyntax(TypeAwareSyntaxWriter writer) {
+  public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {
     throw new NotImplementedException();
   }
 }

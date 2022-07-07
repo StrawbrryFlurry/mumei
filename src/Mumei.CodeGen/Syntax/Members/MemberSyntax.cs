@@ -1,8 +1,6 @@
 ﻿namespace Mumei.CodeGen.Syntax;
 
 public abstract class MemberSyntax : Syntax {
-  public readonly string Name;
-
   /// <summary>
   ///   The type of the member or the
   ///   return type if the member is a method.

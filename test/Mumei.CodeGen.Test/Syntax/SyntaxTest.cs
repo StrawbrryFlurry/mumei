@@ -87,8 +87,7 @@ public class SyntaxTest {
     public SyntaxImpl(SyntaxConfiguration config) : base(config) {
     }
 
-    public override string WriteAsSyntax(TypeAwareSyntaxWriter writer) {
-      return "";
+    public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {
     }
   }
 }
