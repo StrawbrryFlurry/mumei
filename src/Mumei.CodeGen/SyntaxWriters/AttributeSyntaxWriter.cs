@@ -1,10 +1,10 @@
 ﻿using Mumei.CodeGen.Extensions;
-using Mumei.CodeGen.Syntax;
+using Mumei.CodeGen.SyntaxNodes;
 
 namespace Mumei.CodeGen.SyntaxWriters;
 
 public class AttributeSyntaxWriter : TypeAwareSyntaxWriter {
-  public AttributeSyntaxWriter(SyntaxTypeContext ctx) : base(ctx) {
+  public AttributeSyntaxWriter(SyntaxTypeContext? ctx) : base(ctx) {
   }
 
   public void WriteAttributes(AttributeUsage[] attributes, bool sameLine = false) {

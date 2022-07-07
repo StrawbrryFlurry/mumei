@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using FluentAssertions;
-using Mumei.CodeGen.Syntax;
+using Mumei.CodeGen.SyntaxNodes;
 using Mumei.CodeGen.SyntaxWriters;
 
 namespace Mumei.Test.SyntaxWriters;

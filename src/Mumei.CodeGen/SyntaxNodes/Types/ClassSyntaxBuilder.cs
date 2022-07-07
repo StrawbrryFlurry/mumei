@@ -1,7 +1,7 @@
 ﻿using Mumei.CodeGen.SyntaxWriters;
 using static Mumei.CodeGen.SyntaxWriters.TypeDeclarationVisibility;
 
-namespace Mumei.CodeGen.Syntax;
+namespace Mumei.CodeGen.SyntaxNodes;
 
 public class ClassSyntaxBuilder : SyntaxWriter {
   private readonly List<MemberFieldInfo> _fields = new();

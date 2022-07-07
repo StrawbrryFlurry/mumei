@@ -1,4 +1,4 @@
-﻿namespace Mumei.CodeGen.Syntax;
+﻿namespace Mumei.CodeGen.SyntaxNodes;
 
 public struct AttributeUsage {
   public Type Type;

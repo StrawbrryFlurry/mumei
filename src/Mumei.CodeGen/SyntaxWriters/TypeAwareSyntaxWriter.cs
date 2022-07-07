@@ -5,9 +5,9 @@ using Mumei.CodeGen.Extensions;
 namespace Mumei.CodeGen.SyntaxWriters;
 
 public class TypeAwareSyntaxWriter : SyntaxWriter, ITypeAwareSyntaxWriter {
-  private readonly SyntaxTypeContext _ctx;
+  private readonly SyntaxTypeContext? _ctx;
 
-  public TypeAwareSyntaxWriter(SyntaxTypeContext ctx) {
+  public TypeAwareSyntaxWriter(SyntaxTypeContext? ctx) {
     _ctx = ctx;
   }
 

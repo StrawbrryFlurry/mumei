@@ -1,4 +1,6 @@
-﻿namespace Mumei.CodeGen.SyntaxWriters;
+﻿using Mumei.CodeGen.SyntaxNodes;
+
+namespace Mumei.CodeGen.SyntaxWriters;
 
 public interface ISyntaxWriter {
   public int IndentLevelLevel { get; set; }
@@ -32,7 +34,7 @@ public interface ISyntaxWriter {
   ///   Appends the syntax to the current line
   /// </summary>
   /// <param name="syntax"></param>
-  public void Write(Syntax.Syntax syntax);
+  public void Write(Syntax syntax);
 
   /// <summary>
   ///   Writes a new line to the code buffer
