@@ -1,21 +1,23 @@
 ﻿// ReSharper disable once CheckNamespace
 
-using Mumei.CodeGen.Syntax;
+using Mumei.CodeGen.SyntaxNodes;
 using Mumei.CodeGen.SyntaxWriters;
 
 namespace Mumei.CodeGen.SyntaxBuilders;
 
-public abstract class TypeSyntax : Syntax.Syntax {
+public abstract class TypeSyntax : Syntax {
   private readonly List<MemberSyntax> _members = new();
 
-  public readonly Type[] TypeArguments;
+  public readonly Type[] TypeArguments = Type.EmptyTypes;
   public bool IsGenericType => TypeArguments.Length > 0;
 
   public IEnumerable<MemberSyntax> Members => _members;
   public bool HasMembers => _members.Count > 0;
 
-  protected TypeSyntax(TypeSyntaxConfiguration config) : base(config) {
-    TypeArguments = config.TypeArguments;
+  protected TypeSyntax(string name) : base(name) {
+  }
+
+  protected TypeSyntax(string name, Syntax? parent) : base(name, parent) {
   }
 
   public void AddMember(MemberSyntax member) {

@@ -1,19 +1,23 @@
 ﻿using Mumei.CodeGen.SyntaxWriters;
 
-namespace Mumei.CodeGen.Syntax;
+namespace Mumei.CodeGen.SyntaxNodes;
 
 public abstract class Syntax {
-  public readonly AttributeUsage[] Attributes;
   public readonly string Name;
-  public readonly SyntaxVisibility Visibility;
+  public readonly Syntax? Parent;
+  protected SyntaxTypeContext TypeContext;
+  public SyntaxVisibility Visibility { get; init; } = SyntaxVisibility.None;
+  public AttributeUsage[] Attributes { get; init; } = Array.Empty<AttributeUsage>();
 
-  protected internal SyntaxTypeContext TypeContext;
+  protected Syntax(string name) {
+    Name = name;
+    TypeContext = new SyntaxTypeContext();
+  }
 
-  protected Syntax(SyntaxConfiguration config) {
-    Name = config.Name;
-    Visibility = config.Visibility;
-    Attributes = config.Attributes;
-    TypeContext = config.TypeContext;
+  protected Syntax(string name, Syntax? parent) {
+    Name = name;
+    Parent = parent;
+    TypeContext = parent?.TypeContext ?? new SyntaxTypeContext();
   }
 
   protected internal string? GetAttributeSyntax(bool sameLine = false) {

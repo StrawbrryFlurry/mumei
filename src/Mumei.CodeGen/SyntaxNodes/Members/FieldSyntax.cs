@@ -1,14 +1,12 @@
-﻿using Mumei.CodeGen.Syntax;
-using Mumei.CodeGen.SyntaxWriters;
+﻿using Mumei.CodeGen.SyntaxWriters;
 
-// ReSharper disable once CheckNamespace
-namespace Mumei.CodeGen.SyntaxBuilders;
+namespace Mumei.CodeGen.SyntaxNodes;
 
 public class FieldSyntax : MemberSyntax {
   public override int Priority => 0;
   public object? Initializer { get; set; }
 
-  public FieldSyntax(MemberSyntaxConfiguration config) : base(config) {
+  public FieldSyntax(string name, Syntax parent) : base(name, parent) {
   }
 
   public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {

@@ -1,18 +1,16 @@
 ﻿using System.Runtime.CompilerServices;
 using FluentAssertions;
-using Mumei.CodeGen.Syntax;
+using Mumei.CodeGen.SyntaxNodes;
 using Mumei.CodeGen.SyntaxWriters;
 using static Mumei.Test.Utils.StringExtensions;
-using SyntaxClass = Mumei.CodeGen.Syntax.Syntax;
 
-namespace Mumei.Test.Syntax;
+namespace Mumei.Test.SyntaxNodes;
 
 public class SyntaxTest {
   [Fact]
   public void GetAttributeSyntax_ReturnsNull_WhenSyntaxHasNoAttributes() {
-    var config = new SyntaxConfiguration("");
+    var sut = new SyntaxImpl();
 
-    var sut = new SyntaxImpl(config);
     var syntax = sut.GetAttributeSyntax();
 
     syntax.Should().BeNull();
@@ -21,13 +19,12 @@ public class SyntaxTest {
   [Fact]
   public void
     GetAttributeSyntax_ReturnsStringRepresentingTheAttributeWithNoNewLine_WhenSyntaxHasOneAttributeAndSameLineIsFalse() {
-    var config = new SyntaxConfiguration("") {
+    var sut = new SyntaxImpl {
       Attributes = new[] {
         AttributeUsage.Create<StateMachineAttribute>()
       }
     };
 
-    var sut = new SyntaxImpl(config);
     var syntax = sut.GetAttributeSyntax(true);
 
     syntax.Should().Be("[StateMachine()]");
@@ -36,13 +33,12 @@ public class SyntaxTest {
   [Fact]
   public void
     GetAttributeSyntax_ReturnsStringRepresentingTheAttributeWithNewLineAtTheEnd_WhenSyntaxHasOneAttribute() {
-    var config = new SyntaxConfiguration("") {
+    var sut = new SyntaxImpl {
       Attributes = new[] {
         AttributeUsage.Create<StateMachineAttribute>()
       }
     };
 
-    var sut = new SyntaxImpl(config);
     var syntax = sut.GetAttributeSyntax();
 
     syntax.Should().Be(Line("[StateMachine()]"));
@@ -51,14 +47,13 @@ public class SyntaxTest {
   [Fact]
   public void
     GetAttributeSyntax_ReturnsStringRepresentingMultipleAttributesOnMultipleLines_WhenSyntaxHasMultipleAttributes() {
-    var config = new SyntaxConfiguration("") {
+    var sut = new SyntaxImpl {
       Attributes = new[] {
         AttributeUsage.Create<StateMachineAttribute>(),
         AttributeUsage.Create<StateMachineAttribute>()
       }
     };
 
-    var sut = new SyntaxImpl(config);
     var syntax = sut.GetAttributeSyntax();
 
     syntax.Should().Be(
@@ -70,21 +65,20 @@ public class SyntaxTest {
   [Fact]
   public void
     GetAttributeSyntax_ReturnsStringRepresentingMultipleAttributesOnSingleLine_WhenSyntaxHasMultipleAttributes() {
-    var config = new SyntaxConfiguration("") {
+    var sut = new SyntaxImpl {
       Attributes = new[] {
         AttributeUsage.Create<StateMachineAttribute>(),
         AttributeUsage.Create<StateMachineAttribute>()
       }
     };
 
-    var sut = new SyntaxImpl(config);
     var syntax = sut.GetAttributeSyntax(true);
 
     syntax.Should().Be("[StateMachine()] [StateMachine()]");
   }
 
-  private class SyntaxImpl : SyntaxClass {
-    public SyntaxImpl(SyntaxConfiguration config) : base(config) {
+  private class SyntaxImpl : Syntax {
+    public SyntaxImpl() : base("") {
     }
 
     public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {

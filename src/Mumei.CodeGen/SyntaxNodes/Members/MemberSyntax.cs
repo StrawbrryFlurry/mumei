@@ -1,11 +1,16 @@
-﻿namespace Mumei.CodeGen.Syntax;
+﻿namespace Mumei.CodeGen.SyntaxNodes;
 
 public abstract class MemberSyntax : Syntax {
+  /// <summary>
+  ///   The Syntax in which this member is declared.
+  /// </summary>
+  public new readonly Syntax Parent;
+
   /// <summary>
   ///   The type of the member or the
   ///   return type if the member is a method.
   /// </summary>
-  public readonly Type? Type;
+  public Type? Type { get; init; }
 
   /// <summary>
   ///   Priority of the member in the order of declaration.
@@ -18,7 +23,7 @@ public abstract class MemberSyntax : Syntax {
   /// </summary>
   public abstract int Priority { get; }
 
-  public MemberSyntax(MemberSyntaxConfiguration config) : base(config) {
-    Type = config.Type;
+  public MemberSyntax(string name, Syntax parent) : base(name, parent) {
+    Parent = parent;
   }
 }
