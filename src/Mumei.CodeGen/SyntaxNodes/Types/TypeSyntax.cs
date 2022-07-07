@@ -24,10 +24,20 @@ public abstract class TypeSyntax : Syntax {
     _members.Add(member);
   }
 
-  public T AddNewMember<T>(string name, Type typeOrReturnType) where T : MemberSyntax {
-    var member = (T) Activator.CreateInstance(typeof(T), name, typeOrReturnType);
+  public T AddNewMember<T>(string name, Type type) where T : MemberSyntax {
+    var member = (T) Activator.CreateInstance(typeof(T), name, type);
     AddMember(member);
     return member;
+  }
+
+  public TBuilder CreateMemberBuilder<TBuilder>(string name, Type type) {
+    // There is by design no constraint the builder type because that would
+    // make the API really verbose to use. Once source generators support a
+    // runtime with covariance on derived types, we can change the builders
+    // Build method to return the concrete type and therefore omit the generic.
+    var builder = Activator.CreateInstance(typeof(TBuilder), this, name, type);
+
+    return (TBuilder) builder;
   }
 
   public T? GetMember<T>(string name) where T : MemberSyntax {

@@ -1,9 +1,9 @@
 ﻿namespace Mumei.CodeGen.SyntaxNodes;
 
-public struct AttributeUsage {
-  public Type Type;
+public class AttributeUsage {
   public object[] Arguments = Array.Empty<object>();
   public Dictionary<NamedAttributeParameter, object> NamedArguments = new();
+  public Type Type;
 
   public AttributeUsage(Type type) {
     Type = type;

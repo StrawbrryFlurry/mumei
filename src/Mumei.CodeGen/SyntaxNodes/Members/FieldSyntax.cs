@@ -3,15 +3,15 @@
 namespace Mumei.CodeGen.SyntaxNodes;
 
 public class FieldSyntax : MemberSyntax {
-  public override int Priority => 0;
-
   /// <summary>
   ///   The initial value of the field.
   ///   <remarks>
   ///     null is not explicitly set.
   ///   </remarks>
   /// </summary>
-  public object? Initializer { get; init; }
+  public object? Initializer { get; set; }
+
+  public override int Priority => 0;
 
   public FieldSyntax(string name, Syntax parent) : base(name, parent) {
   }

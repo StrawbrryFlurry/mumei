@@ -10,7 +10,7 @@ public abstract class MemberSyntax : Syntax {
   ///   The type of the member or the
   ///   return type if the member is a method.
   /// </summary>
-  public Type? Type { get; init; }
+  public Type? Type { get; set; }
 
   /// <summary>
   ///   Priority of the member in the order of declaration.

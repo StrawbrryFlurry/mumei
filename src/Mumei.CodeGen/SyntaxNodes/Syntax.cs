@@ -6,8 +6,8 @@ public abstract class Syntax {
   public readonly string Name;
   public readonly Syntax? Parent;
   protected SyntaxTypeContext TypeContext;
-  public SyntaxVisibility Visibility { get; init; } = SyntaxVisibility.None;
-  public AttributeUsage[] Attributes { get; init; } = Array.Empty<AttributeUsage>();
+  public SyntaxVisibility Visibility { get; set; } = SyntaxVisibility.None;
+  public AttributeUsage[] Attributes { get; set; } = Array.Empty<AttributeUsage>();
 
   public bool HasAttributes => Attributes.Length > 0;
 
