@@ -14,10 +14,10 @@ public abstract class TypeSyntax : Syntax {
   public IEnumerable<MemberSyntax> Members => _members;
   public bool HasMembers => _members.Count > 0;
 
-  protected TypeSyntax(string name) : base(name) {
+  protected TypeSyntax(string identifier) : base(identifier) {
   }
 
-  protected TypeSyntax(string name, Syntax? parent) : base(name, parent) {
+  protected TypeSyntax(string identifier, Syntax? parent) : base(identifier, parent) {
   }
 
   public void AddMember(MemberSyntax member) {
@@ -41,7 +41,7 @@ public abstract class TypeSyntax : Syntax {
   }
 
   public T? GetMember<T>(string name) where T : MemberSyntax {
-    return Members.OfType<T>().SingleOrDefault(m => m.Name == name);
+    return Members.OfType<T>().SingleOrDefault(m => m.Identifier == name);
   }
 
   public IEnumerable<T> GetMembers<T>() where T : MemberSyntax {

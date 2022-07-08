@@ -23,7 +23,7 @@ public abstract class MemberSyntax : Syntax {
   /// </summary>
   public abstract int Priority { get; }
 
-  public MemberSyntax(string name, Syntax parent) : base(name, parent) {
+  public MemberSyntax(string identifier, Syntax parent) : base(identifier, parent) {
     Parent = parent;
   }
 }

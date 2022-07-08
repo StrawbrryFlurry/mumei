@@ -4,10 +4,10 @@ using Mumei.CodeGen.SyntaxWriters;
 namespace Mumei.CodeGen.SyntaxNodes;
 
 public class ClassSyntax : TypeSyntax {
-  public ClassSyntax(string name) : base(name) {
+  public ClassSyntax(string identifier) : base(identifier) {
   }
 
-  public ClassSyntax(string name, Syntax? parent) : base(name, parent) {
+  public ClassSyntax(string identifier, Syntax? parent) : base(identifier, parent) {
   }
 
   public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {

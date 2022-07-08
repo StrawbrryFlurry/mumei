@@ -3,7 +3,7 @@
 namespace Mumei.CodeGen.SyntaxNodes;
 
 public abstract class Syntax {
-  public readonly string Name;
+  public readonly string Identifier;
   public readonly Syntax? Parent;
   protected SyntaxTypeContext TypeContext;
   public SyntaxVisibility Visibility { get; set; } = SyntaxVisibility.None;
@@ -11,13 +11,13 @@ public abstract class Syntax {
 
   public bool HasAttributes => Attributes.Length > 0;
 
-  protected Syntax(string name) {
-    Name = name;
+  protected Syntax(string identifier) {
+    Identifier = identifier;
     TypeContext = new SyntaxTypeContext();
   }
 
-  protected Syntax(string name, Syntax? parent) {
-    Name = name;
+  protected Syntax(string identifier, Syntax? parent) {
+    Identifier = identifier;
     Parent = parent;
     TypeContext = parent?.TypeContext ?? new SyntaxTypeContext();
   }
@@ -38,7 +38,7 @@ public abstract class Syntax {
   /// </summary>
   /// <returns></returns>
   public virtual string GetIdentifier() {
-    return Name;
+    return Identifier;
   }
 
   public abstract void WriteAsSyntax(ITypeAwareSyntaxWriter writer);

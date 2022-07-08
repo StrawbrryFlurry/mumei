@@ -166,7 +166,7 @@ public class SyntaxWriterTest {
   }
 
   private class FooSyntax : Syntax {
-    public FooSyntax(string name) : base(name) {
+    public FooSyntax(string identifier) : base(identifier) {
     }
 
     public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {

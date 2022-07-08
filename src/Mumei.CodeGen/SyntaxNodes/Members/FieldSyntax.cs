@@ -13,7 +13,7 @@ public class FieldSyntax : MemberSyntax {
 
   public override int Priority => 0;
 
-  public FieldSyntax(string name, Syntax parent) : base(name, parent) {
+  public FieldSyntax(string identifier, Syntax parent) : base(identifier, parent) {
   }
 
   public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {
@@ -29,7 +29,7 @@ public class FieldSyntax : MemberSyntax {
 
     writer.WriteTypeName(Type);
     writer.Write(" ");
-    writer.Write(Name);
+    writer.Write(Identifier);
 
     if (Initializer is not null) {
       writer.Write(" = ");

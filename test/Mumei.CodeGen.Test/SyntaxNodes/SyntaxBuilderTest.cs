@@ -17,13 +17,13 @@ public class SyntaxBuilderTest {
   }
 
   [Fact]
-  public void Build_CreatesSyntaxInstance_WithNameAndParentSet() {
+  public void Build_CreatesSyntaxInstance_WithIdentifierAndParentSet() {
     var parent = new StubTypeSyntax("");
     var sut = new StubSyntaxBuilder("syntax", parent);
 
     var syntax = sut.Build();
 
-    syntax.Name.Should().Be("syntax");
+    syntax.Identifier.Should().Be("syntax");
     syntax.Parent.Should().Be(parent);
   }
 

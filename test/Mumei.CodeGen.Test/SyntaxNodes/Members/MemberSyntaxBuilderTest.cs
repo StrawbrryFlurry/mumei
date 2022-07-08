@@ -10,6 +10,6 @@ public class MemberSyntaxBuilderTest {
 
     var member = new StubMemberSyntaxBuilder("Foo", typeof(string), parent).Add();
 
-    parent.Members.Should().Contain(m => m.Name == member.Name);
+    parent.Members.Should().Contain(m => m.Identifier == member.Identifier);
   }
 }
