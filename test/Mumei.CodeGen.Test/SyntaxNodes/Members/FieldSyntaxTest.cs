@@ -10,6 +10,15 @@ public class FieldSyntaxTest {
   private readonly SyntaxTypeContext? _context = new();
 
   [Fact]
+  public void SetInitialValue_SetsInitializerInField() {
+    var field = new FieldSyntax("field", null!);
+
+    field.SetInitialValue("FooBar");
+
+    field.Initializer.Should().Be("FooBar");
+  }
+
+  [Fact]
   public void WriteAsSyntax_Field() {
     var field = new FieldSyntax("field", null!) {
       Type = typeof(string)

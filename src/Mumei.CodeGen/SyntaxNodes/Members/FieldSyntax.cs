@@ -16,6 +16,10 @@ public class FieldSyntax : MemberSyntax {
   public FieldSyntax(string identifier, Syntax parent) : base(identifier, parent) {
   }
 
+  public void SetInitialValue(object? value) {
+    Initializer = value;
+  }
+
   public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {
     if (Type is null) {
       throw new InvalidOperationException("Field type cannot be null");
