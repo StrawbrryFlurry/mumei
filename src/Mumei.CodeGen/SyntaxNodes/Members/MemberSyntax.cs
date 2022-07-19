@@ -1,6 +1,6 @@
 ﻿namespace Mumei.CodeGen.SyntaxNodes;
 
-public abstract class MemberSyntax : Syntax {
+public abstract class MemberSyntax : TypeSyntax {
   /// <summary>
   ///   The Syntax in which this member is declared.
   /// </summary>

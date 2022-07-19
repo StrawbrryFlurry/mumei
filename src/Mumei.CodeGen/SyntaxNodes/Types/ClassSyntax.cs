@@ -3,11 +3,11 @@ using Mumei.CodeGen.SyntaxWriters;
 
 namespace Mumei.CodeGen.SyntaxNodes;
 
-public class ClassSyntax : TypeSyntax {
-  public ClassSyntax(string identifier) : base(identifier) {
+public class ClassDeclarationSyntax : TypeDeclarationSyntax {
+  public ClassDeclarationSyntax(string identifier) : base(identifier) {
   }
 
-  public ClassSyntax(string identifier, Syntax? parent) : base(identifier, parent) {
+  public ClassDeclarationSyntax(string identifier, Syntax? parent) : base(identifier, parent) {
   }
 
   public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {

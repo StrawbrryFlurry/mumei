@@ -5,7 +5,7 @@ using Mumei.CodeGen.SyntaxWriters;
 
 namespace Mumei.CodeGen.SyntaxBuilders;
 
-public abstract class TypeSyntax : Syntax {
+public abstract class TypeDeclarationSyntax : TypeSyntax {
   private readonly List<MemberSyntax> _members = new();
 
   public readonly Type[] TypeArguments = Type.EmptyTypes;
@@ -14,10 +14,10 @@ public abstract class TypeSyntax : Syntax {
   public IEnumerable<MemberSyntax> Members => _members;
   public bool HasMembers => _members.Count > 0;
 
-  protected TypeSyntax(string identifier) : base(identifier) {
+  protected TypeDeclarationSyntax(string identifier) : base(identifier) {
   }
 
-  protected TypeSyntax(string identifier, Syntax? parent) : base(identifier, parent) {
+  protected TypeDeclarationSyntax(string identifier, Syntax? parent) : base(identifier, parent) {
   }
 
   public void AddMember(MemberSyntax member) {
