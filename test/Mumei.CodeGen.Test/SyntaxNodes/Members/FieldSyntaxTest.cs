@@ -62,10 +62,9 @@ public class FieldSyntaxTest {
     var field = new FieldSyntax("field", null!) {
       Type = typeof(string),
       Initializer = "FooBar",
-      Visibility = SyntaxVisibility.Public,
-      Attributes = new[]
-        {AttributeUsage.Create<StateMachineAttribute>()}
+      Visibility = SyntaxVisibility.Public
     };
+    field.AttributeList.AddAttribute<StateMachineAttribute>();
     var writer = new TypeAwareSyntaxWriter(_context);
 
     field.WriteAsSyntax(writer);
@@ -79,12 +78,11 @@ public class FieldSyntaxTest {
     var field = new FieldSyntax("field", null!) {
       Type = typeof(string),
       Initializer = "FooBar",
-      Visibility = SyntaxVisibility.Public,
-      Attributes = new[] {
-        AttributeUsage.Create<StateMachineAttribute>(),
-        AttributeUsage.Create<StateMachineAttribute>()
-      }
+      Visibility = SyntaxVisibility.Public
     };
+    field.AttributeList.AddAttribute<StateMachineAttribute>();
+    field.AttributeList.AddAttribute<StateMachineAttribute>();
+
     var writer = new TypeAwareSyntaxWriter(_context);
 
     field.WriteAsSyntax(writer);

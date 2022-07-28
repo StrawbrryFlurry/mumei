@@ -23,7 +23,6 @@ public class AttributeSyntaxTest {
   [Fact]
   public void WriteAttribute_WritesAttributeSyntaxWithSingleArgument() {
     var sut = AttributeSyntax.Create<StateMachineAttribute>("StateMachine");
-
     var writer = new TypeAwareSyntaxWriter(_ctx);
 
     sut.WriteAsSyntax(writer);
@@ -33,66 +32,65 @@ public class AttributeSyntaxTest {
 
   [Fact]
   public void WriteAttribute_WritesAttributeSyntaxWithMultipleArguments() {
-    var sut = new AttributeSyntaxWriter(new SyntaxTypeContext());
-    var attribute = AttributeUsage.Create<StateMachineAttribute>("StateMachine", typeof(IEnumerable<string>));
+    var sut = AttributeSyntax.Create<StateMachineAttribute>("StateMachine", typeof(IEnumerable<string>));
+    var writer = new TypeAwareSyntaxWriter(_ctx);
 
-    sut.WriteAttribute(attribute);
+    sut.WriteAsSyntax(writer);
 
-    sut.ToSyntax().Should().Be("[StateMachine(\"StateMachine\", typeof(IEnumerable<String>))]");
+    writer.ToSyntax().Should().Be("[StateMachine(\"StateMachine\", typeof(IEnumerable<String>))]");
   }
 
   [Fact]
   public void WriteAttribute_WritesAttributeSyntaxWithNamedArgument() {
-    var sut = new AttributeSyntaxWriter(new SyntaxTypeContext());
-    var attribute = AttributeUsage.Create<StateMachineAttribute>(
+    var sut = AttributeSyntax.Create<StateMachineAttribute>(
       new Dictionary<NamedAttributeParameter, object> { { "Parameter", "StateMachine" } }
     );
+    var writer = new TypeAwareSyntaxWriter(_ctx);
 
-    sut.WriteAttribute(attribute);
+    sut.WriteAsSyntax(writer);
 
-    sut.ToSyntax().Should().Be("[StateMachine(Parameter: \"StateMachine\")]");
-  }
-
-  [Fact]
-  public void WriteAttribute_WritesAttributeSyntaxWithNamedFieldArgument() {
-    var sut = new AttributeSyntaxWriter(new SyntaxTypeContext());
-    var attribute = AttributeUsage.Create<StateMachineAttribute>(
-      new Dictionary<NamedAttributeParameter, object> {
-        { new NamedAttributeParameter { Name = "Field", IsField = true }, "StateMachine" }
-      }
-    );
-
-    sut.WriteAttribute(attribute);
-
-    sut.ToSyntax().Should().Be("[StateMachine(Field = \"StateMachine\")]");
+    writer.ToSyntax().Should().Be("[StateMachine(Parameter: \"StateMachine\")]");
   }
 
   [Fact]
   public void WriteAttribute_WritesAttributeSyntaxWithAllArgumentTypes() {
-    var sut = new AttributeSyntaxWriter(new SyntaxTypeContext());
-    var attribute = AttributeUsage.Create<StateMachineAttribute>(
+    var sut = AttributeSyntax.Create<StateMachineAttribute>(
       new Dictionary<NamedAttributeParameter, object> {
         { "NamedParameter", "State" },
         { new NamedAttributeParameter { Name = "NamedField", IsField = true }, "Machine" }
       },
       "StateMachine"
     );
+    var writer = new TypeAwareSyntaxWriter(_ctx);
 
-    sut.WriteAttribute(attribute);
+    sut.WriteAsSyntax(writer);
 
-    sut.ToSyntax()
+    writer.ToSyntax()
       .Should()
       .Be("[StateMachine(\"StateMachine\", NamedParameter: \"State\", NamedField = \"Machine\")]");
   }
 
   [Fact]
+  public void WriteAttribute_WritesAttributeSyntaxWithNamedFieldArgument() {
+    var sut = AttributeSyntax.Create<StateMachineAttribute>(
+      new Dictionary<NamedAttributeParameter, object> {
+        { new NamedAttributeParameter { Name = "Field", IsField = true }, "StateMachine" }
+      }
+    );
+    var writer = new TypeAwareSyntaxWriter(_ctx);
+
+    sut.WriteAsSyntax(writer);
+
+    writer.ToSyntax().Should().Be("[StateMachine(Field = \"StateMachine\")]");
+  }
+
+  [Fact]
   public void WriteAttribute_AddsAttributeTypeToNamespaceCache_WhenAttributeHasNamespace() {
-    var ctx = new SyntaxTypeContext();
-    var sut = new AttributeSyntaxWriter(ctx);
-    var attribute = AttributeUsage.Create<StateMachineAttribute>();
+    var sut = AttributeSyntax.Create<StateMachineAttribute>();
+    var writer = new TypeAwareSyntaxWriter(_ctx);
 
-    sut.WriteAttribute(attribute);
+    sut.WriteAsSyntax(writer);
 
-    ctx.UsedNamespaces.First().Should().Be("System.Runtime.CompilerServices");
+    _ctx.UsedNamespaces.First().Should().Be("System.Runtime.CompilerServices");
   }
 }

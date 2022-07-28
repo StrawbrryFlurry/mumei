@@ -15,7 +15,7 @@ public class TypeAwareSyntaxWriter : SyntaxWriter, ITypeAwareSyntaxWriter {
     var ns = type.Namespace;
 
     if (ns is not null) {
-      _ctx.UseNamespace(ns);
+      _ctx?.UseNamespace(ns);
     }
 
     if (!type.IsGenericType) {
