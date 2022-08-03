@@ -8,6 +8,4 @@
 ///   prior to startup. GetInstance will try to resolve the provider instance.
 ///   // TODO Can we do static analysis on components like controllers?
 /// </summary>
-public interface IDynamicModule {
-  public TProvider GetInstance<TProvider>(TProvider instance) where TProvider : class;
-}
+public interface IDynamicModule { }

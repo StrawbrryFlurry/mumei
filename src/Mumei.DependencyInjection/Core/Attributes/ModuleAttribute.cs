@@ -6,5 +6,5 @@
 ///   don't need to be marked with this attribute.
 ///   All "Injectable" members of a module are automatically added to the module.
 /// </summary>
-public class ModuleAttribute {
-}
+[AttributeUsage(AttributeTargets.Class)]
+public class ModuleAttribute : Attribute { }
