@@ -1,12 +1,10 @@
-﻿using System.Reflection.Emit;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Mumei.CodeGen.SyntaxNodes;
 using Mumei.CodeGen.SyntaxWriters;
-using static Mumei.Test.Utils.StringExtensions;
 
-namespace Mumei.Test.SyntaxWriters;
+namespace Mumei.Test.SyntaxNodes.Types;
 
-public class ClassSyntaxBuilderTest {
+public class ClassSyntaxBuilderTests {
   [Fact]
   public void ToString_ReturnsClassSkeletonWithDefaultVisibility_WhenNoVisibilityIsProvided() {
     var sut = new ClassSyntaxBuilder("Test");
@@ -110,10 +108,8 @@ public class ClassSyntaxBuilderTest {
   }
 
   [Fact]
-  public void AddField_AddsFieldWithSpecifiedTypeAndNameAndDefaultValue() {
-  }
+  public void AddField_AddsFieldWithSpecifiedTypeAndNameAndDefaultValue() { }
 
   [Fact]
-  public void AddField_AddsFieldWithSpecifiedNullableTypeAndNameAndDefaultValue() {
-  }
+  public void AddField_AddsFieldWithSpecifiedNullableTypeAndNameAndDefaultValue() { }
 }

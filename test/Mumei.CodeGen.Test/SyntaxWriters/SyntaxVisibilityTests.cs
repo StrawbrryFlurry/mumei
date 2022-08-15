@@ -3,7 +3,7 @@ using Mumei.CodeGen.SyntaxWriters;
 
 namespace Mumei.Test.SyntaxWriters;
 
-public class SyntaxVisibilityTest {
+public class SyntaxVisibilityTests {
   [Fact]
   public void ToVisibilityString_ReturnsSingleVisibilityAsString() {
     var sut = SyntaxVisibility.Public;

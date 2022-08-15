@@ -6,7 +6,7 @@ using Mumei.Test.SyntaxNodes.Stubs;
 
 namespace Mumei.Test.SyntaxNodes;
 
-public class AttributeSyntaxTest {
+public class AttributeSyntaxTests {
   public readonly SyntaxTypeContext _ctx = new();
   public readonly Syntax _parent = new StubSyntax("Parent");
 

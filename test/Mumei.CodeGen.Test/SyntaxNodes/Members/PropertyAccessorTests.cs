@@ -4,7 +4,7 @@ using Mumei.CodeGen.SyntaxWriters;
 
 namespace Mumei.Test.SyntaxNodes.Members;
 
-public class PropertyAccessorTest {
+public class PropertyAccessorTests {
   [Fact]
   public void WriteAsSyntax_WritesAutoGetter_WhenAccessorIsGetterAndHasNoBody() {
     var sut = new PropertyAccessor(PropertyAccessorType.Get, null);

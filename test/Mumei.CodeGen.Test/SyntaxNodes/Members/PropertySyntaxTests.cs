@@ -2,7 +2,7 @@
 
 namespace Mumei.Test.SyntaxNodes.Members;
 
-public class PropertySyntaxTest {
+public class PropertySyntaxTests {
   public void AddAutoGetter_() {
     var sut = MakeProperty();
   }

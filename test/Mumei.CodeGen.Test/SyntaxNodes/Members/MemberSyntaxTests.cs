@@ -1,4 +1,4 @@
 ﻿namespace Mumei.Test.SyntaxNodes.Members;
 
-public class MemberSyntaxTest {
+public class MemberSyntaxTests {
 }

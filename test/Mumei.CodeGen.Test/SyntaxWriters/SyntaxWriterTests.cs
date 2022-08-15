@@ -1,11 +1,10 @@
 ﻿using FluentAssertions;
 using Mumei.CodeGen.SyntaxNodes;
 using Mumei.CodeGen.SyntaxWriters;
-using static Mumei.Test.Utils.StringExtensions;
 
 namespace Mumei.Test.SyntaxWriters;
 
-public class SyntaxWriterTest {
+public class SyntaxWriterTests {
   [Fact]
   public void GetIndent_ReturnsEmptyString_WhenIndentIsZero() {
     var sut = new SyntaxWriter();
@@ -166,10 +165,8 @@ public class SyntaxWriterTest {
   }
 
   private class FooSyntax : Syntax {
-    public FooSyntax(string identifier) : base(identifier) {
-    }
+    public FooSyntax(string identifier) : base(identifier) { }
 
-    public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {
-    }
+    public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) { }
   }
 }

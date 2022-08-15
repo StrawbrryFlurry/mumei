@@ -4,7 +4,7 @@ using Mumei.CodeGen.SyntaxWriters;
 
 namespace Mumei.Test.SyntaxWriters;
 
-public class TypeAwareSyntaxWriterTest {
+public class TypeAwareSyntaxWriterTests {
   [Fact]
   public void IncludeTypeNamespace_AddsNamespaceOfTheSpecifiedTypeToContext() {
     var ctx = new SyntaxTypeContext();
@@ -31,8 +31,8 @@ public class TypeAwareSyntaxWriterTest {
     var sut = new TypeAwareSyntaxWriter(ctx);
 
     sut.GetValueAsExpressionSyntax(SyntaxVisibility.Internal)
-       .Should()
-       .Be($"{nameof(SyntaxVisibility)}.Internal");
+      .Should()
+      .Be($"{nameof(SyntaxVisibility)}.Internal");
 
     sut.GetValueAsExpressionSyntax(1).Should().Be("1");
     sut.GetValueAsExpressionSyntax(1.2).Should().Be("1.2");
@@ -42,10 +42,10 @@ public class TypeAwareSyntaxWriterTest {
     sut.GetValueAsExpressionSyntax(null).Should().Be("null");
 
     sut.GetValueAsExpressionSyntax(SyntaxVisibility.Internal)
-       .Should()
-       .Be($"{nameof(SyntaxVisibility)}.Internal");
+      .Should()
+      .Be($"{nameof(SyntaxVisibility)}.Internal");
     sut.GetValueAsExpressionSyntax(typeof(StateMachineAttribute)).Should()
-       .Be($"typeof({nameof(StateMachineAttribute)})");
+      .Be($"typeof({nameof(StateMachineAttribute)})");
     sut.GetValueAsExpressionSyntax(typeof(IEnumerable<string>)).Should().Be("typeof(IEnumerable<String>)");
   }
 

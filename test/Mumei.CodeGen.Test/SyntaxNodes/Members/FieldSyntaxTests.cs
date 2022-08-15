@@ -6,7 +6,7 @@ using static Mumei.Test.Utils.StringExtensions;
 
 namespace Mumei.Test.SyntaxNodes.Members;
 
-public class FieldSyntaxTest {
+public class FieldSyntaxTests {
   private readonly SyntaxTypeContext? _context = new();
 
   [Fact]
