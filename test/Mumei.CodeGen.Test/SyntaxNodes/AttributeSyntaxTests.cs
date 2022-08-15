@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using FluentAssertions;
 using Mumei.CodeGen.SyntaxNodes;
 using Mumei.CodeGen.SyntaxWriters;
 using Mumei.Test.SyntaxNodes.Stubs;
@@ -8,7 +7,7 @@ namespace Mumei.Test.SyntaxNodes;
 
 public class AttributeSyntaxTests {
   public readonly SyntaxTypeContext _ctx = new();
-  public readonly Syntax _parent = new StubSyntax("Parent");
+  public readonly Syntax _parent = new StubSyntax();
 
   [Fact]
   public void WriteAttribute_WritesAttributeSyntaxWithNoArguments() {

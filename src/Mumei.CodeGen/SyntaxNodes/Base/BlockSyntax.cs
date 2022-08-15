@@ -5,14 +5,10 @@ namespace Mumei.CodeGen.SyntaxNodes;
 /// <summary>
 ///   A block of statements.
 /// </summary>
-public class BlockSyntax : Syntax {
+public class BlockSyntax : StatementSyntax {
+  public BlockSyntax(Syntax? parent = null) : base(parent) { }
+
   public IEnumerable<Syntax> Statements { get; set; }
-
-  public BlockSyntax(string identifier) : base(identifier) {
-  }
-
-  public BlockSyntax(string identifier, Syntax? parent) : base(identifier, parent) {
-  }
 
   public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {
     writer.WriteLine("{");

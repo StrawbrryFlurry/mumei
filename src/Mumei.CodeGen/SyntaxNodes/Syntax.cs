@@ -3,27 +3,16 @@
 namespace Mumei.CodeGen.SyntaxNodes;
 
 public abstract class Syntax {
-  public readonly string Identifier;
   public readonly Syntax? Parent;
   protected SyntaxTypeContext TypeContext;
 
-  protected Syntax(string identifier) {
-    Identifier = identifier;
+  protected Syntax() {
     TypeContext = new SyntaxTypeContext();
   }
 
-  protected Syntax(string identifier, Syntax? parent) {
-    Identifier = identifier;
+  protected Syntax(Syntax? parent) {
     Parent = parent;
     TypeContext = parent?.TypeContext ?? new SyntaxTypeContext();
-  }
-
-  /// <summary>
-  ///   Returns the identifier for the member.
-  /// </summary>
-  /// <returns></returns>
-  public virtual string GetIdentifier() {
-    return Identifier;
   }
 
   public abstract void WriteAsSyntax(ITypeAwareSyntaxWriter writer);

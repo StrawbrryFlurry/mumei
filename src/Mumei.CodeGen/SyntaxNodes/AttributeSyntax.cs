@@ -8,11 +8,11 @@ public class AttributeSyntax : Syntax {
   public object[] PositionalArguments = Array.Empty<object>();
   public Type Type;
 
-  public AttributeSyntax(Type type) : base(type.Name) {
+  public AttributeSyntax(Type type) {
     Type = type;
   }
 
-  public AttributeSyntax(Type type, Syntax parent) : base(type.Name, parent) {
+  public AttributeSyntax(Type type, Syntax parent) : base(parent) {
     Type = type;
   }
 

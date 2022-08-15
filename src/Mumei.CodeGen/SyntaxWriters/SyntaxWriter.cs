@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using Mumei.CodeGen.SyntaxNodes;
 
 namespace Mumei.CodeGen.SyntaxWriters;
 
@@ -54,11 +53,6 @@ public class SyntaxWriter : ISyntaxWriter {
 
   public ISyntaxWriter Write(string text) {
     _code.Append(text);
-    return this;
-  }
-
-  public ISyntaxWriter Write(Syntax syntax) {
-    Write(syntax.GetIdentifier());
     return this;
   }
 

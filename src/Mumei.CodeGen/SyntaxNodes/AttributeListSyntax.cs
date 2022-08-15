@@ -10,14 +10,13 @@ public class AttributeListSyntax : Syntax, ICollection<AttributeSyntax> {
   private readonly List<AttributeSyntax> _attributes = new();
   private readonly SeparationStrategy _separationStrategy = SeparationStrategy.None;
 
-  public AttributeListSyntax() : base("<AttributeList>") { }
+  public AttributeListSyntax() { }
 
-  public AttributeListSyntax(SeparationStrategy separationStrategy) : base("<AttributeList>") {
+  public AttributeListSyntax(SeparationStrategy separationStrategy) {
     _separationStrategy = separationStrategy;
   }
 
-  public AttributeListSyntax(SeparationStrategy separationStrategy, Syntax? parent) :
-    base("<AttributeList>", parent) {
+  public AttributeListSyntax(SeparationStrategy separationStrategy, Syntax? parent) : base(parent) {
     _separationStrategy = separationStrategy;
   }
 

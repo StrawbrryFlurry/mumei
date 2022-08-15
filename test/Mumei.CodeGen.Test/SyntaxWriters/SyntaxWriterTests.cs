@@ -156,16 +156,6 @@ public class SyntaxWriterTests {
   }
 
   [Fact]
-  public void Write_AppendsSyntaxIdentifierToLine_WhenArgumentIsSyntax() {
-    var sut = new SyntaxWriter();
-
-    sut.Write(new FooSyntax("Foo"));
-    var code = sut.ToSyntax();
-
-    code.Should().Be("Foo");
-  }
-
-  [Fact]
   public void Write_AppendsSyntaxVisibilityToLine_WhenArgumentIsSyntaxVisibility() {
     var sut = new SyntaxWriter();
 
@@ -176,8 +166,6 @@ public class SyntaxWriterTests {
   }
 
   private class FooSyntax : Syntax {
-    public FooSyntax(string identifier) : base(identifier) { }
-
     public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) { }
   }
 }

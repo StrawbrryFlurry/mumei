@@ -8,12 +8,11 @@ public enum PropertyAccessorType {
   Init
 }
 
-public class PropertyAccessor : Syntax {
+public class PropertyAccessor : TypeSyntax {
+  public PropertyAccessor(PropertyAccessorType type, Syntax? parent) : base(type.ToString().ToLower(), parent) { }
+
   public PropertyAccessorType AccessorType { get; set; }
   public BlockSyntax Body { get; set; }
-
-  public PropertyAccessor(PropertyAccessorType type, Syntax? parent) : base(type.ToString().ToLower(), parent) {
-  }
 
   public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {
     writer.Write(GetIdentifier());

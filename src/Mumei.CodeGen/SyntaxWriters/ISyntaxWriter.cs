@@ -1,6 +1,4 @@
-﻿using Mumei.CodeGen.SyntaxNodes;
-
-namespace Mumei.CodeGen.SyntaxWriters;
+﻿namespace Mumei.CodeGen.SyntaxWriters;
 
 public interface ISyntaxWriter : IDisposable {
   public int IndentLevelLevel { get; set; }
@@ -29,12 +27,6 @@ public interface ISyntaxWriter : IDisposable {
   /// </summary>
   /// <param name="text"></param>
   public ISyntaxWriter Write(string text);
-
-  /// <summary>
-  ///   Appends the syntax to the current line
-  /// </summary>
-  /// <param name="syntax"></param>
-  public ISyntaxWriter Write(Syntax syntax);
 
   /// <summary>
   ///   Appends the string value of the
