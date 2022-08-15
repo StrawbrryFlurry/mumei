@@ -1,9 +1,9 @@
 ﻿namespace Mumei.CodeGen.SyntaxWriters;
 
 public abstract class SeparationStrategy {
-  public static SeparationStrategy None = new SeparationStrategyNone();
-  public static SeparationStrategy Space = new SeparationStrategySpace();
-  public static SeparationStrategy NewLine = new SeparationStrategyNewLine();
+  public static readonly SeparationStrategy None = new SeparationStrategyNone();
+  public static readonly SeparationStrategy Space = new SeparationStrategySpace();
+  public static readonly SeparationStrategy NewLine = new SeparationStrategyNewLine();
   public abstract void WriteSeparator(ISyntaxWriter writer);
 }
 
