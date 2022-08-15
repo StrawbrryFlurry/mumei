@@ -2,7 +2,7 @@
 
 namespace Mumei.CodeGen.SyntaxWriters;
 
-public interface ISyntaxWriter {
+public interface ISyntaxWriter : IDisposable {
   public int IndentLevelLevel { get; set; }
 
   public void Indent();

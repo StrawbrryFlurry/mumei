@@ -4,7 +4,7 @@ namespace Mumei.CodeGen.SyntaxNodes;
 
 /// <summary>
 ///   Represents a syntax node that is part of a type
-///   declaration or member.
+///   declaration, or member.
 /// </summary>
 public abstract class TypeSyntax : Syntax {
   public TypeSyntax(string identifier) : base(identifier) { }

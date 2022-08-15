@@ -80,6 +80,8 @@ public class SyntaxWriter : ISyntaxWriter {
     return this;
   }
 
+  public void Dispose() { }
+
   private void RecalculateIndent() {
     var indentationCharCount = IndentLevelLevel * IndentSpacing;
     _indentString = new string(IndentChar, indentationCharCount);

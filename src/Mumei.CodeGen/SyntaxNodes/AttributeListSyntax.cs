@@ -8,11 +8,9 @@ namespace Mumei.CodeGen.SyntaxNodes;
 /// </summary>
 public class AttributeListSyntax : Syntax, ICollection<AttributeSyntax> {
   private readonly List<AttributeSyntax> _attributes = new();
-  private readonly SeparationStrategy _separationStrategy;
+  private readonly SeparationStrategy _separationStrategy = SeparationStrategy.None;
 
-  public AttributeListSyntax() : base("<AttributeList>") {
-    _separationStrategy = SeparationStrategy.None;
-  }
+  public AttributeListSyntax() : base("<AttributeList>") { }
 
   public AttributeListSyntax(SeparationStrategy separationStrategy) : base("<AttributeList>") {
     _separationStrategy = separationStrategy;
