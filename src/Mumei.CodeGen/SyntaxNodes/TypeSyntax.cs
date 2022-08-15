@@ -16,12 +16,33 @@ public abstract class TypeSyntax : Syntax {
 
   public bool HasAttributes => AttributeList.Count > 0;
 
-  protected internal void WriteAttributes(ITypeAwareSyntaxWriter writer) {
+  protected void WriteAttributes(ITypeAwareSyntaxWriter writer) {
     AttributeList.WriteAsSyntax(writer);
   }
 
-  public Syntax SetVisibility(SyntaxVisibility visibility) {
+  protected void WriteVisibility(ITypeAwareSyntaxWriter writer) {
+    writer.Write(Visibility);
+  }
+
+  public TypeSyntax SetVisibility(SyntaxVisibility visibility) {
     Visibility = visibility;
     return this;
+  }
+
+  /// <summary>
+  ///   Writes the attribute list, visibility modifiers and
+  ///   identifier to the syntax writer
+  ///   [...Attributes]
+  ///   [public ...] [identifier]
+  /// </summary>
+  /// <param name="writer"></param>
+  public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {
+    if (HasAttributes) {
+      WriteAttributes(writer);
+      writer.WriteLine();
+    }
+
+    WriteVisibility(writer);
+    writer.Write(GetIdentifier());
   }
 }

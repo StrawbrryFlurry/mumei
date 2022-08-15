@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using FluentAssertions;
 using Moq;
 using Mumei.CodeGen.SyntaxNodes;
 using Mumei.CodeGen.SyntaxWriters;
@@ -87,6 +86,6 @@ public class AttributeListSyntaxTests {
     sut.WriteAsSyntax(writer);
 
     writer.ToSyntax().Should().Be(Line("[StateMachine()]") +
-                                  Line("[StateMachine()]"));
+                                  "[StateMachine()]");
   }
 }

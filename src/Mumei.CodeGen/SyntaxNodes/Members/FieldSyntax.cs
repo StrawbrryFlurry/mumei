@@ -20,13 +20,16 @@ public class FieldSyntax : MemberSyntax {
   }
 
   public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {
-    WriteAttributes(writer);
+    if (HasAttributes) {
+      WriteAttributes(writer);
+      writer.WriteLine();
+    }
 
     if (Type is null) {
       throw new InvalidOperationException("Field type cannot be null");
     }
 
-    writer.Write(Visibility);
+    WriteVisibility(writer);
 
     writer.WriteTypeName(Type);
     writer.Write(" ");

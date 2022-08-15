@@ -6,6 +6,10 @@ public abstract class MemberSyntax : TypeSyntax {
   /// </summary>
   public new readonly Syntax Parent;
 
+  public MemberSyntax(string identifier, Syntax parent) : base(identifier, parent) {
+    Parent = parent;
+  }
+
   /// <summary>
   ///   The type of the member or the
   ///   return type if the member is a method.
@@ -22,8 +26,4 @@ public abstract class MemberSyntax : TypeSyntax {
   ///   - Method: 10
   /// </summary>
   public abstract int Priority { get; }
-
-  public MemberSyntax(string identifier, Syntax parent) : base(identifier, parent) {
-    Parent = parent;
-  }
 }

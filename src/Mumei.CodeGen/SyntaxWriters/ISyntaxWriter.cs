@@ -52,6 +52,13 @@ public interface ISyntaxWriter : IDisposable {
   /// <param name="line"></param>
   public ISyntaxWriter WriteLine(string line);
 
+  /// <summary>
+  ///   Writes an empty line to the stream
+  /// </summary>
+  /// <returns></returns>
+  public ISyntaxWriter WriteLine();
+
+
   public string GetIndent();
   public string ToSyntax();
 }

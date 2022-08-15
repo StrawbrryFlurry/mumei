@@ -53,9 +53,13 @@ public class AttributeListSyntax : Syntax, ICollection<AttributeSyntax> {
   public bool IsReadOnly { get; } = false;
 
   public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {
-    foreach (var attribute in _attributes) {
+    for (var i = 0; i < _attributes.Count; i++) {
+      var attribute = _attributes[i];
       attribute.WriteAsSyntax(writer);
-      _separationStrategy.WriteSeparator(writer);
+
+      if (i < _attributes.Count - 1) {
+        _separationStrategy.WriteSeparator(writer);
+      }
     }
   }
 

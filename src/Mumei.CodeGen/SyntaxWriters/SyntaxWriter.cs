@@ -80,6 +80,11 @@ public class SyntaxWriter : ISyntaxWriter {
     return this;
   }
 
+  public ISyntaxWriter WriteLine() {
+    _code.Append(NewLine);
+    return this;
+  }
+
   public void Dispose() { }
 
   private void RecalculateIndent() {

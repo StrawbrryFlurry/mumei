@@ -1,5 +1,4 @@
-﻿using FluentAssertions;
-using Mumei.CodeGen.SyntaxNodes;
+﻿using Mumei.CodeGen.SyntaxNodes;
 using Mumei.CodeGen.SyntaxWriters;
 
 namespace Mumei.Test.SyntaxWriters;
@@ -86,6 +85,18 @@ public class SyntaxWriterTests {
     sut.IndentLevelLevel = 2;
 
     sut.GetIndent().Should().Be(IndentationString(2));
+  }
+
+  [Fact]
+  public void WriteLine_WritesNewLineAtEndOfCurrentLine_WhenNoParametersAreSpecified() {
+    var sut = new SyntaxWriter();
+
+    sut.WriteLine("line");
+    sut.WriteLine();
+    var code = sut.ToSyntax();
+
+    code.Should().Be(Line("line") +
+                     Line());
   }
 
   [Fact]
