@@ -12,7 +12,7 @@ public class SyntaxWriter : ISyntaxWriter {
   private string _indentString = "";
   internal string NewLine = Environment.NewLine;
 
-  public int IndentLevelLevel {
+  public int IndentLevel {
     get => _indentLevelLevel;
     set {
       _indentLevelLevel = value > 0 ? value : 0;
@@ -21,7 +21,7 @@ public class SyntaxWriter : ISyntaxWriter {
   }
 
   public void SetIndentLevel(int level) {
-    IndentLevelLevel = level;
+    IndentLevel = level;
   }
 
   public string GetIndent() {
@@ -33,16 +33,21 @@ public class SyntaxWriter : ISyntaxWriter {
   }
 
   public void Indent() {
-    IndentLevelLevel++;
+    IndentLevel++;
   }
 
   public void UnIndent() {
-    IndentLevelLevel--;
+    IndentLevel--;
   }
 
   public ISyntaxWriter WriteLineStart(string text) {
     _code.Append(GetIndent());
     _code.Append(text);
+    return this;
+  }
+
+  public ISyntaxWriter WriteLineStart() {
+    _code.Append(GetIndent());
     return this;
   }
 
@@ -82,7 +87,7 @@ public class SyntaxWriter : ISyntaxWriter {
   public void Dispose() { }
 
   private void RecalculateIndent() {
-    var indentationCharCount = IndentLevelLevel * IndentSpacing;
+    var indentationCharCount = IndentLevel * IndentSpacing;
     _indentString = new string(IndentChar, indentationCharCount);
   }
 }

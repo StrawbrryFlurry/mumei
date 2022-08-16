@@ -27,11 +27,11 @@ public class SyntaxWriterTests {
   public void Indent_IncreasesTheIndentationByOne() {
     var sut = new SyntaxWriter();
 
-    sut.IndentLevelLevel.Should().Be(0);
+    sut.IndentLevel.Should().Be(0);
 
     sut.Indent();
 
-    sut.IndentLevelLevel.Should().Be(1);
+    sut.IndentLevel.Should().Be(1);
   }
 
   [Fact]
@@ -40,49 +40,49 @@ public class SyntaxWriterTests {
 
     sut.Indent();
 
-    sut.IndentLevelLevel.Should().Be(1);
+    sut.IndentLevel.Should().Be(1);
 
     sut.UnIndent();
 
-    sut.IndentLevelLevel.Should().Be(0);
+    sut.IndentLevel.Should().Be(0);
   }
 
   [Fact]
   public void UnIndent_DoesNothing_WhenIndentLevelIsZero() {
     var sut = new SyntaxWriter();
 
-    sut.IndentLevelLevel.Should().Be(0);
+    sut.IndentLevel.Should().Be(0);
 
     sut.UnIndent();
 
-    sut.IndentLevelLevel.Should().Be(0);
+    sut.IndentLevel.Should().Be(0);
   }
 
   [Fact]
   public void IndentLevel_DoesNotAllowValuesBelowZero_WhenTheyAreSet() {
     var sut = new SyntaxWriter();
 
-    sut.IndentLevelLevel = -1;
+    sut.IndentLevel = -1;
 
-    sut.IndentLevelLevel.Should().Be(0);
+    sut.IndentLevel.Should().Be(0);
   }
 
   [Fact]
   public void SetIndentLevel_SetsIndentLevel() {
     var sut = new SyntaxWriter();
 
-    sut.IndentLevelLevel.Should().Be(0);
+    sut.IndentLevel.Should().Be(0);
 
     sut.SetIndentLevel(1);
 
-    sut.IndentLevelLevel.Should().Be(1);
+    sut.IndentLevel.Should().Be(1);
   }
 
   [Fact]
   public void SettingIndentLevel_RecalculatesTheIndent_WhenItIsCalled() {
     var sut = new SyntaxWriter();
 
-    sut.IndentLevelLevel = 2;
+    sut.IndentLevel = 2;
 
     sut.GetIndent().Should().Be(IndentationString(2));
   }

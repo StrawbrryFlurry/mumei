@@ -1,7 +1,7 @@
 ﻿namespace Mumei.CodeGen.SyntaxWriters;
 
 public interface ISyntaxWriter : IDisposable {
-  public int IndentLevelLevel { get; set; }
+  public int IndentLevel { get; set; }
 
   public void Indent();
   public void UnIndent();
@@ -14,6 +14,9 @@ public interface ISyntaxWriter : IDisposable {
   /// </summary>
   /// <param name="text"></param>
   public ISyntaxWriter WriteLineStart(string text);
+
+  /// <inheritdoc cref="WriteLineStart(string)" />
+  public ISyntaxWriter WriteLineStart();
 
   /// <summary>
   ///   Appends text to the current line.
@@ -49,7 +52,6 @@ public interface ISyntaxWriter : IDisposable {
   /// </summary>
   /// <returns></returns>
   public ISyntaxWriter WriteLine();
-
 
   public string GetIndent();
   public string ToSyntax();
