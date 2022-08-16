@@ -6,19 +6,27 @@ namespace Mumei.CodeGen.SyntaxNodes;
 ///   A block of statements.
 /// </summary>
 public class BlockSyntax : StatementSyntax {
-  public BlockSyntax(Syntax? parent = null) : base(parent) { }
+  protected readonly List<StatementSyntax> _statements = new();
 
-  public IEnumerable<Syntax> Statements { get; set; }
+  public BlockSyntax(Syntax? parent = null) : base(parent) { }
+  public IEnumerable<StatementSyntax> Statements => _statements;
 
   public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {
     writer.WriteLine("{");
     writer.Indent();
 
     foreach (var statement in Statements) {
+      writer.WriteLineStart();
       statement.WriteAsSyntax(writer);
+      writer.WriteLine();
     }
 
     writer.UnIndent();
-    writer.WriteLine("}");
+    writer.Write("}");
+  }
+
+  internal void AddStatement(StatementSyntax statement) {
+    statement.SetParent(this);
+    _statements.Add(statement);
   }
 }

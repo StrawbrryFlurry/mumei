@@ -3,7 +3,6 @@
 namespace Mumei.CodeGen.SyntaxNodes;
 
 public abstract class Syntax {
-  public readonly Syntax? Parent;
   protected SyntaxTypeContext TypeContext;
 
   protected Syntax() {
@@ -15,5 +14,12 @@ public abstract class Syntax {
     TypeContext = parent?.TypeContext ?? new SyntaxTypeContext();
   }
 
+  public Syntax? Parent { get; private set; }
+
+
   public abstract void WriteAsSyntax(ITypeAwareSyntaxWriter writer);
+
+  internal void SetParent(Syntax parent) {
+    Parent = parent;
+  }
 }

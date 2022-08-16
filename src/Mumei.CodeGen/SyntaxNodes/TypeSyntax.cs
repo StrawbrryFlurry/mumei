@@ -19,7 +19,7 @@ public abstract class TypeSyntax : Syntax {
 
   public virtual AttributeListSyntax AttributeList { get; } = new(SeparationStrategy.NewLine);
 
-  public SyntaxVisibility Visibility { get; set; } = SyntaxVisibility.None;
+  public virtual SyntaxVisibility Visibility { get; set; } = SyntaxVisibility.None;
 
   public bool HasAttributes => AttributeList.Count > 0;
 
