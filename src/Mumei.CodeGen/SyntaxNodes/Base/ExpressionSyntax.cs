@@ -8,10 +8,8 @@ public interface ITransformMemberExpression {
   public Expression TransformMemberAccess(Expression target, MemberInfo member);
 }
 
-/// <summary>
-///   Represents a expression through a LINQ expression
-/// </summary>
 public class ExpressionSyntax : Syntax {
+  private static readonly SyntaxExpressionVisitor SyntaxExpressionVisitor = new();
   protected readonly Expression ExpressionNode;
 
   public ExpressionSyntax(Expression expressionNode, Syntax? parent = null) : base(parent) {
@@ -53,8 +51,7 @@ public class ExpressionSyntax : Syntax {
   /// </summary>
   /// <returns></returns>
   private Expression TransformInternalExpressionSyntax() {
-    var visitor = new ExpressionSyntaxVisitor();
-    return visitor.Visit(ExpressionNode) ?? ExpressionNode;
+    return SyntaxExpressionVisitor.Visit(ExpressionNode) ?? ExpressionNode;
   }
 
   public override string ToString() {

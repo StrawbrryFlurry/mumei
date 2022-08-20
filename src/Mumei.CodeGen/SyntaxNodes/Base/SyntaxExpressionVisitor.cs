@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace Mumei.CodeGen.SyntaxNodes;
 
-public class ExpressionSyntaxVisitor : ExpressionVisitor {
+public class SyntaxExpressionVisitor : ExpressionVisitor {
   private const string CompilerGeneratedClassPrefix = "<>c__";
 
   protected override Expression VisitMemberInit(MemberInitExpression node) {
@@ -67,7 +67,7 @@ public class ExpressionSyntaxVisitor : ExpressionVisitor {
       return UnwrapClosureWrappedConstantExpression(wrappedTarget!, (FieldInfo)node.Member);
     }
 
-    var expression = Visit(node.Expression) ?? node.Expression;
+    var expression = Visit(node.Expression);
 
     if (expression is not ConstantExpression target) {
       return base.VisitMember(node);
@@ -83,11 +83,11 @@ public class ExpressionSyntaxVisitor : ExpressionVisitor {
   internal bool IsClosureWrappedConstantExpression(MemberExpression expression, out ConstantExpression? target) {
     target = Visit(expression.Expression) as ConstantExpression;
 
-    if (target is not { NodeType: ExpressionType.Constant } expressionTarget) {
-      return false;
+    if (target is { NodeType: ExpressionType.Constant } expressionTarget) {
+      return IsCompilerGeneratedClosureWrapper(expressionTarget);
     }
 
-    return IsCompilerGeneratedClosureWrapper(expressionTarget);
+    return false;
   }
 
   private static bool IsCompilerGeneratedClosureWrapper(ConstantExpression? expression) {
@@ -205,9 +205,5 @@ public class ExpressionSyntaxVisitor : ExpressionVisitor {
 
   protected override MemberMemberBinding VisitMemberMemberBinding(MemberMemberBinding node) {
     return base.VisitMemberMemberBinding(node);
-  }
-
-  internal static bool ShouldTransformExpressionMember(object expression) {
-    return expression is ITransformMemberExpression;
   }
 }

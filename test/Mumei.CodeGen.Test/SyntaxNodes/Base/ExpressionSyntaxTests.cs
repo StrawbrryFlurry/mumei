@@ -23,55 +23,19 @@ public class ExpressionSyntaxTests {
 
   [Fact]
   public void ParseExpressionToSyntaxString_KeepsMemberExpressionAsIs_WhenTargetDoesNotImplementITransformMember() {
-    var closureVariable = Expression.Variable(typeof(string), "");
+    var closureVariable = Expression.Variable(typeof(string), "Bar");
     var sut = new ExpressionSyntax(() => closureVariable.Name == "Bar");
 
-    sut.ParseExpressionToSyntaxString().Should().Be("(Bar == \"Bar\")");
+    sut.ParseExpressionToSyntaxString().Should().Be("(Bar.Name == \"Bar\")");
   }
 
   [Fact]
-  public void ShouldTransformExpressionMember_ReturnsTrue_WhenTypeInheritsFromITransformableExpression() {
-    ExpressionSyntaxVisitor
-      .ShouldTransformExpressionMember(new ImplementsITransformMemberExpression())
-      .Should()
-      .BeTrue();
+  public void ParseExpressionToSyntaxString_KeepsMemberExpressionAsIs_WhenTargetIsNoExpression() {
+    var closureVariable = "Foo";
+    var sut = new ExpressionSyntax(() => closureVariable.Length == 5);
+
+    sut.ParseExpressionToSyntaxString().Should().Be("(\"Foo\".Length == 5)");
   }
-
-  [Fact]
-  public void ShouldTransformExpressionMember_ReturnsFalse_WhenTypeDoesNotInheritFromITransformableExpression() {
-    ExpressionSyntaxVisitor
-      .ShouldTransformExpressionMember(new object())
-      .Should()
-      .BeFalse();
-  }
-
-  [Fact]
-  public void UnwrapClosureWrappedConstantExpression() { }
-
-  [Fact]
-  public void UnwrapClosureWrappedConstantExpression_ReturnsWrappedValue() {
-    var input = "input";
-    Expression<Func<int>> expr = () => input.Length;
-    var sut = new ExpressionSyntaxVisitor();
-
-    var propertyExpression = (MemberExpression)expr.Body;
-    var closureWrappedValueAccessExpression = (MemberExpression)propertyExpression.Expression!;
-    var closureWrappedInstance = (ConstantExpression)closureWrappedValueAccessExpression.Expression!;
-    var closureWrappedValueAccessor = (FieldInfo)closureWrappedValueAccessExpression.Member!;
-
-    var r = sut.UnwrapClosureWrappedConstantExpression(closureWrappedInstance, closureWrappedValueAccessor);
-
-    r.Value.Should().Be(input);
-  }
-
-  [Fact]
-  public void IsClosureWrappedConstantExpression_ReturnsFalse_WhenExpressionHasNoClosureWrappedValue() { }
-
-  [Fact]
-  public void IsClosureWrappedConstantExpression_ReturnsTrue_WhenExpressionHasClosureWrappedValue() { }
-
-  [Fact]
-  public void IsClosureWrappedConstantExpression() { }
 
   private class ImplementsITransformMemberExpression : ITransformMemberExpression {
     public string BoundValue { get; set; }
