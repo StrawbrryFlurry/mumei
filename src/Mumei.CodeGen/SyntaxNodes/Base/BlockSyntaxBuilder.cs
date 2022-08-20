@@ -47,6 +47,10 @@ public class BlockSyntaxBuilder {
     return genericVariableDeclarationMethod.Invoke(this, args);
   }
 
+  public void Statement(Expression<Action> statement) {
+    Statements.Add(new ExpressionStatementSyntax(statement));
+  }
+
   public IfStatementSyntax If(Expression<Func<bool>> condition, BlockBuilder body) {
     var statement = new IfStatementSyntax();
     Statements.Add(statement);
