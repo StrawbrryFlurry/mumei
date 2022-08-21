@@ -167,5 +167,9 @@ public class SyntaxWriterTests {
 
   private class FooSyntax : Syntax {
     public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) { }
+
+    public override Syntax Clone() {
+      throw new NotImplementedException();
+    }
   }
 }

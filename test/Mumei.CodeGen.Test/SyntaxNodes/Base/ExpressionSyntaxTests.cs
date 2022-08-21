@@ -13,6 +13,15 @@ public class ExpressionSyntaxTests {
   }
 
   [Fact]
+  public void Clone_ReturnsNewExpressionSyntaxWithSameExpression() {
+    var sut = new ExpressionSyntax(() => 10 + 20);
+
+    var clone = sut.Clone();
+
+    clone.ToString().Should().Be(sut.ToString());
+  }
+
+  [Fact]
   public void
     ParseExpressionToSyntaxString_ReplacesTargetCallWithSpecifiedValue_WhenTargetImplementsITransformMember() {
     var closureVariable = new ImplementsITransformMemberExpression();

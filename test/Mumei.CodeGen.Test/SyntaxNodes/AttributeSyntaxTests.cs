@@ -10,6 +10,16 @@ public class AttributeSyntaxTests {
   public readonly Syntax _parent = new StubSyntax();
 
   [Fact]
+  public void Clone_() {
+    var sut = new AttributeSyntax(typeof(StateMachineAttribute));
+    var clone = sut.Clone<AttributeSyntax>();
+
+    clone.Type.Should().Be(sut.Type);
+    clone.NamedArguments.Should().BeSameAs(sut.NamedArguments);
+    clone.PositionalArguments.Should().BeSameAs(sut.PositionalArguments);
+  }
+
+  [Fact]
   public void WriteAttribute_WritesAttributeSyntaxWithNoArguments() {
     var sut = AttributeSyntax.Create<StateMachineAttribute>();
     var writer = new TypeAwareSyntaxWriter(_ctx);

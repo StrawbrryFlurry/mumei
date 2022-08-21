@@ -8,4 +8,8 @@ public class StubSyntax : Syntax {
   public StubSyntax(Syntax? parent) : base(parent) { }
 
   public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) { }
+
+  public override Syntax Clone() {
+    throw new NotImplementedException();
+  }
 }

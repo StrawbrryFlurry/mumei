@@ -18,7 +18,7 @@ public class BlockSyntaxBuilderTests {
     var sut = new BlockSyntaxBuilder();
 
     sut.VariableDeclaration(typeof(string), "Test");
-    var declaration = sut.Statements.OfType<VariableDeclarationSyntax>().First();
+    var declaration = sut.Statements.OfType<VariableDeclarationStatementSyntax>().First();
 
     declaration.Identifier.Should().Be("Test");
     declaration.Type.Should().Be<string>();
@@ -29,7 +29,7 @@ public class BlockSyntaxBuilderTests {
     var sut = new BlockSyntaxBuilder();
 
     sut.VariableDeclaration(typeof(string), "Test", Expression.Constant(42));
-    var declaration = sut.Statements.OfType<VariableDeclarationSyntax>().First();
+    var declaration = sut.Statements.OfType<VariableDeclarationStatementSyntax>().First();
 
     declaration.Initializer!.ToString().Should().Be("42");
   }
@@ -48,7 +48,7 @@ public class BlockSyntaxBuilderTests {
     var sut = new BlockSyntaxBuilder();
 
     sut.VariableDeclaration<string>("Test");
-    var declaration = sut.Statements.OfType<VariableDeclarationSyntax>().First();
+    var declaration = sut.Statements.OfType<VariableDeclarationStatementSyntax>().First();
 
     declaration.Identifier.Should().Be("Test");
     declaration.Type.Should().Be<string>();
@@ -59,7 +59,7 @@ public class BlockSyntaxBuilderTests {
     var sut = new BlockSyntaxBuilder();
 
     sut.VariableDeclaration<string>("Test", Expression.Constant(42));
-    var declaration = sut.Statements.OfType<VariableDeclarationSyntax>().First();
+    var declaration = sut.Statements.OfType<VariableDeclarationStatementSyntax>().First();
 
     declaration.Initializer!.ToString().Should().Be("42");
   }

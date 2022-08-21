@@ -26,12 +26,12 @@ public class VariableExpressionSyntax<T> : ExpressionSyntax, ITransformMemberExp
   }
 }
 
-public class VariableDeclarationSyntax : StatementSyntax {
+public class VariableDeclarationStatementSyntax : StatementSyntax {
   public readonly string Identifier;
   public readonly ExpressionSyntax? Initializer;
   public readonly Type Type;
 
-  public VariableDeclarationSyntax(
+  public VariableDeclarationStatementSyntax(
     Type type,
     string identifier,
     ExpressionSyntax? initializer = null,
@@ -52,6 +52,11 @@ public class VariableDeclarationSyntax : StatementSyntax {
     }
 
     writer.Write(";");
+  }
+
+  public override Syntax Clone() {
+    var initializer = Initializer?.Clone() as ExpressionSyntax;
+    return new VariableDeclarationStatementSyntax(Type, Identifier, initializer);
   }
 
   private void WriteInitializer(ITypeAwareSyntaxWriter writer) {

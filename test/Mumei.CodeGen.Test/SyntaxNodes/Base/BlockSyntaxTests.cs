@@ -14,8 +14,8 @@ public class BlockSyntaxTests {
   public void WriteAsSyntax_WritesAllStatementsSeperatedByNewLinesWithIndentation() {
     var sut = new BlockSyntax();
 
-    sut.AddStatement(new VariableDeclarationSyntax(typeof(string), "Foo"));
-    sut.AddStatement(new VariableDeclarationSyntax(typeof(string), "Bar"));
+    sut.AddStatement(new VariableDeclarationStatementSyntax(typeof(string), "Foo"));
+    sut.AddStatement(new VariableDeclarationStatementSyntax(typeof(string), "Bar"));
 
     WriteSyntaxAsString(sut).Should().Be(
       Line("{") +
@@ -32,5 +32,17 @@ public class BlockSyntaxTests {
     sut.AddStatement(statement);
 
     statement.Parent.Should().Be(sut);
+  }
+
+  [Fact]
+  public void Clone_ReturnsNewBlockWithSameStatements() {
+    var sut = new BlockSyntax();
+    var statement = new VariableDeclarationStatementSyntax(typeof(string), "Foo");
+    sut.AddStatement(statement);
+
+    var clone = (BlockSyntax)sut.Clone();
+
+    clone.Parent.Should().BeNull();
+    clone.Statements.OfType<VariableDeclarationStatementSyntax>().First().Identifier.Should().Be("Foo");
   }
 }

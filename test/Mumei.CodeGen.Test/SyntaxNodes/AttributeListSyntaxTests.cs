@@ -9,6 +9,17 @@ public class AttributeListSyntaxTests {
   private readonly SyntaxTypeContext _ctx = new();
 
   [Fact]
+  public void Clone_ReturnsNewAttributeListWithClonedAttributes() {
+    var sut = new AttributeListSyntax();
+    sut.AddAttribute<StateMachineAttribute>();
+
+    var clone = sut.Clone<AttributeListSyntax>();
+
+    clone.Parent.Should().BeNull();
+    clone.ElementAt(0).Parent.Should().Be(clone);
+  }
+
+  [Fact]
   public void AddAttribute_SetsSelfAsParent() {
     var sut = new AttributeListSyntax();
 

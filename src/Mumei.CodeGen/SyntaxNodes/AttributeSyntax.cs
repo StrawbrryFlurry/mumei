@@ -50,6 +50,13 @@ public class AttributeSyntax : Syntax {
     writer.WriteLineStart("]");
   }
 
+  public override Syntax Clone() {
+    return new AttributeSyntax(Type) {
+      NamedArguments = NamedArguments,
+      PositionalArguments = PositionalArguments
+    };
+  }
+
   private void WriteArguments(ITypeAwareSyntaxWriter writer) {
     for (var i = 0; i < PositionalArguments.Length; i++) {
       var argument = PositionalArguments[i];

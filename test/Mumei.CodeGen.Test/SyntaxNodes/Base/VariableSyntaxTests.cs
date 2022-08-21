@@ -13,7 +13,7 @@ public class VariableSyntaxTests {
 
   [Fact]
   public void VariableDeclarationSyntax_WriteAsSyntax_WritesVariableTypeAndName_WhenVariableDoesNotHavInitializer() {
-    var sut = new VariableDeclarationSyntax(typeof(string), "Test");
+    var sut = new VariableDeclarationStatementSyntax(typeof(string), "Test");
 
     WriteSyntaxAsString(sut).Should().Be("String Test;");
   }
@@ -21,8 +21,21 @@ public class VariableSyntaxTests {
   [Fact]
   public void
     VariableDeclarationSyntax_WriteAsSyntax_WritesVariableTypeNameAndInitializer_WhenVariableHasInitializer() {
-    var sut = new VariableDeclarationSyntax(typeof(string), "Test", Expression.Constant(10));
+    var sut = new VariableDeclarationStatementSyntax(typeof(string), "Test", Expression.Constant(10));
 
     WriteSyntaxAsString(sut).Should().Be("String Test = 10;");
+  }
+
+  [Fact]
+  public void
+    VariableDeclarationSyntax_Clone_ReturnsNewInstanceWithCloneOfTheInitializer() {
+    var sut = new VariableDeclarationStatementSyntax(typeof(string), "Test", Expression.Constant(10));
+
+    var clone = (VariableDeclarationStatementSyntax)sut.Clone();
+
+    clone.Initializer.Should().NotBe(sut.Initializer);
+    clone.Initializer.Should().NotBe(sut.Initializer);
+    clone.Identifier.Should().Be(sut.Identifier);
+    clone.Type.Should().Be(sut.Type);
   }
 }

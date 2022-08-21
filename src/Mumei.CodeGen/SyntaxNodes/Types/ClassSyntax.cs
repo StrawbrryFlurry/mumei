@@ -13,4 +13,8 @@ public class ClassDeclarationSyntax : TypeDeclarationSyntax {
   public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {
     throw new NotImplementedException();
   }
+
+  public override Syntax Clone() {
+    throw new NotImplementedException();
+  }
 }

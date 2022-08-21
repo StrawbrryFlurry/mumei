@@ -12,4 +12,8 @@ public class PropertySyntax : MemberSyntax {
   public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {
     throw new NotImplementedException();
   }
+
+  public override Syntax Clone() {
+    throw new NotImplementedException();
+  }
 }

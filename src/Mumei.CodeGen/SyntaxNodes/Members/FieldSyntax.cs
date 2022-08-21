@@ -42,4 +42,8 @@ public class FieldSyntax : MemberSyntax {
 
     writer.WriteLineEnd(";");
   }
+
+  public override Syntax Clone() {
+    throw new NotImplementedException();
+  }
 }

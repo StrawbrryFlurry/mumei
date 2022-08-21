@@ -33,7 +33,7 @@ public class BlockSyntaxBuilder {
   /// <returns>A placeholder variable instance that can be used as a reference in expressions within this block</returns>
   public VariableExpressionSyntax<TVariable> VariableDeclaration<TVariable>(string name,
     ExpressionSyntax? initializer = null) {
-    var declaration = new VariableDeclarationSyntax(typeof(TVariable), name, initializer);
+    var declaration = new VariableDeclarationStatementSyntax(typeof(TVariable), name, initializer);
     Statements.Add(declaration);
 
     return new VariableExpressionSyntax<TVariable>(name, declaration);
@@ -51,11 +51,29 @@ public class BlockSyntaxBuilder {
     Statements.Add(new ExpressionStatementSyntax(statement));
   }
 
+  public void Statement<TReturn>(Expression<Func<TReturn>> statement) {
+    Statements.Add(new ExpressionStatementSyntax(statement));
+  }
+
+  public void Assign<TVariable>(VariableExpressionSyntax<TVariable> variable, TVariable value) { }
+
   public IfStatementSyntax If(Expression<Func<bool>> condition, BlockBuilder body) {
-    var statement = new IfStatementSyntax();
+    return If((ExpressionSyntax)condition, body);
+  }
+
+  public IfStatementSyntax If(ExpressionSyntax condition, BlockBuilder body) {
+    var block = MakeBlock(body);
+    var statement = new IfStatementSyntax(condition, block);
+
     Statements.Add(statement);
 
     return statement;
+  }
+
+  private BlockSyntax MakeBlock(BlockBuilder blockFactory) {
+    var blockBuilder = new BlockSyntaxBuilder();
+    blockFactory.Invoke(blockBuilder);
+    return blockBuilder.Build();
   }
 
   public BlockSyntax Build() {

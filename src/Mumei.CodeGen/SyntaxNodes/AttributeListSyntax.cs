@@ -29,6 +29,7 @@ public class AttributeListSyntax : Syntax, ICollection<AttributeSyntax> {
   }
 
   public void Add(AttributeSyntax item) {
+    item.SetParent(this);
     _attributes.Add(item);
   }
 
@@ -60,6 +61,16 @@ public class AttributeListSyntax : Syntax, ICollection<AttributeSyntax> {
         _separationStrategy.WriteSeparator(writer);
       }
     }
+  }
+
+  public override Syntax Clone() {
+    var clone = new AttributeListSyntax();
+
+    foreach (var attribute in _attributes) {
+      clone.Add(attribute.Clone<AttributeSyntax>());
+    }
+
+    return clone;
   }
 
   public AttributeListSyntax AddAttribute<TAttribute>() {

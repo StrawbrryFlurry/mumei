@@ -19,6 +19,10 @@ public class PropertyAccessor : TypeSyntax {
     writer.Write(";");
   }
 
+  public override Syntax Clone() {
+    throw new NotImplementedException();
+  }
+
   public override string GetIdentifier() {
     return AccessorType.ToString().ToLower();
   }

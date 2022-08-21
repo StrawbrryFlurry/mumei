@@ -33,6 +33,10 @@ public class ExpressionSyntax : Syntax {
     writer.Write(ParseExpressionToSyntaxString());
   }
 
+  public override Syntax Clone() {
+    return new ExpressionSyntax(ExpressionNode);
+  }
+
   protected internal virtual string ParseExpressionToSyntaxString() {
     return TransformInternalExpressionSyntax().ToString();
   }

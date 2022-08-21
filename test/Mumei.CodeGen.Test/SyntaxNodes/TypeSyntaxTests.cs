@@ -48,5 +48,9 @@ public class TypeSyntaxTests {
 
   private class TypeSyntaxImpl : TypeSyntax {
     public TypeSyntaxImpl(string identifier) : base(identifier) { }
+
+    public override Syntax Clone() {
+      throw new NotImplementedException();
+    }
   }
 }

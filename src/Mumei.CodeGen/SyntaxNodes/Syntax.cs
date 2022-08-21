@@ -16,10 +16,20 @@ public abstract class Syntax {
 
   public Syntax? Parent { get; private set; }
 
-
   public abstract void WriteAsSyntax(ITypeAwareSyntaxWriter writer);
 
+  public TSyntax Clone<TSyntax>() where TSyntax : Syntax {
+    return (TSyntax)Clone();
+  }
+
+  public abstract Syntax Clone();
+
   internal void SetParent(Syntax parent) {
+    if (Parent is not null) {
+      throw new InvalidOperationException(
+        "Syntax node already has a parent defined. Use <Syntax>.Clone to create a copy of the current node");
+    }
+
     Parent = parent;
   }
 }
