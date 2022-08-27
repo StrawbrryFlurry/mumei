@@ -18,10 +18,20 @@ public abstract class Syntax {
 
   public abstract void WriteAsSyntax(ITypeAwareSyntaxWriter writer);
 
+  /// <inheritdoc cref="Clone" />
   public TSyntax Clone<TSyntax>() where TSyntax : Syntax {
     return (TSyntax)Clone();
   }
 
+  /// <summary>
+  ///   Clones the current syntax node, creating
+  ///   an exact replica without a parent defined
+  ///   for it. Additionally creates a clone of all
+  ///   child nodes that the syntax might have and
+  ///   sets the parent of the cloned nodes to the
+  ///   new syntax.
+  /// </summary>
+  /// <returns></returns>
   public abstract Syntax Clone();
 
   internal void SetParent(Syntax parent) {
