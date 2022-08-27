@@ -65,7 +65,7 @@ public class BlockSyntaxBuilderTests {
   }
 
   [Fact]
-  public void Assign_AddsAssignmentToStatementList() {
+  public void Assign_AddsAssignmentToStatementList_WhenValueIsObject() {
     var sut = new BlockSyntaxBuilder();
 
     var variable = new VariableExpressionSyntax<string>("foo");
@@ -73,5 +73,37 @@ public class BlockSyntaxBuilderTests {
     var assignment = sut.Statements.OfType<ExpressionStatementSyntax>().First();
 
     WriteSyntaxAsString(assignment).Should().Be("foo = \"Bar\";");
+  }
+
+  [Fact]
+  public void Assign_AddsAssignmentToStatementList_WhenValueIsExpressionSyntax() {
+    var sut = new BlockSyntaxBuilder();
+
+    var variable = new VariableExpressionSyntax<string>("foo");
+    var value = new VariableExpressionSyntax<string>("bar");
+
+    sut.Assign(variable, value);
+    var assignment = sut.Statements.OfType<ExpressionStatementSyntax>().First();
+
+    WriteSyntaxAsString(assignment).Should().Be("foo = bar;");
+  }
+
+  [Fact]
+  public void Assign_AddsAssignmentToStatementList_WhenValueIsExpression() {
+    var sut = new BlockSyntaxBuilder();
+    var stringSubstringMethod = typeof(string).GetMethod(nameof(string.Substring), new[] { typeof(int) })!;
+
+    var variable = new VariableExpressionSyntax<string>("foo");
+    var value = new VariableExpressionSyntax<string>("bar");
+    var callExpression = Expression.Call(
+      value,
+      stringSubstringMethod,
+      Expression.Constant(1)
+    );
+
+    sut.Assign(variable, callExpression);
+    var assignment = sut.Statements.OfType<ExpressionStatementSyntax>().First();
+
+    WriteSyntaxAsString(assignment).Should().Be("foo = bar.Substring(1);");
   }
 }
