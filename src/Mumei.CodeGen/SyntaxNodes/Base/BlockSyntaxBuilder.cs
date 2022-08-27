@@ -31,8 +31,10 @@ public class BlockSyntaxBuilder {
   /// <param name="initializer"></param>
   /// <typeparam name="TVariable"></typeparam>
   /// <returns>A placeholder variable instance that can be used as a reference in expressions within this block</returns>
-  public VariableExpressionSyntax<TVariable> VariableDeclaration<TVariable>(string name,
-    ExpressionSyntax? initializer = null) {
+  public VariableExpressionSyntax<TVariable> VariableDeclaration<TVariable>(
+    string name,
+    ExpressionSyntax? initializer = null
+  ) {
     var declaration = new VariableDeclarationStatementSyntax(typeof(TVariable), name, initializer);
     Statements.Add(declaration);
 
@@ -40,11 +42,15 @@ public class BlockSyntaxBuilder {
   }
 
   /// <inheritdoc cref="VariableDeclaration{TVariable}" />
-  public object VariableDeclaration(Type variableType, string name,
-    ExpressionSyntax? initializer = null) {
-    var genericVariableDeclarationMethod = GenericVariableDeclarationMethodInfo.MakeGenericMethod(variableType);
-    var args = new object?[] { name, initializer };
-    return genericVariableDeclarationMethod.Invoke(this, args);
+  public VariableExpressionSyntax VariableDeclaration(
+    Type variableType,
+    string name,
+    ExpressionSyntax? initializer = null
+  ) {
+    var declaration = new VariableDeclarationStatementSyntax(variableType, name, initializer);
+    Statements.Add(declaration);
+
+    return new VariableExpressionSyntax(variableType, name, declaration);
   }
 
   public void Statement(Expression<Action> statement) {
@@ -55,7 +61,17 @@ public class BlockSyntaxBuilder {
     Statements.Add(new ExpressionStatementSyntax(statement));
   }
 
-  public void Assign<TVariable>(VariableExpressionSyntax<TVariable> variable, TVariable value) { }
+  public void Assign<TSyntax, TValue>(TSyntax target, TValue value)
+    where TSyntax : ExpressionSyntax, IValueHolderSyntax<TValue> {
+    Expression valueExpression = value switch {
+      ExpressionSyntax expression => expression,
+      Expression expression => expression,
+      _ => Expression.Constant(value)
+    };
+
+    var assignment = Expression.Assign(target, valueExpression);
+    Statements.Add(new ExpressionStatementSyntax(assignment));
+  }
 
   public IfStatementSyntax If(Expression<Func<bool>> condition, BlockBuilder body) {
     return If((ExpressionSyntax)condition, body);

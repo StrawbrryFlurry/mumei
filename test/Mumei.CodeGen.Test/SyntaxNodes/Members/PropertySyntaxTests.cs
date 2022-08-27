@@ -28,7 +28,7 @@ public class PropertySyntaxTests {
   }
 
   private PropertySyntax MakeProperty() {
-    var property = new PropertySyntax("property", null!);
+    var property = new PropertySyntax(typeof(string), "property", null!);
     return property;
   }
 }

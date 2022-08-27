@@ -6,15 +6,16 @@ public abstract class MemberSyntax : TypeSyntax {
   /// </summary>
   public new readonly Syntax Parent;
 
-  public MemberSyntax(string identifier, Syntax parent) : base(identifier, parent) {
+  public MemberSyntax(Type type, string identifier, Syntax parent) : base(identifier, parent) {
     Parent = parent;
+    Type = type;
   }
 
   /// <summary>
   ///   The type of the member or the
   ///   return type if the member is a method.
   /// </summary>
-  public Type? Type { get; set; }
+  public Type Type { get; init; }
 
   /// <summary>
   ///   Priority of the member in the order of declaration.

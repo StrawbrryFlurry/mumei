@@ -4,7 +4,7 @@ using Mumei.CodeGen.SyntaxWriters;
 namespace Mumei.Test.SyntaxNodes.Stubs;
 
 public class StubMemberSyntax : MemberSyntax {
-  public StubMemberSyntax(string identifier, Syntax parent) : base(identifier, parent) { }
+  public StubMemberSyntax(Type type, string identifier, Syntax parent) : base(type, identifier, parent) { }
 
   public override int Priority { get; } = 10;
 

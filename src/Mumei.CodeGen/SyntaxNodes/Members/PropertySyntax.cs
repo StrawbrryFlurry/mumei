@@ -3,7 +3,7 @@
 namespace Mumei.CodeGen.SyntaxNodes;
 
 public class PropertySyntax : MemberSyntax {
-  public PropertySyntax(string identifier, Syntax parent) : base(identifier, parent) { }
+  public PropertySyntax(Type type, string identifier, Syntax parent) : base(type, identifier, parent) { }
 
   public override int Priority => 1;
 

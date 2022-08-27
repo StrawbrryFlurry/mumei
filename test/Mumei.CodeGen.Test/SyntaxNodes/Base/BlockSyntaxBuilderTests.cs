@@ -5,12 +5,12 @@ namespace Mumei.Test.SyntaxNodes.Base;
 
 public class BlockSyntaxBuilderTests {
   [Fact]
-  public void VariableDeclaration_ReturnsVariableExpressionWithDefaultValue() {
+  public void VariableDeclaration_ReturnsBoxedNullValueForPrimitive_WhenNoValueIsSpecified() {
     var sut = new BlockSyntaxBuilder();
 
-    var v = (VariableExpressionSyntax<int>)sut.VariableDeclaration(typeof(int), "Test");
+    var v = sut.VariableDeclaration(typeof(int), "Test");
 
-    v.Value.Should().Be(0);
+    v.Value.Should().BeNull();
   }
 
   [Fact]
@@ -62,5 +62,16 @@ public class BlockSyntaxBuilderTests {
     var declaration = sut.Statements.OfType<VariableDeclarationStatementSyntax>().First();
 
     declaration.Initializer!.ToString().Should().Be("42");
+  }
+
+  [Fact]
+  public void Assign_AddsAssignmentToStatementList() {
+    var sut = new BlockSyntaxBuilder();
+
+    var variable = new VariableExpressionSyntax<string>("foo");
+    sut.Assign(variable, "Bar");
+    var assignment = sut.Statements.OfType<ExpressionStatementSyntax>().First();
+
+    WriteSyntaxAsString(assignment).Should().Be("foo = \"Bar\";");
   }
 }
