@@ -1,7 +1,8 @@
-﻿using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
+using FluentAssertions;
 using Mumei.CodeGen.SyntaxNodes;
 using Mumei.CodeGen.SyntaxWriters;
+using static Mumei.Test.Utils.StringExtensions;
 
 namespace Mumei.Test.SyntaxNodes.Members;
 
@@ -10,16 +11,16 @@ public class FieldSyntaxTests {
 
   [Fact]
   public void SetInitialValue_SetsInitializerInField() {
-    var field = new FieldSyntax<string>("field", null!);
+    var field = new FieldSyntax("field", null!);
 
     field.SetInitialValue("FooBar");
 
-    ((ConstantExpression)field.Initializer!).Value.Should().Be("FooBar");
+    field.Initializer.Should().Be("FooBar");
   }
 
   [Fact]
   public void WriteAsSyntax_Field() {
-    var field = new FieldSyntax<string>("field", null!) {
+    var field = new FieldSyntax("field", null!) {
       Type = typeof(string)
     };
     var writer = new TypeAwareSyntaxWriter(_context);
@@ -31,7 +32,7 @@ public class FieldSyntaxTests {
 
   [Fact]
   public void WriteAsSyntax_FieldWithSingleAccessModifier() {
-    var field = new FieldSyntax<string>("field", null!) {
+    var field = new FieldSyntax("field", null!) {
       Type = typeof(string),
       Visibility = SyntaxVisibility.Public
     };
@@ -44,9 +45,9 @@ public class FieldSyntaxTests {
 
   [Fact]
   public void WriteAsSyntax_FieldWithInitializer() {
-    var field = new FieldSyntax<string>("field", null!) {
+    var field = new FieldSyntax("field", null!) {
       Type = typeof(string),
-      Initializer = Expression.Constant("FooBar"),
+      Initializer = "FooBar",
       Visibility = SyntaxVisibility.Public
     };
     var writer = new TypeAwareSyntaxWriter(_context);
@@ -58,9 +59,9 @@ public class FieldSyntaxTests {
 
   [Fact]
   public void WriteAsSyntax_FieldWithAttribute() {
-    var field = new FieldSyntax<string>("field", null!) {
+    var field = new FieldSyntax("field", null!) {
       Type = typeof(string),
-      Initializer = Expression.Constant("FooBar"),
+      Initializer = "FooBar",
       Visibility = SyntaxVisibility.Public
     };
     field.AttributeList.AddAttribute<StateMachineAttribute>();
@@ -74,9 +75,9 @@ public class FieldSyntaxTests {
 
   [Fact]
   public void WriteAsSyntax_FieldWithAttributes() {
-    var field = new FieldSyntax<string>("field", null!) {
+    var field = new FieldSyntax("field", null!) {
       Type = typeof(string),
-      Initializer = Expression.Constant("FooBar"),
+      Initializer = "FooBar",
       Visibility = SyntaxVisibility.Public
     };
     field.AttributeList.AddAttribute<StateMachineAttribute>();

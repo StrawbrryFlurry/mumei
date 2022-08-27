@@ -1,24 +1,22 @@
-﻿using System.Linq.Expressions;
-using Mumei.CodeGen.SyntaxWriters;
+﻿using Mumei.CodeGen.SyntaxWriters;
 
 namespace Mumei.CodeGen.SyntaxNodes;
 
-public class FieldSyntax : FieldSyntax<object> {
-  public FieldSyntax(Type type, string identifier, Syntax parent) : base(type, identifier, parent) { }
-}
+public class FieldSyntax : MemberSyntax {
+  public FieldSyntax(string identifier, Syntax parent) : base(identifier, parent) { }
 
-public class FieldSyntax<T> : MemberSyntax, IValueHolderSyntax<T>, IValueHolderDeclarationSyntax {
-  public FieldSyntax(string identifier, Syntax parent) : base(typeof(T), identifier, parent) { }
-  protected FieldSyntax(Type type, string identifier, Syntax parent) : base(type, identifier, parent) { }
+  /// <summary>
+  ///   The initial value of the field.
+  ///   <remarks>
+  ///     null is not explicitly set.
+  ///   </remarks>
+  /// </summary>
+  public object? Initializer { get; set; }
 
   public override int Priority => 0;
 
-  public ExpressionSyntax? Initializer { get; set; }
-
-  public T? Value { get; set; }
-
   public void SetInitialValue(object? value) {
-    Initializer = Expression.Constant(value);
+    Initializer = value;
   }
 
   public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {

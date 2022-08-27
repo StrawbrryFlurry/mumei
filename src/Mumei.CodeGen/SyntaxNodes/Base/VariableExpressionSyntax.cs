@@ -1,28 +1,35 @@
 ﻿using System.Linq.Expressions;
+using System.Reflection;
 using Mumei.CodeGen.SyntaxWriters;
 
 namespace Mumei.CodeGen.SyntaxNodes;
 
-public class VariableExpressionSyntax : VariableExpressionSyntax<object> {
-  public readonly Type Type;
+public class VariableExpressionSyntax<T> : ExpressionSyntax, ITransformMemberExpression {
+  public readonly string Name;
 
-  public VariableExpressionSyntax(Type type, string name, Syntax? parent = null) : base(name, parent) {
-    Type = type;
-  }
-}
-
-public class VariableExpressionSyntax<T> : ExpressionSyntax, IValueHolderSyntax<T> {
   public VariableExpressionSyntax(string name, Syntax? parent = null)
     : base(Expression.Variable(typeof(T), name), parent) {
-    Identifier = name;
+    Name = name;
   }
 
-  public string Identifier { get; }
   public T Value { get; set; } = default!;
+
+  public Expression TransformMemberAccess(Expression target, MemberInfo member) {
+    // We allow users to imitate variable access though the "Value"
+    // property. To reflect that in the generated expression, we need to
+    // replace the current target with the variable instance.
+    if (member.Name == nameof(Value)) {
+      return ExpressionNode;
+    }
+
+    return Expression.MakeMemberAccess(target, member);
+  }
 }
 
-public class VariableDeclarationStatementSyntax : StatementSyntax, IValueHolderDeclarationSyntax {
+public class VariableDeclarationStatementSyntax : StatementSyntax {
   public readonly string Identifier;
+  public readonly ExpressionSyntax? Initializer;
+  public readonly Type Type;
 
   public VariableDeclarationStatementSyntax(
     Type type,
@@ -34,9 +41,6 @@ public class VariableDeclarationStatementSyntax : StatementSyntax, IValueHolderD
     Identifier = identifier;
     Type = type;
   }
-
-  public ExpressionSyntax? Initializer { get; }
-  public Type Type { get; }
 
   public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {
     writer.WriteTypeName(Type);
