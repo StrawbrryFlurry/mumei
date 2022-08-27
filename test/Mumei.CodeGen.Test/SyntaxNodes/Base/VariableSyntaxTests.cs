@@ -12,6 +12,13 @@ public class VariableSyntaxTests {
   }
 
   [Fact]
+  public void VariableSyntax_WriteAsSyntax_WritesVariableNameAsString_WhenVariableIsNonGenericInstance() {
+    var sut = new VariableExpressionSyntax(typeof(string), "Test");
+
+    WriteSyntaxAsString(sut).Should().Be("Test");
+  }
+
+  [Fact]
   public void VariableDeclarationSyntax_WriteAsSyntax_WritesVariableTypeAndName_WhenVariableDoesNotHavInitializer() {
     var sut = new VariableDeclarationStatementSyntax(typeof(string), "Test");
 
