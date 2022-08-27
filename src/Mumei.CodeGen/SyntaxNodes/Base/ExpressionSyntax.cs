@@ -1,12 +1,7 @@
 ﻿using System.Linq.Expressions;
-using System.Reflection;
 using Mumei.CodeGen.SyntaxWriters;
 
 namespace Mumei.CodeGen.SyntaxNodes;
-
-public interface ITransformMemberExpression {
-  public Expression TransformMemberAccess(Expression target, MemberInfo member);
-}
 
 public class ExpressionSyntax : Syntax {
   private static readonly SyntaxExpressionVisitor SyntaxExpressionVisitor = new();
@@ -37,8 +32,24 @@ public class ExpressionSyntax : Syntax {
     return new ExpressionSyntax(ExpressionNode);
   }
 
-  protected internal virtual string ParseExpressionToSyntaxString() {
-    return TransformInternalExpressionSyntax().ToString();
+  protected internal string ParseExpressionToSyntaxString() {
+    var expressionString = TransformInternalExpressionSyntax().ToString();
+    return RemoveSurroundingParentheses(expressionString);
+  }
+
+  /// <summary>
+  ///   Standalone expressions like "a + b" are wrapped in parentheses
+  ///   by the LINQ Expression API. We don't need these parentheses
+  ///   so we remove them.
+  /// </summary>
+  /// <param name="expression"></param>
+  /// <returns></returns>
+  private string RemoveSurroundingParentheses(string expression) {
+    if (expression.StartsWith("(") && expression.EndsWith(")")) {
+      return expression.Substring(1, expression.Length - 2);
+    }
+
+    return expression;
   }
 
   /// <summary>

@@ -1,5 +1,4 @@
 ﻿using System.Linq.Expressions;
-using System.Reflection;
 using Mumei.CodeGen.SyntaxNodes;
 
 namespace Mumei.Test.SyntaxNodes.Base;
@@ -24,10 +23,10 @@ public class ExpressionSyntaxTests {
   [Fact]
   public void
     ParseExpressionToSyntaxString_ReplacesTargetCallWithSpecifiedValue_WhenTargetImplementsITransformMember() {
-    var closureVariable = new ImplementsITransformMemberExpression();
-    var sut = new ExpressionSyntax(() => closureVariable.BoundValue == "Bar");
+    var closureVariable = new ImplementsIValueHolder<string> { Identifier = "Bar" };
+    var sut = new ExpressionSyntax(() => closureVariable.Value == "Bar");
 
-    sut.ParseExpressionToSyntaxString().Should().Be("(Bar == \"Bar\")");
+    sut.ParseExpressionToSyntaxString().Should().Be("Bar == \"Bar\"");
   }
 
   [Fact]
@@ -35,7 +34,7 @@ public class ExpressionSyntaxTests {
     var closureVariable = Expression.Variable(typeof(string), "Bar");
     var sut = new ExpressionSyntax(() => closureVariable.Name == "Bar");
 
-    sut.ParseExpressionToSyntaxString().Should().Be("(Bar.Name == \"Bar\")");
+    sut.ParseExpressionToSyntaxString().Should().Be("Bar.Name == \"Bar\"");
   }
 
   [Fact]
@@ -43,19 +42,11 @@ public class ExpressionSyntaxTests {
     var closureVariable = "Foo";
     var sut = new ExpressionSyntax(() => closureVariable.Length == 5);
 
-    sut.ParseExpressionToSyntaxString().Should().Be("(\"Foo\".Length == 5)");
+    sut.ParseExpressionToSyntaxString().Should().Be("\"Foo\".Length == 5");
   }
 
-  private class ImplementsITransformMemberExpression : ITransformMemberExpression {
-    public string BoundValue { get; set; }
-    public string NonBoundValue { get; set; }
-
-    public Expression TransformMemberAccess(Expression target, MemberInfo member) {
-      if (member.Name == nameof(BoundValue)) {
-        return Expression.Variable(typeof(string), "Bar");
-      }
-
-      return Expression.MakeMemberAccess(target, member);
-    }
+  private class ImplementsIValueHolder<T> : IValueHolderSyntax<T> {
+    public string Identifier { get; set; }
+    public T Value { get; set; }
   }
 }
