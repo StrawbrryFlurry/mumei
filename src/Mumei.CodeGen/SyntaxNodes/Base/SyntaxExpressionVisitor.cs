@@ -73,11 +73,30 @@ public class SyntaxExpressionVisitor : ExpressionVisitor {
       return base.VisitMember(node);
     }
 
-    if (target.Value is ITransformMemberExpression transformableTarget) {
-      return transformableTarget.TransformMemberAccess(target, node.Member);
+    if (IsValueHolderSyntax(target.Value)) {
+      return TransformValueHolderSyntax(target, node.Member);
     }
 
     return base.VisitMember(node);
+  }
+
+  private bool IsValueHolderSyntax(object value) {
+    var interfaces = value.GetType().GetInterfaces();
+    return interfaces.Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValueHolderSyntax<>));
+  }
+
+  private Expression TransformValueHolderSyntax(ConstantExpression target, MemberInfo member) {
+    // We allow users to imitate variable access though the "Value"
+    // property. To reflect that in the generated expression, we need to
+    // replace the current target with the variable instance.
+    if (member.Name != nameof(IValueHolderSyntax<object>.Value)) {
+      return Expression.MakeMemberAccess(target, member);
+    }
+
+    var valueHolder = target.Value;
+    var identifierProperty = valueHolder.GetType().GetProperty(nameof(IValueHolderSyntax<object>.Identifier))!;
+    var valueProperty = valueHolder.GetType().GetProperty(nameof(IValueHolderSyntax<object>.Value))!;
+    return Expression.Variable(valueProperty.PropertyType, (string)identifierProperty.GetValue(valueHolder));
   }
 
   internal bool IsClosureWrappedConstantExpression(MemberExpression expression, out ConstantExpression? target) {
