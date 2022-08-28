@@ -106,4 +106,27 @@ public class BlockSyntaxBuilderTests {
 
     WriteSyntaxAsString(assignment).Should().Be("foo = bar.Substring(1);");
   }
+
+  [Fact]
+  public void Build_CreatesNewBlockSyntaxWithAllStatementsAddedInTheBlock() {
+    var sut = new BlockSyntaxBuilder();
+
+    sut.Statement(Expression.Empty());
+    sut.Statement(Expression.Empty());
+    sut.Statement(Expression.Empty());
+
+    var block = sut.Build();
+
+    block.Statements.Should().HaveCount(3);
+  }
+
+  [Fact]
+  public void Build_SetsParentOfBlock_WhenParentIsSpecified() {
+    var parent = new BlockSyntax();
+    var sut = new BlockSyntaxBuilder(parent);
+
+    var block = sut.Build();
+
+    block.Parent.Should().Be(parent);
+  }
 }

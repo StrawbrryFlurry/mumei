@@ -12,7 +12,7 @@ public class BlockSyntax : StatementSyntax {
   public IEnumerable<StatementSyntax> Statements => _statements;
 
   public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {
-    writer.WriteLine("{");
+    writer.WriteLineEnd("{");
     writer.Indent();
 
     foreach (var statement in Statements) {

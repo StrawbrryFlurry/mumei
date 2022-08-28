@@ -33,8 +33,19 @@ public class ExpressionSyntax : Syntax {
   }
 
   protected internal string ParseExpressionToSyntaxString() {
-    var expressionString = TransformInternalExpressionSyntax().ToString();
+    var expressionString = ConvertExpressionToString(TransformInternalExpressionSyntax());
     return RemoveSurroundingParentheses(expressionString);
+  }
+
+  private string ConvertExpressionToString(Expression expression) {
+    // TODO: Clean up
+    if (expression is ConstantExpression constant) {
+      if (constant.Value is bool b) {
+        return b ? "true" : "false";
+      }
+    }
+
+    return expression.ToString();
   }
 
   /// <summary>

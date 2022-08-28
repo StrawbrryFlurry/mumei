@@ -6,6 +6,14 @@ namespace Mumei.CodeGen.SyntaxNodes;
 
 public delegate void BlockBuilder(BlockSyntaxBuilder builder);
 
+public static class BlockBuilderExtensions {
+  public static BlockSyntax Build(this BlockBuilder builder) {
+    var blockBuilder = new BlockSyntaxBuilder();
+    builder(blockBuilder);
+    return blockBuilder.Build();
+  }
+}
+
 public class BlockSyntaxBuilder {
   private static readonly MethodInfo GenericVariableDeclarationMethodInfo =
     typeof(BlockSyntaxBuilder).SelectGenericMethodOverload(nameof(VariableDeclaration));
@@ -53,6 +61,14 @@ public class BlockSyntaxBuilder {
     return new VariableExpressionSyntax(variableType, name, declaration);
   }
 
+  public void Statement(StatementSyntax statement) {
+    Statements.Add(statement);
+  }
+
+  public void Statement(Expression expression) {
+    Statements.Add(new ExpressionStatementSyntax(expression));
+  }
+
   public void Statement(Expression<Action> statement) {
     Statements.Add(new ExpressionStatementSyntax(statement));
   }
@@ -85,18 +101,12 @@ public class BlockSyntaxBuilder {
   }
 
   public IfStatementSyntax If(ExpressionSyntax condition, BlockBuilder body) {
-    var block = MakeBlock(body);
+    var block = body.Build();
     var statement = new IfStatementSyntax(condition, block);
 
     Statements.Add(statement);
 
     return statement;
-  }
-
-  private BlockSyntax MakeBlock(BlockBuilder blockFactory) {
-    var blockBuilder = new BlockSyntaxBuilder();
-    blockFactory.Invoke(blockBuilder);
-    return blockBuilder.Build();
   }
 
   public BlockSyntax Build() {
