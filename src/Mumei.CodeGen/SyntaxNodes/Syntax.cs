@@ -41,5 +41,6 @@ public abstract class Syntax {
     }
 
     Parent = parent;
+    TypeContext = parent.TypeContext;
   }
 }
