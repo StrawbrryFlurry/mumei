@@ -1,5 +1,6 @@
 ﻿namespace Mumei.Core.Attributes;
 
-[AttributeUsage(AttributeTargets.Interface | AttributeTargets.Class)]
-public class ScopedAttribute : Attribute {
-}
+public class ScopedAttribute<TProvider, TImplementation> :
+  DependencyRegistrationAttribute<TProvider, TImplementation> where TImplementation : TProvider { }
+
+public class ScopedAttribute<TProvider> : DependencyRegistrationAttribute<TProvider> { }

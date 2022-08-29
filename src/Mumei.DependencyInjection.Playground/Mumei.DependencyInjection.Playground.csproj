@@ -11,4 +11,9 @@
         <ProjectReference Include="..\Mumei.DependencyInjection\Mumei.DependencyInjection.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Include="Features\Weather\.generated\WeatherControllerFactory.g.cs" />
+      <Compile Include="Features\Weather\.generated\WeatherServiceFactory.g.cs" />
+    </ItemGroup>
+
 </Project>
