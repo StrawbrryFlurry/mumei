@@ -1,5 +1,7 @@
 ﻿namespace Mumei.Core.Attributes;
 
+public class Singleton : Attribute { }
+
 public class SingletonAttribute<TProvider, TImplementation>
   : DependencyRegistrationAttribute<TProvider, TImplementation>
   where TImplementation : TProvider { }
@@ -17,3 +19,5 @@ public class InternalSingletonAttribute<TProvider, TImplementation>
   : SingletonAttribute<TProvider, TImplementation> where TImplementation : TProvider { }
 
 public class InternalSingletonAttribute<TProvider> : SingletonAttribute<TProvider> { }
+
+public class InternalAttribute : Attribute { }

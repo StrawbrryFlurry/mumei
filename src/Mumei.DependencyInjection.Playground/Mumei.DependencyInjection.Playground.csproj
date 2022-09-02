@@ -12,8 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Include="Features\Weather\.generated\WeatherControllerFactory.g.cs" />
-      <Compile Include="Features\Weather\.generated\WeatherServiceFactory.g.cs" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0-preview.7.22375.6" />
     </ItemGroup>
 
 </Project>

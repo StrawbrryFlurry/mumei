@@ -1,25 +1,26 @@
 ﻿using System.Runtime.CompilerServices;
+using Mumei.Core.Injector;
 
 namespace Mumei.Core;
 
 public abstract class Binding<TProvider> {
-  protected readonly Provider<TProvider> Provider;
+  protected readonly IProviderFactory<TProvider> Provider;
 
   public Type ProviderType = typeof(TProvider);
 
-  public Binding(Provider<TProvider> provider) {
+  public Binding(IProviderFactory<TProvider> provider) {
     Provider = provider;
   }
 
-  public abstract TProvider Get(object? scope = null);
+  public abstract TProvider Get(IInjector? scope = null);
 }
 
 public class SingletonBinding<TProvider> : Binding<TProvider> {
   private TProvider? _instance;
 
-  public SingletonBinding(Provider<TProvider> provider) : base(provider) { }
+  public SingletonBinding(IProviderFactory<TProvider> provider) : base(provider) { }
 
-  public override TProvider Get(object? scope = null) {
+  public override TProvider Get(IInjector? scope = null) {
     if (_instance is not null) {
       return _instance;
     }
@@ -30,18 +31,17 @@ public class SingletonBinding<TProvider> : Binding<TProvider> {
 }
 
 public class TransientBinding<TProvider> : Binding<TProvider> {
-  public TransientBinding(Provider<TProvider> provider) : base(provider) { }
+  public TransientBinding(IProviderFactory<TProvider> provider) : base(provider) { }
 
-  public override TProvider Get(object? scope = null) {
+  public override TProvider Get(IInjector? scope = null) {
     return Provider.Get();
   }
 }
 
 public class ScopedBinding<TProvider> : Binding<TProvider> where TProvider : class? {
-  private static readonly object GlobalSingletonScope = new();
   private readonly ConditionalWeakTable< /* Injector */ object, TProvider> _instances = new();
 
-  public ScopedBinding(Provider<TProvider> provider) : base(provider) { }
+  public ScopedBinding(IProviderFactory<TProvider> provider) : base(provider) { }
 
   /// <summary>
   ///   Returns the provider instance scoped to the given injector.
@@ -50,7 +50,7 @@ public class ScopedBinding<TProvider> : Binding<TProvider> where TProvider : cla
   ///   has been completed. If no scope is specified, the global singleton scope is used.
   /// </summary>
   /// <returns></returns>
-  public override TProvider Get(object? scope = null) {
-    return _instances.GetValue(scope ?? GlobalSingletonScope, _ => Provider.Get());
+  public override TProvider Get(IInjector? scope = null) {
+    return _instances.GetValue(scope ?? SingletonScopeλInjector.Instance, _ => Provider.Get());
   }
 }

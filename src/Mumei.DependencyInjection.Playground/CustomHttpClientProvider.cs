@@ -4,8 +4,8 @@ using HttpClient = Mumei.DependencyInjection.Playground.Common.HttpClient;
 
 namespace Mumei.DependencyInjection.Playground;
 
-public class HttpClientλFactory : IProviderFactory<IHttpClient> {
-  public IHttpClient Get() {
+public class CustomHttpClientProvider : IDynamicProvider<IHttpClient> {
+  public IHttpClient Provide() {
     return new HttpClient();
   }
 }
