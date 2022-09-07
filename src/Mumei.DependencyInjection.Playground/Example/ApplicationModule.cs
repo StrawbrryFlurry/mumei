@@ -1,7 +1,7 @@
 ﻿using Mumei.Core;
 using Mumei.Core.Attributes;
+using Mumei.Core.Provider;
 using Mumei.DependencyInjection.Playground.Common;
-using Mumei.DependencyInjection.Playground.Example.Modules;
 using Mumei.DependencyInjection.Playground.Example.Modules.Services;
 using Mumei.DependencyInjection.Playground.Generated;
 using Mumei.Internal;
@@ -17,20 +17,22 @@ public interface IApplicationModule { }
 [MumeiModule]
 public sealed class ApplicationModule : IApplicationModule, IModule {
   internal readonly Binding<IHttpClient> HttpClientBinding;
+  internal readonly WeatherModule WeatherModule;
   internal readonly Binding<IWeatherService> WeatherServiceBinding;
 
   public ApplicationModule(WeatherModule weatherModule, CommonModule commonModule) {
+    WeatherModule = weatherModule;
     HttpClientBinding = commonModule.HttpClientBinding;
     WeatherServiceBinding = weatherModule.WeatherServiceBinding;
   }
 
   public IInjector Parent { get; } = PlatformInjector.Instance;
 
-  public T Get<T>() {
+  public TProvider Get<TProvider>(InjectFlags flags = InjectFlags.None) {
     throw new NotImplementedException();
   }
 
-  public object Get(Type provider) {
+  public object Get(object token, InjectFlags flags = InjectFlags.None) {
     throw new NotImplementedException();
   }
 

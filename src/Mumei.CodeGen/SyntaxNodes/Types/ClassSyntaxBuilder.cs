@@ -1,5 +1,4 @@
 ﻿using Mumei.CodeGen.SyntaxWriters;
-using static Mumei.CodeGen.SyntaxWriters.TypeDeclarationVisibility;
 
 namespace Mumei.CodeGen.SyntaxNodes;
 
@@ -8,20 +7,20 @@ public class ClassSyntaxBuilder : SyntaxWriter {
   private readonly HashSet<Type> _interfaces = new();
 
   private readonly string _name;
-  private readonly TypeDeclarationVisibility _visibility;
+  private readonly SyntaxVisibility _visibility;
 
   private Type? _baseType;
+
+  public ClassSyntaxBuilder(string className, SyntaxVisibility classVisibility = SyntaxVisibility.Internal) {
+    _name = className;
+    _visibility = classVisibility;
+  }
 
   private bool HasInterfaces => _interfaces.Count > 0;
   private bool HasBaseType => _baseType is not null;
   private bool HasBaseTypes => HasInterfaces || HasBaseType;
 
   private bool HasFields => _fields.Count > 0;
-
-  public ClassSyntaxBuilder(string className, TypeDeclarationVisibility classVisibility = Internal) {
-    _name = className;
-    _visibility = classVisibility;
-  }
 
   public void DefineBaseType(Type baseType) {
     if (HasBaseType) {
@@ -47,21 +46,17 @@ public class ClassSyntaxBuilder : SyntaxWriter {
     _interfaces.Add(@interface);
   }
 
-  public void AddField() {
-  }
+  public void AddField() { }
 
   public void AddField<TField>() {
     _fields.Add(new MemberFieldInfo());
   }
 
-  public void AddProperty() {
-  }
+  public void AddProperty() { }
 
-  public void AddMethod() {
-  }
+  public void AddMethod() { }
 
-  public void AddConstructor() {
-  }
+  public void AddConstructor() { }
 
   public override string ToString() {
     var visibility = _visibility.ToVisibilityString();

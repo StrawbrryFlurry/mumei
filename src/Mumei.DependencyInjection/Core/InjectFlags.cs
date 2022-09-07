@@ -2,6 +2,7 @@
 
 namespace Mumei.Core;
 
+[Flags]
 public enum InjectFlags {
   None = 1 << 0,
   Optional = 1 << 2,

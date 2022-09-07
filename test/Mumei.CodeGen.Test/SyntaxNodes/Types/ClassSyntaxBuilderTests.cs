@@ -1,5 +1,4 @@
-﻿using FluentAssertions;
-using Mumei.CodeGen.SyntaxNodes;
+﻿using Mumei.CodeGen.SyntaxNodes;
 using Mumei.CodeGen.SyntaxWriters;
 
 namespace Mumei.Test.SyntaxNodes.Types;
@@ -17,7 +16,7 @@ public class ClassSyntaxBuilderTests {
 
   [Fact]
   public void ToString_ReturnsClassSkeletonWithSpecifiedVisibility() {
-    var sut = new ClassSyntaxBuilder("Test", TypeDeclarationVisibility.Public);
+    var sut = new ClassSyntaxBuilder("Test", SyntaxVisibility.Public);
 
     sut.ToString().Should().Be(
       Line("public class Test {") +

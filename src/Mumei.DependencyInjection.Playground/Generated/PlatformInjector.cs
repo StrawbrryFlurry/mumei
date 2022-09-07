@@ -8,26 +8,23 @@ public partial class PlatformInjector : IInjector {
   private PlatformInjector() { }
 
   public IInjector Parent { get; } = EnvironmentInjector.Instance;
-
-  public partial T Get<T>();
-  public partial object Get(Type provider);
 }
 
 public partial class PlatformInjector {
-  public partial T Get<T>() {
-    var provider = typeof(T);
+  public TProvider Get<TProvider>(InjectFlags flags = InjectFlags.None) {
+    var provider = typeof(TProvider);
     var instance = provider switch {
       _ when provider == typeof(IInjector) => Instance,
       _ => Parent.Get(provider)
     };
 
-    return (T)instance;
+    return (TProvider)instance;
   }
 
-  public partial object Get(Type provider) {
-    return provider switch {
-      _ when provider == typeof(IInjector) => Instance,
-      _ => Parent.Get(provider)
+  public object Get(object token, InjectFlags flags = InjectFlags.None) {
+    return token switch {
+      _ when token == typeof(IInjector) => Instance,
+      _ => Parent.Get(token)
     };
   }
 }

@@ -1,18 +1,17 @@
 ﻿using Mumei.Core;
+using Mumei.Core.Provider;
 using Mumei.DependencyInjection.Playground.Example.Modules.Services;
 
 namespace Mumei.DependencyInjection.Playground.Example.Modules; 
 
-public class WeatherControllerλFactory : IProviderFactory<WeatherController> {
-  private readonly IProviderFactory<IWeatherService> _weatherServiceProvider;
-  private readonly IProviderFactory<OptionalService> _optionalServiceProvider;
+public class WeatherControllerλBindingFactory : ScopedBindingFactory<WeatherController> {
+  private readonly Binding<IWeatherService> _weatherServiceProvider;
 
-  public WeatherControllerλFactory(IProviderFactory<IWeatherService> weatherServiceProvider, IProviderFactory<OptionalService> optionalServiceProvider) {
+  public WeatherControllerλBindingFactory(Binding<IWeatherService> weatherServiceProvider) {
     _weatherServiceProvider = weatherServiceProvider;
-    _optionalServiceProvider = optionalServiceProvider;
   }
-  
-  public WeatherController Get() {
-    return new WeatherController(_weatherServiceProvider.Get(), _optionalServiceProvider.Get());
+
+  protected override WeatherController Create(IInjector? scope = null) {
+    return new WeatherController(_weatherServiceProvider.Get(scope));
   }
 }

@@ -5,13 +5,13 @@ public sealed class SingletonScopeλInjector : IInjector {
 
   public IInjector Parent => default!;
 
-  public T Get<T>() {
+  public object Get(object providerToken, InjectFlags flags) {
     throw new NotSupportedException(
       "SingletonScopeInjector does not support dependency resolution and is only used for scoping purposes."
     );
   }
 
-  public object Get(Type provider) {
+  public T Get<T>(InjectFlags flags) {
     throw new NotSupportedException(
       "SingletonScopeInjector does not support dependency resolution and is only used for scoping purposes."
     );

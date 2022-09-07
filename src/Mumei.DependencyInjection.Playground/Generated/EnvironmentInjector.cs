@@ -7,11 +7,11 @@ public class EnvironmentInjector : IInjector {
   public static readonly EnvironmentInjector Instance = new();
   public IInjector Parent { get; } = NullInjector.Instance;
 
-  public T Get<T>() {
-    return Parent.Get<T>();
+  public TProvider Get<TProvider>(InjectFlags flags = InjectFlags.None) {
+    return Parent.Get<TProvider>();
   }
 
-  public object Get(Type provider) {
-    return Parent.Get(provider);
+  public object Get(object token, InjectFlags flags = InjectFlags.None) {
+    return Parent.Get(token, flags);
   }
 }
