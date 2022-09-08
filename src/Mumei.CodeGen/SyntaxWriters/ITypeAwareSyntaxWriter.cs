@@ -1,11 +1,7 @@
 ﻿namespace Mumei.CodeGen.SyntaxWriters;
 
 public interface ITypeAwareSyntaxWriter : ISyntaxWriter {
-  /// <summary>
-  ///   Includes a type dependency in the syntax.
-  /// </summary>
-  /// <param name="type"></param>
-  public void IncludeTypeNamespace(Type type);
+  public SyntaxTypeContext TypeContext { get; }
 
   /// <summary>
   ///   Converts any value to it's expression form.

@@ -4,7 +4,6 @@ using Mumei.CodeGen.SyntaxWriters;
 namespace Mumei.CodeGen.SyntaxNodes;
 
 public class ExpressionSyntax : Syntax {
-  private static readonly SyntaxExpressionVisitor SyntaxExpressionVisitor = new();
   protected readonly Expression ExpressionNode;
 
   public ExpressionSyntax(Expression expressionNode, Syntax? parent = null) : base(parent) {
@@ -25,15 +24,15 @@ public class ExpressionSyntax : Syntax {
   }
 
   public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {
-    writer.Write(ParseExpressionToSyntaxString());
+    writer.Write(ParseExpressionToSyntaxString(writer));
   }
 
   public override Syntax Clone() {
     return new ExpressionSyntax(ExpressionNode);
   }
 
-  protected internal string ParseExpressionToSyntaxString() {
-    var expressionString = ConvertExpressionToString(TransformInternalExpressionSyntax());
+  protected internal string ParseExpressionToSyntaxString(ITypeAwareSyntaxWriter writer) {
+    var expressionString = ConvertExpressionToString(TransformInternalExpressionSyntax(writer.TypeContext));
     return RemoveSurroundingParentheses(expressionString);
   }
 
@@ -76,11 +75,12 @@ public class ExpressionSyntax : Syntax {
   ///   to a single VariableExpression.
   /// </summary>
   /// <returns></returns>
-  private Expression TransformInternalExpressionSyntax() {
-    return SyntaxExpressionVisitor.Visit(ExpressionNode) ?? ExpressionNode;
+  private Expression TransformInternalExpressionSyntax(SyntaxTypeContext ctx) {
+    var visitor = new SyntaxExpressionVisitor(ctx);
+    return visitor.Visit(ExpressionNode) ?? ExpressionNode;
   }
 
   public override string ToString() {
-    return ParseExpressionToSyntaxString();
+    return ParseExpressionToSyntaxString(NoopSyntaxWriter.Instance);
   }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Mumei.CodeGen.SyntaxNodes;
+using Mumei.CodeGen.SyntaxWriters;
 
 namespace Mumei.Test.SyntaxNodes.Base;
 
@@ -26,7 +27,7 @@ public class ExpressionSyntaxTests {
     var closureVariable = new ImplementsIValueHolder<string> { Identifier = "Bar" };
     var sut = new ExpressionSyntax(() => closureVariable.Value == "Bar");
 
-    sut.ParseExpressionToSyntaxString().Should().Be("Bar == \"Bar\"");
+    sut.ParseExpressionToSyntaxString(NoopSyntaxWriter.Instance).Should().Be("Bar == \"Bar\"");
   }
 
   [Fact]
@@ -34,7 +35,7 @@ public class ExpressionSyntaxTests {
     var closureVariable = Expression.Variable(typeof(string), "Bar");
     var sut = new ExpressionSyntax(() => closureVariable.Name == "Bar");
 
-    sut.ParseExpressionToSyntaxString().Should().Be("Bar.Name == \"Bar\"");
+    sut.ParseExpressionToSyntaxString(NoopSyntaxWriter.Instance).Should().Be("Bar.Name == \"Bar\"");
   }
 
   [Fact]
@@ -42,7 +43,7 @@ public class ExpressionSyntaxTests {
     var closureVariable = "Foo";
     var sut = new ExpressionSyntax(() => closureVariable.Length == 5);
 
-    sut.ParseExpressionToSyntaxString().Should().Be("\"Foo\".Length == 5");
+    sut.ParseExpressionToSyntaxString(NoopSyntaxWriter.Instance).Should().Be("\"Foo\".Length == 5");
   }
 
   private class ImplementsIValueHolder<T> : IValueHolderSyntax<T> {

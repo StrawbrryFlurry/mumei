@@ -10,4 +10,22 @@ public class SyntaxTypeContext {
   public void UseNamespace(string ns) {
     _usedNamespaces.Add(ns);
   }
+
+  public void IncludeTypeNamespace(Type type) {
+    var ns = type.Namespace;
+
+    if (ns is not null) {
+      UseNamespace(ns);
+    }
+
+    if (!type.IsGenericType) {
+      return;
+    }
+
+    var args = type.GetGenericArguments();
+
+    foreach (var arg in args) {
+      IncludeTypeNamespace(arg);
+    }
+  }
 }

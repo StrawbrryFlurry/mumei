@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using FluentAssertions;
 using Mumei.CodeGen.SyntaxWriters;
 
 namespace Mumei.Test.SyntaxWriters;
@@ -8,9 +7,8 @@ public class TypeAwareSyntaxWriterTests {
   [Fact]
   public void IncludeTypeNamespace_AddsNamespaceOfTheSpecifiedTypeToContext() {
     var ctx = new SyntaxTypeContext();
-    var sut = new TypeAwareSyntaxWriter(ctx);
 
-    sut.IncludeTypeNamespace(typeof(string));
+    ctx.IncludeTypeNamespace(typeof(string));
 
     ctx.UsedNamespaces.First().Should().Be(typeof(string).Namespace);
   }
@@ -18,9 +16,8 @@ public class TypeAwareSyntaxWriterTests {
   [Fact]
   public void IncludeTypeNamespace_AddsNamespaceOfGenericArgumentsToContext_WhenTypeIsGeneric() {
     var ctx = new SyntaxTypeContext();
-    var sut = new TypeAwareSyntaxWriter(ctx);
 
-    sut.IncludeTypeNamespace(typeof(IEnumerable<string>));
+    ctx.IncludeTypeNamespace(typeof(IEnumerable<string>));
 
     ctx.UsedNamespaces.Should().ContainInOrder(typeof(IEnumerable<>).Namespace, typeof(string).Namespace);
   }

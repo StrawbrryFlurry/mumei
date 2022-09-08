@@ -1,10 +1,17 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
+using Mumei.CodeGen.Expressions;
+using Mumei.CodeGen.SyntaxWriters;
 
 namespace Mumei.CodeGen.SyntaxNodes;
 
 public class SyntaxExpressionVisitor : ExpressionVisitor {
   private const string CompilerGeneratedClassPrefix = "<>c__";
+  private readonly SyntaxTypeContext _typeContext;
+
+  public SyntaxExpressionVisitor(SyntaxTypeContext typeContext) {
+    _typeContext = typeContext;
+  }
 
   protected override Expression VisitMemberInit(MemberInitExpression node) {
     return base.VisitMemberInit(node);
@@ -23,7 +30,12 @@ public class SyntaxExpressionVisitor : ExpressionVisitor {
   }
 
   protected override Expression VisitConstant(ConstantExpression node) {
-    return base.VisitConstant(node);
+    if (node.Value is not Type type) {
+      return base.VisitConstant(node);
+    }
+
+    _typeContext.IncludeTypeNamespace(type);
+    return new TypeExpression(type);
   }
 
   protected override Expression VisitDefault(DefaultExpression node) {

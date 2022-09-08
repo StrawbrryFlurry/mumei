@@ -5,29 +5,11 @@ using Mumei.CodeGen.Extensions;
 namespace Mumei.CodeGen.SyntaxWriters;
 
 public class TypeAwareSyntaxWriter : SyntaxWriter, ITypeAwareSyntaxWriter {
-  private readonly SyntaxTypeContext? _ctx;
-
-  public TypeAwareSyntaxWriter(SyntaxTypeContext? ctx) {
-    _ctx = ctx;
+  public TypeAwareSyntaxWriter(SyntaxTypeContext? ctx = null) {
+    TypeContext = ctx ?? new SyntaxTypeContext();
   }
 
-  public void IncludeTypeNamespace(Type type) {
-    var ns = type.Namespace;
-
-    if (ns is not null) {
-      _ctx?.UseNamespace(ns);
-    }
-
-    if (!type.IsGenericType) {
-      return;
-    }
-
-    var args = type.GetGenericArguments();
-
-    foreach (var arg in args) {
-      IncludeTypeNamespace(arg);
-    }
-  }
+  public SyntaxTypeContext TypeContext { get; }
 
   public void WriteValueAsExpressionSyntax(object value) {
     Write(GetValueAsExpressionSyntax(value));
@@ -64,7 +46,7 @@ public class TypeAwareSyntaxWriter : SyntaxWriter, ITypeAwareSyntaxWriter {
   }
 
   private string GetNonGenericTypeAsString(Type type) {
-    IncludeTypeNamespace(type);
+    TypeContext.IncludeTypeNamespace(type);
     return type.Name;
   }
 

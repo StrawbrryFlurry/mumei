@@ -38,7 +38,7 @@ public class AttributeSyntax : Syntax {
 
   // [<TypeName>(...Arguments)]
   public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {
-    writer.IncludeTypeNamespace(Type);
+    writer.TypeContext.IncludeTypeNamespace(Type);
 
     writer.WriteLineStart("[");
     writer.Write(Type.GetAttributeName());
