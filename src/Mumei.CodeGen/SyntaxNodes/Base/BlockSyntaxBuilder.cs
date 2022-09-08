@@ -77,6 +77,19 @@ public class BlockSyntaxBuilder {
     Statements.Add(new ExpressionStatementSyntax(statement));
   }
 
+  public void Assign<TValue>(IValueHolderSyntax<TValue> target, Expression<Func<TValue>> valueExpression) {
+    Expression assignmentExpression;
+    if (target is ExpressionSyntax expressionTarget) {
+      assignmentExpression = Expression.Assign(expressionTarget, valueExpression.Body);
+    }
+    else {
+      var targetVariable = Expression.Variable(typeof(TValue), target.Identifier);
+      assignmentExpression = Expression.Assign(targetVariable, valueExpression.Body);
+    }
+
+    Statements.Add(new ExpressionStatementSyntax(assignmentExpression));
+  }
+
   public void Assign<TValue>(IValueHolderSyntax<TValue> target, ExpressionSyntax refValue) {
     Expression assignmentExpression;
     if (target is ExpressionSyntax expressionTarget) {

@@ -76,6 +76,17 @@ public class BlockSyntaxBuilderTests {
   }
 
   [Fact]
+  public void Assign_AddsAssignmentToStatementList_WhenValueIsLambdaWithExpression() {
+    var sut = new BlockSyntaxBuilder();
+
+    var variable = new VariableExpressionSyntax<int>("foo");
+    sut.Assign(variable, () => typeof(string).Name.Length);
+    var assignment = sut.Statements.OfType<ExpressionStatementSyntax>().First();
+
+    WriteSyntaxAsString(assignment).Should().Be("foo = typeof(String).Name.Length;");
+  }
+
+  [Fact]
   public void Assign_AddsAssignmentToStatementList_WhenValueIsExpressionSyntax() {
     var sut = new BlockSyntaxBuilder();
 
