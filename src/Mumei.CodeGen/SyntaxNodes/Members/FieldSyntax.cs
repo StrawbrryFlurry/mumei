@@ -8,17 +8,29 @@ public class FieldSyntax : FieldSyntax<object> {
 }
 
 public class FieldSyntax<T> : MemberSyntax, IValueHolderSyntax<T>, IValueHolderDeclarationSyntax {
+  private ExpressionSyntax? _initilizer;
+
   public FieldSyntax(string identifier, Syntax parent) : base(typeof(T), identifier, parent) { }
   protected FieldSyntax(Type type, string identifier, Syntax parent) : base(type, identifier, parent) { }
 
   public override int Priority => 0;
 
-  public ExpressionSyntax? Initializer { get; set; }
+  public ExpressionSyntax? Initializer {
+    get => _initilizer;
+    set {
+      value?.SetParent(this);
+      _initilizer = value;
+    }
+  }
 
   public T? Value { get; set; }
 
-  public void SetInitialValue(object? value) {
+  public void SetInitialValue(T? value) {
     Initializer = Expression.Constant(value);
+  }
+
+  public void SetInitialValue(Expression<Func<T>> value) {
+    Initializer = value;
   }
 
   public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {
@@ -46,6 +58,15 @@ public class FieldSyntax<T> : MemberSyntax, IValueHolderSyntax<T>, IValueHolderD
   }
 
   public override Syntax Clone() {
-    throw new NotImplementedException();
+    var attributes = AttributeList.Clone<AttributeListSyntax>();
+
+    var clone = new FieldSyntax<T>(Identifier, null!) {
+      AttributeList = attributes,
+      Initializer = Initializer,
+      Value = Value,
+      Visibility = Visibility
+    };
+
+    return clone;
   }
 }

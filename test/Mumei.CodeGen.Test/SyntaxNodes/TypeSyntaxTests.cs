@@ -46,6 +46,18 @@ public class TypeSyntaxTests {
     );
   }
 
+
+  [Fact]
+  public void SetAttributeList_ShouldSetSelfAsParentOfList() {
+    var attributeList = new AttributeListSyntax();
+
+    var sut = new TypeSyntaxImpl("<identifier>") {
+      AttributeList = attributeList
+    };
+
+    attributeList.Parent.Should().Be(sut);
+  }
+
   private class TypeSyntaxImpl : TypeSyntax {
     public TypeSyntaxImpl(string identifier) : base(identifier) { }
 

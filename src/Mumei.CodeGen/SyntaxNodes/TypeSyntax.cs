@@ -7,6 +7,8 @@ namespace Mumei.CodeGen.SyntaxNodes;
 ///   declaration, or member.
 /// </summary>
 public abstract class TypeSyntax : Syntax {
+  private readonly AttributeListSyntax _attributeList = new(SeparationStrategy.NewLine);
+
   public TypeSyntax(string identifier) {
     Identifier = identifier;
   }
@@ -17,7 +19,13 @@ public abstract class TypeSyntax : Syntax {
 
   public string Identifier { get; }
 
-  public virtual AttributeListSyntax AttributeList { get; } = new(SeparationStrategy.NewLine);
+  public virtual AttributeListSyntax AttributeList {
+    get => _attributeList;
+    init {
+      value.SetParent(this);
+      _attributeList = value;
+    }
+  }
 
   public virtual SyntaxVisibility Visibility { get; set; } = SyntaxVisibility.None;
 
