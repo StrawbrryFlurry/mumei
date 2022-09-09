@@ -72,7 +72,7 @@ public class IfStatementSyntaxTests {
       b => b.VariableDeclaration<string>("foo", Expression.Constant(42))
     );
 
-    WriteSyntaxAsString(sut).Should().Be(
+    sut.WriteSyntaxAsString().Should().Be(
       Line("if(true) {") +
       IndentedLine("String foo = 42;", 1) +
       "}");
@@ -87,7 +87,7 @@ public class IfStatementSyntaxTests {
 
     sut.DefineElse(b => b.VariableDeclaration<string>("bar", Expression.Constant(42)));
 
-    WriteSyntaxAsString(sut).Should().Be(
+    sut.WriteSyntaxAsString().Should().Be(
       Line("if(true) {") +
       IndentedLine("String foo = 42;", 1) +
       Line("} else {") +
@@ -105,7 +105,7 @@ public class IfStatementSyntaxTests {
 
     sut.AddElseIf(() => false, b => b.VariableDeclaration<string>("bar", Expression.Constant(42)));
 
-    WriteSyntaxAsString(sut).Should().Be(
+    sut.WriteSyntaxAsString().Should().Be(
       Line("if(true) {") +
       IndentedLine("String foo = 42;", 1) +
       Line("} else if(false) {") +
@@ -125,7 +125,7 @@ public class IfStatementSyntaxTests {
     sut.AddElseIf(() => false, b => b.VariableDeclaration<string>("baz", Expression.Constant(42)));
     sut.DefineElse(b => b.VariableDeclaration<string>("qux", Expression.Constant(42)));
 
-    WriteSyntaxAsString(sut).Should().Be(
+    sut.WriteSyntaxAsString().Should().Be(
       Line("if(true) {") +
       IndentedLine("String foo = 42;", 1) +
       Line("} else if(false) {") +

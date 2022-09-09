@@ -8,21 +8,21 @@ public class VariableSyntaxTests {
   public void VariableSyntax_WriteAsSyntax_WritesVariableNameAsString() {
     var sut = new VariableExpressionSyntax<string>("Test");
 
-    WriteSyntaxAsString(sut).Should().Be("Test");
+    sut.WriteSyntaxAsString().Should().Be("Test");
   }
 
   [Fact]
   public void VariableSyntax_WriteAsSyntax_WritesVariableNameAsString_WhenVariableIsNonGenericInstance() {
     var sut = new VariableExpressionSyntax(typeof(string), "Test");
 
-    WriteSyntaxAsString(sut).Should().Be("Test");
+    sut.WriteSyntaxAsString().Should().Be("Test");
   }
 
   [Fact]
   public void VariableDeclarationSyntax_WriteAsSyntax_WritesVariableTypeAndName_WhenVariableDoesNotHavInitializer() {
     var sut = new VariableDeclarationStatementSyntax(typeof(string), "Test");
 
-    WriteSyntaxAsString(sut).Should().Be("String Test;");
+    sut.WriteSyntaxAsString().Should().Be("String Test;");
   }
 
   [Fact]
@@ -30,7 +30,7 @@ public class VariableSyntaxTests {
     VariableDeclarationSyntax_WriteAsSyntax_WritesVariableTypeNameAndInitializer_WhenVariableHasInitializer() {
     var sut = new VariableDeclarationStatementSyntax(typeof(string), "Test", Expression.Constant(10));
 
-    WriteSyntaxAsString(sut).Should().Be("String Test = 10;");
+    sut.WriteSyntaxAsString().Should().Be("String Test = 10;");
   }
 
   [Fact]

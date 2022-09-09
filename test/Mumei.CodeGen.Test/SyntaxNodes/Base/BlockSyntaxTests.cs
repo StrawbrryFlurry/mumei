@@ -7,7 +7,7 @@ public class BlockSyntaxTests {
   public void WriteAsSyntax_WritesEmptyBrackets_WhenBlockDoesNotHaveAnyStatements() {
     var sut = new BlockSyntax();
 
-    WriteSyntaxAsString(sut).Should().Be(Line("{") + "}");
+    sut.WriteSyntaxAsString().Should().Be(Line("{") + "}");
   }
 
   [Fact]
@@ -17,7 +17,7 @@ public class BlockSyntaxTests {
     sut.AddStatement(new VariableDeclarationStatementSyntax(typeof(string), "Foo"));
     sut.AddStatement(new VariableDeclarationStatementSyntax(typeof(string), "Bar"));
 
-    WriteSyntaxAsString(sut).Should().Be(
+    sut.WriteSyntaxAsString().Should().Be(
       Line("{") +
       IndentedLine("String Foo;", 1) +
       IndentedLine("String Bar;", 1) +

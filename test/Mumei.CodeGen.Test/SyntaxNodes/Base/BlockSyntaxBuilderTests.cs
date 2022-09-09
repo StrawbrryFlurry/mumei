@@ -72,7 +72,7 @@ public class BlockSyntaxBuilderTests {
     sut.Assign(variable, "Bar");
     var assignment = sut.Statements.OfType<ExpressionStatementSyntax>().First();
 
-    WriteSyntaxAsString(assignment).Should().Be("foo = \"Bar\";");
+    assignment.WriteSyntaxAsString().Should().Be("foo = \"Bar\";");
   }
 
   [Fact]
@@ -83,7 +83,7 @@ public class BlockSyntaxBuilderTests {
     sut.Assign(variable, () => typeof(string).Name.Length);
     var assignment = sut.Statements.OfType<ExpressionStatementSyntax>().First();
 
-    WriteSyntaxAsString(assignment).Should().Be("foo = typeof(String).Name.Length;");
+    assignment.WriteSyntaxAsString().Should().Be("foo = typeof(String).Name.Length;");
   }
 
   [Fact]
@@ -96,7 +96,7 @@ public class BlockSyntaxBuilderTests {
     sut.Assign(variable, value);
     var assignment = sut.Statements.OfType<ExpressionStatementSyntax>().First();
 
-    WriteSyntaxAsString(assignment).Should().Be("foo = bar;");
+    assignment.WriteSyntaxAsString().Should().Be("foo = bar;");
   }
 
   [Fact]
@@ -115,7 +115,7 @@ public class BlockSyntaxBuilderTests {
     sut.Assign(variable, callExpression);
     var assignment = sut.Statements.OfType<ExpressionStatementSyntax>().First();
 
-    WriteSyntaxAsString(assignment).Should().Be("foo = bar.Substring(1);");
+    assignment.WriteSyntaxAsString().Should().Be("foo = bar.Substring(1);");
   }
 
   [Fact]
