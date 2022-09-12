@@ -119,6 +119,28 @@ public class BlockSyntaxBuilderTests {
   }
 
   [Fact]
+  public void Return_AddsReturnStatementToStatements() {
+    var sut = new BlockSyntaxBuilder();
+
+    sut.Return();
+
+    sut.Statements.First().Should().BeOfType<ReturnStatementSyntax>();
+  }
+
+  [Fact]
+  public void Return_AddsReturnStatementWithValueToStatements() {
+    var value = Expression.Constant("");
+    var sut = new BlockSyntaxBuilder();
+
+    sut.Return(value);
+
+    var statement = sut.Statements.OfType<ReturnStatementSyntax>().First();
+
+    statement.Should().NotBeNull();
+    ((ConstantExpression)statement.Value!).Should().Be(value);
+  }
+
+  [Fact]
   public void Build_CreatesNewBlockSyntaxWithAllStatementsAddedInTheBlock() {
     var sut = new BlockSyntaxBuilder();
 

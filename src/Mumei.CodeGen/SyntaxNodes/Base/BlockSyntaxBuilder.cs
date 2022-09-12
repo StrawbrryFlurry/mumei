@@ -113,6 +113,14 @@ public class BlockSyntaxBuilder {
     return If((ExpressionSyntax)condition, body);
   }
 
+  public void Return() {
+    Statements.Add(new ReturnStatementSyntax());
+  }
+
+  public void Return(ExpressionSyntax value) {
+    Statements.Add(new ReturnStatementSyntax(value));
+  }
+
   public IfStatementSyntax If(ExpressionSyntax condition, BlockBuilder body) {
     var block = body.Build();
     var statement = new IfStatementSyntax(condition, block);

@@ -9,6 +9,10 @@ public class VariableExpressionSyntax : VariableExpressionSyntax<object> {
   public VariableExpressionSyntax(Type type, string name, Syntax? parent = null) : base(name, parent) {
     Type = type;
   }
+
+  public override Syntax Clone() {
+    return new VariableExpressionSyntax(Type, Identifier);
+  }
 }
 
 public class VariableExpressionSyntax<T> : ExpressionSyntax, IValueHolderSyntax<T> {
@@ -19,6 +23,10 @@ public class VariableExpressionSyntax<T> : ExpressionSyntax, IValueHolderSyntax<
 
   public string Identifier { get; }
   public T Value { get; set; } = default!;
+
+  public override Syntax Clone() {
+    return new VariableExpressionSyntax<T>(Identifier);
+  }
 }
 
 public class VariableDeclarationStatementSyntax : StatementSyntax, IValueHolderDeclarationSyntax {

@@ -35,6 +35,7 @@ public class SyntaxExpressionVisitor : ExpressionVisitor {
     }
 
     _typeContext.IncludeTypeNamespace(type);
+    // Types in constant expressions are not stringified as typeof expressions.
     return new TypeExpression(type);
   }
 

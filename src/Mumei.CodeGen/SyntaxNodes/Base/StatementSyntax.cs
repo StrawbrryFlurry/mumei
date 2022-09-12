@@ -13,6 +13,10 @@ public class ExpressionStatementSyntax : StatementSyntax {
     _expression = expression;
   }
 
+  public static implicit operator ExpressionStatementSyntax(ExpressionSyntax expression) {
+    return new ExpressionStatementSyntax(expression);
+  }
+
   public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {
     _expression.WriteAsSyntax(writer);
     writer.Write(";");
