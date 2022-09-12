@@ -30,4 +30,8 @@ public static class StringExtensions {
   public static string IndentationString(int indents) {
     return new string(SyntaxWriter.IndentChar, SyntaxWriter.IndentSpacing * indents);
   }
+
+  public static string IndentationString(string str, int indents) {
+    return $"{IndentationString(indents)}{str}";
+  }
 }
