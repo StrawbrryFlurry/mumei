@@ -20,11 +20,13 @@ public enum SyntaxVisibility {
   Extern = 1 << 13,
   Volatile = 1 << 14,
   Unsafe = 1 << 15,
-  Async = 1 << 16
+  Required = 1 << 16,
+  Async = 1 << 17
 }
 
-public enum TypeDeclarationVisibility {
+public enum DeclarationVisibility {
   Public = SyntaxVisibility.Public,
+  Private = SyntaxVisibility.Private,
   Internal = SyntaxVisibility.Internal
 }
 
@@ -42,7 +44,7 @@ public static class VisibilityExtensions {
     return visibilityString;
   }
 
-  public static string ToVisibilityString(this TypeDeclarationVisibility visibility) {
+  public static string ToVisibilityString(this DeclarationVisibility visibility) {
     return visibility.ToString().ToLower();
   }
 }

@@ -1,5 +1,4 @@
-﻿using FluentAssertions;
-using Mumei.CodeGen.SyntaxWriters;
+﻿using Mumei.CodeGen.SyntaxWriters;
 
 namespace Mumei.Test.SyntaxWriters;
 
