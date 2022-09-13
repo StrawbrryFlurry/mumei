@@ -4,9 +4,9 @@ public abstract class MemberSyntax : TypeSyntax {
   /// <summary>
   ///   The Syntax in which this member is declared.
   /// </summary>
-  public new readonly Syntax Parent;
+  public new readonly Syntax? Parent;
 
-  public MemberSyntax(Type type, string identifier, Syntax parent) : base(identifier, parent) {
+  public MemberSyntax(Type type, string identifier, Syntax? parent) : base(identifier, parent) {
     Parent = parent;
     Type = type;
   }

@@ -21,8 +21,8 @@ public class AccessorListSyntaxTests {
 
     var sut = new AccessorListSyntax(getter, setter);
 
-    sut.Accessors.Getter.Should().Be(getter);
-    sut.Accessors.Setter.Should().Be(setter);
+    sut.Getter.Should().Be(getter);
+    sut.Setter.Should().Be(setter);
   }
 
   [Fact]
@@ -33,7 +33,7 @@ public class AccessorListSyntaxTests {
     sut.DefineGetter(getter);
 
     getter.Parent.Should().Be(sut);
-    sut.Accessors.Getter.Should().Be(getter);
+    sut.Getter.Should().Be(getter);
   }
 
   [Fact]
@@ -54,7 +54,7 @@ public class AccessorListSyntaxTests {
     sut.DefineSetter(setter);
 
     setter.Parent.Should().Be(sut);
-    sut.Accessors.Setter.Should().Be(setter);
+    sut.Setter.Should().Be(setter);
   }
 
   [Fact]
@@ -93,5 +93,25 @@ public class AccessorListSyntaxTests {
                                           IndentedLine("get;", 1) +
                                           IndentedLine("set;", 1) +
                                           "}");
+  }
+
+  [Fact]
+  public void Clone_Throws_WhenAccessorDoesNotHaveValidGetter() {
+    var sut = new AccessorListSyntax();
+
+    var action = () => sut.Clone();
+
+    action.Should().Throw<InvalidOperationException>();
+  }
+
+  [Fact]
+  public void Clone_CreatesNewAccessorListWithSameAccessors() {
+    var sut = new AccessorListSyntax(AccessorSyntax.AutoGet, AccessorSyntax.AutoSet);
+
+    var clone = sut.Clone<AccessorListSyntax>();
+
+    clone.Should().NotBeSameAs(sut);
+    clone.Getter.Should().NotBeSameAs(sut.Getter);
+    clone.Setter.Should().NotBeSameAs(sut.Setter);
   }
 }

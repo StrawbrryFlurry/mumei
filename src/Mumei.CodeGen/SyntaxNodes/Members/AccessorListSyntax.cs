@@ -3,33 +3,29 @@
 namespace Mumei.CodeGen.SyntaxNodes;
 
 public class AccessorListSyntax : Syntax {
-  public AccessorListSyntax(Syntax? parent = null) : base(parent) {
-    Accessors = (null, null)!;
-  }
+  public AccessorListSyntax(Syntax? parent = null) : base(parent) { }
 
   public AccessorListSyntax(
-    AccessorSyntax get,
+    AccessorSyntax? get,
     AccessorSyntax? set = null,
     Syntax? parent = null) : base(parent) {
     DefineGetter(get);
     DefineSetter(set);
   }
 
-  public (
-    AccessorSyntax Getter,
-    AccessorSyntax? Setter
-    ) Accessors { get; private set; }
+  public AccessorSyntax? Getter { get; private set; }
+  public AccessorSyntax? Setter { get; private set; }
 
-  public void DefineGetter(AccessorSyntax getter) {
+  public void DefineGetter(AccessorSyntax? getter) {
     AssertValidGetter(getter);
-    getter.SetParent(this);
-    Accessors = (getter, Accessors.Setter);
+    getter?.SetParent(this);
+    Getter = getter;
   }
 
   public void DefineSetter(AccessorSyntax? setter) {
     AssertValidSetter(setter);
     setter?.SetParent(this);
-    Accessors = (Accessors.Getter, setter);
+    Setter = setter;
   }
 
   public override void WriteAsSyntax(ITypeAwareSyntaxWriter writer) {
@@ -38,11 +34,11 @@ public class AccessorListSyntax : Syntax {
     writer.WriteLine("{");
     writer.Indent();
 
-    Accessors.Getter.WriteAsSyntax(writer);
+    Getter!.WriteAsSyntax(writer);
 
-    if (Accessors.Setter is not null) {
+    if (Setter is not null) {
       writer.WriteLine();
-      Accessors.Setter.WriteAsSyntax(writer);
+      Setter.WriteAsSyntax(writer);
     }
 
     writer.WriteLine();
@@ -51,13 +47,13 @@ public class AccessorListSyntax : Syntax {
   }
 
   private void AssertHasGetter() {
-    if (Accessors.Getter is null) {
+    if (Getter is null) {
       throw new InvalidOperationException("Invalid accessor list. No getter is defined");
     }
   }
 
-  private void AssertValidGetter(AccessorSyntax accessor) {
-    if (accessor.AccessorType is not AccessorType.Get) {
+  private void AssertValidGetter(AccessorSyntax? accessor) {
+    if (accessor is { AccessorType: not AccessorType.Get }) {
       throw new ArgumentException("Invalid accessor. Getter must be be of type get");
     }
   }
@@ -69,7 +65,8 @@ public class AccessorListSyntax : Syntax {
   }
 
   public override Syntax Clone() {
-    var clone = new AccessorListSyntax(Accessors.Getter, Accessors.Setter);
+    AssertHasGetter();
+    var clone = new AccessorListSyntax(Getter?.Clone<AccessorSyntax>(), Setter?.Clone<AccessorSyntax>());
     return clone;
   }
 }
