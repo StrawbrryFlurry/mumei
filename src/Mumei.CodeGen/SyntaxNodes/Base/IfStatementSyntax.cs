@@ -4,7 +4,7 @@ using Mumei.CodeGen.SyntaxWriters;
 namespace Mumei.CodeGen.SyntaxNodes;
 
 public class IfStatementSyntax : StatementSyntax {
-  private readonly List<(ExpressionSyntax, BlockSyntax)> _clauses = new();
+  private readonly List<(ExpressionSyntax Condition, BlockSyntax Body)> _clauses = new();
 
   public IfStatementSyntax(Expression<Func<bool>> condition, BlockBuilder body, Syntax? parent = null)
     : this(new ExpressionSyntax(condition), body.Build(), parent) { }
@@ -26,22 +26,23 @@ public class IfStatementSyntax : StatementSyntax {
     var ifClause = _clauses[0];
 
     writer.Write("if(");
-    ifClause.Item1.WriteAsSyntax(writer);
+    ifClause.Condition.WriteAsSyntax(writer);
     writer.Write(") ");
-    ifClause.Item2.WriteAsSyntax(writer);
+    ifClause.Body.WriteAsSyntax(writer);
 
-    for (var i = 1; i < _clauses.Count; i++) {
-      var elseIfClause = _clauses[i];
+    foreach (var elseIfClause in _clauses.Skip(1)) {
       writer.Write(" else if(");
-      elseIfClause.Item1.WriteAsSyntax(writer);
+      elseIfClause.Condition.WriteAsSyntax(writer);
       writer.Write(") ");
-      elseIfClause.Item2.WriteAsSyntax(writer);
+      elseIfClause.Body.WriteAsSyntax(writer);
     }
 
-    if (ElseClause != null) {
-      writer.Write(" else ");
-      ElseClause.WriteAsSyntax(writer);
+    if (ElseClause == null) {
+      return;
     }
+
+    writer.Write(" else ");
+    ElseClause.WriteAsSyntax(writer);
   }
 
   public override Syntax Clone() {
