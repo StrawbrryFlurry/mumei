@@ -1,7 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
-using Mumei.Core.Injector;
 
-namespace Mumei.Core.Provider;
+namespace Mumei.Core;
 
 public abstract class ScopedBindingFactory<TProvider> : Binding<TProvider> where TProvider : class {
   private readonly ConditionalWeakTable<IInjector, TProvider> _instances = new();

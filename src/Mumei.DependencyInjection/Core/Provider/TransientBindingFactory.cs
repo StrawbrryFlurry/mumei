@@ -1,4 +1,4 @@
-﻿namespace Mumei.Core.Provider;
+﻿namespace Mumei.Core;
 
 public abstract class TransientBindingFactory<TProvider> : Binding<TProvider> {
   public override TProvider Get(IInjector? scope = null) {

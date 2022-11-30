@@ -1,4 +1,4 @@
-﻿namespace Mumei.Core.Attributes;
+﻿namespace Mumei.Attributes;
 
 /// <summary>
 ///   Enables a provider token (Type, provider name, etc.)

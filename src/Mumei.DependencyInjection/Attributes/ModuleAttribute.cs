@@ -1,4 +1,4 @@
-﻿namespace Mumei.Core.Attributes;
+﻿namespace Mumei.Attributes;
 
 /// <summary>
 ///   Marks a class as a module.

@@ -1,4 +1,4 @@
-﻿namespace Mumei.Core.Attributes;
+﻿namespace Mumei.Attributes;
 
 public class ScopedAttribute<TProvider, TImplementation> :
   DependencyRegistrationAttribute<TProvider, TImplementation> where TImplementation : TProvider { }

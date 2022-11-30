@@ -1,4 +1,4 @@
-﻿namespace Mumei.Core.Attributes;
+﻿namespace Mumei.Attributes;
 
 public class TransientAttribute<TProvider, TImplementation>
   : DependencyRegistrationAttribute<TProvider, TImplementation>

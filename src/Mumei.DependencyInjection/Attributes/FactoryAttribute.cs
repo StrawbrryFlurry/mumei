@@ -1,4 +1,6 @@
-﻿namespace Mumei.Core.Attributes;
+﻿using Mumei.Core;
+
+namespace Mumei.Attributes;
 
 /// <summary>
 ///   Specifies that a method in a module provides the

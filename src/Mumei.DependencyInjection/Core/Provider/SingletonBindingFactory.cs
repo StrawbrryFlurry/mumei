@@ -1,4 +1,4 @@
-﻿namespace Mumei.Core.Provider;
+﻿namespace Mumei.Core;
 
 public abstract class SingletonBindingFactory<TProvider> : Binding<TProvider> {
   private TProvider? _instance;

@@ -1,4 +1,4 @@
-﻿namespace Mumei.Core.Attributes;
+﻿namespace Mumei.Attributes;
 
 [AttributeUsage(AttributeTargets.Method)]
 public class ProvidesAttribute<TProvides> : Attribute { }

@@ -2,5 +2,5 @@
 
 public interface IModule : IInjector {
   public IInjector CreateScope();
-  // public ComponentRef<object>[] Components { get; }
+  public IInjector CreateScope(IInjector context);
 }
