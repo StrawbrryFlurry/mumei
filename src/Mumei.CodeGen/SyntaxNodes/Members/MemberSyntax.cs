@@ -26,5 +26,5 @@ public abstract class MemberSyntax : TypeSyntax {
   ///   - Constructor: 5
   ///   - Method: 10
   /// </summary>
-  public abstract int Priority { get; }
+  protected internal abstract int Priority { get; }
 }

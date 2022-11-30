@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using Microsoft.CodeAnalysis;
 using Mumei.CodeGen.SyntaxWriters;
 
 namespace Mumei.CodeGen.SyntaxNodes;
@@ -7,13 +8,13 @@ public class FieldSyntax : FieldSyntax<object> {
   public FieldSyntax(Type type, string identifier, Syntax parent) : base(type, identifier, parent) { }
 }
 
-public class FieldSyntax<T> : MemberSyntax, IValueHolderSyntax<T>, IValueHolderDeclarationSyntax {
+public class FieldSyntax<T> : MemberSyntax, IMemberValueHolderSyntax<T>, IMemberValueHolderDeclarationSyntax {
   private ExpressionSyntax? _initilizer;
 
   public FieldSyntax(string identifier, Syntax parent) : base(typeof(T), identifier, parent) { }
   protected FieldSyntax(Type type, string identifier, Syntax parent) : base(type, identifier, parent) { }
 
-  public override int Priority => 0;
+  protected internal override int Priority => 0;
 
   public ExpressionSyntax? Initializer {
     get => _initilizer;

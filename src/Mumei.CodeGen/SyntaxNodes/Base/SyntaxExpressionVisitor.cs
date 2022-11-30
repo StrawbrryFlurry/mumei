@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Collections.ObjectModel;
+using System.Linq.Expressions;
 using System.Reflection;
 using Mumei.CodeGen.Expressions;
 using Mumei.CodeGen.SyntaxWriters;
@@ -30,6 +31,10 @@ public class SyntaxExpressionVisitor : ExpressionVisitor {
   }
 
   protected override Expression VisitConstant(ConstantExpression node) {
+    if (node.Value is bool b) {
+      return new BooleanExpression(b);
+    }
+
     if (node.Value is not Type type) {
       return base.VisitConstant(node);
     }
@@ -60,7 +65,58 @@ public class SyntaxExpressionVisitor : ExpressionVisitor {
   }
 
   protected override Expression VisitInvocation(InvocationExpression node) {
-    return base.VisitInvocation(node);
+    var expression = Visit(node.Expression)!;
+
+    if (expression is not MemberExpression member) {
+      return base.VisitInvocation(node);
+    }
+
+    if (member.Expression is not ConstantExpression target) {
+      return base.VisitInvocation(node);
+    }
+
+    return TransformInvocationInvokableExpression(node, target, member.Member, node.Arguments);
+  }
+
+  private bool IsInvokableInvocation(object target) {
+    var interfaces = target.GetType().GetInterfaces();
+
+    return interfaces
+      .Select(@interface => @interface.GetGenericTypeDefinition())
+      .Any(genericInterface => genericInterface == typeof(IInvokable<>));
+  }
+
+  private Expression TransformInvocationInvokableExpression(
+    InvocationExpression node,
+    ConstantExpression target,
+    MemberInfo member,
+    ReadOnlyCollection<Expression> arguments
+  ) {
+    if (!IsInvokableInvocation(target.Value)) {
+      return base.VisitInvocation(node);
+    }
+
+    if (member.Name != nameof(IInvokable<object>.Invoke)) {
+      return base.VisitInvocation(node);
+    }
+
+    var invokeProperty = (PropertyInfo)member;
+    var returnType = GetInvokableReturnType(invokeProperty.PropertyType);
+
+    return MakeInvokeInvokableExpression(target, returnType, node.Arguments);
+  }
+
+  private Type GetInvokableReturnType(Type invokableMethod) {
+    if (invokableMethod == typeof(Delegate)) {
+      return typeof(object);
+    }
+
+    try {
+      return MethodHelpers.GetFunctionDefinition(invokableMethod, out _);
+    }
+    catch {
+      throw new InvalidOperationException("`Invoke` property of the invokable syntax is not a valid function.");
+    }
   }
 
   protected override Expression VisitLabel(LabelExpression node) {
@@ -107,9 +163,10 @@ public class SyntaxExpressionVisitor : ExpressionVisitor {
     }
 
     var valueHolder = target.Value;
-    var identifierProperty = valueHolder.GetType().GetProperty(nameof(IValueHolderSyntax<object>.Identifier))!;
-    var valueProperty = valueHolder.GetType().GetProperty(nameof(IValueHolderSyntax<object>.Value))!;
-    return Expression.Variable(valueProperty.PropertyType, (string)identifierProperty.GetValue(valueHolder));
+    var valueHolderType = valueHolder.GetType();
+    var identifier = GetSyntaxIdentifier(valueHolderType, valueHolder);
+    var valueProperty = valueHolderType.GetProperty(nameof(IValueHolderSyntax<object>.Value))!;
+    return Expression.Variable(valueProperty.PropertyType, identifier);
   }
 
   internal bool IsClosureWrappedConstantExpression(MemberExpression expression, out ConstantExpression? target) {
@@ -162,7 +219,6 @@ public class SyntaxExpressionVisitor : ExpressionVisitor {
     return Expression.Constant(wrappedValue);
   }
 
-
   protected override Expression VisitNew(NewExpression node) {
     return base.VisitNew(node);
   }
@@ -212,7 +268,76 @@ public class SyntaxExpressionVisitor : ExpressionVisitor {
   }
 
   protected override Expression VisitMethodCall(MethodCallExpression node) {
-    return base.VisitMethodCall(node);
+    var expression = node.Object;
+
+    if (expression is null) {
+      return base.VisitMethodCall(node);
+    }
+
+    expression = Visit(expression);
+
+    if (expression is not ConstantExpression target) {
+      return base.VisitMethodCall(node);
+    }
+
+    return TransformMethodCallToInvokableExpression(node, target);
+  }
+
+  private Expression TransformMethodCallToInvokableExpression(
+    MethodCallExpression node,
+    ConstantExpression target
+  ) {
+    if (!IsDynamicInvocation(target.Value)) {
+      return base.VisitMethodCall(node);
+    }
+
+    if (node.Method.Name != nameof(IDynamicallyInvokable.Invoke)) {
+      return base.VisitMethodCall(node);
+    }
+
+    // The invoke method always has a single argument which is the params array.
+    var arguments = GetMethodCallArgumentsFromImplicitParamsParameter(node.Arguments.First());
+
+    return MakeInvokeInvokableExpression(target, typeof(object), arguments);
+  }
+
+  private Expression[] GetMethodCallArgumentsFromImplicitParamsParameter(Expression expression) {
+    if (expression is not NewArrayExpression newArrayExpression) {
+      return Array.Empty<Expression>();
+    }
+
+    // All members of the array init expression are cast to object because the params
+    // parameter takes an object[]. We don't need the type conversion.
+    return newArrayExpression.Expressions.Select(StripConvertExpression).ToArray();
+  }
+
+  private Expression StripConvertExpression(Expression expression) {
+    if (expression is not UnaryExpression convertExpression) {
+      return expression;
+    }
+
+    return convertExpression.Operand;
+  }
+
+  private bool IsDynamicInvocation(object target) {
+    return target is IDynamicallyInvokable;
+  }
+
+  private Expression MakeInvokeInvokableExpression(
+    ConstantExpression target,
+    Type returnType,
+    IReadOnlyCollection<Expression> arguments) {
+    var invokable = target.Value;
+    var invokableType = invokable.GetType();
+    var identifier = GetSyntaxIdentifier(invokableType, invokable);
+
+    var updatedArguments = arguments.Select(Visit).ToArray();
+
+    return new InvokeInvokableExpression(
+      identifier,
+      updatedArguments,
+      returnType
+    );
   }
 
   protected override Expression VisitNewArray(NewArrayExpression node) {
@@ -237,5 +362,10 @@ public class SyntaxExpressionVisitor : ExpressionVisitor {
 
   protected override MemberMemberBinding VisitMemberMemberBinding(MemberMemberBinding node) {
     return base.VisitMemberMemberBinding(node);
+  }
+
+  private string GetSyntaxIdentifier(Type type, object instance) {
+    var identifierProperty = type.GetProperty(nameof(ISyntaxIdentifier.Identifier))!;
+    return (string)identifierProperty.GetValue(instance);
   }
 }

@@ -14,7 +14,8 @@ public sealed class AccessorSyntax : TypeSyntax {
     AccessorType type,
     BlockSyntax? body = null,
     SyntaxVisibility visibility = None,
-    Syntax? parent = null) : base(type.ToString(), parent) {
+    Syntax? parent = null
+    ) : base(type.ToString(), parent) {
     AssertIsValidVisibility(visibility);
     Visibility = visibility;
     AccessorType = type;

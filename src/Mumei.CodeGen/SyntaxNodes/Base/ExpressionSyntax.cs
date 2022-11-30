@@ -37,13 +37,6 @@ public class ExpressionSyntax : Syntax {
   }
 
   private string ConvertExpressionToString(Expression expression) {
-    // TODO: Clean up
-    if (expression is ConstantExpression constant) {
-      if (constant.Value is bool b) {
-        return b ? "true" : "false";
-      }
-    }
-
     return expression.ToString();
   }
 

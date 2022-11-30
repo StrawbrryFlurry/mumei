@@ -6,6 +6,38 @@ namespace Mumei.CodeGen.SyntaxNodes;
 
 public delegate void BlockBuilder(BlockSyntaxBuilder builder);
 
+public delegate void MethodBuilder<TArg>(ParameterSyntax<TArg> arg, BlockSyntaxBuilder builder);
+
+public delegate void MethodBuilder<TArg1, TArg2>(
+  ParameterSyntax<TArg1> arg1,
+  ParameterSyntax<TArg2> arg2,
+  BlockSyntaxBuilder builder
+);
+
+public delegate void MethodBuilder<TArg1, TArg2, TArg3>(
+  ParameterSyntax<TArg1> arg1,
+  ParameterSyntax<TArg2> arg2,
+  ParameterSyntax<TArg3> arg3,
+  BlockSyntaxBuilder builder
+);
+
+public delegate void MethodBuilder<TArg1, TArg2, TArg3, TArg4>(
+  ParameterSyntax<TArg1> arg1,
+  ParameterSyntax<TArg2> arg2,
+  ParameterSyntax<TArg3> arg3,
+  ParameterSyntax<TArg4> arg4,
+  BlockSyntaxBuilder builder
+);
+
+public delegate void MethodBuilder<TArg1, TArg2, TArg3, TArg4, TArg5>(
+  ParameterSyntax<TArg1> arg1,
+  ParameterSyntax<TArg2> arg2,
+  ParameterSyntax<TArg3> arg3,
+  ParameterSyntax<TArg4> arg4,
+  ParameterSyntax<TArg5> arg5,
+  BlockSyntaxBuilder builder
+);
+
 public static class BlockBuilderExtensions {
   public static BlockSyntax Build(this BlockBuilder builder) {
     var blockBuilder = new BlockSyntaxBuilder();
@@ -109,6 +141,12 @@ public class BlockSyntaxBuilder {
     Statements.Add(new ExpressionStatementSyntax(assignment));
   }
 
+  public void AssignDynamic(Expression target, Expression<Func<object?>> value) {
+    var assignment = Expression.Assign(target, Expression.Constant(value));
+    Statements.Add(new ExpressionStatementSyntax(assignment));
+  }
+
+
   public IfStatementSyntax If(Expression<Func<bool>> condition, BlockBuilder body) {
     return If((ExpressionSyntax)condition, body);
   }
@@ -118,6 +156,10 @@ public class BlockSyntaxBuilder {
   }
 
   public void Return(ExpressionSyntax value) {
+    Statements.Add(new ReturnStatementSyntax(value));
+  }
+
+  public void Return<TReturnValue>(Expression<Func<TReturnValue>> value) {
     Statements.Add(new ReturnStatementSyntax(value));
   }
 

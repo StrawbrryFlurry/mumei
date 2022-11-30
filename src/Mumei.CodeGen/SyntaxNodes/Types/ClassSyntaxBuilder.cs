@@ -1,10 +1,23 @@
-﻿using Mumei.CodeGen.SyntaxWriters;
+﻿using Microsoft.CodeAnalysis;
+using Mumei.CodeGen.SyntaxWriters;
 
 namespace Mumei.CodeGen.SyntaxNodes;
 
-public class ClassSyntaxBuilder : SyntaxWriter {
+public class ClassSyntaxBuilder<TClass> : TypeSyntax {
+  public ClassSyntaxBuilder() : base(typeof(TClass).Name) { }
+
+  public FieldSyntax<TField> AddField<TField>(string name) {
+    return new FieldSyntax<TField>(name, this);
+  }
+
+  public override Syntax Clone() {
+    throw new NotImplementedException();
+  }
+}
+
+public sealed class ClassSyntaxBuilder : SyntaxWriter {
   private readonly List<MemberFieldInfo> _fields = new();
-  private readonly HashSet<Type> _interfaces = new();
+  private readonly HashSet<string> _interfaces = new();
 
   private readonly string _name;
   private readonly SyntaxVisibility _visibility;
@@ -43,20 +56,79 @@ public class ClassSyntaxBuilder : SyntaxWriter {
       throw new ArgumentException($"Type '{@interface}' is not an interface");
     }
 
-    _interfaces.Add(@interface);
+    _interfaces.Add(@interface.FullName);
   }
 
-  public void AddField() { }
+  public void AddInterfaceImplementation(ITypeSymbol @interface) {
+    if (@interface.TypeKind != TypeKind.Interface) {
+      throw new ArgumentException($"Type '{@interface}' is not an interface");
+    }
 
-  public void AddField<TField>() {
+    _interfaces.Add(@interface.Name);
+  }
+
+  public FieldSyntax AddField(Type type, string name) {
+    return null!;
+  }
+
+  public FieldSyntax<TField> AddField<TField>(string name, SyntaxVisibility visibility = SyntaxVisibility.Private) {
     _fields.Add(new MemberFieldInfo());
+    return null!;
   }
 
-  public void AddProperty() { }
+  public FieldSyntax<TFieldHelper> AddField<TFieldHelper>(
+    string name,
+    Type type,
+    SyntaxVisibility visibility = SyntaxVisibility.Private) {
+    _fields.Add(new MemberFieldInfo());
+    return null!;
+  }
 
-  public void AddMethod() { }
+  public FieldSyntax AddField(
+    string name,
+    Type type,
+    SyntaxVisibility visibility = SyntaxVisibility.Private) {
+    _fields.Add(new MemberFieldInfo());
+    return null!;
+  }
 
-  public void AddConstructor() { }
+  public PropertySyntax<TProperty> AddProperty<TProperty>(string name) {
+    return new PropertySyntax<TProperty>(name, null!);
+  }
+
+  public MethodSyntax AddMethod(Type returnType, Param param1, MethodBuilder<object> body) {
+    var parameters = new List<object>();
+    foreach (var parameterInfo in body.Method.GetParameters()) {
+      var parameter = ParameterSyntax.MakeGenericParameter(parameterInfo.ParameterType, parameterInfo.Name);
+      parameters.Add(parameter);
+    }
+
+    return null!;
+  }
+
+  public MethodSyntax AddMethod<TArg>(Type returnType, MethodBuilder<TArg> body) {
+    var parameters = new List<object>();
+    foreach (var parameterInfo in body.Method.GetParameters()) {
+      var parameter = ParameterSyntax.MakeGenericParameter(parameterInfo.ParameterType, parameterInfo.Name);
+      parameters.Add(parameter);
+    }
+
+    return null!;
+  }
+
+  public BlockSyntaxBuilder AddConstructor() {
+    return new BlockSyntaxBuilder();
+  }
+
+  public void AddConstructor(BlockBuilder builder) { }
+
+  public void AddConstructor<TArg1, TArg2, TArg3>(MethodBuilder<TArg1, TArg2, TArg3> builder) { }
+
+  public void AddConstructor(
+    Param param1,
+    Param param2,
+    Param param3,
+    MethodBuilder<object, object, object> builder) { }
 
   public override string ToString() {
     var visibility = _visibility.ToVisibilityString();
@@ -68,7 +140,7 @@ public class ClassSyntaxBuilder : SyntaxWriter {
 
     WriteLineEnd("{");
     WriteLine("}");
-    return base.ToSyntax();
+    return ToSyntax();
   }
 
   private void WriteDerivedTypesToClassDefinition() {
@@ -88,9 +160,13 @@ public class ClassSyntaxBuilder : SyntaxWriter {
       return;
     }
 
-    var interfaceNames = _interfaces.Select(i => i.FullName);
+    var interfaceNames = _interfaces;
     Write(string.Join(", ", interfaceNames));
     Write(" ");
+  }
+
+  public void AddBaseClass(Type type) {
+    throw new NotImplementedException();
   }
 
   internal class MemberFieldInfo {

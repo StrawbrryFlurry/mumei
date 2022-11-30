@@ -1,6 +1,6 @@
 ﻿namespace Mumei.CodeGen.SyntaxWriters;
 
-public interface ISyntaxWriter : IDisposable {
+public interface ISyntaxWriter {
   public int IndentLevel { get; set; }
 
   public void Indent();
