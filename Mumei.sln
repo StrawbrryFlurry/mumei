@@ -2,13 +2,25 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.DependencyInjection", "src\Mumei.DependencyInjection\Mumei.DependencyInjection.csproj", "{2E5CEC39-AEC3-4D55-9105-93C9B0E24C94}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.CodeGen.Test", "test\Mumei.CodeGen.Test\Mumei.CodeGen.Test.csproj", "{DD328314-3F55-4304-BC0E-A1938F1F6C81}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.CodeGen.Tests", "test\Mumei.CodeGen.Tests\Mumei.CodeGen.Tests.csproj", "{DD328314-3F55-4304-BC0E-A1938F1F6C81}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.CodeGen", "src\Mumei.CodeGen\Mumei.CodeGen.csproj", "{E54B335C-4B8E-4932-8250-871B915E702B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.DependencyInjection.Playground", "src\Mumei.DependencyInjection.Playground\Mumei.DependencyInjection.Playground.csproj", "{CD228734-1006-4BD5-B3A2-5C71D7529696}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.DependencyInjection.Test", "test\Mumei.DependencyInjection.Test\Mumei.DependencyInjection.Test.csproj", "{56A59D0F-16CA-4378-A608-8DB898734F64}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.DependencyInjection.Tests", "test\Mumei.DependencyInjection.Tests\Mumei.DependencyInjection.Tests.csproj", "{56A59D0F-16CA-4378-A608-8DB898734F64}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.Roslyn", "src\Mumei.Roslyn\Mumei.Roslyn.csproj", "{52CFB02B-3B1A-495E-AE02-F59155ECF7DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.Roslyn.Tests", "test\Mumei.Roslyn.Tests\Mumei.Roslyn.Tests.csproj", "{013D3076-B19F-4637-BC36-39CACD141755}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.Common", "src\Mumei.Common\Mumei.Common.csproj", "{92B22F06-3E50-4825-93E7-BACD438D0D59}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.Common.Tests", "test\Mumei.Common.Tests\Mumei.Common.Tests.csproj", "{06234A02-2538-4CE7-A03A-341DF8F55827}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.DependencyInjection.Roslyn", "src\Mumei.DependencyInjection.Roslyn\Mumei.DependencyInjection.Roslyn.csproj", "{613912A9-5BD4-4828-93F4-C36C47F0EEC3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.Roslyn.Testing", "test\Mumei.Roslyn.Testing\Mumei.Roslyn.Testing.csproj", "{ABD444D8-D357-4FA6-98D6-7EC52E31F51D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,5 +48,29 @@ Global
 		{56A59D0F-16CA-4378-A608-8DB898734F64}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56A59D0F-16CA-4378-A608-8DB898734F64}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56A59D0F-16CA-4378-A608-8DB898734F64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52CFB02B-3B1A-495E-AE02-F59155ECF7DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52CFB02B-3B1A-495E-AE02-F59155ECF7DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52CFB02B-3B1A-495E-AE02-F59155ECF7DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52CFB02B-3B1A-495E-AE02-F59155ECF7DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{013D3076-B19F-4637-BC36-39CACD141755}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{013D3076-B19F-4637-BC36-39CACD141755}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{013D3076-B19F-4637-BC36-39CACD141755}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{013D3076-B19F-4637-BC36-39CACD141755}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92B22F06-3E50-4825-93E7-BACD438D0D59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92B22F06-3E50-4825-93E7-BACD438D0D59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92B22F06-3E50-4825-93E7-BACD438D0D59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92B22F06-3E50-4825-93E7-BACD438D0D59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06234A02-2538-4CE7-A03A-341DF8F55827}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06234A02-2538-4CE7-A03A-341DF8F55827}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06234A02-2538-4CE7-A03A-341DF8F55827}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06234A02-2538-4CE7-A03A-341DF8F55827}.Release|Any CPU.Build.0 = Release|Any CPU
+		{613912A9-5BD4-4828-93F4-C36C47F0EEC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{613912A9-5BD4-4828-93F4-C36C47F0EEC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{613912A9-5BD4-4828-93F4-C36C47F0EEC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{613912A9-5BD4-4828-93F4-C36C47F0EEC3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ABD444D8-D357-4FA6-98D6-7EC52E31F51D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABD444D8-D357-4FA6-98D6-7EC52E31F51D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABD444D8-D357-4FA6-98D6-7EC52E31F51D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABD444D8-D357-4FA6-98D6-7EC52E31F51D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
