@@ -1,5 +1,4 @@
 ﻿using Mumei.Core;
-using Mumei.Core.Provider;
 using Mumei.DependencyInjection.Playground.Common;
 using HttpClient = Mumei.DependencyInjection.Playground.Common.HttpClient;
 

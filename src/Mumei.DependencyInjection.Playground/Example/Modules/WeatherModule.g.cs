@@ -1,7 +1,6 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
 using Mumei.Core;
-using Mumei.Core.Provider;
 using Mumei.DependencyInjection.Playground;
 using Mumei.DependencyInjection.Playground.Common;
 using Mumei.DependencyInjection.Playground.Example.Modules;
@@ -23,10 +22,7 @@ public sealed class WeatherModule : IModule, IWeatherModule {
   public WeatherModule(IInjector parent, CommonModule commonModule) {
     Parent = parent;
     HttpClientBinding = commonModule.HttpClientBinding;
-
-    // Works with existing bindings
-    // Works with configuration methods
-    // Maybe works with inject flags / Injector specific configuration
+    
     WeatherServiceBinding = new IWeatherServiceλBindingFactory(
       new ApplyIWeatherServiceIHttpClientConfiguration(
         ConfigureHttpClientMethodInfo,
@@ -67,7 +63,15 @@ public sealed class WeatherModule : IModule, IWeatherModule {
     return new WeatherModuleλScopeInjector(Parent, this);
   }
 
+  public IInjector CreateScope(IInjector ctx) {
+    var decoratedParent = new DecoratedInjector(ctx, this);
+    return new WeatherModuleλScopeInjector(decoratedParent, this);
+  }
+
+
   public IWeatherService WeatherService => WeatherServiceBinding.Get();
+  
+  public CommonModule CommonModule { get; }
 
   private sealed class WeatherModuleλScopeInjector : IInjector {
     private readonly WeatherModule _module;

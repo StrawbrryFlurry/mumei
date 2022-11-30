@@ -1,11 +1,20 @@
-﻿using Mumei.DependencyInjection.Playground.Common;
+﻿using System.Reflection;
+using Castle.Core.Internal;
+using Mumei.Core;
+using Mumei.DependencyInjection.Playground.Common;
+using Mumei.DependencyInjection.Playground.Example.Generated;
+using Mumei.DependencyInjection.Playground.Example.Modules;
 using Mumei.DependencyInjection.Playground.Example.Modules.Services;
+using Mumei.DependencyInjection.Playground.Lib.Http;
 
 namespace Mumei.DependencyInjection.Playground.Example;
 
 public class Program {
   public static void Main() {
-    //var app = new ApplicationBuilder<ApplicationModule>().Build();
+    var appEnvironment = PlatformInjector.CreateEnvironment<IApplicationModule>();
+    
+    ScanModules(appEnvironment.Instance);
+    
     var common = new CommonModule();
     var weather = new WeatherModule(null, common);
     var app = new ApplicationModule(weather, common);
@@ -22,11 +31,46 @@ public class Program {
     Console.Write(w1 == w2);
   }
 
-  // private void MapControllers(IApplicationModule module) {
-  //   foreach (IModuleRef moduleRef in module.Modules) {
-  //     foreach (IComponentRef componentRef in moduleRef.Components) {
-  //        ... Get Routing metadata
-  //     }
-  //   }
-  // }
+  private static void ScanModules(IModuleRef<IModule> module) {
+    foreach (var moduleRef in module.Imports) {
+      foreach (var componentRef in moduleRef.Components) {
+        var controllerAttribute = componentRef.Type.GetAttribute<ControllerAttribute>();
+
+        if (controllerAttribute is not null) {
+          MapController(componentRef);
+        }
+      }
+    }
+  }
+
+  private static void MapController(IComponentRef componentRef) {
+    var route = componentRef.Type.GetAttribute<RouteAttribute>().Path;
+    var methods = componentRef.Type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
+
+    foreach (var method in methods) {
+      var getAttribute = method.GetAttribute<HttpGetAttribute>();
+
+      if (getAttribute is null) {
+        continue;
+      }
+
+      var handlerDescriptor = new HandlerDescriptor() {
+        Route = route,
+        Method = "Get",
+        Handler = (request) => {
+          var requestInjector = new DynamicInjector() {
+            { typeof(HttpRequestMessage), request }
+          };
+          var scope = componentRef.CreateScope(requestInjector);
+          return componentRef.InvokeWithProviderFactory(scope, method);
+        },
+      };
+    }
+  }
+
+  private class HandlerDescriptor {
+    public string Route { get; set; }
+    public string Method { get; set; }
+    public Func<HttpRequestMessage, object> Handler { get; set; }
+  }
 }

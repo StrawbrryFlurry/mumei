@@ -1,5 +1,4 @@
 ﻿using Mumei.Core;
-using Mumei.Core.Provider;
 using Mumei.DependencyInjection.Playground.Example.Modules.Services;
 
 namespace Mumei.DependencyInjection.Playground.Example.Modules; 

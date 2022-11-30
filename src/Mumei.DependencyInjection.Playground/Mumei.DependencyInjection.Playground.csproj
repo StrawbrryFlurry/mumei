@@ -9,11 +9,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Mumei.DependencyInjection\Mumei.DependencyInjection.csproj"/>
+        <ProjectReference Include="..\Mumei.Roslyn\Mumei.Roslyn.csproj" />
+        <ProjectReference Include="..\Mumei.DependencyInjection\Mumei.DependencyInjection.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0-preview.7.22375.6"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0-preview.7.22375.6" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="README.md" />
     </ItemGroup>
 
 </Project>

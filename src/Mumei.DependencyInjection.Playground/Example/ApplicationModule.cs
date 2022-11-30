@@ -1,9 +1,8 @@
-﻿using Mumei.Core;
-using Mumei.Core.Attributes;
-using Mumei.Core.Provider;
+﻿using Mumei.Attributes;
+using Mumei.Core;
 using Mumei.DependencyInjection.Playground.Common;
+using Mumei.DependencyInjection.Playground.Example.Generated;
 using Mumei.DependencyInjection.Playground.Example.Modules.Services;
-using Mumei.DependencyInjection.Playground.Generated;
 using Mumei.Internal;
 
 namespace Mumei.DependencyInjection.Playground.Example;
@@ -12,7 +11,7 @@ namespace Mumei.DependencyInjection.Playground.Example;
 [ApplicationRoot]
 [Import<WeatherModule>]
 [Import<CommonModule>]
-public interface IApplicationModule { }
+public interface IApplicationModule : IModule { }
 
 [MumeiModule]
 public sealed class ApplicationModule : IApplicationModule, IModule {
@@ -37,6 +36,10 @@ public sealed class ApplicationModule : IApplicationModule, IModule {
   }
 
   public IInjector CreateScope() {
+    throw new NotImplementedException();
+  }
+
+  public IInjector CreateScope(IInjector context) {
     throw new NotImplementedException();
   }
 }

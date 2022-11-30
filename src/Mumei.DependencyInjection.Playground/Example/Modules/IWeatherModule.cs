@@ -1,4 +1,4 @@
-﻿using Mumei.Core.Attributes;
+﻿using Mumei.Attributes;
 using Mumei.DependencyInjection.Playground.Common;
 using Mumei.DependencyInjection.Playground.Example.Modules.Services;
 
@@ -10,6 +10,9 @@ namespace Mumei.DependencyInjection.Playground.Example.Modules;
 public interface IWeatherModule {
   [Transient<WeatherService>]
   public IWeatherService WeatherService { get; }
+
+  [Import] // Import module with ability to reference it in methods
+  public CommonModule CommonModule { get; }
 
   [ConfigureFor<IWeatherService>]
   public IHttpClient ConfigureHttpClient(IHttpClient httpClient) {

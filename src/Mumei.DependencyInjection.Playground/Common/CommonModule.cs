@@ -1,7 +1,5 @@
-﻿using Mumei.Core;
-using Mumei.Core.Attributes;
-using Mumei.Core.Injector;
-using Mumei.Core.Provider;
+﻿using Mumei.Attributes;
+using Mumei.Core;
 
 namespace Mumei.DependencyInjection.Playground.Common;
 
@@ -35,6 +33,10 @@ public sealed class CommonModule : IModule {
 
   public IInjector CreateScope() {
     throw new NotSupportedException("Cannot create scope of non user modules");
+  }
+
+  public IInjector CreateScope(IInjector context) {
+    throw new NotImplementedException();
   }
 
   [Scoped<IHttpClient, HttpClient>]
