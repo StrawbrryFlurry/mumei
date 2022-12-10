@@ -9,8 +9,19 @@ internal sealed partial class PlatformInjector : IInjector {
 
   public IInjector Parent { get; } = NullInjector.Instance;
 
-  public static EnvironmentInjector<TAppModule> CreateEnvironment<TAppModule>() where TAppModule : IModule {
-    return new EnvironmentInjector<TAppModule>();
+  public static EnvironmentInjector<TAppModule> CreateEnvironment<TAppModule>() {
+    return typeof(TAppModule) switch {
+      _ when typeof(TAppModule) == typeof(IApplicationModule) => (dynamic)new ApplicationModuleλEnvironmentInjector()!,
+      _ => ModuleNotFound<TAppModule>()
+    };
+  }
+
+  private static object ModuleNotFound<TModule>() {
+    throw new InvalidOperationException(
+      $"The module {typeof(TModule).FullName} was not found!" +
+      "Please ensure that the module is declared as a root module by the [RootModule] Attribute " +
+      "or is explicitly requested trough: PlatformInjector.CreateEnvironment<TRootModule>()"
+    );
   }
 }
 
