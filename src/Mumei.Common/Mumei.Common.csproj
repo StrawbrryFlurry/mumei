@@ -1,18 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <TargetFramework>netstandard2.1</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <LangVersion>latest</LangVersion>
-    </PropertyGroup>
-    
-    <ItemGroup>
-        <InternalsVisibleTo Include="Mumei.Roslyn" />
-        <InternalsVisibleTo Include="$(AssemblyName).Tests" />
-    </ItemGroup>
-    
-    <ItemGroup>
-      <None Remove="README.md" />
-    </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Mumei.Roslyn"/>
+  </ItemGroup>
 </Project>

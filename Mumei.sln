@@ -1,5 +1,4 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.DependencyInjection", "src\Mumei.DependencyInjection\Mumei.DependencyInjection.csproj", "{2E5CEC39-AEC3-4D55-9105-93C9B0E24C94}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.CodeGen.Tests", "test\Mumei.CodeGen.Tests\Mumei.CodeGen.Tests.csproj", "{DD328314-3F55-4304-BC0E-A1938F1F6C81}"
@@ -74,3 +73,6 @@ Global
 		{ABD444D8-D357-4FA6-98D6-7EC52E31F51D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
+GlobalSection(SolutionProperties) = preSolution
+    DefaultTargets = Build
+EndGlobalSection
