@@ -2,7 +2,7 @@
 
 namespace Mumei.CodeGen.Expressions;
 
-public class InvokeInvokableExpression : Expression {
+public sealed class InvokeInvokableExpression : Expression {
   public InvokeInvokableExpression(string identifier, Expression[] arguments, Type returnType) {
     Identifier = identifier;
     Arguments = arguments;

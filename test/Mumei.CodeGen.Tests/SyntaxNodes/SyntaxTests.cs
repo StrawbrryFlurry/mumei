@@ -34,7 +34,7 @@ public class SyntaxTests {
   }
 
   private class SyntaxImpl : Syntax {
-    public SyntaxImpl(Syntax parent = null) : base(parent) { }
+    public SyntaxImpl(Syntax parent = null!) : base(parent) { }
 
     public SyntaxTypeContext PublicTypeContext => TypeContext;
 

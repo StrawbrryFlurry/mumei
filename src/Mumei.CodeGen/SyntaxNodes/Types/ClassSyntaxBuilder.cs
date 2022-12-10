@@ -56,7 +56,7 @@ public sealed class ClassSyntaxBuilder : SyntaxWriter {
       throw new ArgumentException($"Type '{@interface}' is not an interface");
     }
 
-    _interfaces.Add(@interface.FullName);
+    _interfaces.Add(@interface.FullName ?? @interface.Name);
   }
 
   public void AddInterfaceImplementation(ITypeSymbol @interface) {
@@ -99,7 +99,7 @@ public sealed class ClassSyntaxBuilder : SyntaxWriter {
   public MethodSyntax AddMethod(Type returnType, Param param1, MethodBuilder<object> body) {
     var parameters = new List<object>();
     foreach (var parameterInfo in body.Method.GetParameters()) {
-      var parameter = ParameterSyntax.MakeGenericParameter(parameterInfo.ParameterType, parameterInfo.Name);
+      var parameter = ParameterSyntax.MakeGenericParameter(parameterInfo.ParameterType, parameterInfo.Name!);
       parameters.Add(parameter);
     }
 
@@ -109,7 +109,7 @@ public sealed class ClassSyntaxBuilder : SyntaxWriter {
   public MethodSyntax AddMethod<TArg>(Type returnType, MethodBuilder<TArg> body) {
     var parameters = new List<object>();
     foreach (var parameterInfo in body.Method.GetParameters()) {
-      var parameter = ParameterSyntax.MakeGenericParameter(parameterInfo.ParameterType, parameterInfo.Name);
+      var parameter = ParameterSyntax.MakeGenericParameter(parameterInfo.ParameterType, parameterInfo.Name!);
       parameters.Add(parameter);
     }
 
@@ -170,8 +170,8 @@ public sealed class ClassSyntaxBuilder : SyntaxWriter {
   }
 
   internal class MemberFieldInfo {
-    public string Name { get; }
-    public Type FieldType { get; }
-    public Type[] Attributes { get; }
+    public string Name { get; } = default!;
+    public Type FieldType { get; } = default!;
+    public Type[] Attributes { get; } = default!;
   }
 }

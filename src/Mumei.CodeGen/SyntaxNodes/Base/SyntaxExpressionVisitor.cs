@@ -78,7 +78,11 @@ public class SyntaxExpressionVisitor : ExpressionVisitor {
     return TransformInvocationInvokableExpression(node, target, member.Member, node.Arguments);
   }
 
-  private bool IsInvokableInvocation(object target) {
+  private bool IsInvokableInvocation(object? target) {
+    if (target is null) {
+      return false;
+    }
+
     var interfaces = target.GetType().GetInterfaces();
 
     return interfaces
@@ -149,7 +153,11 @@ public class SyntaxExpressionVisitor : ExpressionVisitor {
     return base.VisitMember(node);
   }
 
-  private bool IsValueHolderSyntax(object value) {
+  private bool IsValueHolderSyntax(object? value) {
+    if (value is null) {
+      return false;
+    }
+
     var interfaces = value.GetType().GetInterfaces();
     return interfaces.Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValueHolderSyntax<>));
   }
@@ -162,7 +170,7 @@ public class SyntaxExpressionVisitor : ExpressionVisitor {
       return Expression.MakeMemberAccess(target, member);
     }
 
-    var valueHolder = target.Value;
+    var valueHolder = target.Value!;
     var valueHolderType = valueHolder.GetType();
     var identifier = GetSyntaxIdentifier(valueHolderType, valueHolder);
     var valueProperty = valueHolderType.GetProperty(nameof(IValueHolderSyntax<object>.Value))!;
@@ -251,7 +259,7 @@ public class SyntaxExpressionVisitor : ExpressionVisitor {
     return base.VisitElementInit(node);
   }
 
-  protected override LabelTarget VisitLabelTarget(LabelTarget node) {
+  protected override LabelTarget? VisitLabelTarget(LabelTarget? node) {
     return base.VisitLabelTarget(node);
   }
 
@@ -319,7 +327,7 @@ public class SyntaxExpressionVisitor : ExpressionVisitor {
     return convertExpression.Operand;
   }
 
-  private bool IsDynamicInvocation(object target) {
+  private bool IsDynamicInvocation(object? target) {
     return target is IDynamicallyInvokable;
   }
 
@@ -327,11 +335,11 @@ public class SyntaxExpressionVisitor : ExpressionVisitor {
     ConstantExpression target,
     Type returnType,
     IReadOnlyCollection<Expression> arguments) {
-    var invokable = target.Value;
+    var invokable = target.Value!;
     var invokableType = invokable.GetType();
     var identifier = GetSyntaxIdentifier(invokableType, invokable);
 
-    var updatedArguments = arguments.Select(Visit).ToArray();
+    var updatedArguments = arguments.Select(expression => Visit(expression)!).ToArray();
 
     return new InvokeInvokableExpression(
       identifier,
@@ -366,6 +374,6 @@ public class SyntaxExpressionVisitor : ExpressionVisitor {
 
   private string GetSyntaxIdentifier(Type type, object instance) {
     var identifierProperty = type.GetProperty(nameof(ISyntaxIdentifier.Identifier))!;
-    return (string)identifierProperty.GetValue(instance);
+    return (string)identifierProperty.GetValue(instance)!;
   }
 }

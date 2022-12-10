@@ -3,7 +3,7 @@ using Mumei.CodeGen.SyntaxWriters;
 
 namespace Mumei.CodeGen.SyntaxNodes;
 
-public class VariableExpressionSyntax : VariableExpressionSyntax<object> {
+public sealed class VariableExpressionSyntax : VariableExpressionSyntax<object> {
   public readonly Type Type;
 
   public VariableExpressionSyntax(Type type, string name, Syntax? parent = null) : base(name, parent) {
@@ -29,7 +29,7 @@ public class VariableExpressionSyntax<T> : ExpressionSyntax, IValueHolderSyntax<
   }
 }
 
-public class VariableDeclarationStatementSyntax : StatementSyntax, IValueHolderDeclarationSyntax {
+public sealed class VariableDeclarationStatementSyntax : StatementSyntax, IValueHolderDeclarationSyntax {
   public readonly string Identifier;
 
   public VariableDeclarationStatementSyntax(

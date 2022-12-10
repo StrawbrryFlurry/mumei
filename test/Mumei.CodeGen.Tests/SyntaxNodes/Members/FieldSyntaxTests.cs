@@ -33,7 +33,7 @@ public class FieldSyntaxTests {
 
     field.SetInitialValue(() => typeof(FieldSyntax).GetField("Initializer")!);
 
-    field.Initializer.ParseExpressionToSyntaxString(NoopSyntaxWriter.Instance)
+    field.Initializer!.ParseExpressionToSyntaxString(NoopSyntaxWriter.Instance)
       .Should()
       .Be("typeof(FieldSyntax).GetField(\"Initializer\")");
   }

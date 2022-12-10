@@ -10,11 +10,11 @@ namespace Mumei.CodeGen.Expressions;
 ///   which is usually is mal-formatted when
 ///   it's part of a constant expression.
 /// </summary>
-public class TypeExpression : Expression {
+public sealed class TypeExpression : Expression {
   public readonly Type ExpressionType;
 
   public TypeExpression(ConstantExpression type) {
-    ExpressionType = (Type)type.Value;
+    ExpressionType = (Type)type.Value!;
   }
 
   public TypeExpression(Type type) {

@@ -21,11 +21,13 @@ public sealed class ReflectionPropertyInfo : PropertyInfo {
 
     _isIndexer = spec.IsIndexer;
     _indexParameters = spec.IndexParameters;
+
+    Attributes = spec.PropertyAttributes;
   }
 
   public override Type DeclaringType { get; }
   public override string Name { get; }
-  public override Type ReflectedType { get; }
+  public override Type ReflectedType { get; } = null!;
 
   public override PropertyAttributes Attributes { get; }
 
@@ -33,8 +35,8 @@ public sealed class ReflectionPropertyInfo : PropertyInfo {
   public override bool CanWrite { get; }
   public override Type PropertyType { get; }
 
-  public MethodInfo GetMethod { get; }
-  public MethodInfo? SetMethod { get; }
+  public override MethodInfo GetMethod { get; }
+  public override MethodInfo? SetMethod { get; }
 
   public override object[] GetCustomAttributes(bool inherit) {
     throw new NotImplementedException();
@@ -71,22 +73,22 @@ public sealed class ReflectionPropertyInfo : PropertyInfo {
   }
 
   public override object GetValue(
-    object obj,
+    object? obj,
     BindingFlags invokeAttr,
-    Binder binder,
-    object[] index,
-    CultureInfo culture
+    Binder? binder,
+    object?[]? index,
+    CultureInfo? culture
   ) {
     throw new NotSupportedException("Cannot get value of a compile time property.");
   }
 
   public override void SetValue(
-    object obj,
-    object value,
+    object? obj,
+    object? value,
     BindingFlags invokeAttr,
-    Binder binder,
-    object[] index,
-    CultureInfo culture
+    Binder? binder,
+    object?[]? index,
+    CultureInfo? culture
   ) {
     throw new NotSupportedException("Cannot set value of a compile time property.");
   }
@@ -99,6 +101,8 @@ public struct PropertyInfoSpec {
   public bool CanWrite { get; set; }
   public MethodInfoSpec GetMethod { get; set; }
   public MethodInfoSpec? SetMethod { get; set; }
+
+  public PropertyAttributes PropertyAttributes { get; set; }
 
   public bool IsIndexer { get; set; }
   public ParameterInfo[] IndexParameters { get; set; }

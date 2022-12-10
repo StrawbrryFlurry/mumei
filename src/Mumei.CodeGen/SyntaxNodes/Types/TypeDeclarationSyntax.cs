@@ -9,23 +9,22 @@ public abstract class TypeDeclarationSyntax : TypeSyntax {
   private readonly List<MemberSyntax> _members = new();
 
   public readonly Type[] TypeArguments = Type.EmptyTypes;
+
+  protected TypeDeclarationSyntax(string identifier) : base(identifier) { }
+
+  protected TypeDeclarationSyntax(string identifier, Syntax? parent) : base(identifier, parent) { }
+
   public bool IsGenericType => TypeArguments.Length > 0;
 
   public IEnumerable<MemberSyntax> Members => _members;
   public bool HasMembers => _members.Count > 0;
-
-  protected TypeDeclarationSyntax(string identifier) : base(identifier) {
-  }
-
-  protected TypeDeclarationSyntax(string identifier, Syntax? parent) : base(identifier, parent) {
-  }
 
   public void AddMember(MemberSyntax member) {
     _members.Add(member);
   }
 
   public T AddNewMember<T>(string name, Type type) where T : MemberSyntax {
-    var member = (T) Activator.CreateInstance(typeof(T), name, type);
+    var member = (T)Activator.CreateInstance(typeof(T), name, type)!;
     AddMember(member);
     return member;
   }
@@ -35,9 +34,9 @@ public abstract class TypeDeclarationSyntax : TypeSyntax {
     // make the API really verbose to use. Once source generators support a
     // runtime with covariance on derived types, we can change the builders
     // Build method to return the concrete type and therefore omit the generic.
-    var builder = Activator.CreateInstance(typeof(TBuilder), this, name, type);
+    var builder = Activator.CreateInstance(typeof(TBuilder), this, name, type)!;
 
-    return (TBuilder) builder;
+    return (TBuilder)builder;
   }
 
   public T? GetMember<T>(string name) where T : MemberSyntax {
@@ -52,6 +51,5 @@ public abstract class TypeDeclarationSyntax : TypeSyntax {
   ///   Writes all members of the type to the syntax writer.
   /// </summary>
   /// <param name="writer"></param>
-  protected void WriteMembers(ITypeAwareSyntaxWriter writer) {
-  }
+  protected void WriteMembers(ITypeAwareSyntaxWriter writer) { }
 }

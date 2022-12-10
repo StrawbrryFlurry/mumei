@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Mumei.Common\Mumei.Common.csproj"/>
+    <ProjectReference Include="..\..\src\Mumei.Common\Mumei.Common.csproj" />
   </ItemGroup>
 </Project>

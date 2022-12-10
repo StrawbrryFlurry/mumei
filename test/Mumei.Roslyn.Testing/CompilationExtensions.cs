@@ -16,4 +16,13 @@ public static class CompilationExtensions {
     var typeSymbol = GetTypeSymbol(compilation, typeName);
     return typeSymbol.GetMembers().OfType<TMember>().First(x => x.Name == memberName);
   }
+  
+  public static ITypeSymbol GetTypeSymbolOfField(this Compilation compilation, string typeName, string memberName) {
+    var memberSymbol = GetTypeSymbol(compilation, typeName)
+      .GetMembers()
+      .OfType<IFieldSymbol>()
+      .First(x => x.Name == memberName);
+    
+    return memberSymbol.Type;
+  }
 }

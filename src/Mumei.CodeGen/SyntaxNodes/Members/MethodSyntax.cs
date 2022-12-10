@@ -39,6 +39,8 @@ public class MethodSyntax<TCallSignature> : MemberSyntax, IInvokable<TCallSignat
     // _method.Body = body;
 //
     // SyntaxFactory.MethodDeclaration()
+
+    _method = null!;
   }
 
   protected internal override int Priority => 10;
@@ -66,7 +68,7 @@ public class MethodSyntax<TCallSignature> : MemberSyntax, IInvokable<TCallSignat
   }
 }
 
-internal abstract class MethodSyntaxCore : MemberSyntax {
+internal class MethodSyntaxCore : MemberSyntax {
   public BlockSyntax? Body;
   public Type[] ParameterTypes;
   public Type ReturnType;
@@ -82,6 +84,8 @@ internal abstract class MethodSyntaxCore : MemberSyntax {
     ReturnType = returnType;
     ParameterTypes = parameterTypes;
     TypeParameters = typeParameters;
+
+    Body = null!;
   }
 
   protected internal override int Priority => 10;

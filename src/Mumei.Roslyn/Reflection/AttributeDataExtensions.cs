@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Mumei.Common.Reflection;
 
-namespace Mumei.Roslyn.Reflection; 
+namespace Mumei.Roslyn.Reflection;
 
 public static class AttributeDataExtensions {
   public static CustomAttributeData ToAttributeDeclaration(this AttributeData attributeData) {
@@ -41,7 +41,7 @@ public static class AttributeDataExtensions {
 
     foreach (var argument in arguments) {
       var value = argument.GetTypedConstantValue();
-      var type = value.GetType();
+      var type = argument.Type!.ToType();
 
       constructorArguments.Add(new CustomAttributeTypedArgument(type, value));
     }

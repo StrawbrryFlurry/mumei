@@ -1,10 +1,9 @@
 ﻿using System.Linq.Expressions;
-using Microsoft.CodeAnalysis;
 using Mumei.CodeGen.SyntaxWriters;
 
 namespace Mumei.CodeGen.SyntaxNodes;
 
-public class FieldSyntax : FieldSyntax<object> {
+public sealed class FieldSyntax : FieldSyntax<object> {
   public FieldSyntax(Type type, string identifier, Syntax parent) : base(type, identifier, parent) { }
 }
 
@@ -24,7 +23,7 @@ public class FieldSyntax<T> : MemberSyntax, IMemberValueHolderSyntax<T>, IMember
     }
   }
 
-  public T? Value { get; set; }
+  public T Value { get; set; } = default!;
 
   public void SetInitialValue(T? value) {
     Initializer = Expression.Constant(value);

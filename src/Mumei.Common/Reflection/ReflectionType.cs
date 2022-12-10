@@ -7,7 +7,7 @@ using Mumei.Common.Utilities;
 
 namespace Mumei.Common.Reflection;
 
-public sealed class ReflectionType : Type {
+internal sealed class ReflectionType : Type {
   internal static readonly ConcurrentDictionary<Type, Guid> TypeGuids = new();
   internal static readonly ConditionalWeakTable<string, Type> TypeCache = new();
 
@@ -15,6 +15,7 @@ public sealed class ReflectionType : Type {
   private readonly Type[] _interfaces;
   private readonly MethodInfo[] _methods;
   private readonly PropertyInfo[] _properties;
+  private readonly TypeAttributes _typeAttributes;
 
   private ReflectionType(
     string name,
@@ -22,6 +23,8 @@ public sealed class ReflectionType : Type {
     Type? baseType,
     Type[] interfaces,
     Type[] typeArguments,
+    bool isGenericType,
+    TypeAttributes typeAttributes,
     MethodInfoSpec[] methods,
     FieldInfoSpec[] fields,
     PropertyInfoSpec[] properties,
@@ -34,7 +37,11 @@ public sealed class ReflectionType : Type {
     BaseType = baseType;
     FullName = GetFullName(name, @namespace, typeArguments);
 
+    IsGenericType = isGenericType;
+    GenericTypeArguments = typeArguments;
+
     _interfaces = interfaces;
+    _typeAttributes = typeAttributes;
     _methods = CreateMethods(methods);
     _properties = CreateProperties(properties);
     _fields = CreateFields(fields);
@@ -53,6 +60,9 @@ public sealed class ReflectionType : Type {
     BaseType = type.BaseType;
     FullName = GetFullName(type.Name, type.Namespace, typeArguments);
 
+    IsGenericType = type.IsGenericType;
+    GenericTypeArguments = type.GenericTypeArguments;
+    _typeAttributes = type._typeAttributes;
     _interfaces = type._interfaces;
     _methods = type._methods;
     _properties = type._properties;
@@ -61,12 +71,31 @@ public sealed class ReflectionType : Type {
     TypeCache.AddOrUpdate(FullName, this);
   }
 
+  public override Module Module { get; }
+  public override string? Namespace { get; }
+  public override string Name { get; }
+
+  public override Assembly Assembly { get; }
+  public override string? AssemblyQualifiedName { get; } = null;
+  public override Type? BaseType { get; }
+  public override string? FullName { get; }
+  public override Guid GUID => TypeGuids.GetOrAdd(this, _ => new Guid());
+
+  public override Type UnderlyingSystemType
+    => throw new NotSupportedException("Cannot get clr type from compile time type");
+
+  public override bool IsConstructedGenericType => IsGenericType && GenericTypeArguments.Length > 0;
+
+  public override bool IsGenericType { get; }
+
+  public override Type[] GenericTypeArguments { get; }
+
   private static Type Create(
     ReflectionType type,
     Type[] typeArguments
   ) {
-    return TypeCache.TryGetValue(GetFullName(type.Name, type.Namespace, typeArguments), out var cached) 
-      ? cached 
+    return TypeCache.TryGetValue(GetFullName(type.Name, type.Namespace, typeArguments), out var cached)
+      ? cached
       : new ReflectionType(type, typeArguments);
   }
 
@@ -76,6 +105,8 @@ public sealed class ReflectionType : Type {
     Type? baseType,
     Type[] interfaces,
     Type[] typeArguments,
+    bool isGenericType,
+    TypeAttributes typeAttributes,
     MethodInfoSpec[] methods,
     FieldInfoSpec[] fields,
     PropertyInfoSpec[] properties,
@@ -84,32 +115,21 @@ public sealed class ReflectionType : Type {
     if (TypeCache.TryGetValue(GetFullName(name, @namespace, typeArguments), out var type)) {
       return (ReflectionType)type;
     }
-    
+
     return new ReflectionType(
       name,
       @namespace,
       baseType,
       interfaces,
       typeArguments,
+      isGenericType,
+      typeAttributes,
       methods,
       fields,
       properties,
       module
     );
   }
-
-  public override Module Module { get; }
-  public override string? Namespace { get; }
-  public override string Name { get; }
-
-  public override Assembly Assembly { get; }
-  public override string? AssemblyQualifiedName { get; }
-  public override Type? BaseType { get; }
-  public override string? FullName { get; }
-  public override Guid GUID => TypeGuids.GetOrAdd(this, _ => new Guid());
-
-  public override Type UnderlyingSystemType
-    => throw new NotSupportedException("Cannot get clr type from compile time type");
 
   private MethodInfo[] CreateMethods(MethodInfoSpec[] methods) {
     var result = new MethodInfo[methods.Length];
@@ -170,7 +190,7 @@ public sealed class ReflectionType : Type {
   }
 
   protected override TypeAttributes GetAttributeFlagsImpl() {
-    throw new NotImplementedException();
+    return _typeAttributes;
   }
 
   protected override ConstructorInfo? GetConstructorImpl(BindingFlags bindingAttr, Binder? binder,
@@ -220,7 +240,7 @@ public sealed class ReflectionType : Type {
 
     return fields.ToArray();
   }
-  
+
   public override MemberInfo[] GetMembers(BindingFlags bindingAttr) {
     var members = new List<MemberInfo>();
 
@@ -298,13 +318,13 @@ public sealed class ReflectionType : Type {
       typeArguments
     );
   }
-  
+
   protected override bool IsArrayImpl() {
-    throw new NotImplementedException();
+    return false; // Array types should always be available as a runtime type 
   }
 
   protected override bool IsByRefImpl() {
-    return !IsValueType;
+    throw new NotImplementedException();
   }
 
   protected override bool IsCOMObjectImpl() {
@@ -312,7 +332,7 @@ public sealed class ReflectionType : Type {
   }
 
   protected override bool IsPointerImpl() {
-    return FullName == typeof(IntPtr).FullName || FullName == typeof(UIntPtr).FullName;
+    return FullName == typeof(nint).FullName || FullName == typeof(nuint).FullName;
   }
 
   protected override bool IsPrimitiveImpl() {

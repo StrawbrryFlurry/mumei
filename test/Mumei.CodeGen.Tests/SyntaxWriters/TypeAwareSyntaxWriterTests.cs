@@ -36,7 +36,7 @@ public class TypeAwareSyntaxWriterTests {
     sut.GetValueAsExpressionSyntax("foo").Should().Be("\"foo\"");
     sut.GetValueAsExpressionSyntax(true).Should().Be("true");
     sut.GetValueAsExpressionSyntax(false).Should().Be("false");
-    sut.GetValueAsExpressionSyntax(null).Should().Be("null");
+    sut.GetValueAsExpressionSyntax(null!).Should().Be("null");
 
     sut.GetValueAsExpressionSyntax(SyntaxVisibility.Internal)
       .Should()

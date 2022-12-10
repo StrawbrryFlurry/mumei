@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing.XUnit"/>
-    <PackageReference Include="Microsoft.CodeAnalysis.Testing.Verifiers.XUnit"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing.XUnit" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Testing.Verifiers.XUnit" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Mumei.Roslyn\Mumei.Roslyn.csproj"/>
-    <ProjectReference Include="..\Mumei.Roslyn.Testing\Mumei.Roslyn.Testing.csproj"/>
+    <ProjectReference Include="..\..\src\Mumei.Roslyn\Mumei.Roslyn.csproj" />
+    <ProjectReference Include="..\Mumei.Roslyn.Testing\Mumei.Roslyn.Testing.csproj" />
   </ItemGroup>
 </Project>

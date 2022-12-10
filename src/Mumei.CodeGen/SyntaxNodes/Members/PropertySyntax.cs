@@ -23,17 +23,17 @@ public class PropertySyntax<T> : MemberSyntax, IValueHolderSyntax<T> {
 
   public AccessorListSyntax Accessors { get; }
 
-  public T? Value { get; set; }
+  public T Value { get; set; } = default!;
 
   // TODO: Add shortcut for backing field 
   public PropertySyntax<T> DefineBackingFieldGetter(FieldSyntax<T> field) {
     return this;
   }
-  
+
   public PropertySyntax<T> DefineBackingFieldSetter(FieldSyntax<T> field) {
     return this;
   }
-  
+
   public PropertySyntax<T> DefineAutoGetter() {
     Accessors.DefineGetter(AccessorSyntax.AutoGet);
     return this;
@@ -58,7 +58,7 @@ public class PropertySyntax<T> : MemberSyntax, IValueHolderSyntax<T> {
     Accessors.DefineSetter(setter);
     return this;
   }
-  
+
   // TODO: Add custom block builder for properties (ImplicitSetterValue `value`)
   public PropertySyntax<T> DefineSetter(BlockBuilder setterBuilder) {
     var setter = new AccessorSyntax(AccessorType.Set, setterBuilder.Build(), SyntaxVisibility.None, this);

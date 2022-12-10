@@ -111,7 +111,7 @@ public class ExpressionSyntaxTests {
   }
 
   private class ImplementsIInvokableDynamic : IDynamicallyInvokable {
-    public string Identifier { get; init; }
+    public string Identifier { get; init; } = string.Empty;
 
     public object? Invoke(params object[] parameters) {
       throw new NotImplementedException();
@@ -119,27 +119,27 @@ public class ExpressionSyntaxTests {
   }
 
   private class ImplementsIInvokableFuncT1 : IInvokable<Func<string>> {
-    public string Identifier { get; init; }
-    public Func<string> Invoke { get; }
+    public string Identifier { get; init; } = default!;
+    public Func<string> Invoke { get; } = default!;
   }
 
   private class ImplementsIInvokableFuncT3 : IInvokable<Func<bool, int, string>> {
-    public string Identifier { get; init; }
-    public Func<bool, int, string> Invoke { get; }
+    public string Identifier { get; init; } = default!;
+    public Func<bool, int, string> Invoke { get; } = default!;
   }
 
   private class ImplementsIInvokableAction : IInvokable<Action> {
-    public string Identifier { get; init; }
-    public Action Invoke { get; }
+    public string Identifier { get; init; } = default!;
+    public Action Invoke { get; } = default!;
   }
 
   private class ImplementsIInvokableActionT2 : IInvokable<Action<string, int>> {
-    public string Identifier { get; init; }
-    public Action<string, int> Invoke { get; }
+    public string Identifier { get; init; } = default!;
+    public Action<string, int> Invoke { get; } = default!;
   }
 
   private class ImplementsIValueHolder<T> : IValueHolderSyntax<T> {
-    public string Identifier { get; set; }
-    public T Value { get; set; }
+    public string Identifier { get; set; } = default!;
+    public T Value { get; set; } = default!;
   }
 }

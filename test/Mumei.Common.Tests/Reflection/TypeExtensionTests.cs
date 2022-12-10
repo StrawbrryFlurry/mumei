@@ -1,4 +1,5 @@
-﻿using Mumei.Common.Reflection;
+﻿using System.Reflection;
+using Mumei.Common.Reflection;
 using Mumei.Common.Reflection.Members;
 
 namespace Mumei.Common.Tests.Reflection;
@@ -13,18 +14,19 @@ public sealed class TypeExtensionTests {
 
   [Fact]
   public void IsRuntimeType_ReturnsFalse_WhenTypeIsNotRuntimeType() {
-    var mumeiType = ReflectionType.Create(
-      "test",
-      "ns",
-      null,
-      Type.EmptyTypes,
-      Type.EmptyTypes,
-      Array.Empty<MethodInfoSpec>(),
-      Array.Empty<FieldInfoSpec>(),
-      Array.Empty<PropertyInfoSpec>(),
-      ReflectionModule.Create("", null)
-    );
+   // var mumeiType = ReflectionType.Create(
+   //   "test",
+   //   "ns",
+   //   null,
+   //   Type.EmptyTypes,
+   //   Type.EmptyTypes,
+   //   TypeAttributes.Class,
+   //   Array.Empty<MethodInfoSpec>(),
+   //   Array.Empty<FieldInfoSpec>(),
+   //   Array.Empty<PropertyInfoSpec>(),
+   //   ReflectionModule.Create("", null)
+   // );
 
-    mumeiType.IsRuntimeType().Should().BeFalse();
+   // mumeiType.IsRuntimeType().Should().BeFalse();
   }
 }

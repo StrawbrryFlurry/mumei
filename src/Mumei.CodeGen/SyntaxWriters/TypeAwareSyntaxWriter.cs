@@ -19,7 +19,7 @@ public class TypeAwareSyntaxWriter : SyntaxWriter, ITypeAwareSyntaxWriter {
     Write(GetTypeName(type));
   }
 
-  protected internal string GetValueAsExpressionSyntax(object value) {
+  protected internal string GetValueAsExpressionSyntax(object? value) {
     return value switch {
       bool b => b ? "true" : "false",
       Enum e => $"{e.GetType().Name}.{e}",
@@ -50,7 +50,7 @@ public class TypeAwareSyntaxWriter : SyntaxWriter, ITypeAwareSyntaxWriter {
     return type.Name;
   }
 
-  private string GetUnknownExpressionValueAsString(object value) {
+  private string GetUnknownExpressionValueAsString(object? value) {
     return Expression.Constant(value).ToString();
   }
 }

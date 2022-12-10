@@ -60,11 +60,11 @@ public sealed class ReflectionMethodInfo : MethodInfo {
   }
 
   public override object Invoke(
-    object obj,
+    object? obj,
     BindingFlags invokeAttr,
-    Binder binder,
-    object[] parameters,
-    CultureInfo culture
+    Binder? binder,
+    object?[]? parameters,
+    CultureInfo? culture
   ) {
     throw new NotSupportedException("Cannot invoke a compile time method.");
   }

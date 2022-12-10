@@ -25,14 +25,16 @@ public class ParameterSyntax : ParameterSyntax<object> {
 
   public static object MakeGenericParameter(Type type, string name) {
     var genericParameterSyntax = typeof(ParameterSyntax<>).MakeGenericType(type);
-    return Activator.CreateInstance(genericParameterSyntax, Expression.Constant(name));
+    return Activator.CreateInstance(genericParameterSyntax, Expression.Constant(name))!;
   }
 }
 
 public class ParameterSyntax<TParameterType> : ExpressionSyntax, IValueHolderSyntax<TParameterType> {
-  public ParameterSyntax(Expression expressionNode, Syntax? parent = null) : base(expressionNode, parent) { }
+  public ParameterSyntax(Expression expressionNode, Syntax? parent = null) : base(expressionNode, parent) {
+    Identifier = expressionNode.ToString();
+  }
 
   public string Identifier { get; }
 
-  public TParameterType? Value { get; set; }
+  public TParameterType Value { get; set; } = default!;
 }

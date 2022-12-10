@@ -6,7 +6,7 @@ namespace Mumei.CodeGen.Expressions;
 ///   Replaces a <see cref="ConstantExpression" /> whose ToString
 ///   method returns True and False as capitalized strings.
 /// </summary>
-public class BooleanExpression : Expression {
+public sealed class BooleanExpression : Expression {
   public readonly bool Value;
 
   public BooleanExpression(bool value) {
