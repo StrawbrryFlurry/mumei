@@ -1,4 +1,4 @@
-﻿namespace Mumei.Attributes;
+﻿namespace Mumei.DependencyInjection.Attributes;
 
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Parameter)]
 public class InjectAttribute : Attribute {

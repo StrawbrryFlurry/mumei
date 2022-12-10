@@ -1,10 +1,10 @@
-﻿namespace Mumei.Attributes;
+﻿namespace Mumei.DependencyInjection.Attributes;
 
 /// <summary>
-/// Allows consumers to add the decorated type
-/// to a higher level injector rather than a module.
-/// Usually, this is done to map configuration or
-/// define options for third party modules.
+///   Allows consumers to add the decorated type
+///   to a higher level injector rather than a module.
+///   Usually, this is done to map configuration or
+///   define options for third party modules.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class InjectableAttribute : Attribute {
@@ -16,22 +16,23 @@ public sealed class InjectableAttribute : Attribute {
 }
 
 /// <summary>
-/// <inheritdoc cref="InjectableAttribute"/>
+///   <inheritdoc cref="InjectableAttribute" />
 /// </summary>
 /// <typeparam name="TAppModule"></typeparam>
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class InjectableAttribute<TAppModule> : Attribute {
-  public Type AppModuleType => typeof(TAppModule);
   public readonly ProvidedIn ProvidedIn;
-  
+
   public InjectableAttribute(ProvidedIn providedIn = ProvidedIn.Root) {
     ProvidedIn = providedIn;
   }
+
+  public Type AppModuleType => typeof(TAppModule);
 }
 
 /// <summary>
-/// Defines the scope in which the decorated type
-/// is provided.
+///   Defines the scope in which the decorated type
+///   is provided.
 /// </summary>
 public enum ProvidedIn {
   /// <summary>
@@ -40,7 +41,7 @@ public enum ProvidedIn {
   ///   the ApplicationModule / ApplicationRoot.
   /// </summary>
   Root,
-  
+
   /// <summary>
   ///   Provides the injectable type in the environment injector.
   ///   The environment injector contains environment specific configuration
@@ -56,5 +57,5 @@ public enum ProvidedIn {
   ///   Anything that cannot be resolved in the platform injector will
   ///   throw a <see cref="NullInjectorException" />.
   /// </summary>
-  Platform,
+  Platform
 }

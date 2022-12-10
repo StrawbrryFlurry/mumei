@@ -1,4 +1,4 @@
-﻿namespace Mumei.Attributes;
+﻿namespace Mumei.DependencyInjection.Attributes;
 
 public class Singleton : Attribute { }
 

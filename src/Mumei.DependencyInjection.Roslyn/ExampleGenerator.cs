@@ -1,11 +1,9 @@
 ﻿using System.Reflection;
-using Microsoft.CodeAnalysis;
 using Mumei.CodeGen.SyntaxNodes;
 using Mumei.CodeGen.SyntaxWriters;
 using Mumei.Common.Reflection;
-using Mumei.Core;
+using Mumei.DependencyInjection.Core;
 using Mumei.DependencyInjection.Roslyn.Module;
-using Mumei.Roslyn.Reflection;
 
 namespace Mumei.DependencyInjection.Roslyn;
 
@@ -132,7 +130,7 @@ internal class Generator {
     configurationClass.AddMethod(
       providerType,
       (ParameterSyntax<IInjector?> scope, BlockSyntaxBuilder b) =>
-        b.Return(() => applyConfigurationMethod.Invoke(scope.Value))
+        b.Return(() => applyConfigurationMethod.Invoke(scope.Value!))
     );
   }
 

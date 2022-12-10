@@ -1,4 +1,4 @@
-﻿namespace Mumei.Attributes;
+﻿namespace Mumei.DependencyInjection.Attributes;
 
 /// <summary>
 ///   Imports the module specified by the decorated property.

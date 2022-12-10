@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
-using Mumei.Core;
+using Mumei.DependencyInjection.Core;
 using Mumei.DependencyInjection.Playground;
 using Mumei.DependencyInjection.Playground.Common;
 using Mumei.DependencyInjection.Playground.Example.Modules;

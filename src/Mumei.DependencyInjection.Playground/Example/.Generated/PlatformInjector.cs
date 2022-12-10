@@ -1,8 +1,8 @@
-﻿using Mumei.Core;
+﻿using Mumei.DependencyInjection.Core;
 
 namespace Mumei.DependencyInjection.Playground.Example.Generated;
 
-public sealed partial class PlatformInjector : IInjector {
+internal sealed partial class PlatformInjector : IInjector {
   public static readonly PlatformInjector Instance = new();
 
   private PlatformInjector() { }
@@ -14,7 +14,7 @@ public sealed partial class PlatformInjector : IInjector {
   }
 }
 
-public sealed partial class PlatformInjector {
+internal sealed partial class PlatformInjector {
   public TProvider Get<TProvider>(InjectFlags flags = InjectFlags.None) {
     var provider = typeof(TProvider);
     var instance = provider switch {
@@ -27,7 +27,7 @@ public sealed partial class PlatformInjector {
 
   public object Get(object token, InjectFlags flags = InjectFlags.None) {
     return token switch {
-      _ when token == typeof(IInjector) => Instance,
+      Type t when t == typeof(IInjector) => Instance,
       _ => Parent.Get(token)
     };
   }

@@ -1,4 +1,4 @@
-﻿namespace Mumei.Attributes;
+﻿namespace Mumei.DependencyInjection.Attributes;
 
 /// <summary>
 ///   Enables a provider token (Type, provider name, etc.)

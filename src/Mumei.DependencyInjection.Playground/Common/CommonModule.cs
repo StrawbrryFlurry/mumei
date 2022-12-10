@@ -1,5 +1,5 @@
-﻿using Mumei.Attributes;
-using Mumei.Core;
+﻿using Mumei.DependencyInjection.Attributes;
+using Mumei.DependencyInjection.Core;
 
 namespace Mumei.DependencyInjection.Playground.Common;
 
@@ -26,7 +26,7 @@ public sealed class CommonModule : IModule {
 
   public object Get(object providerToken, InjectFlags flags = InjectFlags.None) {
     return providerToken switch {
-      _ when providerToken == typeof(IHttpClient) => HttpClientBinding.Get(this),
+      Type t when t == typeof(IHttpClient) => HttpClientBinding.Get(this),
       _ => Parent.Get(providerToken)
     };
   }

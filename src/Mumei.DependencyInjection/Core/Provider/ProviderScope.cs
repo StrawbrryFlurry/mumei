@@ -1,4 +1,4 @@
-﻿namespace Mumei.Core;
+﻿namespace Mumei.DependencyInjection.Core;
 
 [Flags]
 public enum ProviderScope {

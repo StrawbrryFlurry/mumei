@@ -1,4 +1,4 @@
-﻿namespace Mumei.Core;
+﻿namespace Mumei.DependencyInjection.Core;
 
 [Flags]
 public enum InjectFlags {
@@ -9,9 +9,7 @@ public enum InjectFlags {
   Lazy = 1 << 7
 }
 
-public class InjectBehaviorAttribute : Attribute {
- 
-}
+public class InjectBehaviorAttribute : Attribute { }
 
 /// <summary>
 ///   Marks the dependency as optional and injects null if the dependency is not found.

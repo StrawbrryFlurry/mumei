@@ -1,4 +1,4 @@
-﻿namespace Mumei.Core;
+﻿namespace Mumei.DependencyInjection.Core;
 
 /// <summary>
 ///   Regular modules provide static analysis of providers that can be

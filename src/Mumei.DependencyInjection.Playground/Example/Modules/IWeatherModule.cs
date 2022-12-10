@@ -1,4 +1,4 @@
-﻿using Mumei.Attributes;
+﻿using Mumei.DependencyInjection.Attributes;
 using Mumei.DependencyInjection.Playground.Common;
 using Mumei.DependencyInjection.Playground.Example.Modules.Services;
 

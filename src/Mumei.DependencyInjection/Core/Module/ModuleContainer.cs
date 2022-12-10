@@ -1,7 +1,6 @@
-﻿using Mumei.Attributes;
+﻿using Mumei.DependencyInjection.Attributes;
 
-namespace Mumei.Core; 
+namespace Mumei.DependencyInjection.Core;
 
-[Injectable(providedIn: ProvidedIn.Root)]
-public class ModuleContainer : List<IModuleRef> {
-}
+[Injectable(ProvidedIn.Root)]
+public class ModuleContainer : List<IModuleRef> { }

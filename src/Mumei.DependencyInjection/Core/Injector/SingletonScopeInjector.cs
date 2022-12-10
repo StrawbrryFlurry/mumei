@@ -1,8 +1,8 @@
-﻿namespace Mumei.Core;
+﻿namespace Mumei.DependencyInjection.Core;
 
 /// <summary>
-/// The injector instance that is used in scoped
-/// binding factories to refer to the singleton instance.
+///   The injector instance that is used in scoped
+///   binding factories to refer to the singleton instance.
 /// </summary>
 public sealed class SingletonScopeλInjector : IInjector {
   public static readonly SingletonScopeλInjector Instance = new();

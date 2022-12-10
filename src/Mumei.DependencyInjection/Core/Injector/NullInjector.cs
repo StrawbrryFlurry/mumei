@@ -1,4 +1,4 @@
-﻿namespace Mumei.Core;
+﻿namespace Mumei.DependencyInjection.Core;
 
 public sealed class NullInjector : IInjector {
   public static readonly NullInjector Instance = new();

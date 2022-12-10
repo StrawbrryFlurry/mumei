@@ -1,4 +1,4 @@
-﻿namespace Mumei.Core;
+﻿namespace Mumei.DependencyInjection.Core;
 
 public abstract class ApplyBindingConfigurationFactory<TProvider> : Binding<TProvider> {
   protected override TProvider Create(IInjector? scope = null) {

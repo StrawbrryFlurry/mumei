@@ -1,4 +1,4 @@
-﻿namespace Mumei.Core;
+﻿namespace Mumei.DependencyInjection.Core;
 
 public interface IModule : IInjector {
   public IInjector CreateScope();

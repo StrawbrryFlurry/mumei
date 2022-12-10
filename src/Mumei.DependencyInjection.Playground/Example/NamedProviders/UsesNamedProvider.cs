@@ -1,4 +1,4 @@
-﻿using Mumei.Attributes;
+﻿using Mumei.DependencyInjection.Attributes;
 
 namespace Mumei.DependencyInjection.Playground.Example.NamedProviders;
 

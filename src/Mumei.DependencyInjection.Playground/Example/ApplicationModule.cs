@@ -1,9 +1,9 @@
-﻿using Mumei.Attributes;
-using Mumei.Core;
+﻿using Mumei.DependencyInjection.Attributes;
+using Mumei.DependencyInjection.Core;
+using Mumei.DependencyInjection.Internal;
 using Mumei.DependencyInjection.Playground.Common;
 using Mumei.DependencyInjection.Playground.Example.Generated;
 using Mumei.DependencyInjection.Playground.Example.Modules.Services;
-using Mumei.Internal;
 
 namespace Mumei.DependencyInjection.Playground.Example;
 

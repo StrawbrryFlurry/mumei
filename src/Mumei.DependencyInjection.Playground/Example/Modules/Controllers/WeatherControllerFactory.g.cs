@@ -1,5 +1,7 @@
-﻿using Mumei.Core;
+﻿using Mumei.DependencyInjection.Core;
 using Mumei.DependencyInjection.Playground.Example.Modules.Services;
+
+#nullable enable
 
 namespace Mumei.DependencyInjection.Playground.Example.Modules; 
 

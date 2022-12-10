@@ -1,6 +1,6 @@
-﻿using Mumei.Core;
+﻿using Mumei.DependencyInjection.Core;
 
-namespace Mumei.Hooks; 
+namespace Mumei.DependencyInjection.Hooks;
 
 public interface IAfterResolution {
   public void AfterResolution(IInjector injector);

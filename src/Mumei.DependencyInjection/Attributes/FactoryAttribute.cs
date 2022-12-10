@@ -1,6 +1,6 @@
-﻿using Mumei.Core;
+﻿using Mumei.DependencyInjection.Core;
 
-namespace Mumei.Attributes;
+namespace Mumei.DependencyInjection.Attributes;
 
 /// <summary>
 ///   Specifies that a method in a module provides the

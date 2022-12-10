@@ -1,4 +1,4 @@
-﻿namespace Mumei.Core; 
+﻿namespace Mumei.DependencyInjection.Core;
 
 public interface IComponentFactoryResolver {
   public IComponentFactory<TComponent> Resolve<TComponent>() where TComponent : IComponent;

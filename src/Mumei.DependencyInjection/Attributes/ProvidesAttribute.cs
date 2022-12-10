@@ -1,4 +1,4 @@
-﻿namespace Mumei.Attributes;
+﻿namespace Mumei.DependencyInjection.Attributes;
 
 [AttributeUsage(AttributeTargets.Method)]
 public class ProvidesAttribute<TProvides> : Attribute { }

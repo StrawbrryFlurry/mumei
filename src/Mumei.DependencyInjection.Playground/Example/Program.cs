@@ -1,10 +1,8 @@
 ﻿using System.Reflection;
 using Castle.Core.Internal;
-using Mumei.Core;
+using Mumei.DependencyInjection.Core;
 using Mumei.DependencyInjection.Playground.Common;
 using Mumei.DependencyInjection.Playground.Example.Generated;
-using Mumei.DependencyInjection.Playground.Example.Modules;
-using Mumei.DependencyInjection.Playground.Example.Modules.Services;
 using Mumei.DependencyInjection.Playground.Lib.Http;
 
 namespace Mumei.DependencyInjection.Playground.Example;
@@ -12,23 +10,12 @@ namespace Mumei.DependencyInjection.Playground.Example;
 public class Program {
   public static void Main() {
     var appEnvironment = PlatformInjector.CreateEnvironment<IApplicationModule>();
-    
+
     ScanModules(appEnvironment.Instance);
-    
+
     var common = new CommonModule();
     var weather = new WeatherModule(null, common);
     var app = new ApplicationModule(weather, common);
-
-    var wa = app.WeatherServiceBinding.Get();
-    var s1 = app.WeatherModule.CreateScope();
-    var s2 = app.WeatherModule.CreateScope();
-
-    var w1 = s1.Get<IWeatherService>();
-    Console.Write(w1);
-    var w2 = s2.Get<IWeatherService>();
-    Console.Write(w2);
-    Console.Write(wa == w1);
-    Console.Write(w1 == w2);
   }
 
   private static void ScanModules(IModuleRef<IModule> module) {
@@ -54,23 +41,25 @@ public class Program {
         continue;
       }
 
-      var handlerDescriptor = new HandlerDescriptor() {
+      var handlerDescriptor = new HandlerDescriptor {
         Route = route,
         Method = "Get",
-        Handler = (request) => {
-          var requestInjector = new DynamicInjector() {
+        Handler = request => {
+          var scope = componentRef.CreateScope();
+
+          var requestInjector = new DynamicInjector(scope) {
             { typeof(HttpRequestMessage), request }
           };
-          var scope = componentRef.CreateScope(requestInjector);
-          return componentRef.InvokeWithProviderFactory(scope, method);
-        },
+
+          return componentRef.InvokeWithProviderFactory(requestInjector, method)!;
+        }
       };
     }
   }
 
-  private class HandlerDescriptor {
-    public string Route { get; set; }
-    public string Method { get; set; }
-    public Func<HttpRequestMessage, object> Handler { get; set; }
+  private sealed class HandlerDescriptor {
+    public string Route { get; set; } = default!;
+    public string Method { get; set; } = default!;
+    public Func<HttpRequestMessage, object> Handler { get; set; } = default!;
   }
 }
