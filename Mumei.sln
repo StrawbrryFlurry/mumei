@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.DependencyInjection.R
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.Roslyn.Testing", "test\Mumei.Roslyn.Testing\Mumei.Roslyn.Testing.csproj", "{ABD444D8-D357-4FA6-98D6-7EC52E31F51D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.Integration.AspNetCore", "src\Mumei.Integration.AspNetCore\Mumei.Integration.AspNetCore.csproj", "{2B07E724-936E-4F01-BA8B-B2036244CCE8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,8 +73,13 @@ Global
 		{ABD444D8-D357-4FA6-98D6-7EC52E31F51D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ABD444D8-D357-4FA6-98D6-7EC52E31F51D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ABD444D8-D357-4FA6-98D6-7EC52E31F51D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B07E724-936E-4F01-BA8B-B2036244CCE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B07E724-936E-4F01-BA8B-B2036244CCE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B07E724-936E-4F01-BA8B-B2036244CCE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B07E724-936E-4F01-BA8B-B2036244CCE8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
-GlobalSection(SolutionProperties) = preSolution
-    DefaultTargets = Build
-EndGlobalSection
+Global
+				DefaultTargets = Build
+EndGlobal
+Section
