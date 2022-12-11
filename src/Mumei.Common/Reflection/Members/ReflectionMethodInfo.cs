@@ -1,28 +1,38 @@
-﻿using System.Globalization;
+﻿using System.Collections.Concurrent;
+using System.Globalization;
 using System.Reflection;
 
-namespace Mumei.Common.Reflection.Members;
+namespace Mumei.Common.Reflection;
 
-public sealed class ReflectionMethodInfo : MethodInfo {
+internal sealed class ReflectionMethodInfo : MethodInfo {
+  private static readonly ConcurrentDictionary<TypeMemberCacheKey, MethodInfo> MethodInfoCache = new();
   private readonly Type[] _genericArguments;
   private readonly ParameterInfo[] _parameters;
 
-  internal ReflectionMethodInfo(
-    MethodInfoSpec spec,
+  private ReflectionMethodInfo(
+    string name,
+    Type returnType,
+    ParameterInfo[] parameters,
+    Type[] genericArguments,
+    MethodAttributes methodAttributes,
+    MethodImplAttributes implAttributes,
+    CustomAttributeData[] customAttributes,
     Type declaringType
   ) {
-    _genericArguments = spec.GenericArguments;
-    _parameters = spec.Parameters;
-    Name = spec.Name;
+    _genericArguments = genericArguments;
+    _parameters = parameters;
+    Name = name;
 
     DeclaringType = declaringType;
     ReflectedType = declaringType;
 
-    ReturnType = spec.ReturnType;
-    ReturnTypeCustomAttributes = new MumeiCustomAttributeProvider(spec.ReturnType);
+    ReturnType = returnType;
+    ReturnTypeCustomAttributes = new MumeiCustomAttributeProvider(returnType);
 
     Module = declaringType.Module;
     Attributes = MethodAttributes.Abstract;
+
+    MethodInfoCache.TryAdd(new TypeMemberCacheKey(name, declaringType), this);
   }
 
   public override Type DeclaringType { get; }
@@ -38,6 +48,32 @@ public sealed class ReflectionMethodInfo : MethodInfo {
     throw new NotSupportedException("Cannot get a runtime handle for a compile time type");
 
   public override ICustomAttributeProvider ReturnTypeCustomAttributes { get; }
+
+  public static MethodInfo Create(
+    string name,
+    Type returnType,
+    ParameterInfo[] parameters,
+    Type[] genericArguments,
+    MethodAttributes methodAttributes,
+    MethodImplAttributes implAttributes,
+    CustomAttributeData[] customAttributes,
+    Type declaringType
+  ) {
+    var key = new TypeMemberCacheKey(name, declaringType);
+    return MethodInfoCache.GetOrAdd(
+      key,
+      _ => new ReflectionMethodInfo(
+        name,
+        returnType,
+        parameters,
+        genericArguments,
+        methodAttributes,
+        implAttributes,
+        customAttributes,
+        declaringType
+      )
+    );
+  }
 
   public override object[] GetCustomAttributes(bool inherit) {
     throw new NotImplementedException();
@@ -72,14 +108,4 @@ public sealed class ReflectionMethodInfo : MethodInfo {
   public override MethodInfo GetBaseDefinition() {
     return this;
   }
-}
-
-public struct MethodInfoSpec {
-  public string Name { get; set; }
-  public Type ReturnType { get; set; }
-  public ParameterInfo[] Parameters { get; set; }
-  public Type[] GenericArguments { get; set; }
-  public MethodAttributes MethodAttributes { get; set; }
-  public MethodImplAttributes ImplAttributes { get; set; }
-  public CustomAttributeData[] CustomAttributes { get; set; }
 }

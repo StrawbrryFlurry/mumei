@@ -1,53 +1,74 @@
 ﻿using System.Reflection;
 using Microsoft.CodeAnalysis;
-using Mumei.Common.Reflection.Members;
+using Mumei.Common.Reflection;
 
-namespace Mumei.Roslyn.Reflection.Members; 
+namespace Mumei.Roslyn.Reflection;
 
 public static class MethodSymbolExtensions {
-  public static MethodInfoSpec ToMethodInfoSpec(this IMethodSymbol symbol) {
-    return new MethodInfoSpec {
-      Name = symbol.Name,
-      ReturnType = symbol.ReturnType.ToType(),
-      Parameters = symbol.Parameters.Select(p => p.ToParameterInfo()).ToArray(),
-      GenericArguments = symbol.TypeArguments.Select(t => t.ToType()).ToArray(),
-      MethodAttributes = GetMethodAttributes(symbol),
-      ImplAttributes = symbol.MethodImplementationFlags,
-      CustomAttributes = symbol.GetAttributes().Select(x => x.ToAttributeDeclaration()).ToArray()
-    };
+  internal static IMethodInfoFactory ToMethodInfoFactory(this IMethodSymbol symbol) {
+    return new MethodInfoFactory(symbol);
   }
 
-  private static MethodAttributes GetMethodAttributes(this IMethodSymbol symbol) {
-    MethodAttributes attributes = default;
+  internal static MethodInfo ToMethodInfo(this IMethodSymbol symbol, Type declaringType) {
+    return MethodInfoFactory.CreateMethodInfo(symbol, declaringType);
+  }
 
-    if (symbol.IsAbstract) {
-      attributes |= MethodAttributes.Abstract | MethodAttributes.Virtual;
+  private sealed class MethodInfoFactory : IMethodInfoFactory {
+    private readonly IMethodSymbol _symbol;
+
+    public MethodInfoFactory(IMethodSymbol symbol) {
+      _symbol = symbol;
     }
 
-    if (symbol.IsStatic) {
-      attributes |= MethodAttributes.Static;
+    public MethodInfo CreateMethodInfo(Type declaringType) {
+      return CreateMethodInfo(_symbol, declaringType);
     }
 
-    if (symbol.IsVirtual || symbol.IsOverride) {
-      attributes |= MethodAttributes.Virtual;
+    public static MethodInfo CreateMethodInfo(IMethodSymbol symbol, Type declaringType) {
+      return ReflectionMethodInfo.Create(
+        symbol.Name,
+        symbol.ReturnType.ToType(),
+        symbol.Parameters.Select(p => p.ToParameterInfo(declaringType)).ToArray(),
+        symbol.TypeArguments.Select(t => t.ToType()).ToArray(),
+        GetMethodAttributes(symbol),
+        symbol.MethodImplementationFlags,
+        symbol.GetAttributes().Select(x => x.ToCustomAttributeData()).ToArray(),
+        declaringType
+      );
     }
 
-    switch (symbol.DeclaredAccessibility) {
-      case Accessibility.Public:
-        attributes |= MethodAttributes.Public;
-        break;
-      case Accessibility.Private:
-        attributes |= MethodAttributes.Private;
-        break;
-      case Accessibility.Internal:
-        attributes |= MethodAttributes.Assembly;
-        break;
-    }
+    private static MethodAttributes GetMethodAttributes(IMethodSymbol symbol) {
+      MethodAttributes attributes = default;
 
-    if (symbol.MethodKind != MethodKind.Ordinary) {
-      attributes |= MethodAttributes.SpecialName;
-    }
+      if (symbol.IsAbstract) {
+        attributes |= MethodAttributes.Abstract | MethodAttributes.Virtual;
+      }
 
-    return attributes;
+      if (symbol.IsStatic) {
+        attributes |= MethodAttributes.Static;
+      }
+
+      if (symbol.IsVirtual || symbol.IsOverride) {
+        attributes |= MethodAttributes.Virtual;
+      }
+
+      switch (symbol.DeclaredAccessibility) {
+        case Accessibility.Public:
+          attributes |= MethodAttributes.Public;
+          break;
+        case Accessibility.Private:
+          attributes |= MethodAttributes.Private;
+          break;
+        case Accessibility.Internal:
+          attributes |= MethodAttributes.Assembly;
+          break;
+      }
+
+      if (symbol.MethodKind != MethodKind.Ordinary) {
+        attributes |= MethodAttributes.SpecialName;
+      }
+
+      return attributes;
+    }
   }
 }

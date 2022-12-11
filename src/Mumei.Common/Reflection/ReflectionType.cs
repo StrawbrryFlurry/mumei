@@ -1,15 +1,13 @@
 ﻿using System.Collections.Concurrent;
 using System.Globalization;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using Mumei.Common.Reflection.Members;
 using Mumei.Common.Utilities;
 
 namespace Mumei.Common.Reflection;
 
 internal sealed class ReflectionType : Type {
   internal static readonly ConcurrentDictionary<Type, Guid> TypeGuids = new();
-  internal static readonly ConditionalWeakTable<string, Type> TypeCache = new();
+  internal static readonly ConcurrentDictionary<string, Type> TypeCache = new();
 
   private readonly FieldInfo[] _fields;
   private readonly Type[] _interfaces;
@@ -25,11 +23,17 @@ internal sealed class ReflectionType : Type {
     Type[] typeArguments,
     bool isGenericType,
     TypeAttributes typeAttributes,
-    MethodInfoSpec[] methods,
-    FieldInfoSpec[] fields,
-    PropertyInfoSpec[] properties,
+    IReadOnlyList<IMethodInfoFactory> methods,
+    IReadOnlyList<IFieldInfoFactory> fields,
+    IReadOnlyList<IPropertyInfoFactory> properties,
     Module module
   ) {
+    GUID = TypeGuids.AddOrUpdate(
+      this,
+      _ => Guid.NewGuid(),
+      (_, guid) => guid
+    );
+
     Module = module;
     Assembly = module.Assembly;
     Name = name;
@@ -46,7 +50,7 @@ internal sealed class ReflectionType : Type {
     _properties = CreateProperties(properties);
     _fields = CreateFields(fields);
 
-    TypeCache.AddOrUpdate(FullName, this);
+    TypeCache.TryAdd(FullName, this);
   }
 
   private ReflectionType(
@@ -68,7 +72,7 @@ internal sealed class ReflectionType : Type {
     _properties = type._properties;
     _fields = type._fields;
 
-    TypeCache.AddOrUpdate(FullName, this);
+    TypeCache.TryAdd(FullName, this);
   }
 
   public override Module Module { get; }
@@ -79,7 +83,7 @@ internal sealed class ReflectionType : Type {
   public override string? AssemblyQualifiedName { get; } = null;
   public override Type? BaseType { get; }
   public override string? FullName { get; }
-  public override Guid GUID => TypeGuids.GetOrAdd(this, _ => new Guid());
+  public override Guid GUID { get; }
 
   public override Type UnderlyingSystemType
     => throw new NotSupportedException("Cannot get clr type from compile time type");
@@ -94,12 +98,14 @@ internal sealed class ReflectionType : Type {
     ReflectionType type,
     Type[] typeArguments
   ) {
-    return TypeCache.TryGetValue(GetFullName(type.Name, type.Namespace, typeArguments), out var cached)
-      ? cached
-      : new ReflectionType(type, typeArguments);
+    var key = GetFullName(type.Name, type.Namespace, typeArguments);
+    return TypeCache.GetOrAdd(
+      key,
+      _ => new ReflectionType(type, typeArguments)
+    );
   }
 
-  internal static Type Create(
+  public static Type Create(
     string name,
     string @namespace,
     Type? baseType,
@@ -107,58 +113,58 @@ internal sealed class ReflectionType : Type {
     Type[] typeArguments,
     bool isGenericType,
     TypeAttributes typeAttributes,
-    MethodInfoSpec[] methods,
-    FieldInfoSpec[] fields,
-    PropertyInfoSpec[] properties,
+    IMethodInfoFactory[] methods,
+    IFieldInfoFactory[] fields,
+    IPropertyInfoFactory[] properties,
     Module module
   ) {
-    if (TypeCache.TryGetValue(GetFullName(name, @namespace, typeArguments), out var type)) {
-      return (ReflectionType)type;
-    }
-
-    return new ReflectionType(
-      name,
-      @namespace,
-      baseType,
-      interfaces,
-      typeArguments,
-      isGenericType,
-      typeAttributes,
-      methods,
-      fields,
-      properties,
-      module
+    var key = GetFullName(name, @namespace, typeArguments);
+    return TypeCache.GetOrAdd(
+      key,
+      _ => new ReflectionType(
+        name,
+        @namespace,
+        baseType,
+        interfaces,
+        typeArguments,
+        isGenericType,
+        typeAttributes,
+        methods,
+        fields,
+        properties,
+        module
+      )
     );
   }
 
-  private MethodInfo[] CreateMethods(MethodInfoSpec[] methods) {
-    var result = new MethodInfo[methods.Length];
+  private MethodInfo[] CreateMethods(IReadOnlyList<IMethodInfoFactory> methods) {
+    var result = new MethodInfo[methods.Count];
 
-    for (var i = 0; i < methods.Length; i++) {
+    for (var i = 0; i < methods.Count; i++) {
       var method = methods[i];
-      result[i] = new ReflectionMethodInfo(method, this);
+      result[i] = method.CreateMethodInfo(this);
     }
 
     return result;
   }
 
-  private FieldInfo[] CreateFields(FieldInfoSpec[] fields) {
-    var result = new FieldInfo[fields.Length];
+  private FieldInfo[] CreateFields(IReadOnlyList<IFieldInfoFactory> fields) {
+    var result = new FieldInfo[fields.Count];
 
-    for (var i = 0; i < fields.Length; i++) {
+    for (var i = 0; i < fields.Count; i++) {
       var field = fields[i];
-      result[i] = new ReflectionFieldInfo(field, this);
+      result[i] = field.CreateFieldInfo(this);
     }
 
     return result;
   }
 
-  private PropertyInfo[] CreateProperties(PropertyInfoSpec[] properties) {
-    var result = new PropertyInfo[properties.Length];
+  private PropertyInfo[] CreateProperties(IReadOnlyList<IPropertyInfoFactory> properties) {
+    var result = new PropertyInfo[properties.Count];
 
-    for (var i = 0; i < properties.Length; i++) {
+    for (var i = 0; i < properties.Count; i++) {
       var property = properties[i];
-      result[i] = new ReflectionPropertyInfo(property, this);
+      result[i] = property.CreatePropertyInfo(this);
     }
 
     return result;
@@ -216,29 +222,13 @@ internal sealed class ReflectionType : Type {
   }
 
   public override FieldInfo? GetField(string name, BindingFlags bindingAttr) {
-    throw new NotImplementedException();
+    return GetFields(bindingAttr).FirstOrDefault(x => x.Name == name);
   }
 
   public override FieldInfo[] GetFields(BindingFlags bindingAttr) {
-    var fields = new List<FieldInfo>(_fields);
-
-    if ((bindingAttr & BindingFlags.Public) != 0) {
-      fields.RemoveAll(x => !x.IsPublic);
-    }
-
-    if ((bindingAttr & BindingFlags.NonPublic) != 0) {
-      fields.RemoveAll(x => !x.IsPrivate);
-    }
-
-    if ((bindingAttr & BindingFlags.Static) != 0) {
-      fields.RemoveAll(x => !x.IsStatic);
-    }
-
-    if ((bindingAttr & BindingFlags.Instance) != 0) {
-      fields.RemoveAll(x => x.IsStatic);
-    }
-
-    return fields.ToArray();
+    return _fields
+      .Where(x => FilterMemberByBindingFlags(x, bindingAttr))
+      .ToArray();
   }
 
   public override MemberInfo[] GetMembers(BindingFlags bindingAttr) {
@@ -263,53 +253,28 @@ internal sealed class ReflectionType : Type {
   }
 
   public override MethodInfo[] GetMethods(BindingFlags bindingAttr) {
-    var methods = new List<MethodInfo>(_methods);
-
-    if ((bindingAttr & BindingFlags.Public) != 0) {
-      methods.RemoveAll(x => !x.IsPublic);
-    }
-
-    if ((bindingAttr & BindingFlags.NonPublic) != 0) {
-      methods.RemoveAll(x => !x.IsPrivate);
-    }
-
-    if ((bindingAttr & BindingFlags.Static) != 0) {
-      methods.RemoveAll(x => !x.IsStatic);
-    }
-
-    if ((bindingAttr & BindingFlags.Instance) != 0) {
-      methods.RemoveAll(x => x.IsStatic);
-    }
-
-    return methods.ToArray();
+    return _methods
+      .Where(x => FilterMemberByBindingFlags(x, bindingAttr))
+      .ToArray();
   }
 
   public override PropertyInfo[] GetProperties(BindingFlags bindingAttr) {
-    var properties = new List<PropertyInfo>(_properties);
-
-    if ((bindingAttr & BindingFlags.Public) != 0) {
-      properties.RemoveAll(x => !x.GetMethod!.IsPublic);
-    }
-
-    if ((bindingAttr & BindingFlags.NonPublic) != 0) {
-      properties.RemoveAll(x => !x.GetMethod!.IsPrivate);
-    }
-
-    if ((bindingAttr & BindingFlags.Static) != 0) {
-      properties.RemoveAll(x => !x.GetMethod!.IsStatic);
-    }
-
-    if ((bindingAttr & BindingFlags.Instance) != 0) {
-      properties.RemoveAll(x => x.GetMethod!.IsStatic);
-    }
-
-    return properties.ToArray();
+    return _properties
+      .Where(x => FilterMemberByBindingFlags(x, bindingAttr))
+      .ToArray();
   }
 
-  public override object? InvokeMember(string name, BindingFlags invokeAttr, Binder? binder, object? target,
+  public override object? InvokeMember(
+    string name,
+    BindingFlags invokeAttr,
+    Binder? binder,
+    object? target,
     object?[]? args,
-    ParameterModifier[]? modifiers, CultureInfo? culture, string[]? namedParameters) {
-    throw new NotImplementedException();
+    ParameterModifier[]? modifiers,
+    CultureInfo? culture,
+    string[]? namedParameters
+  ) {
+    throw new NotSupportedException();
   }
 
   public override Type MakeGenericType(params Type[] typeArguments) {
@@ -324,7 +289,7 @@ internal sealed class ReflectionType : Type {
   }
 
   protected override bool IsByRefImpl() {
-    throw new NotImplementedException();
+    return false;
   }
 
   protected override bool IsCOMObjectImpl() {
@@ -345,8 +310,66 @@ internal sealed class ReflectionType : Type {
     Binder? binder,
     Type? returnType,
     Type[]? types,
-    ParameterModifier[]? modifiers) {
-    throw new NotImplementedException();
+    ParameterModifier[]? modifier
+  ) {
+    var candidates = GetProperties(bindingAttr);
+
+    if (!candidates.Any()) {
+      return null;
+    }
+
+    var comparison = GetBindingFlagsStringComparison(bindingAttr);
+    return candidates
+      .Where(x => x.Name.Equals(name, comparison))
+      .Where(x => returnType is null || x.PropertyType == returnType)
+      .FirstOrDefault(
+        x => types is null ||
+             x.GetIndexParameters()
+               .Select(p => p.ParameterType)
+               .SequenceEqual(types));
+  }
+
+  private StringComparison GetBindingFlagsStringComparison(BindingFlags bindingAttr) {
+    return bindingAttr.HasFlag(BindingFlags.IgnoreCase)
+      ? StringComparison.OrdinalIgnoreCase
+      : StringComparison.Ordinal;
+  }
+
+  private bool FilterMemberByBindingFlags(PropertyInfo propertyInfo, BindingFlags bindingFlags) {
+    return FilterMemberByBindingFlags(propertyInfo.GetMethod ?? propertyInfo.SetMethod!, bindingFlags);
+  }
+
+  private bool FilterMemberByBindingFlags(MethodInfo methodInfo, BindingFlags bindingFlags) {
+    return FilterMemberByBindingFlags(methodInfo.IsStatic, methodInfo.IsPublic, methodInfo, bindingFlags);
+  }
+
+  private bool FilterMemberByBindingFlags(FieldInfo fieldInfo, BindingFlags bindingFlags) {
+    return FilterMemberByBindingFlags(fieldInfo.IsStatic, fieldInfo.IsPublic, fieldInfo, bindingFlags);
+  }
+
+  private bool FilterMemberByBindingFlags(bool isStatic, bool isPublic, MemberInfo info, BindingFlags bindingFlags) {
+    if (bindingFlags.HasFlag(BindingFlags.Static) && !isStatic) {
+      return false;
+    }
+
+    if (bindingFlags.HasFlag(BindingFlags.Instance) && isStatic) {
+      return false;
+    }
+
+    if (bindingFlags.HasFlag(BindingFlags.Public) && !isPublic) {
+      return false;
+    }
+
+    if (bindingFlags.HasFlag(BindingFlags.NonPublic) && isPublic) {
+      return false;
+    }
+
+    var isSameInstance = info.DeclaringType == this;
+    if (bindingFlags.HasFlag(BindingFlags.DeclaredOnly) && !isSameInstance) {
+      return false;
+    }
+
+    return true;
   }
 
   protected override bool HasElementTypeImpl() {
@@ -368,5 +391,17 @@ internal sealed class ReflectionType : Type {
 
   public override Type[] GetInterfaces() {
     return _interfaces;
+  }
+
+  public override bool Equals(Type? o) {
+    return o.GUID == GUID;
+  }
+
+  public override bool Equals(object? o) {
+    return o is ReflectionType other && Equals(other);
+  }
+
+  public override int GetHashCode() {
+    return GUID.GetHashCode();
   }
 }

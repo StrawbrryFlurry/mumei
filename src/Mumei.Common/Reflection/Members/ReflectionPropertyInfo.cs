@@ -1,28 +1,40 @@
-﻿using System.Globalization;
+﻿using System.Collections.Concurrent;
+using System.Globalization;
 using System.Reflection;
 
-namespace Mumei.Common.Reflection.Members;
+namespace Mumei.Common.Reflection;
 
-public sealed class ReflectionPropertyInfo : PropertyInfo {
+internal sealed class ReflectionPropertyInfo : PropertyInfo {
+  private static readonly ConcurrentDictionary<TypeMemberCacheKey, PropertyInfo> PropertyInfoCache = new();
   private readonly ParameterInfo[] _indexParameters;
   private readonly bool _isIndexer;
 
-  internal ReflectionPropertyInfo(PropertyInfoSpec spec, Type declaringType) {
+  private ReflectionPropertyInfo(
+    string name,
+    Type propertyType,
+    MethodInfo getMethod,
+    MethodInfo? setMethod,
+    PropertyAttributes propertyAttributes,
+    bool isIndexer,
+    ParameterInfo[] indexParameters,
+    Type declaringType
+  ) {
     DeclaringType = declaringType;
-    Name = spec.Name;
-    PropertyType = spec.PropertyType;
-    CanRead = spec.CanRead;
-    CanWrite = spec.CanWrite;
-    GetMethod = new ReflectionMethodInfo(spec.GetMethod, declaringType);
+    Name = name;
+    PropertyType = propertyType;
+    CanRead = true;
+    CanWrite = setMethod is not null;
+    GetMethod = getMethod;
 
-    if (spec.SetMethod is not null) {
-      SetMethod = new ReflectionMethodInfo(spec.SetMethod.Value, declaringType);
+    if (SetMethod is not null) {
+      SetMethod = setMethod;
     }
 
-    _isIndexer = spec.IsIndexer;
-    _indexParameters = spec.IndexParameters;
+    _isIndexer = isIndexer;
+    _indexParameters = indexParameters;
 
-    Attributes = spec.PropertyAttributes;
+    Attributes = propertyAttributes;
+    PropertyInfoCache.TryAdd(new TypeMemberCacheKey(Name, DeclaringType), this);
   }
 
   public override Type DeclaringType { get; }
@@ -37,6 +49,32 @@ public sealed class ReflectionPropertyInfo : PropertyInfo {
 
   public override MethodInfo GetMethod { get; }
   public override MethodInfo? SetMethod { get; }
+
+  public static PropertyInfo Create(
+    string name,
+    Type propertyType,
+    MethodInfo getMethod,
+    MethodInfo? setMethod,
+    PropertyAttributes propertyAttributes,
+    bool isIndexer,
+    ParameterInfo[] indexParameters,
+    Type declaringType
+  ) {
+    var key = new TypeMemberCacheKey(name, declaringType);
+    return PropertyInfoCache.GetOrAdd(
+      key,
+      _ => new ReflectionPropertyInfo(
+        name,
+        propertyType,
+        getMethod,
+        setMethod,
+        propertyAttributes,
+        isIndexer,
+        indexParameters,
+        declaringType
+      )
+    );
+  }
 
   public override object[] GetCustomAttributes(bool inherit) {
     throw new NotImplementedException();
@@ -92,18 +130,4 @@ public sealed class ReflectionPropertyInfo : PropertyInfo {
   ) {
     throw new NotSupportedException("Cannot set value of a compile time property.");
   }
-}
-
-public struct PropertyInfoSpec {
-  public string Name { get; set; }
-  public Type PropertyType { get; set; }
-  public bool CanRead { get; set; }
-  public bool CanWrite { get; set; }
-  public MethodInfoSpec GetMethod { get; set; }
-  public MethodInfoSpec? SetMethod { get; set; }
-
-  public PropertyAttributes PropertyAttributes { get; set; }
-
-  public bool IsIndexer { get; set; }
-  public ParameterInfo[] IndexParameters { get; set; }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 
-namespace Mumei.Common.Reflection; 
+namespace Mumei.Common.Reflection;
 
 public sealed class ReflectionModule : Module {
   private static readonly ConcurrentDictionary<string, ReflectionModule> ModuleCache = new();
@@ -13,14 +13,12 @@ public sealed class ReflectionModule : Module {
     ModuleCache.TryAdd(name, this);
   }
 
-  public static Module Create(string name, Assembly assembly) {
-    if (ModuleCache.TryGetValue(name, out var module)) {
-      return module;
-    }
-
-    return new ReflectionModule(name, assembly);
-  }
-  
   public override string Name { get; }
   public override Assembly Assembly { get; }
+
+  public static Module Create(string name, Assembly assembly) {
+    return ModuleCache.TryGetValue(name, out var module)
+      ? module
+      : new ReflectionModule(name, assembly);
+  }
 }

@@ -2,7 +2,7 @@
 
 namespace Mumei.Common.Reflection;
 
-public sealed class ReflectionCustomAttributeData : CustomAttributeData {
+internal sealed class ReflectionCustomAttributeData : CustomAttributeData {
   public ReflectionCustomAttributeData(
     Type attributeType,
     IList<CustomAttributeTypedArgument> constructorArguments,

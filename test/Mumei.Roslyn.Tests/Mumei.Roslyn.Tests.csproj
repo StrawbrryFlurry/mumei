@@ -8,4 +8,8 @@
     <ProjectReference Include="..\..\src\Mumei.Roslyn\Mumei.Roslyn.csproj" />
     <ProjectReference Include="..\Mumei.Roslyn.Testing\Mumei.Roslyn.Testing.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="SourceGeneration" />
+  </ItemGroup>
 </Project>

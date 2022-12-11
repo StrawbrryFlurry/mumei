@@ -5,7 +5,11 @@ using Mumei.Common.Reflection;
 namespace Mumei.Roslyn.Reflection;
 
 public static class AttributeDataExtensions {
-  public static CustomAttributeData ToAttributeDeclaration(this AttributeData attributeData) {
+  public static IList<CustomAttributeData> GetCustomAttributeData(this ISymbol symbol) {
+    return symbol.GetAttributes().Select(ToCustomAttributeData).ToList();
+  }
+
+  public static CustomAttributeData ToCustomAttributeData(this AttributeData attributeData) {
     if (attributeData.AttributeClass is null) {
       throw new InvalidOperationException("Attribute class is null");
     }

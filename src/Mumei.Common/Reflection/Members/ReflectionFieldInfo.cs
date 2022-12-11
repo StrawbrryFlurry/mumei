@@ -1,14 +1,27 @@
-﻿using System.Globalization;
+﻿using System.Collections.Concurrent;
+using System.Globalization;
 using System.Reflection;
 
-namespace Mumei.Common.Reflection.Members;
+namespace Mumei.Common.Reflection;
 
-public sealed class ReflectionFieldInfo : FieldInfo {
-  internal ReflectionFieldInfo(FieldInfoSpec spec, Type declaringType) {
+internal sealed class ReflectionFieldInfo : FieldInfo {
+  private static readonly ConcurrentDictionary<TypeMemberCacheKey, ReflectionFieldInfo> FieldInfoCache = new();
+  private readonly IList<CustomAttributeData> _customAttributeData;
+
+  private ReflectionFieldInfo(
+    string name,
+    Type fieldType,
+    FieldAttributes fieldAttributes,
+    IList<CustomAttributeData> customAttributeData,
+    Type declaringType
+  ) {
+    _customAttributeData = customAttributeData;
     DeclaringType = declaringType;
-    Name = spec.Name;
-    FieldType = spec.FieldType;
-    Attributes = spec.Attributes;
+    Name = name;
+    FieldType = fieldType;
+    Attributes = fieldAttributes;
+
+    FieldInfoCache.TryAdd(new TypeMemberCacheKey(name, declaringType), this);
   }
 
   public override Type DeclaringType { get; }
@@ -19,6 +32,31 @@ public sealed class ReflectionFieldInfo : FieldInfo {
   public override RuntimeFieldHandle FieldHandle => throw new NotSupportedException();
   public override Type FieldType { get; }
 
+  public static FieldInfo Create(
+    string name,
+    Type fieldType,
+    FieldAttributes fieldAttributes,
+    IList<CustomAttributeData> customAttributeData,
+    Type declaringType
+  ) {
+    var key = new TypeMemberCacheKey(name, declaringType);
+    return FieldInfoCache.GetOrAdd(
+      key,
+      _ => new ReflectionFieldInfo(
+        name,
+        fieldType,
+        fieldAttributes,
+        customAttributeData,
+        declaringType
+      )
+    );
+  }
+
+  public override IList<CustomAttributeData> GetCustomAttributesData() {
+    return _customAttributeData;
+  }
+
+
   public override object[] GetCustomAttributes(bool inherit) {
     throw new NotImplementedException();
   }
@@ -28,21 +66,24 @@ public sealed class ReflectionFieldInfo : FieldInfo {
   }
 
   public override bool IsDefined(Type attributeType, bool inherit) {
-    throw new NotImplementedException();
+    return _customAttributeData.Any(x =>
+      x.AttributeType.FullName == attributeType.FullName
+      && inherit
+      && x.AttributeType.DeclaringType == DeclaringType
+    );
   }
 
   public override object GetValue(object? obj) {
     throw new NotSupportedException();
   }
 
-  public override void SetValue(object? obj, object? value, BindingFlags invokeAttr, Binder? binder,
-    CultureInfo? culture) {
+  public override void SetValue(
+    object? obj,
+    object? value,
+    BindingFlags invokeAttr,
+    Binder? binder,
+    CultureInfo? culture
+  ) {
     throw new NotSupportedException();
   }
-}
-
-public struct FieldInfoSpec {
-  public string Name { get; set; }
-  public Type FieldType { get; set; }
-  public FieldAttributes Attributes { get; set; }
 }

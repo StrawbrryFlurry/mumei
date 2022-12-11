@@ -5,7 +5,7 @@ using Mumei.Roslyn.Testing;
 
 namespace Mumei.Roslyn.Tests.Reflection;
 
-public sealed class ReflectionTypeTests {
+public sealed class TypeSymbolExtensionTests {
   private const string Source = """
   namespace Test;
   

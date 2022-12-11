@@ -2,7 +2,7 @@
 
 namespace Mumei.Common.Reflection;
 
-public sealed class MumeiCustomAttributeProvider : ICustomAttributeProvider {
+internal sealed class MumeiCustomAttributeProvider : ICustomAttributeProvider {
   private readonly Type _type;
 
   public MumeiCustomAttributeProvider(Type type) {
