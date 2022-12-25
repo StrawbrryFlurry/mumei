@@ -5,7 +5,7 @@ namespace Mumei.Common.Reflection;
 
 internal sealed class ReflectionParameterInfo : ParameterInfo {
   private static readonly ConcurrentDictionary<ParameterInfoKey, ParameterInfo> ParameterInfoCache = new();
-  private readonly IList<CustomAttributeData> _customAttributes;
+  private readonly ReflectionAttributeCollection _customAttributes;
   private readonly IMemberInfoFactory _declaringMemberFactory;
   private readonly Type _declaringType;
 
@@ -14,7 +14,7 @@ internal sealed class ReflectionParameterInfo : ParameterInfo {
     Type parameterType,
     Type declaringType,
     IMemberInfoFactory declaringMemberFactory,
-    IList<CustomAttributeData> customAttributes,
+    ReflectionAttributeCollection customAttributes,
     int position,
     bool hasDefaultValue,
     object? defaultValue
@@ -28,7 +28,8 @@ internal sealed class ReflectionParameterInfo : ParameterInfo {
     _declaringMemberFactory = declaringMemberFactory;
     _customAttributes = customAttributes;
 
-    ParameterInfoCache.TryAdd(new ParameterInfoKey(Guid.NewGuid(), position), this);
+    var key = new ParameterInfoKey(declaringType, declaringMemberFactory.MemberInfoName, name, position);
+    ParameterInfoCache.TryAdd(key, this);
   }
 
   public override MemberInfo Member => _declaringMemberFactory.CreateMemberInfo(_declaringType);
@@ -48,12 +49,13 @@ internal sealed class ReflectionParameterInfo : ParameterInfo {
     Type declaringType,
     IMemberInfoFactory declaringMemberFactory,
     Type parameterType,
-    IList<CustomAttributeData> customAttributes,
+    ReflectionAttributeCollection customAttributes,
     int position,
     bool hasDefaultValue,
     object? defaultValue
   ) {
-    var key = new ParameterInfoKey(Guid.NewGuid(), position);
+    var key = new ParameterInfoKey(declaringType, declaringMemberFactory.MemberInfoName, name, position);
+
     return ParameterInfoCache.GetOrAdd(
       key,
       _ => new ReflectionParameterInfo(
@@ -70,11 +72,8 @@ internal sealed class ReflectionParameterInfo : ParameterInfo {
   }
 
   public override IList<CustomAttributeData> GetCustomAttributesData() {
-    return _customAttributes;
+    return _customAttributes.Clone();
   }
 
-  // TODO: Make key unique to factory
-  private record struct ParameterInfoKey(Guid Guid, int Position);
+  private record struct ParameterInfoKey(Type DeclaringType, string MemberInfoName, string Name, int Position);
 }
-
-internal struct ParameterInfoSpec { }

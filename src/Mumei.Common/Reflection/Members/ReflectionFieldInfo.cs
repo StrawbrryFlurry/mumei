@@ -6,13 +6,14 @@ namespace Mumei.Common.Reflection;
 
 internal sealed class ReflectionFieldInfo : FieldInfo {
   private static readonly ConcurrentDictionary<TypeMemberCacheKey, ReflectionFieldInfo> FieldInfoCache = new();
-  private readonly IList<CustomAttributeData> _customAttributeData;
+  private readonly ReflectionAttributeCollection _customAttributeData;
+  private ReflectionAttributeSearcher<FieldInfo>? _attributeSearcher;
 
   private ReflectionFieldInfo(
     string name,
     Type fieldType,
     FieldAttributes fieldAttributes,
-    IList<CustomAttributeData> customAttributeData,
+    ReflectionAttributeCollection customAttributeData,
     Type declaringType
   ) {
     _customAttributeData = customAttributeData;
@@ -36,7 +37,7 @@ internal sealed class ReflectionFieldInfo : FieldInfo {
     string name,
     Type fieldType,
     FieldAttributes fieldAttributes,
-    IList<CustomAttributeData> customAttributeData,
+    ReflectionAttributeCollection customAttributeData,
     Type declaringType
   ) {
     var key = new TypeMemberCacheKey(name, declaringType);
@@ -53,24 +54,22 @@ internal sealed class ReflectionFieldInfo : FieldInfo {
   }
 
   public override IList<CustomAttributeData> GetCustomAttributesData() {
-    return _customAttributeData;
+    return _customAttributeData.Clone();
   }
 
-
   public override object[] GetCustomAttributes(bool inherit) {
-    throw new NotImplementedException();
+    _attributeSearcher ??= new ReflectionAttributeSearcher<FieldInfo>(this);
+    return _attributeSearcher.GetCustomAttributes(DeclaringType, inherit);
   }
 
   public override object[] GetCustomAttributes(Type attributeType, bool inherit) {
-    throw new NotImplementedException();
+    _attributeSearcher ??= new ReflectionAttributeSearcher<FieldInfo>(this);
+    return _attributeSearcher.GetCustomAttributes(attributeType, DeclaringType, inherit);
   }
 
   public override bool IsDefined(Type attributeType, bool inherit) {
-    return _customAttributeData.Any(x =>
-      x.AttributeType.FullName == attributeType.FullName
-      && inherit
-      && x.AttributeType.DeclaringType == DeclaringType
-    );
+    _attributeSearcher ??= new ReflectionAttributeSearcher<FieldInfo>(this);
+    return _attributeSearcher.IsDefined(attributeType, inherit);
   }
 
   public override object GetValue(object? obj) {

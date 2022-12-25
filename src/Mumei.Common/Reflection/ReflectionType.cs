@@ -394,7 +394,7 @@ internal sealed class ReflectionType : Type {
   }
 
   public override bool Equals(Type? o) {
-    return o.GUID == GUID;
+    return o?.GUID == GUID;
   }
 
   public override bool Equals(object? o) {

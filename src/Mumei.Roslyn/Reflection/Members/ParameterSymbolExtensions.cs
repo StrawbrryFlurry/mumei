@@ -33,7 +33,7 @@ public static class ParameterSymbolExtensions {
         declaringType,
         declaringMemberFactory,
         symbol.Type.ToType(),
-        symbol.GetCustomAttributeData(),
+        symbol.ToCustomAttributeCollection(),
         symbol.Ordinal,
         symbol.HasExplicitDefaultValue,
         symbol.HasExplicitDefaultValue ? symbol.ExplicitDefaultValue : null

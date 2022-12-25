@@ -19,6 +19,21 @@ public static class TypeSymbolExtensions {
 
     var isGenericType = symbol is INamedTypeSymbol { IsGenericType: true };
 
+    var methodInfoFactories = members
+      .OfType<IMethodSymbol>()
+      .Select(MethodSymbolExtensions.ToMethodInfoFactory)
+      .ToArray();
+
+    var fieldInfoFactories = members
+      .OfType<IFieldSymbol>()
+      .Select(FieldSymbolExtensions.ToFieldInfoFactory)
+      .ToArray();
+
+    var propertyInfoFactories = members
+      .OfType<IPropertySymbol>()
+      .Select(PropertySymbolExtensions.ToPropertyInfoFactory)
+      .ToArray();
+
     var mumeiType = ReflectionType.Create(
       symbol.Name,
       symbol.ContainingNamespace.ToDisplayString(),
@@ -27,9 +42,9 @@ public static class TypeSymbolExtensions {
       symbol.GetGenericArguments(),
       isGenericType,
       typeAttributes,
-      members.OfType<IMethodSymbol>().Select(MethodSymbolExtensions.ToMethodInfoFactory).ToArray(),
-      members.OfType<IFieldSymbol>().Select(FieldSymbolExtensions.ToFieldInfoFactory).ToArray(),
-      members.OfType<IPropertySymbol>().Select(PropertySymbolExtensions.ToPropertyInfoFactory).ToArray(),
+      methodInfoFactories,
+      fieldInfoFactories,
+      propertyInfoFactories,
       module
     );
 

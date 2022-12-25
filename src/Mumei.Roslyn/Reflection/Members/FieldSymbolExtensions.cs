@@ -9,7 +9,7 @@ public static class FieldSymbolExtensions {
     return new FieldInfoFactory(fieldSymbol);
   }
 
-  public static FieldInfo ToPropertyInfo(this IFieldSymbol fieldSymbol, Type declaringType) {
+  public static FieldInfo ToFieldInfo(this IFieldSymbol fieldSymbol, Type declaringType) {
     return FieldInfoFactory.CreateFieldInfo(fieldSymbol, declaringType);
   }
 
@@ -27,9 +27,9 @@ public static class FieldSymbolExtensions {
     public static FieldInfo CreateFieldInfo(IFieldSymbol symbol, Type declaringType) {
       return ReflectionFieldInfo.Create(
         symbol.Name,
-        declaringType,
+        symbol.Type.ToType(),
         GetFieldAttributes(symbol),
-        symbol.GetCustomAttributeData(),
+        symbol.ToCustomAttributeCollection(),
         declaringType
       );
     }
@@ -45,6 +45,10 @@ public static class FieldSymbolExtensions {
         attributes |= FieldAttributes.InitOnly;
       }
 
+      if (symbol.IsConst) {
+        attributes |= FieldAttributes.Literal;
+      }
+
       switch (symbol.DeclaredAccessibility) {
         case Accessibility.Public:
           attributes |= FieldAttributes.Public;
@@ -54,6 +58,12 @@ public static class FieldSymbolExtensions {
           break;
         case Accessibility.Protected:
           attributes |= FieldAttributes.Family;
+          break;
+        case Accessibility.Internal:
+          attributes |= FieldAttributes.Assembly;
+          break;
+        case Accessibility.ProtectedOrInternal:
+          attributes |= FieldAttributes.FamORAssem;
           break;
       }
 
