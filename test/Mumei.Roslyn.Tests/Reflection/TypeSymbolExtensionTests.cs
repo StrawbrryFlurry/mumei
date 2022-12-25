@@ -19,7 +19,6 @@ public sealed class TypeSymbolExtensionTests {
   }
   """;
 
-
   private static readonly Compilation Compilation = new TestCompilationBuilder()
     .AddSourceText(Source);
 
