@@ -1,10 +1,13 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Reflection;
+using Microsoft.CodeAnalysis;
 using Mumei.Roslyn.Reflection;
 using Mumei.Roslyn.Testing;
 
 namespace Mumei.Roslyn.Tests.Reflection.Members;
 
-public abstract class MemberSymbolExtensionTest {
+public abstract class MemberSymbolExtensionTest<TSymbol, TMemberInfo>
+  where TSymbol : ISymbol
+  where TMemberInfo : MemberInfo {
   private const string TestTypeSource = """
   namespace Test;
 
@@ -12,6 +15,8 @@ public abstract class MemberSymbolExtensionTest {
   """;
 
   private Compilation? _compilation;
+
+  protected virtual string DeclaringTypeFullyQualifiedName { get; } = "Test.TestType";
 
   protected Compilation Compilation => _compilation ??= GetMemberTestCompilation();
 
@@ -27,12 +32,33 @@ public abstract class MemberSymbolExtensionTest {
   /// trough the type members. The tests would therefore
   /// only get the cached instance, which might break a
   /// test before the tested action on the member is even taken.
-  protected ITypeSymbol GetDeclaringTypeSymbol() {
+  protected ITypeSymbol GetEmptyDeclaringTypeSymbol() {
     return Compilation.GetTypeSymbol("Test.TestDeclaringType");
   }
 
-  /// <inheritdoc cref="GetDeclaringTypeSymbol" />
-  protected Type GetDeclaringType() {
-    return GetDeclaringTypeSymbol().ToType();
+  /// <inheritdoc cref="GetEmptyDeclaringTypeSymbol" />
+  protected Type GetEmptyDeclaringType() {
+    return GetEmptyDeclaringTypeSymbol().ToType();
   }
+
+  #region Utilities
+
+  protected abstract TMemberInfo CreateMemberInfo(TSymbol symbol, Type declaringType);
+
+  protected TMemberInfo GetMemberInfoWithoutCreatingType(string memberName, out TSymbol memberSymbol) {
+    memberSymbol = GetMemberSymbol(memberName);
+    return CreateMemberInfo(memberSymbol, GetEmptyDeclaringType());
+  }
+
+  protected TMemberInfo GetMemberInfo(string memberName, out TSymbol memberSymbol) {
+    memberSymbol = GetMemberSymbol(memberName);
+    var declaringType = Compilation.GetTypeSymbol(DeclaringTypeFullyQualifiedName).ToType();
+    return CreateMemberInfo(memberSymbol, declaringType);
+  }
+
+  protected TSymbol GetMemberSymbol(string name) {
+    return Compilation.GetTypeMemberSymbol<TSymbol>(DeclaringTypeFullyQualifiedName, name);
+  }
+
+  #endregion
 }
