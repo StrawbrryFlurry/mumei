@@ -5,9 +5,11 @@ using Mumei.Common.Reflection;
 namespace Mumei.Roslyn.Reflection;
 
 public static class TypeSymbolExtensions {
+  private static readonly Assembly[] Assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
   public static Type ToType(this ITypeSymbol symbol) {
     var fullName = symbol.GetFullName();
-    var existingType = Type.GetType(fullName);
+    var existingType = GetExistingRuntimeTypeInAssemblies(fullName);
 
     if (existingType is not null) {
       return existingType;
@@ -99,5 +101,17 @@ public static class TypeSymbolExtensions {
     }
 
     return attributes;
+  }
+
+  private static Type? GetExistingRuntimeTypeInAssemblies(string fullName) {
+    foreach (var assembly in Assemblies) {
+      var type = assembly.GetType(fullName);
+
+      if (type is not null) {
+        return type;
+      }
+    }
+
+    return null;
   }
 }
