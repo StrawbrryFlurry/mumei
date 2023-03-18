@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Xml;
 using Microsoft.CodeAnalysis;
 using Mumei.Common.Reflection;
@@ -10,7 +11,6 @@ namespace Mumei.Roslyn.Tests.Reflection.Members;
 public sealed class FieldSymbolExtensionTests : MemberSymbolExtensionTest<IFieldSymbol, FieldInfo> {
   private const string Source = """
   using System;
-  using System.Xml;
 
   namespace Test;
   
@@ -22,16 +22,16 @@ public sealed class FieldSymbolExtensionTests : MemberSymbolExtensionTest<IField
     protected internal int ProtectedInternalField;
     public static int PublicStaticField;
     public readonly int PublicReadonlyField;
-    public const int PublicConstField = 1;
+    public const int PublicConstField = 0;
 
     // FieldInfo does not have abstract, virtual, override, new, sealed, extern, volatile, or unsafe modifiers
     public abstract int PublicReadonlyField;
 
-    [XmlAttribute("Name", Type = typeof(string))]
+    [Obsolete("Test", DiagnosticId = "TestId")]
     public int FieldWithAttribute;
     
-    [Obsolete]
-    [XmlAttribute]
+    [Obsolete("Test")]
+    [NonSerializedAttribute] 
     public int FieldWithTwoAttributes;
 
     public int FieldWithoutAttribute;
@@ -190,7 +190,7 @@ public sealed class FieldSymbolExtensionTests : MemberSymbolExtensionTest<IField
     fieldInfo = GetMemberInfoWithoutCreatingType("FieldWithAttribute", out _);
 
     var customAttributeData = fieldInfo.CustomAttributes.Single();
-    customAttributeData.AttributeType.Should().Be(typeof(XmlAttribute));
+    customAttributeData.AttributeType.Should().Be(typeof(ObsoleteAttribute));
   }
 
   #endregion
@@ -215,12 +215,12 @@ public sealed class FieldSymbolExtensionTests : MemberSymbolExtensionTest<IField
     attributes.Should().HaveCount(1);
 
     var attribute = attributes.Single();
-    attribute.AttributeType.Should().BeOfType<XmlAttribute>();
+    attribute.AttributeType.Should().Be(typeof(ObsoleteAttribute));
     attribute.ConstructorArguments.Should().ContainSingle(x => x.Value is string && (string)x.Value == "Test");
     attribute.NamedArguments.Should().ContainSingle(x =>
-      x.MemberName == "Type"
-      && x.TypedValue.Value is Type
-      && (Type)x.TypedValue.Value == typeof(string)
+      x.MemberName == "DiagnosticId"
+      && x.TypedValue.Value is string
+      && (string)x.TypedValue.Value == "TestId"
     );
   }
 
@@ -232,7 +232,7 @@ public sealed class FieldSymbolExtensionTests : MemberSymbolExtensionTest<IField
 
     attributes.Should().HaveCount(2);
     attributes.Should().Contain(a => a.AttributeType == typeof(ObsoleteAttribute));
-    attributes.Should().Contain(a => a.AttributeType == typeof(XmlAttribute));
+    attributes.Should().Contain(a => a.AttributeType == typeof(NonSerializedAttribute));
   }
 
   [Fact]
@@ -287,7 +287,7 @@ public sealed class FieldSymbolExtensionTests : MemberSymbolExtensionTest<IField
     var attributes = fieldInfo.GetCustomAttributes(false);
 
     attributes.Should().HaveCount(1);
-    attributes.Should().ContainSingle(a => a is XmlAttribute);
+    attributes.Should().ContainSingle(a => a is ObsoleteAttribute);
   }
 
   [Fact]
@@ -298,7 +298,26 @@ public sealed class FieldSymbolExtensionTests : MemberSymbolExtensionTest<IField
 
     attributes.Should().HaveCount(2);
     attributes.Should().Contain(a => a is ObsoleteAttribute);
-    attributes.Should().Contain(a => a is XmlAttribute);
+    attributes.Should().Contain(a => a is NonSerializedAttribute);
+  }
+
+  [Fact]
+  public void GetCustomAttributes_Type_bool_ReturnsEmptyCollection_WhenFieldDoesNotHaveAttributeOfType() {
+    var fieldInfo = GetMemberInfo("FieldWithAttribute", out _);
+
+    var attributes = fieldInfo.GetCustomAttributes(typeof(StateMachineAttribute), false);
+
+    attributes.Should().BeEmpty();
+  }
+
+  [Fact]
+  public void GetCustomAttributes_Type_bool_ReturnsSingleAttributeMatchingType_WhenFieldHasAttributeOfType() {
+    var fieldInfo = GetMemberInfo("FieldWithAttribute", out _);
+
+    var attributes = fieldInfo.GetCustomAttributes(typeof(ObsoleteAttribute), false);
+
+    attributes.Should().HaveCount(1);
+    attributes.Should().Contain(a => a is ObsoleteAttribute);
   }
 
   #endregion

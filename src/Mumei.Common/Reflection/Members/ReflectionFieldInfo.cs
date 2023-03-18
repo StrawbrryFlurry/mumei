@@ -7,6 +7,7 @@ namespace Mumei.Common.Reflection;
 internal sealed class ReflectionFieldInfo : FieldInfo {
   private static readonly ConcurrentDictionary<TypeMemberCacheKey, ReflectionFieldInfo> FieldInfoCache = new();
   private readonly ReflectionAttributeCollection _customAttributeData;
+
   private ReflectionAttributeSearcher<FieldInfo>? _attributeSearcher;
 
   private ReflectionFieldInfo(
@@ -24,6 +25,9 @@ internal sealed class ReflectionFieldInfo : FieldInfo {
 
     FieldInfoCache.TryAdd(new TypeMemberCacheKey(name, declaringType), this);
   }
+
+  public override IEnumerable<CustomAttributeData> CustomAttributes => _customAttributeData;
+  public override Module Module => DeclaringType.Module;
 
   public override Type DeclaringType { get; }
   public override string Name { get; }
@@ -83,6 +87,10 @@ internal sealed class ReflectionFieldInfo : FieldInfo {
     Binder? binder,
     CultureInfo? culture
   ) {
+    throw new NotSupportedException();
+  }
+
+  public override object? GetRawConstantValue() {
     throw new NotSupportedException();
   }
 }

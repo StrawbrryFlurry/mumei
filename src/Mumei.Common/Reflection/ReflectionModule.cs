@@ -6,9 +6,16 @@ namespace Mumei.Common.Reflection;
 public sealed class ReflectionModule : Module {
   private static readonly ConcurrentDictionary<string, ReflectionModule> ModuleCache = new();
 
-  private ReflectionModule(string name, Assembly assembly) {
+  private readonly List<Type> _typesDeclaredInModule = new();
+
+  private ReflectionModule(
+    string name,
+    Assembly assembly,
+    Type[] typesDeclaredInModule) {
     Assembly = assembly;
     Name = name;
+
+    _typesDeclaredInModule.AddRange(typesDeclaredInModule);
 
     ModuleCache.TryAdd(name, this);
   }
@@ -16,9 +23,13 @@ public sealed class ReflectionModule : Module {
   public override string Name { get; }
   public override Assembly Assembly { get; }
 
-  public static Module Create(string name, Assembly assembly) {
+  public static Module Create(
+    string name,
+    Assembly assembly,
+    Type[] typesDeclaredInModule
+  ) {
     return ModuleCache.TryGetValue(name, out var module)
       ? module
-      : new ReflectionModule(name, assembly);
+      : new ReflectionModule(name, assembly, typesDeclaredInModule);
   }
 }

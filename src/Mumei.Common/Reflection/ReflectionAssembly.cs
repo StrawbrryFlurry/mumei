@@ -26,6 +26,12 @@ internal sealed class ReflectionAssembly : Assembly {
   }
 
   public override Type[] GetTypes() {
-    throw new NotImplementedException();
+    var typesInAssembly = new List<Type>();
+    foreach (var module in Modules) {
+      var typesInModule = module.GetTypes();
+      typesInAssembly.AddRange(typesInModule);
+    }
+
+    return typesInAssembly.ToArray();
   }
 }

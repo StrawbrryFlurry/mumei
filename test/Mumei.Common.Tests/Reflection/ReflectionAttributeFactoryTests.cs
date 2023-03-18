@@ -19,7 +19,7 @@ public sealed class ReflectionAttributeFactoryTests {
       Array.Empty<IMethodInfoFactory>(),
       Array.Empty<IFieldInfoFactory>(),
       Array.Empty<IPropertyInfoFactory>(),
-      ReflectionModule.Create("", Assembly.GetExecutingAssembly())
+      ReflectionModule.Create("", Assembly.GetExecutingAssembly(), Type.EmptyTypes)
     );
     var attributeData = CreateCustomAttributeData(type);
     var action = () => ReflectionAttributeFactory.CreateInstance(attributeData);

@@ -11,6 +11,7 @@ public sealed class TestCompilationBuilder {
   private readonly MetadataReferenceCollection _metadataReferences = new();
 
   private readonly SourceFileList _sources = new("", "cs");
+  private string _assemblyName = DefaultAssemblyName;
 
   private Compilation? _compilation;
 
@@ -24,7 +25,7 @@ public sealed class TestCompilationBuilder {
     var syntaxTrees = ParseSourceTexts();
 
     return CSharpCompilation.Create(
-      DefaultAssemblyName,
+      _assemblyName,
       syntaxTrees,
       _metadataReferences,
       new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
@@ -38,6 +39,11 @@ public sealed class TestCompilationBuilder {
     }
 
     return syntaxTrees;
+  }
+
+  public TestCompilationBuilder WithAssemblyName(string assemblyName) {
+    _assemblyName = assemblyName;
+    return this;
   }
 
   public TestCompilationBuilder AddTypeReference<TAssemblyType>() {

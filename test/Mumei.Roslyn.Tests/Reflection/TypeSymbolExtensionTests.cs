@@ -6,6 +6,8 @@ using Mumei.Roslyn.Testing;
 namespace Mumei.Roslyn.Tests.Reflection;
 
 public sealed class TypeSymbolExtensionTests {
+  private const string AssemblyName = "TestAssembly";
+
   private const string Source = """
   namespace Test;
   
@@ -20,6 +22,7 @@ public sealed class TypeSymbolExtensionTests {
   """;
 
   private static readonly Compilation Compilation = new TestCompilationBuilder()
+    .WithAssemblyName(AssemblyName)
     .AddSourceText(Source);
 
   [Fact]
@@ -66,5 +69,12 @@ public sealed class TypeSymbolExtensionTests {
     testType.IsAbstract.Should().BeFalse();
     testType.IsSealed.Should().BeFalse();
     testType.IsNested.Should().BeFalse();
+  }
+
+  [Fact]
+  public void X_CreatesContainingAssemblyType() {
+    var testType = Compilation.GetTypeSymbol("Test.TestType").ToType();
+
+    testType.Assembly.GetName().Name.Should().Be(AssemblyName);
   }
 }
