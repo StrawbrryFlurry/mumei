@@ -5,10 +5,10 @@ using Mumei.DependencyInjection.Playground.Example.Modules.Services;
 
 namespace Mumei.DependencyInjection.Playground.Example.Modules; 
 
-public class WeatherControllerλBindingFactory : ScopedBindingFactory<WeatherController> {
+public class WeatherControllerλBinding : ScopedBinding<WeatherController> {
   private readonly Binding<IWeatherService> _weatherServiceProvider;
 
-  public WeatherControllerλBindingFactory(Binding<IWeatherService> weatherServiceProvider) {
+  public WeatherControllerλBinding(Binding<IWeatherService> weatherServiceProvider) {
     _weatherServiceProvider = weatherServiceProvider;
   }
 

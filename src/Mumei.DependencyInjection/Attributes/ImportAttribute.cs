@@ -6,5 +6,5 @@
 [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
 public sealed class ImportAttribute : Attribute { }
 
-[AttributeUsage(AttributeTargets.Interface, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = true)]
 public sealed class ImportAttribute<TModule> : DependencyRegistrationAttribute<TModule> { }

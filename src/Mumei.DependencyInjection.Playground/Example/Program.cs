@@ -14,8 +14,8 @@ public class Program {
     ScanModules(appEnvironment.Instance);
 
     var common = new CommonModule();
-    var weather = new WeatherModule(null, common);
-    var app = new ApplicationModule(weather, common);
+    var weather = new λMumeiλWeatherModule(null, common);
+    var app = new ApplicationModuleImpl(weather, common);
   }
 
   private static void ScanModules(IModuleRef<IModule> module) {
@@ -47,9 +47,10 @@ public class Program {
         Handler = request => {
           var scope = componentRef.CreateScope();
 
-          var requestInjector = new DynamicInjector(scope) {
-            { typeof(HttpRequestMessage), request }
-          };
+          var requestInjector = StaticInjector.Create(
+            scope,
+            c => c.Add(request)
+          );
 
           return componentRef.InvokeWithProviderFactory(requestInjector, method)!;
         }

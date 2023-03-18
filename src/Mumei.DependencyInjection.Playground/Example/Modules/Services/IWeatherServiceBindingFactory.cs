@@ -4,10 +4,10 @@ using Mumei.DependencyInjection.Playground.Common;
 namespace Mumei.DependencyInjection.Playground.Example.Modules.Services;
 
 // ReSharper disable once InconsistentNaming
-public sealed class IWeatherServiceλBindingFactory : ScopedBindingFactory<IWeatherService> {
+public sealed class WeatherServiceλBinding : ScopedBinding<IWeatherService> {
   private readonly Binding<IHttpClient> _httpClientBinding;
 
-  public IWeatherServiceλBindingFactory(Binding<IHttpClient> httpClientBinding) {
+  public WeatherServiceλBinding(Binding<IHttpClient> httpClientBinding) {
     _httpClientBinding = httpClientBinding;
   }
 

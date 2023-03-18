@@ -1,9 +1,9 @@
 ﻿namespace Mumei.DependencyInjection.Core;
 
-internal class SingletonBindingFactoryImpl : SingletonBindingFactory<object> {
+internal sealed class SingletonBindingImpl : SingletonBinding<object> {
   private readonly object _instance;
 
-  public SingletonBindingFactoryImpl(object instance) {
+  public SingletonBindingImpl(object instance) {
     _instance = instance;
   }
 

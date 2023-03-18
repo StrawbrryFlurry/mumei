@@ -3,7 +3,7 @@ using Mumei.DependencyInjection.Core;
 using Mumei.DependencyInjection.Internal;
 using Mumei.DependencyInjection.Playground.Common;
 using Mumei.DependencyInjection.Playground.Example.Generated;
-using Mumei.DependencyInjection.Playground.Example.Modules.Services;
+using Mumei.DependencyInjection.Playground.Example.Modules;
 
 namespace Mumei.DependencyInjection.Playground.Example;
 
@@ -11,18 +11,23 @@ namespace Mumei.DependencyInjection.Playground.Example;
 [ApplicationRoot]
 [Import<WeatherModule>]
 [Import<CommonModule>]
-public interface IApplicationModule : IModule { }
+public partial interface IApplicationModule { }
 
-[MumeiModule]
-public sealed class ApplicationModule : IApplicationModule, IModule {
-  internal readonly Binding<IHttpClient> HttpClientBinding;
-  internal readonly WeatherModule WeatherModule;
-  internal readonly Binding<IWeatherService> WeatherServiceBinding;
+[MumeiGenerated]
+public partial interface IApplicationModule : IModule {
+  public WeatherModule WeatherModule { get; }
+  public CommonModule CommonModule { get; }
+}
 
-  public ApplicationModule(WeatherModule weatherModule, CommonModule commonModule) {
-    WeatherModule = weatherModule;
-    HttpClientBinding = commonModule.HttpClientBinding;
-    WeatherServiceBinding = weatherModule.WeatherServiceBinding;
+[MumeiGenerated]
+[MumeiModuleOf<IApplicationModule>]
+public sealed class ApplicationModuleImpl : IApplicationModule {
+  internal readonly CommonModule λCommonModule;
+  internal readonly λMumeiλWeatherModule λWeatherModule;
+
+  public ApplicationModuleImpl(λMumeiλWeatherModule weatherModule, CommonModule commonModule) {
+    λWeatherModule = weatherModule;
+    λCommonModule = commonModule;
   }
 
   public IInjector Parent { get; } = PlatformInjector.Instance;
@@ -42,4 +47,7 @@ public sealed class ApplicationModule : IApplicationModule, IModule {
   public IInjector CreateScope(IInjector context) {
     throw new NotImplementedException();
   }
+
+  public WeatherModule WeatherModule => λWeatherModule;
+  public CommonModule CommonModule => λCommonModule;
 }

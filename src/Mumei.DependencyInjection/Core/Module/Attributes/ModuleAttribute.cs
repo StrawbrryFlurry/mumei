@@ -7,4 +7,4 @@
 ///   All "Injectable" members of a module are automatically added to the module.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
-public class ModuleAttribute : Attribute { }
+public sealed class ModuleAttribute : Attribute { }

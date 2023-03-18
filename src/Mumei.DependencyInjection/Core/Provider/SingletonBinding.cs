@@ -1,6 +1,6 @@
 ﻿namespace Mumei.DependencyInjection.Core;
 
-public abstract class SingletonBindingFactory<TProvider> : Binding<TProvider> {
+public abstract class SingletonBinding<TProvider> : Binding<TProvider> {
   private TProvider? _instance;
 
   public override TProvider Get(IInjector? scope = null) {

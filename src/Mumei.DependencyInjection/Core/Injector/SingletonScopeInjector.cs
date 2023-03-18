@@ -2,7 +2,7 @@
 
 /// <summary>
 ///   The injector instance that is used in scoped
-///   binding factories to refer to the singleton instance.
+///   bindings to refer to the singleton instance.
 /// </summary>
 public sealed class SingletonScopeλInjector : IInjector {
   public static readonly SingletonScopeλInjector Instance = new();

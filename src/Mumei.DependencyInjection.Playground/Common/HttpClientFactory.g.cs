@@ -4,7 +4,7 @@ using HttpClient = Mumei.DependencyInjection.Playground.Common.HttpClient;
 
 namespace Mumei.DependencyInjection.Playground;
 
-public class HttpClientλFactory : ScopedBindingFactory<IHttpClient> {
+public class HttpClientλBinding : ScopedBinding<IHttpClient> {
   protected override IHttpClient Create(IInjector scope) {
     return new HttpClient();
   }

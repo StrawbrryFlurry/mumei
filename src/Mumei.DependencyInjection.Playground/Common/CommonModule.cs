@@ -4,13 +4,13 @@ using Mumei.DependencyInjection.Core;
 namespace Mumei.DependencyInjection.Playground.Common;
 
 public sealed class CommonModule : IModule {
+  internal readonly Binding<IHttpClient> HttpClientBinding;
+
   public CommonModule() {
-    HttpClientBinding = new HttpClientλFactory();
+    HttpClientBinding = new HttpClientλBinding();
   }
 
   public IHttpClient HttpClient => HttpClientBinding.Get(this);
-
-  public Binding<IHttpClient> HttpClientBinding { get; }
 
   public IInjector Parent { get; } = NullInjector.Instance;
 

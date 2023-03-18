@@ -1,13 +1,26 @@
-﻿namespace Mumei.DependencyInjection.Core;
+﻿using Microsoft.Extensions.DependencyInjection;
+
+namespace Mumei.DependencyInjection.Core;
 
 /// <summary>
-///   Regular modules provide static analysis of providers that can be
-///   retrieved from it. This provides a fast and safe interface for
-///   getting provider instances. In some cases though, dynamic resolution
-///   is required at runtime, when not all participants of the graph are known
-///   prior to startup. GetInstance will try to resolve the provider instance.
-///   // TODO Can we do static analysis on components like controllers?
+///   Serves as a way to dynamically register providers before the application starts.
+///   This is useful for migrations from other DI frameworks or solve the issue where
+///   dynamic configuration of the injector needs to happen before the application starts.
 /// </summary>
-public interface IDynamicModule {
+public interface IDynamicModule<TModule> : IModule, IServiceCollection {
   public void ConfigureModule();
+
+  public void HasProvider(object providerToken);
+
+  public IDynamicModule<TModule> BindSingleton(Type providerToken, Type implementationType);
+  public IDynamicModule<TModule> BindSingleton(string providerToken, Type implementationType);
+  public IDynamicModule<TModule> BindSingleton(Type providerToken, object instance);
+
+  public IDynamicModule<TModule> BindTransient(Type providerToken, Type implementationType);
+  public IDynamicModule<TModule> BindTransient(string providerToken, Type implementationType);
+  public IDynamicModule<TModule> BindTransient(Type providerToken, object instance);
+
+  public IDynamicModule<TModule> BindScoped(Type providerToken, Type implementationType);
+  public IDynamicModule<TModule> BindScoped(string providerToken, Type implementationType);
+  public IDynamicModule<TModule> BindScoped(Type providerToken, object instance);
 }

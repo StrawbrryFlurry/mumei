@@ -6,4 +6,4 @@
 ///   for example by calling PlatformInjector.CreateEnvironment{TRootModule} in the application startup.
 /// </summary>
 [AttributeUsage(AttributeTargets.Interface)]
-public class RootModuleAttribute : Attribute { }
+public sealed class RootModuleAttribute : Attribute { }
