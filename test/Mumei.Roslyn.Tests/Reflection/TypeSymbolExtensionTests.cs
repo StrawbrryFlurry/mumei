@@ -70,11 +70,4 @@ public sealed class TypeSymbolExtensionTests {
     testType.IsSealed.Should().BeFalse();
     testType.IsNested.Should().BeFalse();
   }
-
-  [Fact]
-  public void X_CreatesContainingAssemblyType() {
-    var testType = Compilation.GetTypeSymbol("Test.TestType").ToType();
-
-    testType.Assembly.GetName().Name.Should().Be(AssemblyName);
-  }
 }

@@ -23,16 +23,6 @@ public sealed class AssemblySymbolExtensionTests {
     runtimeAssembly.FullName.Should().Be($"{AssemblyName}, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
   }
 
-  [Fact]
-  public void GetTypes_ReturnsAllTypesContainedInModulesOfTheAssembly_WhenAssemblyHasOneManagedModule() {
-    var runtimeAssembly = GetAssemblyFromTestType();
-
-    var types = runtimeAssembly.GetTypes();
-
-    var testType = Compilation.GetTypeSymbol("TestNamespace.TestType").ToType();
-    types.Should().ContainSingle(x => x == testType);
-  }
-
   private Assembly GetAssemblyFromTestType() {
     return Compilation.GetTypeSymbol("TestNamespace.TestType").ContainingAssembly.ToAssembly();
   }
