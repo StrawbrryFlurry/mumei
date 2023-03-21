@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+    <PropertyGroup>
+        <RootNamespace>CleanArchitectureApplication</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Mumei.Roslyn\Mumei.Roslyn.csproj" />
+        <ProjectReference Include="..\Mumei.DependencyInjection\Mumei.DependencyInjection.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="MediatR" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Include=".Generated\ApplicationEnvironment.cs" />
+      <Compile Include=".Generated\PlatformInjector.cs" />
+    </ItemGroup>
+</Project>

@@ -25,6 +25,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.AspNetCore", "src\Mum
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.AspNetCore.Common", "src\Mumei.AspNetCore.Common\Mumei.AspNetCore.Common.csproj", "{9D01E18D-A8E3-4B45-99FD-49A17FC5B7F6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.Playground.SimpleApplication", "src\Mumei.Playground.SimpleApplication\Mumei.Playground.SimpleApplication.csproj", "{FAC6F7E4-4C02-4388-BAD9-91B3D7ECFAD1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Playground", "Playground", "{F2800B3D-A01D-4716-94DB-C6DC19630B58}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.Playground.CleanArchitectureApplication", "src/Mumei.Playground.CleanArchitectureApplication\Mumei.Playground.CleanArchitectureApplication.csproj", "{83C638DC-6D7D-4BD9-9473-D81F1FD58F33}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +89,19 @@ Global
 		{9D01E18D-A8E3-4B45-99FD-49A17FC5B7F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D01E18D-A8E3-4B45-99FD-49A17FC5B7F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D01E18D-A8E3-4B45-99FD-49A17FC5B7F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FAC6F7E4-4C02-4388-BAD9-91B3D7ECFAD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAC6F7E4-4C02-4388-BAD9-91B3D7ECFAD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAC6F7E4-4C02-4388-BAD9-91B3D7ECFAD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAC6F7E4-4C02-4388-BAD9-91B3D7ECFAD1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83C638DC-6D7D-4BD9-9473-D81F1FD58F33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83C638DC-6D7D-4BD9-9473-D81F1FD58F33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83C638DC-6D7D-4BD9-9473-D81F1FD58F33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83C638DC-6D7D-4BD9-9473-D81F1FD58F33}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FAC6F7E4-4C02-4388-BAD9-91B3D7ECFAD1} = {F2800B3D-A01D-4716-94DB-C6DC19630B58}
+		{CD228734-1006-4BD5-B3A2-5C71D7529696} = {F2800B3D-A01D-4716-94DB-C6DC19630B58}
+		{83C638DC-6D7D-4BD9-9473-D81F1FD58F33} = {F2800B3D-A01D-4716-94DB-C6DC19630B58}
 	EndGlobalSection
 EndGlobal
 Global

@@ -1,3 +1,3 @@
 ﻿namespace Mumei.DependencyInjection.Attributes;
 
-public class ConfigureForAttribute<TConfigureProvider> : Attribute { }
+public sealed class ConfigureForAttribute<TConfigureProvider> : Attribute { }

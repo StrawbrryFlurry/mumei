@@ -3,7 +3,7 @@
 public sealed class NullInjector : IInjector {
   public static readonly NullInjector Instance = new();
 
-  public IInjector Parent => default!;
+  public IInjector Parent => throw new InvalidOperationException("Cannot get parent of NullInjector");
 
   public T Get<T>(InjectFlags flags = InjectFlags.None) {
     return (T)Get(typeof(T));

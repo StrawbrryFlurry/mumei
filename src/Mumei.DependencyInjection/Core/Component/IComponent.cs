@@ -1,3 +1,3 @@
 ﻿namespace Mumei.DependencyInjection.Core;
 
-public interface IComponent { }
+public interface IComponent : IScopableInjector { }

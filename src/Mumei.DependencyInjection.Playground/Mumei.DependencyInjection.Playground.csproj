@@ -1,22 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
+    <ItemGroup>
+        <ProjectReference Include="..\Mumei.Roslyn\Mumei.Roslyn.csproj" />
+        <ProjectReference Include="..\Mumei.DependencyInjection\Mumei.DependencyInjection.csproj" />
+    </ItemGroup>
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Mumei.Roslyn\Mumei.Roslyn.csproj" />
-    <ProjectReference Include="..\Mumei.DependencyInjection\Mumei.DependencyInjection.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Example\.Generated\AppModule__EnvironmentInjector.cs" />
-    <Compile Include="Example\.Generated\EnvironmentInjector.cs" />
-    <Compile Include="Example\.Generated\PlatformInjector.cs" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Configuration" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    </ItemGroup>
 </Project>

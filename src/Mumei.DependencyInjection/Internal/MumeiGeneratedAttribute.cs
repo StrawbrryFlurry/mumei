@@ -1,3 +1,3 @@
 ﻿namespace Mumei.DependencyInjection.Internal;
 
-public class MumeiGeneratedAttribute : Attribute { }
+public sealed class MumeiGeneratedAttribute : Attribute { }
