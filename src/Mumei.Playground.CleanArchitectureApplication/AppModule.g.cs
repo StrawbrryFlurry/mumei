@@ -1,11 +1,12 @@
-﻿using CleanArchitectureApplication.Infrastructure.Order;
+﻿using System.Runtime.CompilerServices;
+using CleanArchitectureApplication.Infrastructure.Order;
 using Mumei.DependencyInjection.Attributes;
 using Mumei.DependencyInjection.Core;
 using Mumei.DependencyInjection.Internal;
 
 namespace CleanArchitectureApplication;
 
-[MumeiGenerated]
+[CompilerGenerated]
 [MumeiModuleImplFor<IAppModule>]
 public sealed class λAppModule : IAppModule {
   internal readonly λAppModuleλOrderInfrastructureModule λOrderModule;

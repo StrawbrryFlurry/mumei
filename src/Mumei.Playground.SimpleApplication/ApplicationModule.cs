@@ -1,6 +1,6 @@
-﻿using Mumei.DependencyInjection.Attributes;
+﻿using System.Runtime.CompilerServices;
+using Mumei.DependencyInjection.Attributes;
 using Mumei.DependencyInjection.Core;
-using Mumei.DependencyInjection.Internal;
 using WeatherApplication.Common;
 using WeatherApplication.Features.Weather;
 
@@ -12,7 +12,7 @@ namespace WeatherApplication;
 [Import<CommonModule>]
 public partial interface IApplicationModule { }
 
-[MumeiGenerated]
+[CompilerGenerated]
 public partial interface IApplicationModule : IModule {
   public WeatherModule WeatherModule { get; }
   public CommonModule CommonModule { get; }

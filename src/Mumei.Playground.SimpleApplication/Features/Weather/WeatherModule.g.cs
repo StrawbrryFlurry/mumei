@@ -12,7 +12,7 @@ using WeatherApplication.Features.Weather;
 using WeatherApplication.Features.Weather.Controllers;
 using WeatherApplication.Features.Weather.Services;
 
-[MumeiGenerated]
+[CompilerGenerated]
 [MumeiModuleImplFor<WeatherModule>]
 public sealed class λWeatherModule : WeatherModule {
   private static readonly MethodInfo ConfigureHttpClientMethodInfo = typeof(WeatherModule)
