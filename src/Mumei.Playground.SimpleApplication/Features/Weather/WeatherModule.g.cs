@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
@@ -28,12 +29,14 @@ public sealed class λWeatherModule : WeatherModule {
   internal readonly Binding<ILogger<WeatherService>> ILoggerλWeatherServiceBinding;
 
   public override λWeatherModuleλCommonModule CommonModule => λCommonModule;
-  
+
   public override IWeatherService WeatherService => WeatherServiceBinding.Get();
   
+  public override IInjector Scope { get; }
   public override IInjector Parent { get; }
 
-  public λWeatherModule(IInjector parent, λWeatherModuleλCommonModule commonModule) {
+  public λWeatherModule(IInjector scope, IInjector parent, λWeatherModuleλCommonModule commonModule) {
+    Scope = scope;
     Parent = parent;
     λCommonModule = commonModule;
 
@@ -52,8 +55,12 @@ public sealed class λWeatherModule : WeatherModule {
   }
   
   public override T Get<T>(InjectFlags flags= InjectFlags.None) {
-    if ((flags & InjectFlags.SkipHost) == 0) {
-      return Parent.Get<T>();
+    if ((flags & InjectFlags.SkipHost | InjectFlags.SkipSelf) != 0) {
+      return Parent.Get<T>(flags & ~(InjectFlags.SkipHost | InjectFlags.SkipSelf));
+    }
+
+    if ((flags & InjectFlags.Lazy) != 0) {
+      return new Lazy<T>(() => Get<T>(flags & ~InjectFlags.Lazy)).Value;
     }
 
     var provider = typeof(T);
@@ -61,33 +68,46 @@ public sealed class λWeatherModule : WeatherModule {
       // Contains all providers from this module and recursively all providers from imported modules.
       // In cases where an import is a dynamic module, HasProvider is called to check if the provider exists on the module.
       // Duplicate providers are omitted, the first one found is used.
-      var instance = provider switch {
-        _ when provider == typeof(IWeatherService) => WeatherServiceBinding.Get(this),
-        _ when provider == typeof(ILogger<WeatherService>) => ILoggerλWeatherServiceBinding.Get(this),
-        _ when provider == typeof(WeatherController) => WeatherControllerBinding.Get(this),
+      object instance = provider switch {
+        _ when provider == typeof(IWeatherService) => WeatherServiceBinding.Get(Scope),
+        _ when provider == typeof(ILogger<WeatherService>) => ILoggerλWeatherServiceBinding.Get(Scope),
+        _ when provider == typeof(WeatherController) => WeatherControllerBinding.Get(Scope),
         // Only store a local decorated binding from an import if there is a global configuration for that
         // provider in the module. Consumers could then use the type provided from that module to get 
         // the configured instance.
-        _ when provider == typeof(HttpClient) => CommonModule.HttpClientBinding.Get(this),
-        _ => Parent.Get(provider)
+        _ when provider == typeof(HttpClient) => CommonModule.HttpClientBinding.Get(Scope),
       };
 
-      return (T)instance; 
+      return (T)instance;
+    }
+    
+    var isOptional = (flags & InjectFlags.Optional) != 0;
+    var resolveInSelf = (flags & InjectFlags.Self) != 0;
+    if (resolveInSelf && isOptional) {
+      return default;
+    }
+    
+    if (resolveInSelf) {
+      throw NullInjector.Exception(provider);
     }
     
     if((flags & InjectFlags.Host) != 0) {
       return Parent.Get<T>();
     }
     
+    if (isOptional) {
+      return default;
+    }
+
     throw NullInjector.Exception(provider);
   }
 
   public override object Get(object token, InjectFlags flags= InjectFlags.None) {
     return token switch {
-      _ when token == typeof(IWeatherService) => WeatherServiceBinding.Get(this),
-      _ when token == typeof(ILogger<WeatherService>) => ILoggerλWeatherServiceBinding.Get(this),
-      _ when token == typeof(WeatherController) => WeatherControllerBinding.Get(this),
-      _ when token == typeof(HttpClient) => CommonModule.HttpClientBinding.Get(this),
+      _ when token == typeof(IWeatherService) => WeatherServiceBinding.Get(Scope),
+      _ when token == typeof(ILogger<WeatherService>) => ILoggerλWeatherServiceBinding.Get(Scope),
+      _ when token == typeof(WeatherController) => WeatherControllerBinding.Get(Scope),
+      _ when token == typeof(HttpClient) => CommonModule.HttpClientBinding.Get(Scope),
       _ => Parent.Get(token)
     };
   }

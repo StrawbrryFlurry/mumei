@@ -46,7 +46,7 @@ public sealed class StaticInjector : IInjector {
     }
 
     private StaticInjectorProviderCollection AddToCollection(object token, object instance) {
-      Bindings.Add((token, new SingletonBindingImpl(instance)));
+      Bindings.Add((token, new DynamicSingletonBinding(instance)));
       return this;
     }
   }

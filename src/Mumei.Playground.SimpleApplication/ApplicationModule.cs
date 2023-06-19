@@ -6,14 +6,13 @@ using WeatherApplication.Features.Weather;
 
 namespace WeatherApplication;
 
-[Module]
-[ApplicationRoot]
+[Entrypoint]
 [Import<WeatherModule>]
 [Import<CommonModule>]
 public partial interface IApplicationModule { }
 
 [CompilerGenerated]
-public partial interface IApplicationModule : IModule {
+public partial interface IApplicationModule : IGlobalModule {
   public WeatherModule WeatherModule { get; }
   public CommonModule CommonModule { get; }
 }

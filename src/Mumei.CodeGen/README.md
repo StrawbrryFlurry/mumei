@@ -27,7 +27,7 @@ classBuilder.AddProperty<List<string>>(
 .DefineBackingFieldGetter(backingField)
 .DefineSetter((b) => {
   b.If(() => b.SetterImplicitValue == null, (ifBody) => {
-    ifBody.ThrowNew<ArgumentNullException>(b.SetterImplicitValue);
+    ifBody.Throw(() => new ArgumentNullException(b.SetterImplicitValue));
   });
       
   b.Assign(backingField, b.SetterImplicitValue);

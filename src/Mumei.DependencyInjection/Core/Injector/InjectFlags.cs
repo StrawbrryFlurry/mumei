@@ -4,6 +4,8 @@
 public enum InjectFlags {
   None = 1 << 0,
   Optional = 1 << 2,
+  Self = 1 << 3,
+  SkipSelf = 1 << 4,
   Host = 1 << 5,
   SkipHost = 1 << 6,
   Lazy = 1 << 7
@@ -32,6 +34,10 @@ public class SkipSelfAttribute : InjectBehaviorAttribute { }
 ///   Restricts the dependency resolution that it can only be resolved by
 ///   the current module injector. If the dependency is not found
 ///   within the current module injector, a <see cref="NullInjectorException" /> is thrown.
+///   Notes:
+///     - SkipSelf and SkipHost do the same in module injectors.
+///     - If both Host and SkipHost are specified, SkipHost takes precedence.
+///     - If both Self and Host are specified, Host takes precedence.
 /// </summary>
 public class HostAttribute : InjectBehaviorAttribute { }
 

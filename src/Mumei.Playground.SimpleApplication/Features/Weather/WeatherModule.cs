@@ -9,7 +9,7 @@ namespace WeatherApplication.Features.Weather;
 
 [Module]
 [Import<CommonModule>]
-[Component<WeatherController>]
+[Scoped<WeatherController>]
 public partial class WeatherModule {
   [Transient<WeatherService>]
   public abstract IWeatherService WeatherService { get; }
@@ -25,7 +25,9 @@ public partial class WeatherModule {
 public abstract partial class WeatherModule : IModule {
   public abstract CommonModule CommonModule { get; }
 
+  public abstract IInjector Scope { get; }
   public abstract IInjector Parent { get; }
+
   public abstract TProvider Get<TProvider>(InjectFlags flags = InjectFlags.None);
   public abstract object Get(object token, InjectFlags flags = InjectFlags.None);
   public abstract IInjector CreateScope();

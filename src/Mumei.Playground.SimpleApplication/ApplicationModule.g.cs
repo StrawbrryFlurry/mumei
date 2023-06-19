@@ -1,4 +1,5 @@
-﻿using Mumei.DependencyInjection.Core;
+﻿using System.Runtime.CompilerServices;
+using Mumei.DependencyInjection.Core;
 using Mumei.DependencyInjection.Internal;
 using Mumei.Playground.SimpleApplication.Common;
 using WeatherApplication;
@@ -8,8 +9,6 @@ using WeatherApplication.Generated;
 
 namespace Mumei.Playground.SimpleApplication; 
 
-[MumeiGenerated]
-[MumeiModuleImplFor<IApplicationModule>]
 public sealed class λApplicationModule : IApplicationModule {
   internal readonly CommonModule λCommonModule;
   internal readonly λWeatherModule λWeatherModule;
@@ -17,6 +16,7 @@ public sealed class λApplicationModule : IApplicationModule {
   public WeatherModule WeatherModule => λWeatherModule;
   public CommonModule CommonModule => λCommonModule;
   
+  public IInjector Scope { get; } = SingletonScopeλInjector.Instance;
   public IInjector Parent { get; } = PlatformInjector.Instance;
 
   public λApplicationModule(λWeatherModule weatherModule, CommonModule commonModule) {
@@ -31,13 +31,4 @@ public sealed class λApplicationModule : IApplicationModule {
   public object Get(object token, InjectFlags flags = InjectFlags.None) {
     throw new NotImplementedException();
   }
-
-  public IInjector CreateScope() {
-    throw new NotImplementedException();
-  }
-
-  public IInjector CreateScope(IInjector context) {
-    throw new NotImplementedException();
-  }
-
 }

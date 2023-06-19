@@ -2,5 +2,5 @@
 
 public class Singleton : Attribute { }
 
-public class SingletonAttribute<TProvider>
+public sealed class SingletonAttribute<TProvider>
   : DependencyRegistrationAttribute<TProvider> { }

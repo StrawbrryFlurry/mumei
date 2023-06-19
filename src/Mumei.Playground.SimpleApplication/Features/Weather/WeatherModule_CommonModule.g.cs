@@ -35,18 +35,6 @@ public sealed class λWeatherModuleλCommonModule : CommonModule {
       _ => Parent.Get(providerToken)
     };
   }
-
-  public override IInjector CreateScope() {
-    throw new NotSupportedException(
-      "Cannot create scope of CommonModule because it is marked as [CannotBeScoped]."
-      );
-  }
-
-  public override IInjector CreateScope(IInjector context) {
-    throw new NotSupportedException(
-      "Cannot create scope of CommonModule because it is marked as [CannotBeScoped]."
-    );
-  }
 }
 
 file class ScopedGenericILoggerλ1Binding<TCategory> : ScopedBinding<ILogger<TCategory>> {
