@@ -25,11 +25,8 @@ public partial class WeatherModule {
 public abstract partial class WeatherModule : IModule {
   public abstract CommonModule CommonModule { get; }
 
-  public abstract IInjector Scope { get; }
   public abstract IInjector Parent { get; }
 
-  public abstract TProvider Get<TProvider>(InjectFlags flags = InjectFlags.None);
-  public abstract object Get(object token, InjectFlags flags = InjectFlags.None);
-  public abstract IInjector CreateScope();
-  public abstract IInjector CreateScope(IInjector context);
+  public abstract TProvider Get<TProvider>(IInjector? scope = null, InjectFlags flags = InjectFlags.None);
+  public abstract object Get(object token, IInjector? scope = null, InjectFlags flags = InjectFlags.None);
 }

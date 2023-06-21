@@ -36,6 +36,21 @@ public sealed class InjectableAttribute<TAppModule> : Attribute {
 /// </summary>
 public enum ProvidedIn {
   /// <summary>
+  /// Provides the injectable type in the generated context injector.
+  /// The consumer of the DI framework can use this injector to provide
+  /// dynamically scoped dependencies, similar to how the Service Provider
+  /// handles scoped dependencies. Implementers can also use any arbitrary
+  /// injector as the context, as long as it is provided when a dependency
+  /// is resolved by an injector.
+  /// </summary>
+  Context,
+
+  /// <summary>
+  /// Provides the injectable type in the next module injector.
+  /// </summary>
+  Host,
+
+  /// <summary>
   ///   Provides the injectable type in the root injector
   ///   making it accessible by all modules that are imported by
   ///   the ApplicationModule / ApplicationRoot.

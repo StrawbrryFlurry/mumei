@@ -18,7 +18,7 @@ public class RoutesExplorer {
     }
   }
 
-  private static void MapController(IComponentRef componentRef) {
+  private static void MapController(IComponentRef<IComponent> componentRef) {
     var route = componentRef.Type.GetAttribute<RouteAttribute>().Path;
     var methods = componentRef.Type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
 
@@ -33,10 +33,8 @@ public class RoutesExplorer {
         Route = route,
         Method = "Get",
         Handler = request => {
-          var scope = componentRef.CreateScope();
-
           var requestInjector = StaticInjector.Create(
-            scope,
+            componentRef,
             c => c.Add(request)
           );
 

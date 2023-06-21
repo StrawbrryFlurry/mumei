@@ -55,7 +55,7 @@ public sealed class MumeiWebApplication : IMumeiWebApplication {
 
   public IConfiguration Configuration { get; }
 
-  public static IMumeiWebApplicationBuilder CreateBuilder<TAppModule>() {
+  public static IMumeiWebApplicationBuilder CreateBuilder<TAppModule>() where TAppModule : IModule {
     var injector = PlatformInjector.CreateEnvironment<TAppModule>();
     var applicationBuilder = WebApplication.CreateBuilder();
 
@@ -65,7 +65,7 @@ public sealed class MumeiWebApplication : IMumeiWebApplication {
 
   public static IMumeiWebApplicationBuilder CreateBuilder<TAppModule>(
     WebApplicationBuilder applicationBuilder
-  ) where TAppModule : new() {
+  ) where TAppModule : IModule, new() {
     var injector = PlatformInjector.CreateEnvironment<TAppModule>();
 
     var builder = new MumeiWebApplicationBuilder(applicationBuilder, injector);

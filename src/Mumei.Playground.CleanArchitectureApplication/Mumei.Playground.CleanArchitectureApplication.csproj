@@ -15,14 +15,19 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Include="ApiHost\.Generated\Application\AppModule.g.cs"/>
+        <Compile Include="ApiHost\.Generated\Application\AppModuleInjector.g.cs"/>
         <Compile Include="ApiHost\.Generated\Application\AppModuleEnvironment.g.cs"/>
+        <Compile Include="ApiHost\.Generated\Application\AppModuleRealizedInstanceFactory.cs"/>
+        <Compile Include="ApiHost\.Generated\Application\λAppModuleRef.cs"/>
         <Compile Include="ApiHost\.Generated\Components\Ordering\IOrderingComponentComposite.cs"/>
         <Compile Include="ApiHost\.Generated\Components\Ordering\OrderingComponent.cs"/>
+        <Compile Include="ApiHost\.Generated\Components\Ordering\λOrderingComponentRef.cs"/>
         <Compile Include="ApiHost\.Generated\Components\Ordering\OrderRepositoryBinding.cs"/>
         <Compile Include="ApiHost\.Generated\Global\ApplicationEnvironment.cs"/>
+        <Compile Include="ApiHost\.Generated\Global\ContextInjector.g.cs"/>
         <Compile Include="ApiHost\.Generated\Global\PlatformInjector.cs"/>
         <Compile Include="ApiHost\.Generated\Modules\ApplicationModule.g.cs"/>
         <Compile Include="ApiHost\.Generated\Modules\ApplicationModuleMediatrBinderApplicationModule.g.cs"/>
+        <Compile Include="ApiHost\.Generated\Modules\λApplicationModuleRef.cs"/>
     </ItemGroup>
 </Project>

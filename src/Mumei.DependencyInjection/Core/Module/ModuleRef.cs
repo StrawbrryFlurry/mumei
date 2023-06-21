@@ -1,20 +1,27 @@
 ﻿namespace Mumei.DependencyInjection.Core;
 
-public interface IModuleRef : IModuleRef<IModule> { }
-
-/// <summary>
-///   Wraps a runtime instance of <see cref="IModule" /> and provides an interface for interacting with it's members.
-/// </summary>
-/// <typeparam name="TModule"></typeparam>
-public interface IModuleRef<out TModule> : IInjector {
+public abstract class ModuleRef<TModule> : IModuleRef<TModule> where TModule : IModule {
+  public IInjector Parent { get; }
   public Type Type { get; }
-  public IModule Injector { get; }
-  public IReadOnlyCollection<IComponentRef> Components { get; }
-  public IReadOnlyCollection<IModuleRef> Imports { get; }
+  public IModule Injector { get; protected set; }
 
-  public IComponentFactoryResolver ComponentFactoryResolver { get; }
+  public abstract IReadOnlyCollection<IComponentRef<IComponent>> Components { get; }
+  public abstract IReadOnlyCollection<IModuleRef<IModule>> Imports { get; }
 
-  public Task<IComponentRef<TComponent>> CreateComponent<TComponent>(
-    IInjector? ctx = null
-  ) where TComponent : IComponent;
+  public ModuleRef(IInjector parent) {
+    Parent = parent;
+  }
+
+  public TProvider Get<TProvider>(IInjector? scope = null, InjectFlags flags = InjectFlags.None) {
+    return (TProvider)Get(typeof(TProvider), scope, flags);
+  }
+
+  public object Get(object token, IInjector? scope = null, InjectFlags flags = InjectFlags.None) {
+    return Injector.Get(token, scope, flags);
+  }
+
+  public Task<IComponentRef<TComponent>> CreateComponent<TComponent>(IInjector? ctx = null)
+    where TComponent : IComponent {
+    throw new NotImplementedException();
+  }
 }

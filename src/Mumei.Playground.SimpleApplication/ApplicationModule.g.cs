@@ -18,17 +18,17 @@ public sealed class λApplicationModule : IApplicationModule {
   
   public IInjector Scope { get; } = SingletonScopeλInjector.Instance;
   public IInjector Parent { get; } = PlatformInjector.Instance;
+  
+  public TProvider Get<TProvider>(IInjector scope = null, InjectFlags flags = InjectFlags.None) {
+    throw new NotImplementedException();
+  }
+
+  public object Get(object token, IInjector scope = null, InjectFlags flags = InjectFlags.None) {
+    throw new NotImplementedException();
+  }
 
   public λApplicationModule(λWeatherModule weatherModule, CommonModule commonModule) {
     λWeatherModule = weatherModule;
     λCommonModule = commonModule;
-  }
-
-  public TProvider Get<TProvider>(InjectFlags flags = InjectFlags.None) {
-    throw new NotImplementedException();
-  }
-
-  public object Get(object token, InjectFlags flags = InjectFlags.None) {
-    throw new NotImplementedException();
   }
 }

@@ -10,7 +10,7 @@ internal sealed partial class PlatformInjector : IInjector {
 
   public IInjector Parent { get; } = NullInjector.Instance;
 
-  public static ApplicationEnvironment<TAppModule> CreateEnvironment<TAppModule>() {
+  public static ApplicationEnvironment<TAppModule> CreateEnvironment<TAppModule>() where TAppModule : IModule {
     return typeof(TAppModule) switch {
       _ when typeof(TAppModule) == typeof(IApplicationModule) =>
         (dynamic)new ApplicationModuleλApplicationEnvironment()!,
@@ -28,7 +28,7 @@ internal sealed partial class PlatformInjector : IInjector {
 }
 
 internal sealed partial class PlatformInjector {
-  public TProvider Get<TProvider>(InjectFlags flags = InjectFlags.None) {
+  public TProvider Get<TProvider>(IInjector? scope = null, InjectFlags flags = InjectFlags.None) {
     var provider = typeof(TProvider);
     var instance = provider switch {
       _ when provider == typeof(IInjector) => Instance,
@@ -38,7 +38,7 @@ internal sealed partial class PlatformInjector {
     return (TProvider)instance;
   }
 
-  public object Get(object token, InjectFlags flags = InjectFlags.None) {
+  public object Get(object token, IInjector? scope = null, InjectFlags flags = InjectFlags.None) {
     return token switch {
       Type t when t == typeof(IInjector) => Instance,
       _ => Parent.Get(token)

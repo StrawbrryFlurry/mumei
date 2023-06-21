@@ -3,4 +3,4 @@
 namespace Mumei.DependencyInjection.Core;
 
 [Injectable(ProvidedIn.Root)]
-public class ModuleContainer : List<IModuleRef> { }
+public class ModuleContainer : List<IModuleRef<IModule>> { }

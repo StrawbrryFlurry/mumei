@@ -1,19 +1,19 @@
 ﻿namespace Mumei.DependencyInjection.Core;
 
 public sealed class StaticInjector : IInjector {
+  public IInjector Parent { get; }
+
   private readonly List<(object Token, Binding Binding)> _bindings = new();
 
   private StaticInjector(IInjector parent) {
     Parent = parent;
   }
 
-  public IInjector Parent { get; }
-
-  public TProvider Get<TProvider>(InjectFlags flags = InjectFlags.None) {
-    return (TProvider)Get(typeof(TProvider), flags);
+  public TProvider Get<TProvider>(IInjector? scope = null, InjectFlags flags = InjectFlags.None) {
+    return (TProvider)Get(typeof(TProvider), scope, flags);
   }
 
-  public object Get(object token, InjectFlags flags = InjectFlags.None) {
+  public object Get(object token, IInjector? scope = null, InjectFlags flags = InjectFlags.None) {
     return _bindings.FirstOrDefault(x => x.Token == token).Binding.GetInstance(this);
   }
 

@@ -19,7 +19,7 @@ public sealed class λWeatherModuleλCommonModule : CommonModule {
     return new ScopedGenericILoggerλ1Binding<TCategory>(this);
   }
   
-  public override T Get<T>(InjectFlags flags = InjectFlags.None) {
+  public override T Get<T>(IInjector? scope, InjectFlags flags = InjectFlags.None) {
     var provider = typeof(T);
     var instance = provider switch {
       _ when provider == typeof(HttpClient) => HttpClientBinding.Get(),
@@ -29,7 +29,7 @@ public sealed class λWeatherModuleλCommonModule : CommonModule {
     return (T)instance;
   }
 
-  public override object Get(object providerToken, InjectFlags flags = InjectFlags.None) {
+  public override object Get(object providerToken, IInjector? scope, InjectFlags flags = InjectFlags.None) {
     return providerToken switch {
       Type t when t == typeof(HttpClient) => HttpClientBinding.Get(this),
       _ => Parent.Get(providerToken)

@@ -9,12 +9,12 @@ public sealed class DecoratedInjector : IInjector {
   public IInjector DecoratorInjector { get; }
   public IInjector Parent { get; }
 
-  public TProvider Get<TProvider>(InjectFlags flags = InjectFlags.None) {
-    return DecoratorInjector.Get<TProvider>(flags & InjectFlags.Optional) ?? Parent.Get<TProvider>(flags);
+  public TProvider Get<TProvider>(IInjector? scope = null, InjectFlags flags = InjectFlags.None) {
+    return DecoratorInjector.Get<TProvider>(scope, flags & InjectFlags.Optional) ?? Parent.Get<TProvider>(scope, flags);
   }
 
-  public object Get(object token, InjectFlags flags = InjectFlags.None) {
+  public object Get(object token, IInjector? scope = null, InjectFlags flags = InjectFlags.None) {
     // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
-    return DecoratorInjector.Get(token, flags & InjectFlags.Optional) ?? Parent.Get(token, flags);
+    return DecoratorInjector.Get(token, scope, flags & InjectFlags.Optional) ?? Parent.Get(token, scope, flags);
   }
 }

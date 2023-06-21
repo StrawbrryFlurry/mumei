@@ -20,6 +20,6 @@ public partial class CommonModule {
 public abstract partial class CommonModule : IGlobalModule {
   public abstract IInjector Parent { get; }
 
-  public abstract TProvider Get<TProvider>(InjectFlags flags = InjectFlags.None);
-  public abstract object Get(object token, InjectFlags flags = InjectFlags.None);
+  public abstract TProvider Get<TProvider>(IInjector? scope = null, InjectFlags flags = InjectFlags.None);
+  public abstract object Get(object token, IInjector? scope = null, InjectFlags flags = InjectFlags.None);
 }

@@ -1,5 +1,5 @@
 ﻿namespace Mumei.DependencyInjection.Core;
 
-public interface IModule : IScopableInjector { }
+public interface IModule : IInjector { }
 
-public interface IGlobalModule : IInjector { }
+public interface IGlobalModule : IModule { }

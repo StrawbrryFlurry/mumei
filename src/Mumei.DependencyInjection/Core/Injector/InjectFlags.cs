@@ -6,9 +6,7 @@ public enum InjectFlags {
   Optional = 1 << 2,
   Self = 1 << 3,
   SkipSelf = 1 << 4,
-  Host = 1 << 5,
-  SkipHost = 1 << 6,
-  Lazy = 1 << 7
+  Host = 1 << 5
 }
 
 public class InjectBehaviorAttribute : Attribute { }
@@ -40,8 +38,3 @@ public class SkipSelfAttribute : InjectBehaviorAttribute { }
 ///     - If both Self and Host are specified, Host takes precedence.
 /// </summary>
 public class HostAttribute : InjectBehaviorAttribute { }
-
-/// <summary>
-///   Starts dependency resolution in the parent of the current module injector.
-/// </summary>
-public class SkipHostAttribute : InjectBehaviorAttribute { }

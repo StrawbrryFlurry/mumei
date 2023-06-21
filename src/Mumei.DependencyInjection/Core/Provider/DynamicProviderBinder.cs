@@ -13,9 +13,9 @@ public abstract class DynamicProviderBinder {
     configureBinder(_providers);
   }
 
-  public bool TryGet<TProvider>(object token, out TProvider provider) {
+  public bool TryGet(object token, out object provider) {
     if (_bindings.TryGetValue(token, out var binding)) {
-      provider = (TProvider)binding.GetInstance(_injector);
+      provider = binding.GetInstance(_injector);
       return true;
     }
 
@@ -25,7 +25,7 @@ public abstract class DynamicProviderBinder {
     }
 
     if (TryMakeDynamicBinding(descriptor!, out binding)) {
-      provider = (TProvider)binding.GetInstance(_injector);
+      provider = binding.GetInstance(_injector);
       return true;
     }
 
