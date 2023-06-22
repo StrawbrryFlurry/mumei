@@ -5,7 +5,7 @@ using Mumei.DependencyInjection.Core;
 
 namespace CleanArchitectureApplication.ApiHost.Generated.Application;
 
-public static class λAppModuleλRealizer {
+public static class λAppModuleRealizer {
   public static λAppModuleRef Realize(IInjector parent) {
     var appModule = new λAppModuleRef(parent);
     var applicationModule = RealizeApplicationModule(appModule);

@@ -18,8 +18,8 @@ public sealed class λOrderingComponentInjector : IOrderingComponentComposite {
   public λOrderingComponentInjector(IInjector parent) {
     Parent = parent;
     MediatorBinding = new LateBoundBinding<IMediator>(Parent, injector => injector.Get<Binding<IMediator>>());
-    OrderControllerBinding = new OrderControllerλBinding(MediatorBinding);
-    OrderRepositoryBinding = new OrderRepositoryλBinding();
+    OrderControllerBinding = new λOrderControllerBinding(MediatorBinding);
+    OrderRepositoryBinding = new λOrderRepositoryBinding();
   }
 
   public IOrderRepository OrderRepository => OrderRepositoryBinding.Get();

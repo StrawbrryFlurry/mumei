@@ -4,10 +4,10 @@ using Mumei.DependencyInjection.Core;
 
 namespace CleanArchitectureApplication.ApiHost.Generated;
 
-public sealed class OrderControllerλBinding : ScopedBinding<OrderController> {
+public sealed class λOrderControllerBinding : ScopedBinding<OrderController> {
   private readonly Binding<IMediator> _mediatrProvider;
 
-  public OrderControllerλBinding(Binding<IMediator> mediatorBinding) {
+  public λOrderControllerBinding(Binding<IMediator> mediatorBinding) {
     _mediatrProvider = mediatorBinding;
   }
 

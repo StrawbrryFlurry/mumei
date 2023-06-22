@@ -17,23 +17,23 @@
     <ItemGroup>
         <Compile Include="ApiHost\.Generated\Application\AppModuleInjector.g.cs"/>
         <Compile Include="ApiHost\.Generated\Application\AppModuleEnvironment.g.cs"/>
-        <Compile Include="ApiHost\.Generated\Application\AppModuleRealizedInstanceFactory.cs"/>
-        <Compile Include="ApiHost\.Generated\Application\λAppModuleRef.cs"/>
-        <Compile Include="ApiHost\.Generated\Components\Ordering\IOrderingComponentComposite.cs"/>
-        <Compile Include="ApiHost\.Generated\Components\Ordering\OrderControllerBinding.cs"/>
+        <Compile Include="ApiHost\.Generated\Application\AppModuleRealizedInstanceFactory.g.cs"/>
+        <Compile Include="ApiHost\.Generated\Application\AppModuleRef.g.cs"/>
+        <Compile Include="ApiHost\.Generated\Components\Ordering\IOrderingComponentComposite.g.cs"/>
+        <Compile Include="ApiHost\.Generated\Components\Ordering\OrderControllerBinding.g.cs"/>
         <Compile Include="ApiHost\.Generated\Components\Ordering\OrderingComponentInjector.g.cs"/>
         <Compile Include="ApiHost\.Generated\Components\Ordering\λOrderingComponentRef.cs"/>
-        <Compile Include="ApiHost\.Generated\Components\Ordering\OrderRepositoryBinding.cs"/>
-        <Compile Include="ApiHost\.Generated\Global\ApplicationEnvironment.cs"/>
+        <Compile Include="ApiHost\.Generated\Components\Ordering\OrderRepositoryBinding.g.cs"/>
+        <Compile Include="ApiHost\.Generated\Global\ApplicationEnvironment.g.cs" />
         <Compile Include="ApiHost\.Generated\Global\ContextInjector.g.cs"/>
-        <Compile Include="ApiHost\.Generated\Global\PlatformInjector.cs"/>
+        <Compile Include="ApiHost\.Generated\Global\PlatformInjector.g.cs" />
         <Compile Include="ApiHost\.Generated\Modules\Application\ApplicationModuleInjector.g.cs"/>
         <Compile Include="ApiHost\.Generated\Modules\Application\ApplicationModuleMediatrBinderApplicationModule.g.cs"/>
         <Compile Include="ApiHost\.Generated\Modules\Application\ApplicationModuleRef.g.cs"/>
-        <Compile Include="ApiHost\.Generated\Modules\Persistence\IUnitOfworkBinding.cs"/>
-        <Compile Include="ApiHost\.Generated\Modules\Persistence\PersistenceModuleInjector.cs"/>
+        <Compile Include="ApiHost\.Generated\Modules\Persistence\IUnitOfworkBinding.g.cs"/>
+        <Compile Include="ApiHost\.Generated\Modules\Persistence\PersistenceModuleInjector.g.cs"/>
         <Compile Include="ApiHost\.Generated\Modules\Persistence\PersistenceModuleRef.g.cs"/>
         <Compile Include="ApiHost\.Generated\Modules\Presentation\PresentationModuleInjector.g.cs"/>
-        <Compile Include="ApiHost\.Generated\Modules\Presentation\λPresentationModuleRef.cs"/>
+        <Compile Include="ApiHost\.Generated\Modules\Presentation\PresentationModuleRef.g.cs"/>
     </ItemGroup>
 </Project>

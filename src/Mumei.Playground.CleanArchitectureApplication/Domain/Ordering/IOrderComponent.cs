@@ -3,6 +3,6 @@
 namespace CleanArchitectureApplication.Domain.Ordering;
 
 public partial interface IOrderComponent {
-  [ForwardRef(ForwardRefSource.Sibling)]
+  [ForwardRef]
   public IOrderRepository OrderRepository { get; }
 }

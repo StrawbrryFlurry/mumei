@@ -6,15 +6,12 @@ namespace CleanArchitectureApplication.ApiHost.Generated;
 internal sealed partial class PlatformInjector : IInjector {
   public static readonly PlatformInjector Instance = new();
 
-  private PlatformInjector() { }
-
-  public IInjector Scope { get; }
   public IInjector Parent { get; } = NullInjector.Instance;
 
   public static ApplicationEnvironment<TAppModule> CreateEnvironment<TAppModule>() where TAppModule : IModule {
     return typeof(TAppModule) switch {
       _ when typeof(TAppModule) == typeof(IAppModule) =>
-        (dynamic)new AppModuleλApplicationEnvironment()!,
+        (dynamic)new λAppModuleApplicationEnvironment()!,
       _ => ModuleNotFound<TAppModule>()
     };
   }

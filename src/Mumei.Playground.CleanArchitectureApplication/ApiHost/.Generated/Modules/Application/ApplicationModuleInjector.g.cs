@@ -1,4 +1,5 @@
-﻿using CleanArchitectureApplication.ApiHost.Generated;
+﻿using System.Runtime.CompilerServices;
+using CleanArchitectureApplication.ApiHost.Generated;
 using CleanArchitectureApplication.Domain.Ordering;
 using Mumei.DependencyInjection.Core;
 using IOrderComponent = CleanArchitectureApplication.Application.Ordering.IOrderComponent;
@@ -22,7 +23,7 @@ public sealed class λApplicationModuleInjector : IApplicationModule {
   public λApplicationModuleInjector(IInjector parent, λOrderingComponentInjector orderingComponent) {
     Parent = parent;
     λOrderingComponent = orderingComponent;
-    λMediatrBinderλIApplicationModule = new ApplicationModuleλMediatrBinderλIApplicationModule(this);
+    λMediatrBinderλIApplicationModule = new λApplicationModuleλMediatrBinderλIApplicationModule(this);
   }
   
   public TProvider Get<TProvider>(IInjector? scope = null, InjectFlags flags = InjectFlags.None) {
@@ -74,8 +75,45 @@ public sealed class λApplicationModuleInjector : IApplicationModule {
   }
 
   internal sealed class λApplicationModuleλBloom {
-    public bool MightContainProvider(object token) {
-      return true;
+    // This will already be initialized when the module is created
+    private static readonly long[] _providerBloomVectors = {
+      0b_000000000000000000000000000000,
+      0b_000000000000000000000000000000,
+      0b_000000000000000000000000000000,
+      0b_000000000000000000000000000000,
+    };
+
+    private const int _vectorCount = 4;
+    private const int _bloomSize = 64 * _vectorCount; // 64 bits (long) per vector * 4 vectors
+    private const int _bloomMask = _bloomSize - 1;
+
+    internal static bool Contains(Type token) {
+      return Contains(token.GUID.GetHashCode());
+    }
+
+    internal static bool Contains(string token) {
+      return Contains(token.GetHashCode());
+    } 
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool Contains(object token) {
+      return Contains(token.GetHashCode());
+    }
+    
+    private static bool Contains(int hash) {
+      hash = ~hash + 1; // Ensure that the hash is positive
+      var mask = 1l << hash;
+      var vectorIdx = ~~(hash / 64l);
+      var bucketVector = _providerBloomVectors[vectorIdx];
+
+      return (mask & bucketVector) != 0u;
+    }
+
+    // Example of what the generator will do
+    private static void Add(int hash) {
+      var mask = 1 << hash;
+      var buckedIdx = (hash & _vectorCount) + 1;
+      _providerBloomVectors[buckedIdx] |= mask;
     }
   }
 }

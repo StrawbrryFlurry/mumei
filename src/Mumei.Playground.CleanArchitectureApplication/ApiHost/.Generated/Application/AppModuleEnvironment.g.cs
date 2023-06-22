@@ -6,14 +6,14 @@ using Mumei.DependencyInjection.Core;
 
 namespace Mumei.Playground.SimpleApplication;
 
-internal sealed class AppModuleλApplicationEnvironment : ApplicationEnvironment<IAppModule> {
+internal sealed class λAppModuleApplicationEnvironment : ApplicationEnvironment<IAppModule> {
   private λAppModuleRef _instance;
   public override IModuleRef<IAppModule> Instance => _instance;
 
   private λAppModuleInjector Injector => (λAppModuleInjector)_instance.Injector;
   
-  public AppModuleλApplicationEnvironment() {
-    _instance = λAppModuleλRealizer.Realize(this);
+  public λAppModuleApplicationEnvironment() {
+    _instance = λAppModuleRealizer.Realize(this);
   }
   
   public override TProvider Get<TProvider>(IInjector scope = null, InjectFlags flags = InjectFlags.None) {
