@@ -7,7 +7,6 @@ public interface IOrderingComponentComposite :
   IOrderComponent,
   CleanArchitectureApplication.Application.Ordering.IOrderComponent,
   Persistence.Ordering.IOrderComponent,
-  Presentation.Ordering.IOrderComponent,
-  IComponent {
+  Presentation.Ordering.IOrderComponent {
   public IOrderRepository OrderRepository { get; }
 }

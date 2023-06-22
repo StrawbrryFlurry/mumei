@@ -7,7 +7,7 @@ public sealed class DynamicSingletonBinding : SingletonBinding<object> {
     _instance = instance;
   }
 
-  protected override object Create(IInjector? scope = null) {
+  protected internal override object Create(IInjector? scope = null) {
     return _instance;
   }
 }

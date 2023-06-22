@@ -12,10 +12,7 @@ public partial interface IApplicationModule : IModule {
 public sealed class λApplicationModuleInjector : IApplicationModule {
   public IInjector Parent { get; }
 
-  private readonly DynamicProviderBinder λMediatrBinderλIApplicationModule;
-  
-  private readonly ProviderCollection _dynamicProviders = new();
-  
+  internal readonly DynamicProviderBinder λMediatrBinderλIApplicationModule;
   internal readonly λApplicationModuleλBloom λBloom = new();
   
   internal readonly λOrderingComponentInjector λOrderingComponent;
@@ -40,23 +37,40 @@ public sealed class λApplicationModuleInjector : IApplicationModule {
     
     // Don't check for Host because this is a module host.
     
-    if (λMediatrBinderλIApplicationModule.TryGet(token, out var provider)) {
-      return provider;
+    object? instance = null;
+    if (TryGet(token, scope, flags, out instance)) {
+      return instance;
     }
     
-    return token switch {
-      _ when ReferenceEquals(token, typeof(IOrderComponent)) => λOrderingComponent,
-      _ when ReferenceEquals(token, typeof(IOrderRepository)) => λOrderingComponent.OrderRepositoryBinding.Get(scope),
-      _ => Parent.Get(token)
-    };
+    return Parent.Get(token, scope, flags);
   }
   
-  public IInjector CreateScope() {
-    throw new NotImplementedException();
+  internal bool TryGet(object token, IInjector scope, InjectFlags flags, out object? instance) {
+    if (λMediatrBinderλIApplicationModule.TryGet(token, out instance)) {
+      return true;
+    }
+    
+    if (TryGetOrderingComponentProvider(token, scope, flags, out instance)) {
+      return true;
+    }
+    
+    instance = null!;
+    return false;
   }
 
-  public IInjector CreateScope(IInjector context) {
-    throw new NotImplementedException();
+  private bool TryGetOrderingComponentProvider(object token, IInjector scope, InjectFlags flags, out object? instance) {
+    if (token == typeof(IOrderComponent)) {
+      instance = λOrderingComponent;
+      return true;
+    }
+    
+    if (token == typeof(IOrderRepository)) {
+      instance = λOrderingComponent.OrderRepositoryBinding.Get(scope);
+      return true;
+    }
+    
+    instance = null!;
+    return false;
   }
 
   internal sealed class λApplicationModuleλBloom {

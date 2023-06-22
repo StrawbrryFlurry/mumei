@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using CleanArchitectureApplication.Application.Ordering.Commands.CreateOrderCommand;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CleanArchitectureApplication.Presentation.Ordering;
@@ -10,8 +11,9 @@ public sealed class OrderController : ControllerBase {
     _mediator = mediator;
   }
 
-  [HttpGet]
-  public IActionResult Get() {
-    return Ok();
+  [HttpPost]
+  public async Task<IActionResult> Create(Guid customerId, List<Guid> productIds) {
+    var order = await _mediator.Send(new CreateOrderCommand(customerId, productIds));
+    return Created($"/{order.Id}", order);
   }
 }

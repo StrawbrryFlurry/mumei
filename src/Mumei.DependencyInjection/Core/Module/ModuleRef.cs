@@ -1,4 +1,6 @@
-﻿namespace Mumei.DependencyInjection.Core;
+﻿using System.Diagnostics;
+
+namespace Mumei.DependencyInjection.Core;
 
 public abstract class ModuleRef<TModule> : IModuleRef<TModule> where TModule : IModule {
   public IInjector Parent { get; }
@@ -12,10 +14,14 @@ public abstract class ModuleRef<TModule> : IModuleRef<TModule> where TModule : I
     Parent = parent;
   }
 
+  [DebuggerHidden]
+  [StackTraceHidden]
   public TProvider Get<TProvider>(IInjector? scope = null, InjectFlags flags = InjectFlags.None) {
     return (TProvider)Get(typeof(TProvider), scope, flags);
   }
 
+  [DebuggerHidden]
+  [StackTraceHidden]
   public object Get(object token, IInjector? scope = null, InjectFlags flags = InjectFlags.None) {
     return Injector.Get(token, scope, flags);
   }

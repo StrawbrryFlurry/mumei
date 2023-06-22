@@ -1,4 +1,7 @@
-﻿using CleanArchitectureApplication.Domain.Ordering;
+﻿using CleanArchitectureApplication.Application;
+using CleanArchitectureApplication.Domain.Ordering;
+using CleanArchitectureApplication.Presentation.Ordering;
+using MediatR;
 using Mumei.DependencyInjection.Core;
 
 namespace CleanArchitectureApplication.ApiHost.Generated;
@@ -7,9 +10,15 @@ public sealed class λOrderingComponentInjector : IOrderingComponentComposite {
   public IInjector Parent { get; set; }
 
   internal readonly Binding<IOrderRepository> OrderRepositoryBinding;
+  internal Binding<OrderController> OrderControllerBinding { get; private set; }
+  internal Binding<IMediator> MediatorBinding { get; private set; }
+  
+  public IMediator Mediator => MediatorBinding.Get(this);
 
   public λOrderingComponentInjector(IInjector parent) {
     Parent = parent;
+    MediatorBinding = new LateBoundBinding<IMediator>(Parent, injector => injector.Get<Binding<IMediator>>());
+    OrderControllerBinding = new OrderControllerλBinding(MediatorBinding);
     OrderRepositoryBinding = new OrderRepositoryλBinding();
   }
 
@@ -31,9 +40,11 @@ public sealed class λOrderingComponentInjector : IOrderingComponentComposite {
 
     var result = token switch {
       _ when ReferenceEquals(token, typeof(IOrderRepository)) => OrderRepositoryBinding.Get(scope),
+      _ when ReferenceEquals(token, typeof(OrderController)) => OrderControllerBinding.Get(scope),
       _ => Parent.Get(token, scope, flags)
     };
 
     return result;
   }
+
 }

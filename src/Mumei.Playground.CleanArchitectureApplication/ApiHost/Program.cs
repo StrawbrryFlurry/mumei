@@ -1,7 +1,11 @@
 ﻿using CleanArchitectureApplication.ApiHost;
 using CleanArchitectureApplication.ApiHost.Generated;
-using CleanArchitectureApplication.Domain.Ordering;
+using CleanArchitectureApplication.Presentation.Ordering;
 
 var app = PlatformInjector.CreateEnvironment<IAppModule>();
 
-var r = app.Get<IOrderRepository>();
+var orderController = app.Get<OrderController>();
+
+var order = await orderController.Create(Guid.NewGuid(), new List<Guid>() { Guid.NewGuid(), Guid.NewGuid() });
+
+Console.Read();

@@ -1,6 +1,6 @@
 ﻿namespace Mumei.DependencyInjection.Core;
 
-public sealed class ProviderDescriptor {
+public sealed record ProviderDescriptor {
   public required object Token { get; init; }
   public Type? ImplementationType { get; init; }
 

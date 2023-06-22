@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Mumei.DependencyInjection.Core;
+﻿using Mumei.DependencyInjection.Core;
 
 namespace CleanArchitectureApplication.ApiHost.Generated;
 

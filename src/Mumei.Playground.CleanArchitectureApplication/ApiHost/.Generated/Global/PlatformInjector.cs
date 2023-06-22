@@ -42,7 +42,7 @@ internal sealed partial class PlatformInjector {
   public object Get(object token, IInjector? scope, InjectFlags flags = InjectFlags.None) {
     return token switch {
       Type t when t == typeof(IInjector) => Instance,
-      _ => Parent.Get(token)
+      _ => Parent.Get(token, scope, flags)
     };
   }
 }

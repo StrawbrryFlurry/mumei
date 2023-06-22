@@ -4,7 +4,6 @@ namespace CleanArchitectureApplication.ApiHost.Generated;
 
 internal abstract class ApplicationEnvironment<TAppModule> : IInjector where TAppModule : IModule {
   public abstract IModuleRef<TAppModule> Instance { get; }
-  public IInjector Scope { get; }
   public IInjector Parent { get; } = PlatformInjector.Instance;
 
   public abstract TProvider Get<TProvider>(IInjector? scope = null, InjectFlags flags = InjectFlags.None);

@@ -1,4 +1,6 @@
 ﻿using CleanArchitectureApplication.Application;
+using CleanArchitectureApplication.Persistence;
+using CleanArchitectureApplication.Presentation;
 using Mumei.DependencyInjection.Core;
 
 namespace CleanArchitectureApplication.ApiHost.Generated.Application;
@@ -12,8 +14,18 @@ public sealed class λAppModuleRef : ModuleRef<IAppModule> {
 
   public λAppModuleRef(IInjector parent) : base(parent) { }
 
-  public void Realize(IModuleRef<IApplicationModule> applicationModuleRef) {
-    Injector = new λAppModuleInjector((λApplicationModuleInjector)applicationModuleRef.Injector);
+  public void Realize(
+    IModuleRef<IApplicationModule> applicationModuleRef,
+    IModuleRef<IPresentationModule> presentationModuleRef,
+    IModuleRef<IPersistenceModule> persistenceModuleRef
+  ) {
+    Injector = new λAppModuleInjector(
+      Parent,
+      (λApplicationModuleInjector)applicationModuleRef.Injector,
+      (λPresentationModuleInjector)presentationModuleRef.Injector,
+      (λPersistenceModuleInjector)persistenceModuleRef.Injector
+    );
+
     _imports[0] = applicationModuleRef;
   }
 }

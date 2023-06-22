@@ -5,4 +5,4 @@ namespace CleanArchitectureApplication.Domain.Ordering;
 public sealed class OrderComponentAttribute : Attribute, IComponentMarker { }
 
 [OrderComponent]
-public partial interface IOrderComponent { }
+public partial interface IOrderComponent : IComponent { }

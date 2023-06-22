@@ -9,7 +9,7 @@ public sealed class DynamicScopedBinding : ScopedBinding<object> {
     _injector = injector;
   }
 
-  protected override object Create(IInjector? scope = null) {
+  protected internal override object Create(IInjector? scope = null) {
     return _factory(_injector);
   }
 }

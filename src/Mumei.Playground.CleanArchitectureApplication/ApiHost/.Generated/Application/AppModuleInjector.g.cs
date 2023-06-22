@@ -11,21 +11,14 @@ using Mumei.DependencyInjection.Internal;
 
 namespace CleanArchitectureApplication.ApiHost;
 
-public partial interface IAppModule : IModule {
-  public IDomainModule DomainModule { get; }
-  public IApplicationModule ApplicationModule { get; }
-  public IPersistenceModule PersistenceModule { get; }
-  public IPresentationModule PresentationModule { get; }
-  
-  public IOrderingComponentComposite Ordering { get; }
-}
-
 [CompilerGenerated]
 [MumeiModuleImplFor<IAppModule>]
 public sealed class λAppModuleInjector : IAppModule {
   public IInjector Parent { get; }
 
   internal readonly λApplicationModuleInjector λApplicationModule;
+  internal readonly λPresentationModuleInjector λPresentationModule;
+  internal readonly λPersistenceModuleInjector λPersistenceModule;
   
   public IDomainModule DomainModule { get; }
   public IApplicationModule ApplicationModule => λApplicationModule;
@@ -33,20 +26,51 @@ public sealed class λAppModuleInjector : IAppModule {
   public IPresentationModule PresentationModule { get; }
   public IOrderingComponentComposite Ordering { get; }
 
-  public λAppModuleInjector(λApplicationModuleInjector applicationModule) {
+  public λAppModuleInjector(
+    IInjector parent,
+    λApplicationModuleInjector applicationModule,
+    λPresentationModuleInjector presentationModule,
+    λPersistenceModuleInjector persistenceModule
+  ) {
+    Parent = parent;
+    
     λApplicationModule = applicationModule;
+    λPresentationModule = presentationModule;
+    λPersistenceModule = persistenceModule;
   }
 
   public TProvider Get<TProvider>(IInjector scope = null, InjectFlags flags = InjectFlags.None) {
-    var token = typeof(TProvider);
-    if (λApplicationModule.λBloom.MightContainProvider(token)) {
-      var instance = λApplicationModule.Get<TProvider>(scope, flags);
-    }
-    
-    throw new NotImplementedException();
+    return (TProvider)Get(typeof(TProvider), scope, flags);
   }
 
   public object Get(object token, IInjector scope = null, InjectFlags flags = InjectFlags.None) {
-    throw new NotImplementedException();
+    scope ??= this;
+    if ((flags & InjectFlags.SkipSelf) != 0) {
+      return Parent.Get(token, scope, flags & ~InjectFlags.SkipSelf);   
+    }
+
+    object? instance = null;
+    if (TryGet(token, scope, flags, out instance)) {
+      return instance;
+    }
+    
+    return Parent.Get(token, scope, flags);
+  }
+
+  internal bool TryGet(object token, IInjector scope, InjectFlags flags, out object? instance) {
+    if (λApplicationModule.TryGet(token, scope, flags, out instance)) {
+      return true;
+    }
+    
+    if (λPresentationModule.TryGet(token, scope, flags, out instance)) {
+      return true;
+    }
+    
+    if (λPersistenceModule.TryGet(token, scope, flags, out instance)) {
+      return true;
+    }
+    
+    instance = null!;
+    return false;
   }
 }

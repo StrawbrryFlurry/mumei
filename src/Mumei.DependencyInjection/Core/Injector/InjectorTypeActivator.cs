@@ -13,7 +13,7 @@ public static class InjectorTypeActivator {
     }
 
     if (ctors.Length > 1) {
-      throw new AmbiguousMatchException($"Multiple public constructors found for type {type.FullName}.");
+      return CreateInstanceWithBestOverloadMatch(type, ctors, injector);
     }
 
     var ctor = ctors[0];
@@ -29,7 +29,7 @@ public static class InjectorTypeActivator {
       var parameter = parameters[i];
 
       if (parameter.IsOptional) {
-        args[i] = parameter.DefaultValue;
+        args[i] = parameter.DefaultValue!;
       }
       else {
         args[i] = injector.Get(parameter.ParameterType);
@@ -37,5 +37,37 @@ public static class InjectorTypeActivator {
     }
 
     return ctor.Invoke(args);
+  }
+
+  private static object CreateInstanceWithBestOverloadMatch(Type t, ConstructorInfo[] ctors, IInjector injector) {
+    var orderedCtors = ctors.Select(c => (c, c.GetParameters())).OrderBy(c => c.Item2.Length);
+
+    foreach (var (ctor, parameters) in orderedCtors) {
+      var args = new object[parameters.Length];
+
+      var hasNullInjectorException = false;
+      foreach (var parameter in parameters) {
+        try {
+          args[parameter.Position] = injector.Get(parameter.ParameterType);
+        }
+        catch (NullInjector.NullInjectorException e) {
+          if (parameter.IsOptional) {
+            args[parameter.Position] = parameter.DefaultValue!;
+            continue;
+          }
+
+          hasNullInjectorException = true;
+          break;
+        }
+      }
+
+      if (hasNullInjectorException) {
+        continue;
+      }
+
+      return ctor.Invoke(args);
+    }
+
+    throw new MissingMethodException($"Could not find a suitable constructor for type {t.FullName}.");
   }
 }

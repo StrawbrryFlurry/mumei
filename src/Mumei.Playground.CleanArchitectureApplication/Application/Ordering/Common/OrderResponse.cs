@@ -2,6 +2,6 @@
 
 public sealed class OrderResponse {
   public required Guid Id { get; init; }
-  public required string CustomerId { get; init; }
-  public required List<string> ProductIds { get; init; }
+  public required Guid CustomerId { get; init; }
+  public required List<Guid> ProductIds { get; init; }
 }
