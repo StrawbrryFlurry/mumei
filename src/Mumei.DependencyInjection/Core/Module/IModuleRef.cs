@@ -6,7 +6,8 @@
 /// <typeparam name="TModule"></typeparam>
 public interface IModuleRef<out TModule> : IInjector where TModule : IModule {
   public Type Type { get; }
-  public IModule Injector { get; }
+  public TModule Injector { get; }
+
   public IReadOnlyCollection<IComponentRef<IComponent>> Components { get; }
   public IReadOnlyCollection<IModuleRef<IModule>> Imports { get; }
 

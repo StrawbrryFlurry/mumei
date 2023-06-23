@@ -2,9 +2,9 @@
 using CleanArchitectureApplication.ApiHost.Generated;
 using CleanArchitectureApplication.Presentation.Ordering;
 
-var app = Platform.CreateEnvironment<IAppModule>();
+var appEnvironment = Platform.CreateEnvironment<IAppModule>();
 
-var orderController = app.Get<OrderController>();
+var orderController = appEnvironment.Get<OrderController>();
 
 var order = await orderController.Create(Guid.NewGuid(), new List<Guid>() { Guid.NewGuid(), Guid.NewGuid() });
 

@@ -24,6 +24,7 @@ public sealed class λApplicationModuleInjector : IApplicationModule {
     Parent = parent;
     _orderingComponent = orderingComponent;
     _mediatrBinderλIApplicationModule = new λApplicationModuleλMediatrBinderλIApplicationModule(this);
+    
     Bloom = new λApplicationModuleλBloom(_orderingComponent, _mediatrBinderλIApplicationModule);
   }
 

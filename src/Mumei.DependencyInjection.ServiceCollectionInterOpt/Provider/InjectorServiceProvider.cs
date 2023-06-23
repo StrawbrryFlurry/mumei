@@ -1,30 +1,40 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Reflection;
 using Mumei.DependencyInjection.Core;
 
 namespace Mumei.DependencyInjection.ServiceCollectionInterOpt.Provider;
 
 public sealed class InjectorServiceProvider : IServiceProvider {
   private readonly IInjector _injector;
-  private readonly IServiceProvider _serviceProvider;
+
+  private static readonly MethodInfo EnumerableEmptyMethod = typeof(Enumerable).GetMethod(nameof(Enumerable.Empty))!;
 
   public InjectorServiceProvider(IInjector injector) {
     _injector = injector;
-    var serviceCollection = (IServiceCollection?)injector.Get<IServiceCollection>(null, InjectFlags.Optional) ??
-                            new ServiceCollection();
-    _serviceProvider = serviceCollection.BuildServiceProvider();
   }
 
   public object? GetService(Type serviceType) {
-    try {
-      var service = _serviceProvider.GetService(serviceType);
-      if (service is not null) {
-        return service;
-      }
-    }
-    catch {
-      // The service provider may throw an exception if the service type is not registered.
-    }
+    // We need to handle IEnumerable<T> specifically because
+    // the service provider implementation does not care when
+    // an enumerable service type does not have any registrations.
+    // It will just return an empty enumerable of that type.
+    var isEnumerableProvider = IsEnumerableProvider(serviceType);
+    var injectFlags = isEnumerableProvider ? InjectFlags.Optional : InjectFlags.None;
+    var result = _injector.Get(serviceType, null, injectFlags);
 
-    return _injector.Get(serviceType);
+    return isEnumerableProvider
+      ? (object?)result ?? MakeEmptyResultEnumerable(serviceType)
+      : result;
+  }
+
+  private static bool IsEnumerableProvider(Type serviceType) {
+    return serviceType.IsGenericType &&
+           serviceType.GetGenericTypeDefinition() == typeof(IEnumerable<>);
+  }
+
+  private static object MakeEmptyResultEnumerable(Type serviceType) {
+    var enumerableType = serviceType.GetGenericArguments()[0];
+    var emptyEnumerableMethod = EnumerableEmptyMethod.MakeGenericMethod(enumerableType);
+
+    return emptyEnumerableMethod.Invoke(null, null)!;
   }
 }

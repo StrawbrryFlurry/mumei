@@ -5,7 +5,7 @@ namespace Mumei.DependencyInjection.Core;
 public abstract class ModuleRef<TModule> : IModuleRef<TModule> where TModule : IModule {
   public IInjector Parent { get; }
   public Type Type { get; }
-  public IModule Injector { get; protected set; }
+  public TModule Injector { get; protected set; }
 
   public abstract IReadOnlyCollection<IComponentRef<IComponent>> Components { get; }
   public abstract IReadOnlyCollection<IModuleRef<IModule>> Imports { get; }

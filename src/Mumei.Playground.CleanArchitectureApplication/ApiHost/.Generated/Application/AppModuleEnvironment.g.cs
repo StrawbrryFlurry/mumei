@@ -8,7 +8,7 @@ namespace Mumei.Playground.SimpleApplication;
 
 internal sealed class λAppModuleApplicationEnvironment : ApplicationEnvironment<IAppModule> {
   private λAppModuleRef _instance;
-  public override IModuleRef<IAppModule> Instance => _instance;
+  public override IModuleRef<IAppModule> RootModuleRef => _instance;
 
   private λAppModuleInjector Injector => (λAppModuleInjector)_instance.Injector;
   
