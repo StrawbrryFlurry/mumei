@@ -6,10 +6,14 @@ public sealed class NullInjector : IInjector {
   public IInjector Parent => throw new InvalidOperationException("Cannot get parent of NullInjector");
 
   public TProvider Get<TProvider>(IInjector? scope = null, InjectFlags flags = InjectFlags.None) {
-    throw new NullInjectorException(typeof(TProvider), scope);
+    return (TProvider)Get(typeof(TProvider), scope, flags) ?? default!;
   }
 
   public object Get(object token, IInjector? scope = null, InjectFlags flags = InjectFlags.None) {
+    if ((flags & InjectFlags.Optional) != 0) {
+      return null!;
+    }
+
     throw new NullInjectorException(token, scope);
   }
 
