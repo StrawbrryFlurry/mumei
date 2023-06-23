@@ -3,8 +3,8 @@ using Mumei.Playground.SimpleApplication;
 
 namespace CleanArchitectureApplication.ApiHost.Generated;
 
-internal sealed partial class PlatformInjector : IInjector {
-  public static readonly PlatformInjector Instance = new();
+internal sealed partial class Platform : IInjector {
+  public static readonly Platform Instance = new();
 
   public IInjector Parent { get; } = NullInjector.Instance;
 
@@ -25,7 +25,7 @@ internal sealed partial class PlatformInjector : IInjector {
   }
 }
 
-internal sealed partial class PlatformInjector {
+internal sealed partial class Platform {
   public TProvider Get<TProvider>(IInjector? scope, InjectFlags flags = InjectFlags.None) {
     var provider = typeof(TProvider);
     var instance = provider switch {

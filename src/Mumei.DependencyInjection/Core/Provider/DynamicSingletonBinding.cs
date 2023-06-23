@@ -1,13 +1,38 @@
-﻿namespace Mumei.DependencyInjection.Core;
+﻿using System.Reflection;
 
-public sealed class DynamicSingletonBinding : SingletonBinding<object> {
-  private readonly object _instance;
+namespace Mumei.DependencyInjection.Core;
 
-  public DynamicSingletonBinding(object instance) {
-    _instance = instance;
+public static class DynamicSingletonBinding {
+  [ThreadStatic]
+  internal static object[]? CtorCallArgs;
+
+  internal static readonly Type[] CtorArgTypes = { typeof(object) };
+
+  public static Binding CreateDynamic(
+    Type bindingType,
+    object instance
+  ) {
+    var ctorCallArgs = CtorCallArgs ??= new object[1];
+    ctorCallArgs[0] = instance;
+
+    return (Binding)GetConstructorForProviderType(bindingType).Invoke(ctorCallArgs);
   }
 
-  protected internal override object Create(IInjector? scope = null) {
+  private static ConstructorInfo GetConstructorForProviderType(Type providerType) {
+    return typeof(DynamicSingletonBinding<>)
+      .MakeGenericType(providerType)
+      .GetConstructor(CtorArgTypes)!;
+  }
+}
+
+public sealed class DynamicSingletonBinding<TProvider> : SingletonBinding<TProvider> {
+  private readonly TProvider _instance;
+
+  public DynamicSingletonBinding(object instance) {
+    _instance = (TProvider)instance;
+  }
+
+  protected internal override TProvider Create(IInjector? scope = null) {
     return _instance;
   }
 }

@@ -34,19 +34,23 @@ public sealed class StaticInjector : IInjector {
     internal List<(object Token, Binding Instance)> Bindings { get; } = new();
 
     public StaticInjectorProviderCollection Add<TToken, TInstance>(TInstance instance) where TInstance : TToken {
-      return AddToCollection(typeof(TToken), instance!);
+      return AddToCollection(typeof(TToken), typeof(TToken), instance!);
     }
 
     public StaticInjectorProviderCollection Add<TToken>(TToken instance) {
-      return AddToCollection(typeof(TToken), instance!);
+      return AddToCollection(typeof(TToken), typeof(TToken), instance!);
     }
 
     public StaticInjectorProviderCollection Add(object token, object instance) {
-      return AddToCollection(token, instance);
+      if (token is not Type bindingType) {
+        bindingType = instance.GetType();
+      }
+
+      return AddToCollection(bindingType, token, instance);
     }
 
-    private StaticInjectorProviderCollection AddToCollection(object token, object instance) {
-      Bindings.Add((token, new DynamicSingletonBinding(instance)));
+    private StaticInjectorProviderCollection AddToCollection(Type bindingType, object token, object instance) {
+      Bindings.Add((token, DynamicSingletonBinding.CreateDynamic(bindingType, instance)));
       return this;
     }
   }

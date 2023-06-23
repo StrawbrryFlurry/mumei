@@ -2,7 +2,7 @@
 using CleanArchitectureApplication.ApiHost.Generated;
 using CleanArchitectureApplication.Presentation.Ordering;
 
-var app = PlatformInjector.CreateEnvironment<IAppModule>();
+var app = Platform.CreateEnvironment<IAppModule>();
 
 var orderController = app.Get<OrderController>();
 

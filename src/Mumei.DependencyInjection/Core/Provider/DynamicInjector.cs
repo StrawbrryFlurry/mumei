@@ -1,16 +1,42 @@
 ﻿namespace Mumei.DependencyInjection.Core;
 
-public abstract class DynamicProviderBinder {
+public abstract class DynamicInjector {
   private readonly IInjector _injector;
   private readonly Dictionary<object, Binding> _bindings = new();
   private readonly ProviderCollection _providers = new();
 
-  public DynamicProviderBinder(
+  public IReadOnlyCollection<ProviderDescriptor> Providers => _providers;
+
+  public DynamicInjector(
     IInjector injector,
-    Action<ProviderCollection> configureBinder
+    Action<ProviderCollection> providerBinder
   ) {
     _injector = injector;
-    configureBinder(_providers);
+    ConfigureProviders(providerBinder);
+  }
+
+  private void ConfigureProviders(Action<ProviderCollection> providerBinder) {
+    providerBinder(_providers);
+
+    // ToList allows us to iterate over a copy of the collection while adding to it.
+    foreach (var provider in _providers.ToList()) {
+      // In generated injectors, bindings are automatically added as providers.
+      // Here, we need to manually do that work after the provider collection
+      // has been configured.
+      AddProviderBindingAsProvider(provider);
+    }
+  }
+
+  private void AddProviderBindingAsProvider(ProviderDescriptor provider) {
+    var providerType = GetProviderType(provider);
+    var genericProviderType = typeof(Binding<>).MakeGenericType(providerType);
+
+    _providers.Add(new ProviderDescriptor {
+      Lifetime = InjectorLifetime.Singleton,
+      Token = genericProviderType,
+      // TODO: Can we somehow avoid capturing `provider` in a closure?
+      ImplementationFactory = _ => MakeDynamicBinding(provider)
+    });
   }
 
   public bool TryGet(object token, out object provider) {
@@ -19,23 +45,7 @@ public abstract class DynamicProviderBinder {
       return true;
     }
 
-    ProviderDescriptor? descriptor = null;
-    if (IsProviderBinding(token, out var bindingType)) {
-      if (_bindings.TryGetValue(bindingType, out binding)) {
-        provider = binding;
-        return true;
-      }
-
-      if (!_providers.TryGet(bindingType, out descriptor)) {
-        provider = default!;
-        return false;
-      }
-
-      provider = MakeDynamicBinding(descriptor!);
-      return true;
-    }
-
-    if (!_providers.TryGet(token, out descriptor)) {
+    if (!_providers.TryGet(token, out var descriptor)) {
       provider = default!;
       return false;
     }
@@ -52,7 +62,7 @@ public abstract class DynamicProviderBinder {
 
     Binding binding;
     if (descriptor.Lifetime is InjectorLifetime.Scoped) {
-      binding = new DynamicScopedBinding(factory(descriptor), _injector);
+      binding = DynamicScopedBinding.CreateDynamic(bindingType, factory(descriptor), _injector);
       _bindings.Add(token, binding);
       return binding;
     }
@@ -63,13 +73,14 @@ public abstract class DynamicProviderBinder {
       return binding;
     }
 
-    binding = new DynamicSingletonBinding(factory(descriptor)(_injector));
+    binding = DynamicSingletonBinding.CreateDynamic(bindingType, factory(descriptor)(_injector));
     _bindings.Add(token, binding);
     return binding;
   }
 
-  private static Func<ProviderDescriptor, Func<IInjector, object>>
-    MakeDescriptorFactory(ProviderDescriptor descriptor) {
+  private static Func<ProviderDescriptor, Func<IInjector, object>> MakeDescriptorFactory(
+    ProviderDescriptor descriptor
+  ) {
     if (descriptor.ImplementationInstance is not null) {
       return static d => _ => d.ImplementationInstance!;
     }
@@ -103,21 +114,5 @@ public abstract class DynamicProviderBinder {
     }
 
     throw new InvalidOperationException($"Could not determine provider type for provider {provider}.");
-  }
-
-  private static bool IsProviderBinding(object token, out Type bindingType) {
-    if (token is not Type type) {
-      bindingType = null!;
-      return false;
-    }
-
-    var isBinding = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Binding<>);
-    if (!isBinding) {
-      bindingType = null!;
-      return false;
-    }
-
-    bindingType = type.GetGenericArguments()[0];
-    return true;
   }
 }

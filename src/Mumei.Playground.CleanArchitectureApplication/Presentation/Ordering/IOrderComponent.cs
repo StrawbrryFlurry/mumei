@@ -5,7 +5,9 @@ using Mumei.DependencyInjection.Core;
 
 namespace CleanArchitectureApplication.Presentation.Ordering;
 
-public partial interface IOrderComponent : IComponent { }
+public partial interface IOrderComponent : IComponent {
+  OrderController OrderController { get; }
+}
 
 [OrderComponent]
 [Scoped<OrderController>]

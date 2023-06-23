@@ -8,21 +8,23 @@ namespace CleanArchitectureApplication.ApiHost.Generated;
 
 public sealed class λOrderingComponentInjector : IOrderingComponentComposite {
   public IInjector Parent { get; set; }
-
-  internal readonly Binding<IOrderRepository> OrderRepositoryBinding;
-  internal Binding<OrderController> OrderControllerBinding { get; private set; }
-  internal Binding<IMediator> MediatorBinding { get; private set; }
+  public InjectorBloomFilter Bloom => new λOrderingComponentInjectorBloom();
   
-  public IMediator Mediator => MediatorBinding.Get(this);
+  private readonly Binding<IMediator> _mediatorBinding;
+  public IMediator Mediator => _mediatorBinding.Get(this);
+  
+  private readonly Binding<OrderController> _orderControllerBinding;
+  public OrderController OrderController => _orderControllerBinding.Get(this);
+  
+  private readonly Binding<IOrderRepository> _orderRepositoryBinding;
+  public IOrderRepository OrderRepository => _orderRepositoryBinding.Get(this);
 
   public λOrderingComponentInjector(IInjector parent) {
     Parent = parent;
-    MediatorBinding = new LateBoundBinding<IMediator>(Parent, injector => injector.Get<Binding<IMediator>>());
-    OrderControllerBinding = new λOrderControllerBinding(MediatorBinding);
-    OrderRepositoryBinding = new λOrderRepositoryBinding();
+    _mediatorBinding = new LateBoundBinding<IMediator>(Parent, injector => injector.Get<Binding<IMediator>>());
+    _orderControllerBinding = new λOrderControllerBinding(_mediatorBinding);
+    _orderRepositoryBinding = new λOrderRepositoryBinding();
   }
-
-  public IOrderRepository OrderRepository => OrderRepositoryBinding.Get();
 
   public TProvider Get<TProvider>(IInjector? scope = null, InjectFlags flags = InjectFlags.None) {
     return (TProvider)Get(typeof(TProvider), scope, flags);
@@ -38,13 +40,43 @@ public sealed class λOrderingComponentInjector : IOrderingComponentComposite {
       Get<IModuleRef<IModule>>().Get(token, scope, flags & ~InjectFlags.Host);
     }
 
-    var result = token switch {
-      _ when ReferenceEquals(token, typeof(IOrderRepository)) => OrderRepositoryBinding.Get(scope),
-      _ when ReferenceEquals(token, typeof(OrderController)) => OrderControllerBinding.Get(scope),
-      _ => Parent.Get(token, scope, flags)
-    };
-
-    return result;
+    if (TryGet(token, scope, flags, out var result)) {
+      return result;
+    }
+    
+    return Parent.Get(token, scope, flags);
   }
 
+  public bool TryGet(object token, IInjector scope, InjectFlags flags, out object? instance) {
+    if (!Bloom.Contains(token)) {
+      instance = null;
+      return false;
+    }
+    
+    if (ReferenceEquals(token, typeof(IOrderRepository))) {
+      instance = _orderRepositoryBinding.Get(scope);
+      return true;
+    }
+
+    if (ReferenceEquals(token, typeof(OrderController))) {
+      instance = _orderControllerBinding.Get(scope);
+      return true;
+    }
+    
+    if (ReferenceEquals(token, typeof(IMediator))) {
+      instance = _mediatorBinding.Get(scope);
+      return true;
+    }
+
+    instance = null!;
+    return false;
+  }
+ 
+  internal sealed class λOrderingComponentInjectorBloom : InjectorBloomFilter {
+    public λOrderingComponentInjectorBloom() {
+      Add(typeof(OrderController));
+      Add(typeof(IOrderRepository));
+      Add(typeof(IMediator));
+    }
+  }
 }

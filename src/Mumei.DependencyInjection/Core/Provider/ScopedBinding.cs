@@ -2,7 +2,7 @@
 
 namespace Mumei.DependencyInjection.Core;
 
-public abstract class ScopedBinding<TProvider> : Binding<TProvider> where TProvider : class {
+public abstract class ScopedBinding<TProvider> : Binding<TProvider> {
   private readonly ConcurrentDictionary<WeakReference<IInjector>, TProvider> _instances = new();
 
   /// <summary>
