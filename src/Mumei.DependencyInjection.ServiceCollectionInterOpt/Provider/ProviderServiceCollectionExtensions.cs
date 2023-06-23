@@ -51,7 +51,7 @@ public static class ProviderServiceCollectionExtensions {
     }
 
     if (descriptor.ImplementationFactory is not null) {
-      return injector => descriptor.ImplementationFactory(new InjectorServiceProvider(injector));
+      return injector => descriptor.ImplementationFactory(injector.Get<IServiceProvider>());
     }
 
     throw new InvalidOperationException("Invalid service descriptor");
