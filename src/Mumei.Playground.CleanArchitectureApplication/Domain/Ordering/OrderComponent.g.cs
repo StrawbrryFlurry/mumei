@@ -2,7 +2,7 @@
 
 namespace CleanArchitectureApplication.Domain.Ordering; 
 
-public sealed class OrderComponentAttribute : Attribute, IComponentMarker { }
+public sealed class OrderingComponentAttribute : Attribute, IComponentMarker { }
 
-[OrderComponent]
+[OrderingComponent]
 public partial interface IOrderComponent : IComponent { }

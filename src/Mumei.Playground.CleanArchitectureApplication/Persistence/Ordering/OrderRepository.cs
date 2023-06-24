@@ -1,4 +1,5 @@
-﻿using CleanArchitectureApplication.Domain.Ordering;
+﻿using System.Collections.Immutable;
+using CleanArchitectureApplication.Domain.Ordering;
 
 namespace CleanArchitectureApplication.Persistence.Ordering;
 
@@ -7,5 +8,9 @@ internal sealed class OrderRepository : IOrderRepository {
 
   public void Add(Order order) {
     _orders.Add(order);
+  }
+
+  public IReadOnlyCollection<Order> GetAll() {
+    return _orders.ToImmutableList();
   }
 }

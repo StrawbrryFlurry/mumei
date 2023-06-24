@@ -3,7 +3,7 @@ using Mumei.DependencyInjection.Attributes;
 
 namespace CleanArchitectureApplication.Persistence.Ordering;
 
-[OrderComponent]
+[OrderingComponent]
 public interface IOrderComponent {
   [Scoped<OrderRepository>]
   public IOrderRepository OrderRepository { get; }

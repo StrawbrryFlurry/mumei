@@ -1,5 +1,6 @@
 ﻿using CleanArchitectureApplication.Domain.Common.Persistence;
 using CleanArchitectureApplication.Persistence;
+using CleanArchitectureApplication.Persistence.Ordering;
 using Mumei.DependencyInjection.Core;
 
 namespace CleanArchitectureApplication.ApiHost.Generated;
@@ -11,8 +12,15 @@ public sealed class λPersistenceModuleInjector : IPersistenceModule {
 
   public IUnitOfWork UnitOfWork => _iunitOfWorkBinding.Get(this);
   public PersistenceOptions Options { get; }
+  
+  private readonly λOrderingComponentInjector _orderingComponent;
+  public IOrderComponent Ordering => _orderingComponent;
 
-  public λPersistenceModuleInjector(IInjector parent) {
+  public λPersistenceModuleInjector(
+    IInjector parent,
+    λOrderingComponentInjector orderingComponent
+  ) {
+    _orderingComponent = orderingComponent;
     Parent = parent;
     _iunitOfWorkBinding = new λIUnitOfworkBinding();
   }

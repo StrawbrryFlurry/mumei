@@ -9,7 +9,7 @@ public partial interface IOrderComponent : IComponent {
   OrderController OrderController { get; }
 }
 
-[OrderComponent]
+[OrderingComponent]
 [Scoped<OrderController>]
 public partial interface IOrderComponent {
   [ForwardRef(ForwardRefSource.Parent)]

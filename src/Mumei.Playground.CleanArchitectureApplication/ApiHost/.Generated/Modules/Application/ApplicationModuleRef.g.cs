@@ -7,7 +7,6 @@ public sealed class λApplicationModuleRef : ModuleRef<IApplicationModule> {
   private readonly IComponentRef<IComponent>[] _components = new IComponentRef<IComponent>[1];
   private readonly IModuleRef<IModule>[] _imports = new IModuleRef<IModule>[0];
 
-
   public override IReadOnlyCollection<IComponentRef<IComponent>> Components => _components;
   public override IReadOnlyCollection<IModuleRef<IModule>> Imports => _imports;
 

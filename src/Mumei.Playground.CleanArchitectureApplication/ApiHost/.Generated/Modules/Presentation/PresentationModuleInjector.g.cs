@@ -2,6 +2,7 @@
 using CleanArchitectureApplication.Presentation;
 using CleanArchitectureApplication.Presentation.Ordering;
 using Mumei.DependencyInjection.Core;
+using IOrderComponent = CleanArchitectureApplication.Presentation.Ordering.IOrderComponent;
 
 namespace CleanArchitectureApplication.ApiHost.Generated;
 
@@ -10,12 +11,13 @@ public sealed class λPresentationModuleInjector : IPresentationModule {
   public IInjector Parent { get; }
   
   internal readonly λOrderingComponentInjector _orderingComponent;
+  public IOrderComponent Ordering => _orderingComponent;
 
   public λPresentationModuleInjector(IInjector parent, λOrderingComponentInjector orderingComponent) {
     Parent = parent;
     _orderingComponent = orderingComponent;
     
-    Bloom = new λPresentationModuleλBloom(_orderingComponent);
+    Bloom = new λPresentationModuleBloom(_orderingComponent);
   }
   
   public TProvider Get<TProvider>(IInjector scope = null, InjectFlags flags = InjectFlags.None) {
@@ -50,8 +52,8 @@ public sealed class λPresentationModuleInjector : IPresentationModule {
     return false;
   }
   
-  internal sealed class λPresentationModuleλBloom : InjectorBloomFilter {
-    public λPresentationModuleλBloom(
+  internal sealed class λPresentationModuleBloom : InjectorBloomFilter {
+    public λPresentationModuleBloom(
       λOrderingComponentInjector orderingComponent
     ) {
       Merge(orderingComponent.Bloom);

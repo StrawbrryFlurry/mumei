@@ -41,7 +41,11 @@ public static class λAppModuleRealizer {
 
   private static IModuleRef<IPersistenceModule> RealizePersistenceModule(IInjector parent) {
     var presentationModuleRef = new λPersistenceModuleRef(parent);
-    presentationModuleRef.Realize();
+    
+    var orderingComponentRef = new λOrderingComponentRef(presentationModuleRef);
+    orderingComponentRef.Realize();
+    
+    presentationModuleRef.Realize(orderingComponentRef);
 
     return presentationModuleRef;
   }

@@ -13,8 +13,6 @@ public partial interface IAppModule : IModule {
   public IApplicationModule ApplicationModule { get; }
   public IPersistenceModule PersistenceModule { get; }
   public IPresentationModule PresentationModule { get; }
-
-  public IOrderingComponentComposite Ordering { get; }
 }
 
 [Entrypoint]

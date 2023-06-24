@@ -7,10 +7,6 @@ using IOrderComponent = CleanArchitectureApplication.Application.Ordering.IOrder
 
 namespace CleanArchitectureApplication.Application;
 
-public partial interface IApplicationModule : IModule {
-  public IOrderComponent Ordering { get; }  
-}
-
 public sealed class λApplicationModuleInjector : IApplicationModule {
   public readonly InjectorBloomFilter Bloom;
   public IInjector Parent { get; }
@@ -25,7 +21,7 @@ public sealed class λApplicationModuleInjector : IApplicationModule {
     _orderingComponent = orderingComponent;
     _mediatrBinderλIApplicationModule = new λApplicationModuleλMediatrBinderλIApplicationModule(this);
     
-    Bloom = new λApplicationModuleλBloom(_orderingComponent, _mediatrBinderλIApplicationModule);
+    Bloom = new λApplicationModuleInjectorBloom(_orderingComponent, _mediatrBinderλIApplicationModule);
   }
 
   public TProvider Get<TProvider>(IInjector? scope = null, InjectFlags flags = InjectFlags.None) {
@@ -66,8 +62,8 @@ public sealed class λApplicationModuleInjector : IApplicationModule {
     return false;
   }
   
-  internal sealed class λApplicationModuleλBloom : InjectorBloomFilter {
-    public λApplicationModuleλBloom(
+  internal sealed class λApplicationModuleInjectorBloom : InjectorBloomFilter {
+    public λApplicationModuleInjectorBloom(
       λOrderingComponentInjector orderingComponent,
       λApplicationModuleλMediatrBinderλIApplicationModule mediatrBinderλIApplicationModule
     ) {

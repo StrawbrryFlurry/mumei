@@ -9,8 +9,10 @@
 ///     making reliable module resolution impossible.
 ///   </remarks>
 /// </summary>
-[AttributeUsage(AttributeTargets.Class)]
-public sealed class ComponentAttribute : Attribute { }
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
+public sealed class ComponentAttribute : Attribute {
+  public ComponentAttribute(string Name) { }
+}
 
 /// <summary>
 ///   Declares that the component of type <typeparamref name="TComponent" /> is part of this module

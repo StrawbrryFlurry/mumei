@@ -5,12 +5,20 @@ using Mumei.DependencyInjection.Core;
 namespace CleanArchitectureApplication.ApiHost.Generated; 
 
 public sealed class λPersistenceModuleRef : ModuleRef<IPersistenceModule> {
+  private readonly IComponentRef<IComponent>[] _components = new IComponentRef<IComponent>[1];
   public override IReadOnlyCollection<IComponentRef<IComponent>> Components { get; }
+  
+  private readonly IModuleRef<IModule>[] _imports = new IModuleRef<IModule>[0];
   public override IReadOnlyCollection<IModuleRef<IModule>> Imports { get; }
  
   public λPersistenceModuleRef(IInjector parent) : base(parent) { }
 
-  public void Realize() {
-    Injector = new λPersistenceModuleInjector(Parent);
+  public void Realize(IComponentRef<IOrderingComponentComposite> orderingComponent) {
+    Injector = new λPersistenceModuleInjector(
+      Parent,
+      (λOrderingComponentInjector)orderingComponent.Injector
+    );
+    
+    _components[0] = orderingComponent;
   }
 }

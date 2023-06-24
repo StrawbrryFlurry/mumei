@@ -6,7 +6,9 @@ using Mumei.DependencyInjection.Core;
 
 namespace CleanArchitectureApplication.Persistence;
 
-public partial interface IPersistenceModule : IModule { }
+public partial interface IPersistenceModule : IModule {
+  public IOrderComponent Ordering { get; }
+}
 
 [Import<IOrderComponent>]
 public partial interface IPersistenceModule {

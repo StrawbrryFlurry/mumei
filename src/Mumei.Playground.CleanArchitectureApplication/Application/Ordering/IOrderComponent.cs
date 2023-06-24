@@ -1,9 +1,11 @@
 ﻿using CleanArchitectureApplication.Domain.Ordering;
+using Mumei.DependencyInjection.Attributes;
 using Mumei.DependencyInjection.Core;
 
 namespace CleanArchitectureApplication.Application.Ordering;
 
+[OrderingComponent]
 public partial interface IOrderComponent : IComponent { }
 
-[OrderComponent]
+[Component("Ordering")]
 public partial interface IOrderComponent { }
