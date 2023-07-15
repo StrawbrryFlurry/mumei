@@ -21,6 +21,7 @@ internal sealed class λAppModuleApplicationEnvironment : ApplicationEnvironment
   }
 
   public override object Get(object token, IInjector scope = null, InjectFlags flags = InjectFlags.None) {
+    scope ??= this;
     if (Injector.TryGet(token, scope, flags, out var instance)) {
       return instance;
     }

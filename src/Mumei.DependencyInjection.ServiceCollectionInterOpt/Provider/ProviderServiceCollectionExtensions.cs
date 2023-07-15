@@ -23,8 +23,8 @@ public static class ProviderServiceCollectionExtensions {
 
       providers.Add(new ProviderDescriptor {
         Token = typeof(IServiceProvider),
-        ImplementationFactory = injector => new InjectorServiceProvider(injector),
-        Lifetime = InjectorLifetime.Singleton
+        ImplementationFactory = (injector, scope) => new InjectorServiceProvider(injector, scope),
+        Lifetime = InjectorLifetime.Scoped
       });
     }
 
@@ -41,17 +41,22 @@ public static class ProviderServiceCollectionExtensions {
     return providers;
   }
 
-  private static Func<IInjector, object> MakeServiceDescriptorFactory(ServiceDescriptor descriptor) {
+  private static ProviderFactory MakeServiceDescriptorFactory(ServiceDescriptor descriptor) {
     if (descriptor.ImplementationInstance is not null) {
-      return _ => descriptor.ImplementationInstance;
+      return (_, _) => descriptor.ImplementationInstance;
     }
 
     if (descriptor.ImplementationType is not null) {
-      return injector => InjectorTypeActivator.CreateInstance(descriptor.ImplementationType, injector);
+      return (injector, scope) => InjectorTypeActivator.CreateInstance(
+        descriptor.ImplementationType,
+        injector,
+        scope
+      );
     }
 
     if (descriptor.ImplementationFactory is not null) {
-      return injector => descriptor.ImplementationFactory(injector.Get<IServiceProvider>());
+      return (injector, scope) =>
+        descriptor.ImplementationFactory(injector.Get<IServiceProvider>(scope));
     }
 
     throw new InvalidOperationException("Invalid service descriptor");

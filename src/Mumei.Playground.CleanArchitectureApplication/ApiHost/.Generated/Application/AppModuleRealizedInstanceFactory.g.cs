@@ -12,7 +12,15 @@ public static class λAppModuleRealizer {
     var presentationModule = RealizePresentationModule(appModule);
     var persistenceModule = RealizePersistenceModule(appModule);
 
-    appModule.Realize(applicationModule, presentationModule, persistenceModule);
+    var orderingComponentRef = new λOrderingComponentRef(appModule);
+    orderingComponentRef.Realize();
+    
+    appModule.Realize(
+      applicationModule,
+      presentationModule,
+      persistenceModule,
+      orderingComponentRef
+    );
 
     return appModule;
   }

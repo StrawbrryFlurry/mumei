@@ -1,14 +1,15 @@
 ﻿using CleanArchitectureApplication.ApiHost;
 using CleanArchitectureApplication.ApiHost.Generated;
+using CleanArchitectureApplication.Application;
 using CleanArchitectureApplication.Domain.Ordering;
 using CleanArchitectureApplication.Presentation.Ordering;
 using Mumei.DependencyInjection.Core;
 
 var appEnvironment = Platform.CreateEnvironment<IAppModule>();
 
-var orderController = appEnvironment.Get<OrderController>(SingletonScopeλInjector.Instance);
+var orderController = appEnvironment.Get<OrderController>();
 
-var orderRepository = appEnvironment.Get<IOrderRepository>(SingletonScopeλInjector.Instance);
+var orderRepository = appEnvironment.Get<IOrderRepository>();
 
 var order = await orderController.Create(Guid.NewGuid(), new List<Guid>() { Guid.NewGuid(), Guid.NewGuid() });
 

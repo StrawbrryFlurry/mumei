@@ -6,11 +6,11 @@ public static class DynamicTransientBinding {
   [ThreadStatic]
   internal static object[]? CtorCallArgs;
 
-  internal static readonly Type[] CtorArgTypes = { typeof(Func<IInjector, object>), typeof(IInjector) };
+  internal static readonly Type[] CtorArgTypes = { typeof(ProviderFactory), typeof(IInjector) };
 
   public static Binding CreateDynamic(
     Type bindingType,
-    Func<IInjector, object> factory,
+    ProviderFactory factory,
     IInjector injector
   ) {
     var ctorCallArgs = CtorCallArgs ??= new object[2];
@@ -28,15 +28,15 @@ public static class DynamicTransientBinding {
 }
 
 public sealed class DynamicTransientBinding<TProvider> : TransientBinding<TProvider> {
-  private readonly Func<IInjector, object> _factory;
+  private readonly ProviderFactory _factory;
   private readonly IInjector _injector;
 
-  public DynamicTransientBinding(Func<IInjector, object> factory, IInjector injector) {
+  public DynamicTransientBinding(ProviderFactory factory, IInjector injector) {
     _factory = factory;
     _injector = injector;
   }
 
   protected internal override TProvider Create(IInjector? scope = null) {
-    return (TProvider)_factory(_injector);
+    return (TProvider)_factory(_injector, scope);
   }
 }

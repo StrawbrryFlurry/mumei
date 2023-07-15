@@ -32,16 +32,16 @@ public abstract class DynamicInjector {
     var genericProviderType = typeof(Binding<>).MakeGenericType(providerType);
 
     _providers.Add(new ProviderDescriptor {
-      Lifetime = InjectorLifetime.Singleton,
+      Lifetime = InjectorLifetime.Scoped,
       Token = genericProviderType,
       // TODO: Can we somehow avoid capturing `provider` in a closure?
-      ImplementationFactory = _ => MakeDynamicBinding(provider)
+      ImplementationFactory = (_, _) => MakeDynamicBinding(provider)
     });
   }
 
-  public bool TryGet(object token, out object provider) {
+  public bool TryGet(object token, IInjector scope, out object provider) {
     if (_bindings.TryGetValue(token, out var binding)) {
-      provider = binding.GetInstance(_injector);
+      provider = binding.GetInstance(scope);
       return true;
     }
 
@@ -51,46 +51,52 @@ public abstract class DynamicInjector {
     }
 
     binding = MakeDynamicBinding(descriptor!);
-    provider = binding.GetInstance(_injector);
+    provider = binding.GetInstance(scope);
     return true;
   }
 
   private Binding MakeDynamicBinding(ProviderDescriptor descriptor) {
     var token = descriptor.Token;
-    var factory = MakeDescriptorFactory(descriptor);
+    // This avoids capturing the descriptor as a closure
+    var providerFactory = MakeProviderFactoryForDescriptor(descriptor);
     var bindingType = GetProviderType(descriptor);
 
     Binding binding;
     if (descriptor.Lifetime is InjectorLifetime.Scoped) {
-      binding = DynamicScopedBinding.CreateDynamic(bindingType, factory(descriptor), _injector);
+      binding = DynamicScopedBinding.CreateDynamic(bindingType, providerFactory, _injector);
       _bindings.Add(token, binding);
       return binding;
     }
 
     if (descriptor.Lifetime is InjectorLifetime.Transient) {
-      binding = DynamicTransientBinding.CreateDynamic(bindingType, factory(descriptor), _injector);
+      binding = DynamicTransientBinding.CreateDynamic(bindingType, providerFactory, _injector);
       _bindings.Add(token, binding);
       return binding;
     }
 
-    binding = DynamicSingletonBinding.CreateDynamic(bindingType, factory(descriptor)(_injector));
+    var singletonInstance = providerFactory(_injector);
+    binding = DynamicSingletonBinding.CreateDynamic(bindingType, singletonInstance);
     _bindings.Add(token, binding);
     return binding;
   }
 
-  private static Func<ProviderDescriptor, Func<IInjector, object>> MakeDescriptorFactory(
+  private static ProviderFactory MakeProviderFactoryForDescriptor(
     ProviderDescriptor descriptor
   ) {
+    // TODO: Get rid of `descriptor` closures
     if (descriptor.ImplementationInstance is not null) {
-      return static d => _ => d.ImplementationInstance!;
+      return (_, _) => descriptor.ImplementationInstance!;
     }
 
     if (descriptor.ImplementationFactory is not null) {
-      return static d => d.ImplementationFactory!;
+      return descriptor.ImplementationFactory!;
     }
 
     if (descriptor.ImplementationType is not null) {
-      return static d => injector => InjectorTypeActivator.CreateInstance(d.ImplementationType!, injector);
+      return (injector, scope) => InjectorTypeActivator.CreateInstance(
+        descriptor.ImplementationType!,
+        injector, scope
+      );
     }
 
     throw new InvalidOperationException();

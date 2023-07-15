@@ -16,27 +16,31 @@ namespace CleanArchitectureApplication.ApiHost;
 public sealed class λAppModuleInjector : IAppModule {
   public IInjector Parent { get; }
 
-  internal readonly λApplicationModuleInjector λApplicationModule;
-  internal readonly λPresentationModuleInjector λPresentationModule;
-  internal readonly λPersistenceModuleInjector λPersistenceModule;
-  
+  internal readonly λApplicationModuleInjector _applicationModule;
+  internal readonly λPresentationModuleInjector _presentationModule;
+  internal readonly λPersistenceModuleInjector _persistenceModule;
+  private readonly λOrderingComponentInjector _orderingComponent;
+
   public IDomainModule DomainModule { get; }
-  public IApplicationModule ApplicationModule => λApplicationModule;
-  public IPersistenceModule PersistenceModule { get; }
-  public IPresentationModule PresentationModule { get; }
-  public IOrderingComponentComposite Ordering { get; }
+  public IApplicationModule ApplicationModule => _applicationModule;
+  public IPersistenceModule PersistenceModule => _persistenceModule;
+  public IPresentationModule PresentationModule => _presentationModule;
+  
+  public IOrderingComponentComposite Ordering => _orderingComponent;
 
   public λAppModuleInjector(
     IInjector parent,
     λApplicationModuleInjector applicationModule,
     λPresentationModuleInjector presentationModule,
-    λPersistenceModuleInjector persistenceModule
+    λPersistenceModuleInjector persistenceModule,
+    λOrderingComponentInjector orderingComponent
   ) {
     Parent = parent;
     
-    λApplicationModule = applicationModule;
-    λPresentationModule = presentationModule;
-    λPersistenceModule = persistenceModule;
+    _applicationModule = applicationModule;
+    _presentationModule = presentationModule;
+    _persistenceModule = persistenceModule;
+    _orderingComponent = orderingComponent;
   }
 
   public TProvider Get<TProvider>(IInjector scope = null, InjectFlags flags = InjectFlags.None) {
@@ -58,15 +62,15 @@ public sealed class λAppModuleInjector : IAppModule {
   }
 
   internal bool TryGet(object token, IInjector scope, InjectFlags flags, out object? instance) {
-    if (λApplicationModule.TryGet(token, scope, flags, out instance)) {
+    if (_applicationModule.TryGet(token, scope, flags, out instance)) {
       return true;
     }
     
-    if (λPresentationModule.TryGet(token, scope, flags, out instance)) {
+    if (_presentationModule.TryGet(token, scope, flags, out instance)) {
       return true;
     }
     
-    if (λPersistenceModule.TryGet(token, scope, flags, out instance)) {
+    if (_persistenceModule.TryGet(token, scope, flags, out instance)) {
       return true;
     }
     

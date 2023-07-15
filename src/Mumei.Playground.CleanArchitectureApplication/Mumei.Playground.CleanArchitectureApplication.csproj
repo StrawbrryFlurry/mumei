@@ -24,9 +24,9 @@
         <Compile Include="ApiHost\.Generated\Components\Ordering\OrderingComponentInjector.g.cs"/>
         <Compile Include="ApiHost\.Generated\Components\Ordering\λOrderingComponentRef.cs"/>
         <Compile Include="ApiHost\.Generated\Components\Ordering\OrderRepositoryBinding.g.cs"/>
-        <Compile Include="ApiHost\.Generated\Global\ApplicationEnvironment.g.cs" />
+        <Compile Include="ApiHost\.Generated\Global\ApplicationEnvironment.g.cs"/>
         <Compile Include="ApiHost\.Generated\Global\ContextInjector.g.cs"/>
-        <Compile Include="ApiHost\.Generated\Global\PlatformInjector.g.cs" />
+        <Compile Include="ApiHost\.Generated\Global\PlatformInjector.g.cs"/>
         <Compile Include="ApiHost\.Generated\Modules\Application\ApplicationModuleInjector.g.cs"/>
         <Compile Include="ApiHost\.Generated\Modules\Application\ApplicationModuleMediatrBinderApplicationModule.g.cs"/>
         <Compile Include="ApiHost\.Generated\Modules\Application\ApplicationModuleRef.g.cs"/>

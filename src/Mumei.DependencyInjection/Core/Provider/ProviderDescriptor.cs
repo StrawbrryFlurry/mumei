@@ -5,7 +5,8 @@ public sealed record ProviderDescriptor {
   public Type? ImplementationType { get; init; }
 
   public object? ImplementationInstance { get; init; }
-  public Func<IInjector, object>? ImplementationFactory { get; init; }
+
+  public ProviderFactory? ImplementationFactory { get; init; }
 
   public required InjectorLifetime Lifetime { get; init; }
 }

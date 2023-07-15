@@ -50,7 +50,7 @@ public sealed class λApplicationModuleInjector : IApplicationModule {
       return false;
     }
 
-    if (_mediatrBinderλIApplicationModule.TryGet(token, out instance)) {
+    if (_mediatrBinderλIApplicationModule.TryGet(token, scope, out instance)) {
       return true;
     }
 
