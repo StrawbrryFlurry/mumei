@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
-using Mumei.DependencyInjection.Core;
-using Mumei.DependencyInjection.Internal;
+using Mumei.DependencyInjection.Injector;
+using Mumei.DependencyInjection.Injector.Behavior;
+using Mumei.DependencyInjection.Injector.Implementation;
 using Mumei.Playground.SimpleApplication.Common;
 using WeatherApplication;
 using WeatherApplication.Common;
@@ -16,7 +17,7 @@ public sealed class λApplicationModule : IApplicationModule {
   public WeatherModule WeatherModule => λWeatherModule;
   public CommonModule CommonModule => λCommonModule;
   
-  public IInjector Scope { get; } = SingletonScopeλInjector.Instance;
+  public IInjector Scope { get; } = SingletonScope.Instance;
   public IInjector Parent { get; } = PlatformInjector.Instance;
   
   public TProvider Get<TProvider>(IInjector scope = null, InjectFlags flags = InjectFlags.None) {

@@ -1,5 +1,9 @@
-﻿using Mumei.DependencyInjection.Attributes;
-using Mumei.DependencyInjection.Core;
+﻿using Mumei.DependencyInjection.Injector;
+using Mumei.DependencyInjection.Injector.Behavior;
+using Mumei.DependencyInjection.Module;
+using Mumei.DependencyInjection.Module.Markers;
+using Mumei.DependencyInjection.Providers;
+using Mumei.DependencyInjection.Providers.Registration;
 
 namespace WeatherApplication.Common;
 
@@ -11,7 +15,7 @@ public partial class CommonModule {
   public abstract HttpClient HttpClient { get; }
 
   [Scoped]
-  [Provides]
+  [Provide]
   public ILogger<TCategory> CreateLogger<TCategory>() {
     return _loggerFactory.CreateLogger<TCategory>();
   }

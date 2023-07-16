@@ -3,7 +3,6 @@ using CleanArchitectureApplication.ApiHost.Generated;
 using CleanArchitectureApplication.Application;
 using CleanArchitectureApplication.Domain.Ordering;
 using CleanArchitectureApplication.Presentation.Ordering;
-using Mumei.DependencyInjection.Core;
 
 var appEnvironment = Platform.CreateEnvironment<IAppModule>();
 

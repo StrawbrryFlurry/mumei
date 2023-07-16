@@ -1,5 +1,5 @@
 ﻿using System.Collections;
-using Mumei.DependencyInjection.Core;
+using Mumei.DependencyInjection.Injector;
 
 namespace Mumei.AspNetCore;
 

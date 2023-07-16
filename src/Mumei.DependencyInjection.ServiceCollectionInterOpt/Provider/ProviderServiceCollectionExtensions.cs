@@ -1,5 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Mumei.DependencyInjection.Core;
+using Mumei.DependencyInjection.Injector;
+using Mumei.DependencyInjection.Injector.Registration;
+using Mumei.DependencyInjection.Injector.Resolution;
+using Mumei.DependencyInjection.Providers;
+using Mumei.DependencyInjection.Providers.Dynamic;
+using Mumei.DependencyInjection.Providers.Registration;
 
 namespace Mumei.DependencyInjection.ServiceCollectionInterOpt.Provider;
 
@@ -41,7 +46,7 @@ public static class ProviderServiceCollectionExtensions {
     return providers;
   }
 
-  private static ProviderFactory MakeServiceDescriptorFactory(ServiceDescriptor descriptor) {
+  private static DynamicProviderFactory MakeServiceDescriptorFactory(ServiceDescriptor descriptor) {
     if (descriptor.ImplementationInstance is not null) {
       return (_, _) => descriptor.ImplementationInstance;
     }

@@ -1,6 +1,11 @@
 ﻿using System.Runtime.CompilerServices;
-using Mumei.DependencyInjection.Attributes;
-using Mumei.DependencyInjection.Core;
+using Mumei.DependencyInjection.Injector;
+using Mumei.DependencyInjection.Injector.Behavior;
+using Mumei.DependencyInjection.Module;
+using Mumei.DependencyInjection.Module.Markers;
+using Mumei.DependencyInjection.Module.Registration;
+using Mumei.DependencyInjection.Providers;
+using Mumei.DependencyInjection.Providers.Registration;
 using WeatherApplication.Common;
 using WeatherApplication.Features.Weather.Controllers;
 using WeatherApplication.Features.Weather.Services;

@@ -1,4 +1,6 @@
-﻿using Mumei.DependencyInjection.Attributes;
+﻿using Mumei.DependencyInjection.Injector;
+using Mumei.DependencyInjection.Injector.Resolution;
+using Mumei.DependencyInjection.Providers;
 
 namespace Mumei.DependencyInjection.Playground.NamedProviders;
 

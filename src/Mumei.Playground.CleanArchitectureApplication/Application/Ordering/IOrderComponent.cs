@@ -1,6 +1,5 @@
 ﻿using CleanArchitectureApplication.Domain.Ordering;
-using Mumei.DependencyInjection.Attributes;
-using Mumei.DependencyInjection.Core;
+using Mumei.DependencyInjection.Module;
 
 namespace CleanArchitectureApplication.Application.Ordering;
 

@@ -1,5 +1,4 @@
 ﻿using CleanArchitectureApplication.Domain.Ordering;
-using Mumei.DependencyInjection.Core;
 
 namespace CleanArchitectureApplication.ApiHost.Generated;
 

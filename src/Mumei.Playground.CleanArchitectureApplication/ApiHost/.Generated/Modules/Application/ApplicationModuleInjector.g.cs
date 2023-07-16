@@ -2,7 +2,9 @@
 using System.Runtime.CompilerServices;
 using CleanArchitectureApplication.ApiHost.Generated;
 using CleanArchitectureApplication.Domain.Ordering;
-using Mumei.DependencyInjection.Core;
+using Mumei.DependencyInjection.Injector;
+using Mumei.DependencyInjection.Injector.Behavior;
+using Mumei.DependencyInjection.Injector.Resolution;
 using IOrderComponent = CleanArchitectureApplication.Application.Ordering.IOrderComponent;
 
 namespace CleanArchitectureApplication.Application;

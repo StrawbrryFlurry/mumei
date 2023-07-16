@@ -2,9 +2,10 @@
 using CleanArchitectureApplication.Application;
 using CleanArchitectureApplication.Domain;
 using CleanArchitectureApplication.Persistence;
-using Mumei.DependencyInjection.Attributes;
-using Mumei.DependencyInjection.Core;
 using CleanArchitectureApplication.Presentation;
+using Mumei.DependencyInjection.Module;
+using Mumei.DependencyInjection.Module.Markers;
+using Mumei.DependencyInjection.Module.Registration;
 
 namespace CleanArchitectureApplication.ApiHost;
 

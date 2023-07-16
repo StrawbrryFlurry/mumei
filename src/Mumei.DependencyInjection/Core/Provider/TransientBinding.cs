@@ -1,7 +1,0 @@
-﻿namespace Mumei.DependencyInjection.Core;
-
-public abstract class TransientBinding<TProvider> : Binding<TProvider> {
-  public override TProvider Get(IInjector? scope = null) {
-    return Create(scope);
-  }
-}

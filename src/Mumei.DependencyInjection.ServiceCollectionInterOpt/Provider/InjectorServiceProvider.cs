@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
-using Mumei.DependencyInjection.Core;
+using Mumei.DependencyInjection.Injector;
+using Mumei.DependencyInjection.Injector.Behavior;
 
 namespace Mumei.DependencyInjection.ServiceCollectionInterOpt.Provider;
 

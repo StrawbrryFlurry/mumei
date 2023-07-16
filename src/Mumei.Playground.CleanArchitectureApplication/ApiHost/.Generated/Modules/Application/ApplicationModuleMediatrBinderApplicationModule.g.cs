@@ -1,5 +1,9 @@
 ﻿using Microsoft.CodeAnalysis;
-using Mumei.DependencyInjection.Core;
+using Mumei.DependencyInjection.Injector;
+using Mumei.DependencyInjection.Injector.Implementation;
+using Mumei.DependencyInjection.Injector.Resolution;
+using Mumei.DependencyInjection.Providers;
+using Mumei.DependencyInjection.Providers.Registration;
 
 namespace CleanArchitectureApplication.Application; 
 

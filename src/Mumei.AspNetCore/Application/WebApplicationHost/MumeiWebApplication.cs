@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http.Features;
 using Mumei.AspNetCore.Common.Application;
 using Mumei.AspNetCore.Example.Generated;
-using Mumei.DependencyInjection.Core;
+using Mumei.DependencyInjection.Injector;
+using Mumei.DependencyInjection.Module;
 
 namespace Mumei.AspNetCore.Application;
 

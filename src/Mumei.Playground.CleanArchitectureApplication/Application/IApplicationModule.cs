@@ -1,6 +1,7 @@
 ﻿using CleanArchitectureApplication.Application.Ordering;
-using Mumei.DependencyInjection.Attributes;
-using Mumei.DependencyInjection.Core;
+using Mumei.DependencyInjection.Module;
+using Mumei.DependencyInjection.Module.Markers;
+using Mumei.DependencyInjection.Module.Registration;
 
 namespace CleanArchitectureApplication.Application;
 

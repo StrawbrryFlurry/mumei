@@ -1,4 +1,6 @@
-﻿using Mumei.DependencyInjection.Core;
+﻿using Mumei.DependencyInjection.Injector;
+using Mumei.DependencyInjection.Providers;
+using Mumei.DependencyInjection.Providers.Resolution;
 
 namespace WeatherApplication.Features.Weather.Services;
 

@@ -1,8 +1,10 @@
 ﻿using CleanArchitectureApplication.Domain.Common.Persistence;
 using CleanArchitectureApplication.Persistence.Common;
 using CleanArchitectureApplication.Persistence.Ordering;
-using Mumei.DependencyInjection.Attributes;
-using Mumei.DependencyInjection.Core;
+using Mumei.DependencyInjection.Module;
+using Mumei.DependencyInjection.Module.Registration;
+using Mumei.DependencyInjection.Providers;
+using Mumei.DependencyInjection.Providers.Registration;
 
 namespace CleanArchitectureApplication.Persistence;
 

@@ -1,4 +1,5 @@
-﻿using Mumei.DependencyInjection.Core;
+﻿using Mumei.DependencyInjection.Providers;
+using Mumei.DependencyInjection.Providers.Registration;
 
 namespace CleanArchitectureApplication.Domain.Ordering;
 

@@ -1,7 +1,8 @@
 ﻿using CleanArchitectureApplication.Domain.Common.Persistence;
 using CleanArchitectureApplication.Persistence;
 using CleanArchitectureApplication.Persistence.Ordering;
-using Mumei.DependencyInjection.Core;
+using Mumei.DependencyInjection.Injector;
+using Mumei.DependencyInjection.Injector.Behavior;
 
 namespace CleanArchitectureApplication.ApiHost.Generated;
 

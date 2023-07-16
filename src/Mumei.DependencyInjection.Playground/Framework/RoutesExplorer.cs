@@ -1,6 +1,8 @@
 ﻿using System.Reflection;
 using Castle.Core.Internal;
-using Mumei.DependencyInjection.Core;
+using Mumei.DependencyInjection.Injector;
+using Mumei.DependencyInjection.Injector.Implementation;
+using Mumei.DependencyInjection.Module;
 using Mumei.DependencyInjection.Playground.Framework.Http;
 
 namespace Mumei.DependencyInjection.Playground.Framework;
@@ -38,7 +40,8 @@ public class RoutesExplorer {
             c => c.Add(request)
           );
 
-          return componentRef.InvokeWithProviderFactory(requestInjector, method)!;
+          var instance = componentRef.Get(componentRef.Type, requestInjector);
+          return method.Invoke(instance, null)!;
         }
       };
     }

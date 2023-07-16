@@ -2,7 +2,9 @@
 using CleanArchitectureApplication.ApiHost;
 using CleanArchitectureApplication.ApiHost.Generated;
 using CleanArchitectureApplication.ApiHost.Generated.Application;
-using Mumei.DependencyInjection.Core;
+using Mumei.DependencyInjection.Injector;
+using Mumei.DependencyInjection.Injector.Behavior;
+using Mumei.DependencyInjection.Module;
 
 namespace Mumei.Playground.SimpleApplication;
 

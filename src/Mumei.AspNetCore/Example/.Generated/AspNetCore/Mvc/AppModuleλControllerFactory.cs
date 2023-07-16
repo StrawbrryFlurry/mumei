@@ -1,5 +1,5 @@
 ﻿using Mumei.AspNetCore.Mvc.Roslyn;
-using Mumei.DependencyInjection.Core;
+using Mumei.DependencyInjection.Injector;
 
 namespace Mumei.AspNetCore.Example.Generated.Mvc;
 

@@ -1,5 +1,6 @@
 ﻿using CleanArchitectureApplication.ApiHost.Generated;
-using Mumei.DependencyInjection.Core;
+using Mumei.DependencyInjection.Injector;
+using Mumei.DependencyInjection.Module;
 
 namespace CleanArchitectureApplication.Application;
 

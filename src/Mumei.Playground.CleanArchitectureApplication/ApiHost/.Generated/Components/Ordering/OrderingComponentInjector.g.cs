@@ -2,7 +2,12 @@
 using CleanArchitectureApplication.Domain.Ordering;
 using CleanArchitectureApplication.Presentation.Ordering;
 using MediatR;
-using Mumei.DependencyInjection.Core;
+using Mumei.DependencyInjection.Injector;
+using Mumei.DependencyInjection.Injector.Behavior;
+using Mumei.DependencyInjection.Injector.Resolution;
+using Mumei.DependencyInjection.Module;
+using Mumei.DependencyInjection.Providers;
+using Mumei.DependencyInjection.Providers.Dynamic.Resolution;
 
 namespace CleanArchitectureApplication.ApiHost.Generated;
 

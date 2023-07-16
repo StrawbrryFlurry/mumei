@@ -1,5 +1,8 @@
-﻿using Mumei.DependencyInjection.Core;
+﻿using Mumei.DependencyInjection.Injector;
+using Mumei.DependencyInjection.Injector.Behavior;
 using Mumei.DependencyInjection.Playground;
+using Mumei.DependencyInjection.Providers;
+using Mumei.DependencyInjection.Providers.Resolution;
 using WeatherApplication.Common;
 
 namespace Mumei.Playground.SimpleApplication.Common; 
