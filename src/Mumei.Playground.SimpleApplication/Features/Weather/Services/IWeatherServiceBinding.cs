@@ -4,11 +4,11 @@ using Mumei.DependencyInjection.Providers.Resolution;
 
 namespace WeatherApplication.Features.Weather.Services;
 
-public sealed class WeatherServiceλBinding : ScopedBinding<IWeatherService> {
+public sealed class λWeatherServiceBinding : ScopedBinding<IWeatherService> {
   private readonly Binding<HttpClient> _httpClientBinding;
   private readonly Binding<ILogger<WeatherService>> _loggerWeatherServiceBinding;
 
-  public WeatherServiceλBinding(
+  public λWeatherServiceBinding(
     Binding<HttpClient> httpClientBinding,
     Binding<ILogger<WeatherService>> loggerWeatherServiceBinding
   ) {

@@ -6,10 +6,10 @@ using WeatherApplication.Features.Weather.Services;
 
 namespace Mumei.DependencyInjection.Playground.Example.Modules; 
 
-public class WeatherControllerλBinding : ScopedBinding<WeatherController> {
+public class λWeatherControllerBinding : ScopedBinding<WeatherController> {
   private readonly Binding<IWeatherService> _weatherServiceProvider;
 
-  public WeatherControllerλBinding(Binding<IWeatherService> weatherServiceProvider) {
+  public λWeatherControllerBinding(Binding<IWeatherService> weatherServiceProvider) {
     _weatherServiceProvider = weatherServiceProvider;
   }
 

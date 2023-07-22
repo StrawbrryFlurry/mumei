@@ -11,11 +11,11 @@ using WeatherApplication.Generated;
 namespace Mumei.Playground.SimpleApplication; 
 
 public sealed class λApplicationModule : IApplicationModule {
-  internal readonly CommonModule λCommonModule;
-  internal readonly λWeatherModule λWeatherModule;
+  internal readonly CommonModule _commonModule;
+  internal readonly λWeatherModule _weatherModule;
   
-  public WeatherModule WeatherModule => λWeatherModule;
-  public CommonModule CommonModule => λCommonModule;
+  public WeatherModule WeatherModule => _weatherModule;
+  public CommonModule CommonModule => _commonModule;
   
   public IInjector Scope { get; } = SingletonScope.Instance;
   public IInjector Parent { get; } = PlatformInjector.Instance;
@@ -29,7 +29,7 @@ public sealed class λApplicationModule : IApplicationModule {
   }
 
   public λApplicationModule(λWeatherModule weatherModule, CommonModule commonModule) {
-    λWeatherModule = weatherModule;
-    λCommonModule = commonModule;
+    _weatherModule = weatherModule;
+    _commonModule = commonModule;
   }
 }

@@ -15,7 +15,7 @@ public sealed class λWeatherModuleλCommonModule : CommonModule {
   public override HttpClient HttpClient => HttpClientBinding.Get();
   
   public λWeatherModuleλCommonModule() {
-    HttpClientBinding = new HttpClientλBinding();
+    HttpClientBinding = new λHttpClientBinding();
   }
   
   internal ScopedBinding<ILogger<TCategory>> MakeDynamicILoggerλ1<TCategory>() {
