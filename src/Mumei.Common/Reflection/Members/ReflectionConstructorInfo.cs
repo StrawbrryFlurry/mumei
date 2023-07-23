@@ -5,13 +5,13 @@ using System.Reflection;
 namespace Mumei.Common.Reflection;
 
 internal sealed class ReflectionConstructorInfo : ConstructorInfo {
+  public const string ConstructorMethodName = ".ctor";
   private static readonly ConcurrentDictionary<TypeMemberCacheKey, ConstructorInfo> ConstructorInfoCache = new();
 
-  private ReflectionConstructorInfo(ConstructorInfoSpec spec, Type declaringType) {
-    Name = spec.Name;
+  private ReflectionConstructorInfo(string name, MethodAttributes methodAttributes, Type declaringType) {
+    Name = name;
     DeclaringType = declaringType;
-
-    ConstructorInfoCache.TryAdd(new TypeMemberCacheKey(spec.Name, declaringType), this);
+    Attributes = methodAttributes;
   }
 
   public override Type DeclaringType { get; }
@@ -21,12 +21,12 @@ internal sealed class ReflectionConstructorInfo : ConstructorInfo {
   public override MethodAttributes Attributes { get; }
   public override RuntimeMethodHandle MethodHandle { get; }
 
-  public static ConstructorInfo Create(ConstructorInfoSpec spec, Type declaringType) {
-    var key = new TypeMemberCacheKey(spec.Name, declaringType);
+  public static ConstructorInfo Create(string name, MethodAttributes methodAttributes, Type declaringType) {
+    var key = new TypeMemberCacheKey(name, declaringType);
 
     return ConstructorInfoCache.GetOrAdd(
       key,
-      _ => new ReflectionConstructorInfo(spec, declaringType)
+      _ => new ReflectionConstructorInfo(name, methodAttributes, declaringType)
     );
   }
 
@@ -58,8 +58,4 @@ internal sealed class ReflectionConstructorInfo : ConstructorInfo {
   public override object Invoke(BindingFlags invokeAttr, Binder? binder, object?[]? parameters, CultureInfo? culture) {
     throw new NotImplementedException();
   }
-}
-
-internal struct ConstructorInfoSpec {
-  public string Name { get; }
 }

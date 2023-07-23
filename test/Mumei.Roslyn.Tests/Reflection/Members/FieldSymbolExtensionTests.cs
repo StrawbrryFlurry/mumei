@@ -10,44 +10,44 @@ namespace Mumei.Roslyn.Tests.Reflection.Members;
 
 public sealed class FieldSymbolExtensionTests : MemberSymbolExtensionTest<IFieldSymbol, FieldInfo> {
   private const string Source = """
-  using System;
+                                using System;
 
-  namespace Test;
-  
-  public class TestType : TestBaseType {
-    public int PublicField;
-    private int PrivateField;
-    protected int ProtectedField;
-    internal int InternalField;
-    protected internal int ProtectedInternalField;
-    public static int PublicStaticField;
-    public readonly int PublicReadonlyField;
-    public const int PublicConstField = 0;
+                                namespace Test;
 
-    // FieldInfo does not have abstract, virtual, override, new, sealed, extern, volatile, or unsafe modifiers
-    public abstract int PublicReadonlyField;
+                                public class TestType : TestBaseType {
+                                  public int PublicField;
+                                  private int PrivateField;
+                                  protected int ProtectedField;
+                                  internal int InternalField;
+                                  protected internal int ProtectedInternalField;
+                                  public static int PublicStaticField;
+                                  public readonly int PublicReadonlyField;
+                                  public const int PublicConstField = 0;
+                                
+                                  // FieldInfo does not have abstract, virtual, override, new, sealed, extern, volatile, or unsafe modifiers
+                                  public abstract int PublicReadonlyField;
+                                
+                                  [Obsolete("Test", DiagnosticId = "TestId")]
+                                  public int FieldWithAttribute;
+                                  
+                                  [Obsolete("Test")]
+                                  [NonSerializedAttribute]
+                                  public int FieldWithTwoAttributes;
+                                
+                                  public int FieldWithoutAttribute;
+                                
+                                  public new int BaseTypeHasAttribute;
+                                }
 
-    [Obsolete("Test", DiagnosticId = "TestId")]
-    public int FieldWithAttribute;
-    
-    [Obsolete("Test")]
-    [NonSerializedAttribute] 
-    public int FieldWithTwoAttributes;
-
-    public int FieldWithoutAttribute;
-
-    public new int BaseTypeHasAttribute;
-  }
-
-  public class TestBaseType {
-    [Obsolete]
-    public int BaseTypeHasAttribute;
-  }
-  """;
+                                public class TestBaseType {
+                                  [Obsolete]
+                                  public int BaseTypeHasAttribute;
+                                }
+                                """;
 
   protected override TestCompilationBuilder CompilationBuilder { get; } = new TestCompilationBuilder()
     .AddTypeReference<XmlAttribute>()
-    .AddSourceText(Source);
+    .AddSource(Source);
 
   protected override FieldInfo CreateMemberInfo(IFieldSymbol symbol, Type declaringType) {
     return symbol.ToFieldInfo(declaringType);

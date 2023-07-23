@@ -2,6 +2,7 @@
 using Mumei.Common;
 using Mumei.Roslyn.Reflection;
 using Mumei.Roslyn.Testing;
+using Mumei.Roslyn.Testing.Comp;
 
 namespace Mumei.Roslyn.Tests.Reflection;
 
@@ -9,21 +10,21 @@ public sealed class TypeSymbolExtensionTests {
   private const string AssemblyName = "TestAssembly";
 
   private const string Source = """
-  namespace Test;
-  
-  public class TestType {
-    public int TestField;
-    public int TestProperty { get; set; }
-    public int TestMethod() => 0;
-  }
+                                namespace Test;
 
-  public class TestGenericType<T> {
-  }
-  """;
+                                public class TestType {
+                                  public int TestField;
+                                  public int TestProperty { get; set; }
+                                  public int TestMethod() => 0;
+                                }
+
+                                public class TestGenericType<T> {
+                                }
+                                """;
 
   private static readonly Compilation Compilation = new TestCompilationBuilder()
     .WithAssemblyName(AssemblyName)
-    .AddSourceText(Source);
+    .AddSource(Source);
 
   [Fact]
   public void ToType_ReturnsRuntimeType_WhenTypeExistsAsRuntimeType() {

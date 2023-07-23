@@ -2,24 +2,25 @@
 using Mumei.Common.Reflection;
 using Mumei.Roslyn.Reflection;
 using Mumei.Roslyn.Testing;
+using Mumei.Roslyn.Testing.Comp;
 
 namespace Mumei.Roslyn.Tests.Reflection.Members;
 
 public sealed class SymbolMemberInfoFactoryTests {
   private const string Source = """
-  namespace Test;
-  
-  public class TestType {
-    public int TestField;
-    public int TestProperty { get; set; }
-    public int TestMethod() => 0;
+                                namespace Test;
 
-    public event EventHandler TestEvent;
-  }
-  """;
+                                public class TestType {
+                                  public int TestField;
+                                  public int TestProperty { get; set; }
+                                  public int TestMethod() => 0;
+                                
+                                  public event EventHandler TestEvent;
+                                }
+                                """;
 
   private static readonly Compilation Compilation = new TestCompilationBuilder()
-    .AddSourceText(Source);
+    .AddSource(Source);
 
   public SymbolMemberInfoFactoryTests() {
     var typeSymbol = Compilation.GetTypeByMetadataName("Test.TestType")!;

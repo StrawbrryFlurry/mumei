@@ -23,7 +23,14 @@ public static class TypeSymbolExtensions {
 
     var methodInfoFactories = members
       .OfType<IMethodSymbol>()
+      .Where(x => x.Name != ReflectionConstructorInfo.ConstructorMethodName)
       .Select(MethodSymbolExtensions.ToMethodInfoFactory)
+      .ToArray();
+
+    var constructorFactories = members
+      .OfType<IMethodSymbol>()
+      .Where(x => x.Name == ReflectionConstructorInfo.ConstructorMethodName)
+      .Select(ConstructorSymbolExtensions.ToConstructorInfoFactory)
       .ToArray();
 
     var fieldInfoFactories = members
@@ -45,6 +52,7 @@ public static class TypeSymbolExtensions {
       isGenericType,
       typeAttributes,
       methodInfoFactories,
+      constructorFactories,
       fieldInfoFactories,
       propertyInfoFactories,
       module

@@ -17,8 +17,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.Common", "src\Mumei.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.Common.Tests", "test\Mumei.Common.Tests\Mumei.Common.Tests.csproj", "{06234A02-2538-4CE7-A03A-341DF8F55827}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.DependencyInjection.Roslyn", "src\Mumei.DependencyInjection.Roslyn\Mumei.DependencyInjection.Roslyn.csproj", "{613912A9-5BD4-4828-93F4-C36C47F0EEC3}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.Roslyn.Testing", "test\Mumei.Roslyn.Testing\Mumei.Roslyn.Testing.csproj", "{ABD444D8-D357-4FA6-98D6-7EC52E31F51D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.AspNetCore", "src\Mumei.AspNetCore\Mumei.AspNetCore.csproj", "{2B07E724-936E-4F01-BA8B-B2036244CCE8}"
@@ -32,6 +30,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.Playground.CleanArchitectureApplication", "src/Mumei.Playground.CleanArchitectureApplication\Mumei.Playground.CleanArchitectureApplication.csproj", "{83C638DC-6D7D-4BD9-9473-D81F1FD58F33}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.DependencyInjection.ServiceCollectionInterOpt", "src\Mumei.DependencyInjection.ServiceCollectionInterOpt\Mumei.DependencyInjection.ServiceCollectionInterOpt.csproj", "{89C0F256-EDD2-4A07-A67F-6505FB0B09D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.DependencyInjection.Roslyn", "src\Mumei.DependencyInjection.Roslyn\Mumei.DependencyInjection.Roslyn.csproj", "{E630449C-D008-4184-9981-46FE8B93380E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.DependencyInjection.Roslyn.Tests", "test\Mumei.DependencyInjection.Roslyn.Tests\Mumei.DependencyInjection.Roslyn.Tests.csproj", "{8B8774E4-C158-4238-95E7-2BDEC737994D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,10 +77,6 @@ Global
 		{06234A02-2538-4CE7-A03A-341DF8F55827}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06234A02-2538-4CE7-A03A-341DF8F55827}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06234A02-2538-4CE7-A03A-341DF8F55827}.Release|Any CPU.Build.0 = Release|Any CPU
-		{613912A9-5BD4-4828-93F4-C36C47F0EEC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{613912A9-5BD4-4828-93F4-C36C47F0EEC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{613912A9-5BD4-4828-93F4-C36C47F0EEC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{613912A9-5BD4-4828-93F4-C36C47F0EEC3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{ABD444D8-D357-4FA6-98D6-7EC52E31F51D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{ABD444D8-D357-4FA6-98D6-7EC52E31F51D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ABD444D8-D357-4FA6-98D6-7EC52E31F51D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -103,6 +101,14 @@ Global
 		{89C0F256-EDD2-4A07-A67F-6505FB0B09D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{89C0F256-EDD2-4A07-A67F-6505FB0B09D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{89C0F256-EDD2-4A07-A67F-6505FB0B09D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E630449C-D008-4184-9981-46FE8B93380E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E630449C-D008-4184-9981-46FE8B93380E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E630449C-D008-4184-9981-46FE8B93380E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E630449C-D008-4184-9981-46FE8B93380E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B8774E4-C158-4238-95E7-2BDEC737994D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B8774E4-C158-4238-95E7-2BDEC737994D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B8774E4-C158-4238-95E7-2BDEC737994D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B8774E4-C158-4238-95E7-2BDEC737994D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{FAC6F7E4-4C02-4388-BAD9-91B3D7ECFAD1} = {F2800B3D-A01D-4716-94DB-C6DC19630B58}

@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Mumei.Roslyn.Reflection;
 using Mumei.Roslyn.Testing;
+using Mumei.Roslyn.Testing.Comp;
 
 namespace Mumei.Roslyn.Tests.Reflection.Members;
 
@@ -9,10 +10,10 @@ public abstract class MemberSymbolExtensionTest<TSymbol, TMemberInfo>
   where TSymbol : ISymbol
   where TMemberInfo : MemberInfo {
   private const string TestTypeSource = """
-  namespace Test;
+                                        namespace Test;
 
-  public class TestDeclaringType { }
-  """;
+                                        public class TestDeclaringType { }
+                                        """;
 
   private Compilation? _compilation;
 
@@ -23,7 +24,7 @@ public abstract class MemberSymbolExtensionTest<TSymbol, TMemberInfo>
   protected abstract TestCompilationBuilder CompilationBuilder { get; }
 
   private Compilation GetMemberTestCompilation() {
-    return CompilationBuilder.AddSourceText(TestTypeSource).Build();
+    return CompilationBuilder.AddSource(TestTypeSource).Build();
   }
 
   /// We use this additional class as the "declaring type"

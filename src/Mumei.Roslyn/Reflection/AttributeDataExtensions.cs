@@ -18,8 +18,10 @@ public static class AttributeDataExtensions {
     }
 
     var attributeType = attributeData.AttributeClass.ToType();
+    var attributeCtor = attributeData.AttributeConstructor?.ToConstructorInfo(attributeType) ??
+                        throw new InvalidOperationException("Attribute constructor is null");
     return new ReflectionCustomAttributeData(
-      attributeType,
+      attributeCtor,
       GetAttributeConstructorArguments(attributeData.ConstructorArguments),
       GetAttributeNamedArguments(attributeType, attributeData.NamedArguments)
     );

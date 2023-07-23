@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using Castle.Core.Internal;
+using Mumei.Common.Utilities;
 using Mumei.DependencyInjection.Injector;
 using Mumei.DependencyInjection.Injector.Implementation;
 using Mumei.DependencyInjection.Module;
@@ -21,7 +21,7 @@ public class RoutesExplorer {
   }
 
   private static void MapController(IComponentRef<IComponent> componentRef) {
-    var route = componentRef.Type.GetAttribute<RouteAttribute>().Path;
+    var route = componentRef.Type.GetAttribute<RouteAttribute>()!.Path;
     var methods = componentRef.Type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
 
     foreach (var method in methods) {

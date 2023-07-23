@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Mumei.Roslyn.Reflection;
 using Mumei.Roslyn.Testing;
+using Mumei.Roslyn.Testing.Comp;
 
 namespace Mumei.Roslyn.Tests.Reflection;
 
@@ -9,13 +10,13 @@ public sealed class AssemblySymbolExtensionTests {
   private const string AssemblyName = "TestAssembly";
 
   private const string Source = """
-  namespace TestNamespace;
-  public class TestType {  }
-  """;
+                                namespace TestNamespace;
+                                public class TestType {  }
+                                """;
 
   private static readonly Compilation Compilation = new TestCompilationBuilder()
     .WithAssemblyName(AssemblyName)
-    .AddSourceText(Source);
+    .AddSource(Source);
 
   [Fact]
   public void ToAssembly_ReturnsInstanceOfAssemblyWithCorrectFullName() {

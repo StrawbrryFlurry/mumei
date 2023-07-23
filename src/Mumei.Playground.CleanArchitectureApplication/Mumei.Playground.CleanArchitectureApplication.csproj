@@ -4,7 +4,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Mumei.DependencyInjection.Roslyn\Mumei.DependencyInjection.Roslyn.csproj" OutputItemType="Analyzer"/>
         <ProjectReference Include="..\Mumei.DependencyInjection.ServiceCollectionInterOpt\Mumei.DependencyInjection.ServiceCollectionInterOpt.csproj"/>
         <ProjectReference Include="..\Mumei.Roslyn\Mumei.Roslyn.csproj"/>
         <ProjectReference Include="..\Mumei.DependencyInjection\Mumei.DependencyInjection.csproj"/>

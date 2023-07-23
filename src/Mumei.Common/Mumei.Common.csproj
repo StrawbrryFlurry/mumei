@@ -1,6 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <ItemGroup>
-    <InternalsVisibleTo Include="Mumei.Roslyn" />
-    <InternalsVisibleTo Include="Mumei.Roslyn.Tests" />
-  </ItemGroup>
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <InternalsVisibleTo Include="Mumei.Roslyn"/>
+        <InternalsVisibleTo Include="Mumei.Roslyn.Tests"/>
+    </ItemGroup>
 </Project>

@@ -3,9 +3,9 @@
 // using Mumei.CodeGen.SyntaxWriters;
 // using Mumei.Common.Reflection;
 // using Mumei.DependencyInjection.Core;
-// using Mumei.DependencyInjection.Roslyn.Module;
+// using Ros.Module;
 // 
-// namespace Mumei.DependencyInjection.Roslyn;
+// namespace Ros;
 // 
 // internal class Generator {
 //   public List<ModuleDeclaration> Declarations { get; } = new();

@@ -14,6 +14,7 @@ internal sealed class ReflectionType : Type {
   private readonly MethodInfo[] _methods;
   private readonly PropertyInfo[] _properties;
   private readonly TypeAttributes _typeAttributes;
+  private readonly ConstructorInfo[] _constructors;
 
   private ReflectionType(
     string name,
@@ -24,6 +25,7 @@ internal sealed class ReflectionType : Type {
     bool isGenericType,
     TypeAttributes typeAttributes,
     IReadOnlyList<IMethodInfoFactory> methods,
+    IReadOnlyList<IConstructorInfoFactory> constructors,
     IReadOnlyList<IFieldInfoFactory> fields,
     IReadOnlyList<IPropertyInfoFactory> properties,
     Module module
@@ -46,6 +48,7 @@ internal sealed class ReflectionType : Type {
 
     _interfaces = interfaces;
     _typeAttributes = typeAttributes;
+    _constructors = CreateConstructors(constructors);
     _methods = CreateMethods(methods);
     _properties = CreateProperties(properties);
     _fields = CreateFields(fields);
@@ -114,6 +117,7 @@ internal sealed class ReflectionType : Type {
     bool isGenericType,
     TypeAttributes typeAttributes,
     IMethodInfoFactory[] methods,
+    IConstructorInfoFactory[] constructors,
     IFieldInfoFactory[] fields,
     IPropertyInfoFactory[] properties,
     Module module
@@ -130,6 +134,7 @@ internal sealed class ReflectionType : Type {
         isGenericType,
         typeAttributes,
         methods,
+        constructors,
         fields,
         properties,
         module
@@ -170,6 +175,31 @@ internal sealed class ReflectionType : Type {
     return result;
   }
 
+  private ConstructorInfo[] CreateConstructors(IReadOnlyList<IConstructorInfoFactory> constructors) {
+    if (constructors.Count <= 0) {
+      return CreateDefaultConstructor();
+    }
+
+    var result = new ConstructorInfo[constructors.Count];
+
+    for (var i = 0; i < constructors.Count; i++) {
+      var constructor = constructors[i];
+      result[i] = constructor.CreateConstructorInfo(this);
+    }
+
+    return result;
+  }
+
+  private ConstructorInfo[] CreateDefaultConstructor() {
+    return new[] {
+      ReflectionConstructorInfo.Create(
+        ".ctor",
+        MethodAttributes.Public,
+        this
+      )
+    };
+  }
+
   private static string GetFullName(string name, string? @namespace, Type[] typeArguments) {
     var nameWithoutTypeArguments = @namespace is null ? name : $"{@namespace}.{name}";
 
@@ -206,7 +236,7 @@ internal sealed class ReflectionType : Type {
   }
 
   public override ConstructorInfo[] GetConstructors(BindingFlags bindingAttr) {
-    throw new NotImplementedException();
+    return _constructors;
   }
 
   public override Type? GetElementType() {

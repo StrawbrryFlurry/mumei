@@ -17,6 +17,7 @@ public sealed class ReflectionAttributeFactoryTests {
       false,
       TypeAttributes.Class,
       Array.Empty<IMethodInfoFactory>(),
+      Array.Empty<IConstructorInfoFactory>(),
       Array.Empty<IFieldInfoFactory>(),
       Array.Empty<IPropertyInfoFactory>(),
       ReflectionModule.Create("", Assembly.GetExecutingAssembly(), Type.EmptyTypes)
@@ -214,11 +215,12 @@ public sealed class ReflectionAttributeFactoryTests {
     IList<CustomAttributeTypedArgument>? constructorArguments = null,
     IList<CustomAttributeNamedArgument>? namedArguments = null
   ) {
+    var ctor = attributeType.GetConstructors()[0];
     constructorArguments ??= Array.Empty<CustomAttributeTypedArgument>();
     namedArguments ??= Array.Empty<CustomAttributeNamedArgument>();
 
     return new ReflectionCustomAttributeData(
-      attributeType,
+      ctor,
       constructorArguments,
       namedArguments
     );

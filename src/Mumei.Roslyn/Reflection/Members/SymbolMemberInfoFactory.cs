@@ -36,4 +36,8 @@ internal sealed class SymbolMemberInfoFactory : IMemberInfoFactory {
   private Func<Type, MemberInfo> CreateFieldInfo(IFieldSymbol fieldSymbol) {
     return fieldSymbol.ToFieldInfoFactory().CreateFieldInfo;
   }
+
+  private Func<Type, MemberInfo> CreateConstructorInfo(IMethodSymbol eventSymbol) {
+    return eventSymbol.ToConstructorInfoFactory().CreateConstructorInfo;
+  }
 }

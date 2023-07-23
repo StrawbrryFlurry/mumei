@@ -1,20 +1,24 @@
 ﻿using System.Reflection;
+using Mumei.Common.Utilities;
 
 namespace Mumei.Common.Reflection;
 
 internal sealed class ReflectionCustomAttributeData : CustomAttributeData {
-  public ReflectionCustomAttributeData(
-    Type attributeType,
-    IList<CustomAttributeTypedArgument> constructorArguments,
-    IList<CustomAttributeNamedArgument> namedArguments
-  ) {
-    AttributeType = attributeType;
-    ConstructorArguments = constructorArguments;
-    NamedArguments = namedArguments;
-  }
-
-  public override Type AttributeType { get; }
+  private static readonly FieldInfo CustomAttributeDataAttributeTypeField = typeof(CustomAttributeData)
+    .GetProperty(nameof(AttributeType))!
+    .GetBackingField();
 
   public override IList<CustomAttributeTypedArgument> ConstructorArguments { get; }
   public override IList<CustomAttributeNamedArgument> NamedArguments { get; }
+  public override ConstructorInfo Constructor { get; }
+
+  public ReflectionCustomAttributeData(
+    ConstructorInfo attributeCtor,
+    IList<CustomAttributeTypedArgument> constructorArguments,
+    IList<CustomAttributeNamedArgument> namedArguments
+  ) {
+    Constructor = attributeCtor;
+    ConstructorArguments = constructorArguments;
+    NamedArguments = namedArguments;
+  }
 }

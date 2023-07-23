@@ -1,7 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <ItemGroup>
-    <PackageReference Include="Castle.Core"/>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
-    <PackageReference Update="NETStandard.Library"/>
-  </ItemGroup>
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Castle.Core"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
+        <PackageReference Update="NETStandard.Library"/>
+    </ItemGroup>
 </Project>

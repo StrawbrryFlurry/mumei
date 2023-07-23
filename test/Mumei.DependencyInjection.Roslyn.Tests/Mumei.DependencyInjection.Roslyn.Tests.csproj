@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <Nullable>enable</Nullable>
+
+        <IsPackable>false</IsPackable>
+
+        <RootNamespace>Mumei.DependencyInjection.Roslyn.Tests</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Mumei.DependencyInjection.Roslyn\Mumei.DependencyInjection.Roslyn.csproj"/>
+        <ProjectReference Include="..\..\src\Mumei.DependencyInjection\Mumei.DependencyInjection.csproj"/>
+        <ProjectReference Include="..\Mumei.Roslyn.Testing\Mumei.Roslyn.Testing.csproj"/>
+    </ItemGroup>
+</Project>

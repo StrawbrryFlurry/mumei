@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Mumei.CodeGen.SyntaxNodes;
 using BlockSyntax = Microsoft.CodeAnalysis.CSharp.Syntax.BlockSyntax;
 using ExpressionStatementSyntax = Microsoft.CodeAnalysis.CSharp.Syntax.ExpressionStatementSyntax;
 

@@ -5,14 +5,16 @@
 &lt;/AssemblyExplorer&gt;</s:String>
 	<s:Int64 x:Key="/Default/Environment/Hierarchy/Build/BuildTool/MsbuildVersion/@EntryValue">1114112</s:Int64>
 	<s:String x:Key="/Default/Environment/Hierarchy/Build/BuildTool/CustomBuildToolPath/@EntryValue">C:\Program Files\dotnet\sdk\7.0.100-preview.6.22352.1\MSBuild.dll</s:String>
-	
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=34d0c4af_002Dd61a_002D4884_002D9188_002D995d86b51f68/@EntryIndexedValue">&lt;SessionState ContinuousTestingIsOn="True" ContinuousTestingMode="1" IsActive="True" Name="Session" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=8af70505_002D1959_002D45e9_002Db3a0_002Dde3df48b6aac/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Session" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;Or&gt;&#xD;
     &lt;Project Location="E:\Programming\cs\mumei\test\Mumei.CodeGen.Tests" Presentation="&amp;lt;Mumei.CodeGen.Tests&amp;gt;" /&gt;&#xD;
     &lt;Project Location="E:\Programming\cs\mumei\test\Mumei.Common.Tests" Presentation="&amp;lt;Mumei.Common.Tests&amp;gt;" /&gt;&#xD;
-    &lt;Project Location="E:\Programming\cs\mumei\test\Mumei.Roslyn.Tests" Presentation="&amp;lt;Mumei.Roslyn.Tests&amp;gt;" /&gt;&#xD;
+    &lt;Project Location="E:\Programming\cs\mumei\test\Mumei.DependencyInjection.Roslyn.Tests" Presentation="&amp;lt;Mumei.DependencyInjection.Roslyn.Tests&amp;gt;" /&gt;&#xD;
   &lt;/Or&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
+	
+	
+	
 	
 	
 	
