@@ -13,9 +13,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.Roslyn", "src\Mumei.R
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.Roslyn.Tests", "test\Mumei.Roslyn.Tests\Mumei.Roslyn.Tests.csproj", "{013D3076-B19F-4637-BC36-39CACD141755}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.Common", "src\Mumei.Common\Mumei.Common.csproj", "{92B22F06-3E50-4825-93E7-BACD438D0D59}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.Reflection", "src\Mumei.Reflection\Mumei.Reflection.csproj", "{92B22F06-3E50-4825-93E7-BACD438D0D59}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.Common.Tests", "test\Mumei.Common.Tests\Mumei.Common.Tests.csproj", "{06234A02-2538-4CE7-A03A-341DF8F55827}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.Reflection.Tests", "test\Mumei.Reflection.Tests\Mumei.Reflection.Tests.csproj", "{06234A02-2538-4CE7-A03A-341DF8F55827}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.Roslyn.Testing", "test\Mumei.Roslyn.Testing\Mumei.Roslyn.Testing.csproj", "{ABD444D8-D357-4FA6-98D6-7EC52E31F51D}"
 EndProject

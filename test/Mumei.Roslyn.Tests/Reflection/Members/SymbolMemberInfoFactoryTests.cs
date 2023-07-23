@@ -1,5 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
-using Mumei.Common.Reflection;
+using Mumei.Common;
 using Mumei.Roslyn.Reflection;
 using Mumei.Roslyn.Testing;
 using Mumei.Roslyn.Testing.Comp;

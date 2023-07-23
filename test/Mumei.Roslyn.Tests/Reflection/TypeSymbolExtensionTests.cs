@@ -38,7 +38,7 @@ public sealed class TypeSymbolExtensionTests {
 
   [Fact]
   public void ToType_ReturnsRuntimeType_WhenTypeDoesNotExistAsRuntimeType() {
-    var reflectionType = CommonModuleAssemblyReference.Assembly.GetType("Mumei.Common.Reflection.ReflectionType");
+    var reflectionType = CommonModuleAssemblyReference.Assembly.GetType("Mumei.Reflection.Reflection.ReflectionType");
     var testTypeSymbol = Compilation.GetTypeSymbol("Test.TestType");
 
     var testType = testTypeSymbol.ToType();

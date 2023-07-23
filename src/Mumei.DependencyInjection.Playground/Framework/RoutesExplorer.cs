@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using Mumei.Common.Utilities;
+using Mumei.Common.Extensions;
 using Mumei.DependencyInjection.Injector;
 using Mumei.DependencyInjection.Injector.Implementation;
 using Mumei.DependencyInjection.Module;

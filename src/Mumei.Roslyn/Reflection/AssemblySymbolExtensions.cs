@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using Microsoft.CodeAnalysis;
-using Mumei.Common.Reflection;
+using Mumei.Common;
 
 namespace Mumei.Roslyn.Reflection;
 

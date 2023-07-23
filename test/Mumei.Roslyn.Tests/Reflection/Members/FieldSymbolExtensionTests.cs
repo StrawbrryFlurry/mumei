@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Xml;
 using Microsoft.CodeAnalysis;
-using Mumei.Common.Reflection;
+using Mumei.Common;
 using Mumei.Roslyn.Reflection;
 using Mumei.Roslyn.Testing;
 

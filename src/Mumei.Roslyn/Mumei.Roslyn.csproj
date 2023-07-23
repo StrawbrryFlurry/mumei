@@ -9,6 +9,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Mumei.Common\Mumei.Common.csproj"/>
+        <ProjectReference Include="..\Mumei.Reflection\Mumei.Reflection.csproj"/>
     </ItemGroup>
 </Project>
