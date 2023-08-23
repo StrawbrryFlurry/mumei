@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Reflection;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace Mumei.Roslyn.Testing;
@@ -15,7 +16,7 @@ public sealed class TestCompilationBuilder {
   public Compilation Compilation => _compilation ??= CreateCompilation();
 
   public TestCompilationBuilder() {
-    _metadataReferences.Add(MetadataReferenceCache.SystemPrivateCoreLib);
+    _metadataReferences.Add(MetadataReferenceCache.SystemCoreLib);
   }
 
   public TestCompilationBuilder WithAssemblyName(string assemblyName) {
@@ -51,8 +52,7 @@ public sealed class TestCompilationBuilder {
     return CSharpCompilation.Create(
       _assemblyName,
       _sources,
-      _metadataReferences,
-      new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+      _metadataReferences
     );
   }
 

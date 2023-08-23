@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.DependencyInjection.Module.Markers;
 using Mumei.Roslyn.Testing;
 using Xunit;
@@ -34,8 +35,10 @@ public sealed class SampleIncrementalSourceGeneratorTests {
 
   [Fact]
   public void GenerateReportMethod() {
-    new SourceGeneratorTest<SampleIncrementalSourceGenerator>(
-        b => b.AddSource(VectorClassText)
+    new SourceGeneratorTest<ModuleMumeiGenerator>(
+        b => b
+          .AddSource(VectorClassText)
+          .AddTypeReference<ModuleAttribute>()
       )
       .Run()
       .Should()
