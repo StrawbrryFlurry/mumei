@@ -7,7 +7,7 @@ namespace Mumei.Roslyn.Testing;
 public sealed class TestCompilationBuilder {
   public const string DefaultAssemblyName = "Compilation_____Assembly";
 
-  private readonly List<MetadataReference> _metadataReferences = new();
+  private readonly MetadataReferenceCollection _metadataReferences = new();
   private readonly List<SyntaxTree> _sources = new();
 
   private string _assemblyName = DefaultAssemblyName;
@@ -15,17 +15,13 @@ public sealed class TestCompilationBuilder {
 
   public Compilation Compilation => _compilation ??= CreateCompilation();
 
-  public TestCompilationBuilder() {
-    _metadataReferences.Add(MetadataReferenceCache.SystemCoreLib);
-  }
-
   public TestCompilationBuilder WithAssemblyName(string assemblyName) {
     _assemblyName = assemblyName;
     return this;
   }
 
   public TestCompilationBuilder AddTypeReference<TAssemblyType>() {
-    _metadataReferences.Add(MetadataReferenceCache.GetReference<TAssemblyType>());
+    _metadataReferences.AddReference<TAssemblyType>();
     return this;
   }
 
@@ -34,8 +30,13 @@ public sealed class TestCompilationBuilder {
     return this;
   }
 
-  public TestCompilationBuilder AddSource(string source) {
-    _sources.Add(CSharpSyntaxTree.ParseText(source));
+  public TestCompilationBuilder AddSource(string source, Action<SourceFileBuilder>? configure = null) {
+    var sourceFileBuilder = new SourceFileBuilder(source);
+    configure?.Invoke(sourceFileBuilder);
+
+    _metadataReferences.AddReferences(sourceFileBuilder.Usings);
+    _sources.Add(sourceFileBuilder.ToSyntaxTree());
+
     return this;
   }
 
@@ -52,7 +53,7 @@ public sealed class TestCompilationBuilder {
     return CSharpCompilation.Create(
       _assemblyName,
       _sources,
-      _metadataReferences
+      _metadataReferences.MetadataReferences
     );
   }
 

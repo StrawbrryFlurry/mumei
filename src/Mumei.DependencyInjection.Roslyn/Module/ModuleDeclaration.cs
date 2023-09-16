@@ -1,17 +1,25 @@
-﻿using System.Reflection;
+﻿using System.Collections.Immutable;
+using System.Reflection;
 
-namespace Mumei.DependencyInjection.Roslyn.Module; 
+namespace Mumei.DependencyInjection.Roslyn.Module;
 
-internal class ModuleDeclaration {
-  public string Name { get; set; }
-  public Type InterfaceDeclaration { get; set; }
+internal sealed class ModuleDeclaration {
+  public required string Name { get; init; }
+  public ModuleDeclaration Parent { get; private set; }
+  public required Type DeclaringType { get; init; }
 
-  public List<ModuleDeclaration> Imports { get; set; }
-  public List<ModuleDeclaration> Exports { get; set; }
-  public List<ComponentDeclaration> Components { get; set; }
+  public required ImmutableArray<ModuleDeclaration> Imports { get; init; }
+  public required ImmutableArray<ModuleDeclaration> Exports { get; init; }
+  public required ImmutableArray<ComponentDeclaration> Components { get; init; }
+  public required ImmutableArray<DynamicProviderBinder> DynamicProviderBinders { get; init; }
 
-  public List<ProviderSpecification> Providers { get; set; }
-  public List<ModuleProviderConfiguration> ProviderConfigurations { get; set; }
+  public required ImmutableArray<ProviderSpecification> Providers { get; init; }
+  public required ImmutableArray<ModuleProviderConfiguration> ProviderConfigurations { get; init; }
 
-  public List<PropertyInfo> Properties { get; set; }
+  public required ImmutableArray<PropertyInfo> Properties { get; init; }
+  public required ImmutableArray<MethodInfo> Methods { get; init; }
+
+  public void Realize(ModuleDeclaration parent) {
+    Parent = parent;
+  }
 }

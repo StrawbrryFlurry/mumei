@@ -12,7 +12,7 @@ public sealed class λApplicationModuleλMediatrBinderλIApplicationModule : Dyn
 
   public λApplicationModuleλMediatrBinderλIApplicationModule(
     IInjector injector
-  ) : base(injector, MediatrBinder<IApplicationModule>.Bind) {
+  ) : base(injector, new MediatrBinder<IApplicationModule>().Bind) {
     Bloom = new λApplicationModuleλMediatrBinderλIApplicationModuleDynmaicBloom(Providers);
   }
   

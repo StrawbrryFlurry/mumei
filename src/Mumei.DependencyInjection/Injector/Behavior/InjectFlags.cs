@@ -33,5 +33,11 @@ public enum InjectFlags {
   ///   Notes:
   ///     - If both Self and Host are specified, Host takes precedence.
   /// </summary>
-  Host = 1 << 5
+  Host = 1 << 5,
+
+  /// <summary>
+  ///  Starts the dependency resolution in the parent of the current module injector.
+  ///  If the current injector is a module injector, this will do the same as SkipSelf.
+  /// </summary>
+  SkipHost = 1 << 6
 }

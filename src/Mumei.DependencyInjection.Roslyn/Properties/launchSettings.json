@@ -1,9 +1,0 @@
-﻿{
-  "$schema": "http://json.schemastore.org/launchsettings.json",
-  "profiles": {
-    "DebugRoslynSourceGenerator": {
-      "commandName": "DebugRoslynComponent",
-      "targetProject": "../Mumei.DependencyInjection.Roslyn.Sample/Mumei.DependencyInjection.Roslyn.Sample.csproj"
-    }
-  }
-}

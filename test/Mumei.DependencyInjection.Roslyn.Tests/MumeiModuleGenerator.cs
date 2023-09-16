@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Mumei.DependencyInjection.Module;
 using Mumei.DependencyInjection.Module.Markers;
 using Mumei.Roslyn.Testing;
 using Xunit;
@@ -6,43 +7,28 @@ using Xunit;
 namespace Mumei.DependencyInjection.Roslyn.Tests;
 
 public sealed class SampleIncrementalSourceGeneratorTests {
-  private string VectorClassText =
-    $$"""
-      using {{typeof(ModuleAttribute).Namespace}};
-
-      [Module]
-      public partial interface IWeatherModule {
-      }
-      """;
+  private const string VectorClassText =
+    """
+    [Module]
+    public partial interface IWeatherModule {
+    }
+    """;
 
   private const string ExpectedGeneratedClassText =
     """
-    using System;
-    using System.Collections.Generic;
-
-    namespace TestNamespace;
-
-    partial class Vector3
-    {
-        public IEnumerable<string> Report()
-        {
-            yield return $""X:{this.X}"";
-            yield return $""Y:{this.Y}"";
-            yield return $""Z:{this.Z}"";
-        }
+    public partial interface IWeatherModule : IModule {
     }
     """;
 
   [Fact]
-  public void GenerateReportMethod() {
+  public void Generator_GeneratesEmptyModuleClass_WhenModuleDeclarationIsEmpty() {
     new SourceGeneratorTest<ModuleMumeiGenerator>(
         b => b
-          .AddSource(VectorClassText)
-          .AddTypeReference<ModuleAttribute>()
+          .AddSource(VectorClassText, x => x.WithUsing<ModuleAttribute>())
       )
       .Run()
       .Should()
-      .HaveGeneratedFile("Vector3.g.cs")
-      .WithGeneratedContent(ExpectedGeneratedClassText);
+      .HaveGeneratedFile("IWeatherModule.g.cs")
+      .WithGeneratedContent(ExpectedGeneratedClassText, x => x.WithUsing<IModule>());
   }
 }

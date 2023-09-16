@@ -27,7 +27,7 @@ public abstract class TypeSyntax : Syntax {
     }
   }
 
-  public virtual SyntaxVisibility Visibility { get; set; } = SyntaxVisibility.None;
+  public virtual SyntaxVisibility Visibility { get; protected internal set; } = SyntaxVisibility.None;
 
   public bool HasAttributes => AttributeList.Count > 0;
 

@@ -4,8 +4,10 @@ using Microsoft.CodeAnalysis;
 namespace Mumei.Roslyn.Testing;
 
 internal static class MetadataReferenceCache {
-  public static MetadataReference SystemCoreLib { get; } =
-    MetadataReference.CreateFromFile(typeof(Attribute).Assembly.Location);
+  public static (string AssemblyLocation, MetadataReference MetadataReference) SystemCoreLib { get; } = (
+    typeof(Attribute).Assembly.Location,
+    MetadataReference.CreateFromFile(typeof(Attribute).Assembly.Location)
+  );
 
   private static readonly Dictionary<Type, MetadataReference> ReferenceCache = new();
 

@@ -1,78 +1,103 @@
 using System.Collections.Immutable;
-using System.Linq;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
+using Mumei.CodeGen.SyntaxNodes;
+using Mumei.CodeGen.SyntaxWriters;
+using Mumei.DependencyInjection.Module;
+using Mumei.DependencyInjection.Module.Markers;
+using Mumei.DependencyInjection.Roslyn.Module;
 using Mumei.Roslyn.Extensions;
-
+using Mumei.Roslyn.Reflection;
+using ClassDeclarationSyntax = Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax;
 
 namespace Mumei.DependencyInjection.Roslyn;
 
+internal struct CompilationModuleDeclaration {
+  public required TypeDeclarationSyntax Syntax { get; init; }
+  public required INamedTypeSymbol Symbol { get; init; }
+}
+
+internal struct CompilationComponentDeclaration {
+  public required TypeDeclarationSyntax Syntax { get; init; }
+  public required INamedTypeSymbol Symbol { get; init; }
+}
+
 [Generator]
 public class ModuleMumeiGenerator : IIncrementalGenerator {
-  private const string Namespace = "Generators";
-  private const string AttributeName = "ReportAttribute";
+  private static readonly string MumeiModuleAttributeName = typeof(ModuleAttribute).FullName!;
+  private static readonly string MumeiComponentAttributeName = typeof(ComponentAttribute).FullName!;
+  private static readonly string MumeiEntrypointAttributeName = typeof(EntrypointAttribute).FullName!;
 
   public void Initialize(IncrementalGeneratorInitializationContext context) {
-    var provider = context.SyntaxProvider
-      .CreateSyntaxProvider(
-        (s, _) => s is ClassDeclarationSyntax or InterfaceDeclarationSyntax,
-        (ctx, _) => GetClassDeclarationForSourceGen(ctx))
-      .Where(t => t.isModuleDeclaration)
-      .Select((t, _) => t.Item1);
+    var moduleDeclarations = context.SyntaxProvider
+      .ForAttributeWithMetadataName(
+        MumeiModuleAttributeName,
+        (node, _) => node is ClassDeclarationSyntax or InterfaceDeclarationSyntax,
+        (syntaxContext, _) => new CompilationModuleDeclaration {
+          Syntax = (TypeDeclarationSyntax)syntaxContext.TargetNode,
+          Symbol = syntaxContext.TargetSymbol.ContainingType
+        }
+      );
 
-    context.RegisterSourceOutput(context.CompilationProvider.Combine(provider.Collect()),
-      (ctx, t) => GenerateCode(ctx, t.Left, t.Right));
-  }
+    var componentDeclarations = context.SyntaxProvider
+      .ForAttributeWithMetadataName(
+        MumeiComponentAttributeName,
+        (node, _) => node is PropertyDeclarationSyntax,
+        (syntaxContext, _) => new CompilationComponentDeclaration {
+          Syntax = (TypeDeclarationSyntax)syntaxContext.TargetNode.Parent!,
+          Symbol = syntaxContext.TargetSymbol.ContainingType
+        }
+      );
 
-  private static (TypeDeclarationSyntax moduleDeclaration, bool isModuleDeclaration) GetClassDeclarationForSourceGen(
-    GeneratorSyntaxContext context
-  ) {
-    var typeDeclarationSyntax = (TypeDeclarationSyntax)context.Node;
-    return typeDeclarationSyntax.HasAttribute(context.SemanticModel, AttributeName, out _)
-      ? (typeDeclarationSyntax, true)
-      : (typeDeclarationSyntax, false);
+    var declarations = moduleDeclarations.Collect()
+      .Combine(componentDeclarations.Collect());
+
+    context.RegisterSourceOutput(
+      context.CompilationProvider.Combine(
+        declarations
+      ),
+      (ctx, t) => GenerateCode(ctx, t.Left, t.Right.Left, t.Right.Right)
+    );
   }
 
   private static void GenerateCode(
-    SourceProductionContext context,
+    SourceProductionContext ctx,
     Compilation compilation,
-    ImmutableArray<TypeDeclarationSyntax> moduleDeclarations
+    ImmutableArray<CompilationModuleDeclaration> moduleDeclarations,
+    ImmutableArray<CompilationComponentDeclaration> componentDeclarations
   ) {
-    foreach (var classDeclarationSyntax in moduleDeclarations) {
-      if (!compilation.TryGetTypeSymbol(classDeclarationSyntax, out var classSymbol)) {
-        continue;
+    var entrypointModules = moduleDeclarations
+      .Where(module =>
+        module.Syntax.TryGetAttribute(
+          compilation.GetSemanticModel(module.Syntax.SyntaxTree),
+          MumeiEntrypointAttributeName, out _
+        )
+      ).ToList();
+
+    foreach (var module in moduleDeclarations) {
+      if (!module.Syntax.IsPartial()) {
+        ctx.ReportDiagnostic(
+          Diagnostic.Create(
+            new DiagnosticDescriptor(
+              "ModuleDeclarationNeedsTobePartial",
+              "ModuleDeclarationNeedsTobePartial",
+              "ModuleDeclarationNeedsTobePartial",
+              "ModuleDeclarationNeedsTobePartial",
+              DiagnosticSeverity.Error,
+              true
+            ),
+            module.Syntax.GetLocation()
+          )
+        );
       }
 
-      var namespaceName = classSymbol.ContainingNamespace.ToDisplayString();
+      var keyword = module.Syntax switch {
+        ClassDeclarationSyntax => "class",
+        InterfaceDeclarationSyntax => "interface",
+        _ => throw new NotSupportedException()
+      };
 
-      var className = classDeclarationSyntax.Identifier.Text;
-
-      var methodBody = classSymbol.GetMembers()
-        .OfType<IPropertySymbol>()
-        .Select(p =>
-          $$"""        yield return $"{{p.Name}}:{this.{{p.Name}}}";"""); // e.g. yield return $"Id:{this.Id}";
-
-      var code = $$"""
-                   // <auto-generated/>
-
-                   using System;
-                   using System.Collections.Generic;
-
-                   namespace {{namespaceName}};
-
-                   partial class {{className}}
-                   {
-                       public IEnumerable<string> Report()
-                       {
-                   {{string.Join("\n", methodBody)}}
-                       }
-                   }
-
-                   """;
-
-      context.AddSource($"{className}.g.cs", SourceText.From(code, Encoding.UTF8));
+      var moduleName = module.Symbol.Name;
     }
   }
 }

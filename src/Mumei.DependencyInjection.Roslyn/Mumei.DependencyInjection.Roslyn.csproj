@@ -15,10 +15,15 @@
         </PackageReference>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces"/>
+        <PackageReference Include="PolySharp">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Mumei.CodeGen\Mumei.CodeGen.csproj"/>
+        <ProjectReference Include="..\Mumei.DependencyInjection\Mumei.DependencyInjection.csproj"/>
         <ProjectReference Include="..\Mumei.Roslyn\Mumei.Roslyn.csproj"/>
     </ItemGroup>
 </Project>
