@@ -1,0 +1,273 @@
+﻿using System.Buffers;
+using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+
+namespace Mumei.Roslyn;
+
+public ref struct ArrayBuilder<TElement> {
+  private const int DefaultCapacity = 4;
+
+  private Span<TElement> _elements;
+  private TElement[] _rentedArray;
+  private int _count = 0;
+  private int _capacity = 0;
+
+  public ArrayBuilder() {
+    _elements = _rentedArray = Array.Empty<TElement>();
+  }
+
+  public ArrayBuilder(int initialCapacity) {
+    if (initialCapacity < 0) {
+      throw new ArgumentOutOfRangeException(nameof(initialCapacity));
+    }
+
+    SetBackingArray(AllocateArray(initialCapacity));
+    _capacity = initialCapacity;
+  }
+
+  private int LastIndex => _capacity - 1;
+
+  /// <summary>
+  /// Returns a new <see cref="Array"/> containing all elements of the builder.
+  /// The builder cannot be used after this operation.
+  /// </summary>
+  /// <returns>A new array containing all the elements of the builder</returns>
+  public TElement[] ToArrayAndFree() {
+    var array = new TElement[_count];
+
+    DangerousAsSpanWithoutOwnership().CopyTo(array);
+    Free();
+
+    return array;
+  }
+
+  /// <summary>
+  /// Returns a new <see cref="ImmutableArray{T}"/> containing all elements of the builder.
+  /// The builder cannot be used after this operation.
+  /// </summary>
+  /// <returns>A new array containing all the elements of the builder</returns>
+  public ImmutableArray<TElement> ToImmutableArrayAndFree() {
+    var elementsWithActualLength = DangerousAsSpanWithoutOwnership();
+    // The ImmutableArray constructor will create a new array from the span,
+    // so we can give it a cut-down version of the array we rented, avoiding
+    // allocating the correctly sized array twice.
+    var array = ImmutableArray.Create(elementsWithActualLength);
+    Free();
+    return array;
+  }
+
+  /// <summary>
+  /// Returns a new <see cref="Span{T}"/> containing all elements of the builder.
+  /// The builder cannot be used after this operation.
+  /// </summary>
+  /// <returns>A new span containing all the elements of the builder</returns>
+  public Span<TElement> ToSpanAndFree() {
+    Span<TElement> backingArray = new TElement[_count];
+
+    DangerousAsSpanWithoutOwnership().CopyTo(backingArray);
+    Free();
+
+    return backingArray;
+  }
+
+  /// <summary>
+  /// Returns a new <see cref="ReadOnlySpan{T}"/> containing all elements of the builder.
+  /// The builder cannot be used after this operation.
+  /// </summary>
+  /// <returns></returns>
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public ReadOnlySpan<TElement> ToReadOnlySpanAndFree() {
+    return new ReadOnlySpan<TElement>(ToArrayAndFree());
+  }
+
+  /// <summary>
+  /// Returns a span that includes all elements in the builder, useful for
+  /// iterating over the elements or copying them to another span.
+  /// Consumers DO NOT own the returned span and MUST NOT use it after
+  /// this builder instance has been used again, mutate it,
+  /// pass it to another method or otherwise leak it outside of it's owned context.
+  /// The backing array of the span is still used by the builder and will be changed
+  /// / updated it for future operations.
+  /// </summary>
+  /// <returns></returns>
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public ReadOnlySpan<TElement> DangerousAsSpanWithoutOwnership() {
+    return _elements[.._count];
+  }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  internal Span<TElement> DangerousAsWriteableSpanWithoutOwnership() {
+    return _elements[.._count];
+  }
+
+  internal void Free() {
+    FreeBackingArray();
+    this = default;
+  }
+
+  public Enumerator GetEnumerator() {
+    return new Enumerator(_elements, _count);
+  }
+
+  public void AddRange(IEnumerable<TElement> elements) {
+    foreach (var element in elements) {
+      Add(element);
+    }
+  }
+
+  public void AddRange(ReadOnlySpan<TElement> elements) {
+    var newCount = _count + elements.Length;
+    if (newCount <= LastIndex) {
+      elements.CopyTo(_elements[_count..]);
+      _count = newCount;
+      return;
+    }
+
+    Grow(newCount);
+
+    elements.CopyTo(_elements[_count..]);
+    _count = newCount;
+  }
+
+  public void Add(TElement element) {
+    if (_count < LastIndex) {
+      AddElement(element);
+      return;
+    }
+
+    if (_count == LastIndex) {
+      Grow(_count + 1);
+      AddElement(element);
+      return;
+    }
+
+    throw new InvalidOperationException("Oops!");
+  }
+
+  private void AddElement(TElement element) {
+    _elements[_count] = element;
+    _count++;
+  }
+
+  public void GrowTo(int capacity) {
+    if (capacity < _count) {
+      throw new ArgumentOutOfRangeException(nameof(capacity));
+    }
+
+    Grow(capacity);
+  }
+
+  private void Grow(int capacity) {
+    Debug.Assert(_count < capacity);
+
+    // Don't jump for the more common grow case
+    if (_capacity is not 0) {
+      GrowWithoutInitValue(capacity);
+      return;
+    }
+
+    if (capacity < DefaultCapacity) {
+      _capacity = DefaultCapacity;
+      SetBackingArray(AllocateArray(_capacity));
+    }
+
+    GrowWithoutInitValue(capacity);
+  }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  private void GrowWithoutInitValue(int capacity) {
+    var newCapacity = _capacity * 2;
+    if (newCapacity < capacity) {
+      newCapacity = capacity;
+    }
+
+    _capacity = newCapacity;
+
+    var resizedElements = AllocateArray(_capacity);
+    _elements.CopyTo(resizedElements);
+    FreeBackingArray();
+    SetBackingArray(resizedElements);
+  }
+
+  [MemberNotNull(nameof(_elements))]
+  [MemberNotNull(nameof(_rentedArray))]
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  private void SetBackingArray(TElement[] array) {
+    _elements = _rentedArray = array;
+  }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  private static TElement[] AllocateArray(int size) {
+    return ArrayPool<TElement>.Shared.Rent(size);
+  }
+
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  private void FreeBackingArray() {
+    ArrayPool<TElement>.Shared.Return(_rentedArray);
+  }
+
+  public ref struct Enumerator {
+    private readonly Span<TElement> _span;
+    private readonly int _actualLength;
+    private int _index;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal Enumerator(Span<TElement> span, int actualLength) {
+      _span = span;
+      _actualLength = actualLength;
+      _index = -1;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool MoveNext() {
+      var idx = _index + 1;
+      if (idx >= _actualLength) {
+        return false;
+      }
+
+      _index = idx;
+      return true;
+    }
+
+    public readonly ref readonly TElement Current {
+      [MethodImpl(MethodImplOptions.AggressiveInlining)]
+      get => ref _span[_index];
+    }
+  }
+}
+
+public static class ArrayBuilderExtensions {
+  public static int IndexOf<T>(this ArrayBuilder<T> builder, T value) where T : IEquatable<T> {
+    return builder.DangerousAsSpanWithoutOwnership().IndexOf(value);
+  }
+
+  public static bool Contains<T>(this ArrayBuilder<T> builder, T value) where T : IEquatable<T> {
+    return builder.IndexOf(value) is not -1;
+  }
+
+  public static ref T? TryGet<T>(this ArrayBuilder<T> builder, T element) where T : IEquatable<T> {
+    var index = builder.IndexOf(element);
+    if (index is not -1) {
+      return ref builder.DangerousAsWriteableSpanWithoutOwnership()[index]!;
+    }
+
+    return ref Unsafe.NullRef<T>()!;
+  }
+
+  public static unsafe string ToStringAndFree(this ArrayBuilder<char> builder) {
+    var chars = builder.DangerousAsSpanWithoutOwnership();
+
+    // The string ctor should copy all chars to its own buffer and
+    // allow us to free the rented array, without breaking the string.
+    // https://source.dot.net/#System.Private.CoreLib/src/libraries/System.Private.CoreLib/src/System/String.cs,151
+    string str;
+    fixed (char* p = chars) {
+      str = new string(p, 0, chars.Length);
+    }
+
+    builder.Free();
+    return str;
+  }
+}

@@ -1,6 +1,7 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
-namespace Mumei.DependencyInjection.Roslyn.Module; 
+namespace Mumei.DependencyInjection.Roslyn.Module;
 
 /// <summary>
 /// A single provider specified in a module.
@@ -11,7 +12,7 @@ namespace Mumei.DependencyInjection.Roslyn.Module;
 /// }
 /// </code>
 /// </summary>
-internal class ProviderSpecification {
+internal sealed class ProviderSpecification {
   public ModuleDeclaration Declaration { get; set; }
   public PropertyInfo DeclarationProperty { get; set; }
   public Type ProviderType { get; set; }
@@ -20,4 +21,12 @@ internal class ProviderSpecification {
   public Type ImplementationType { get; set; }
 
   public int ProviderLifetime { get; set; }
+
+  public static bool TryCreateFromProperty(
+    PropertyInfo property,
+    [NotNullWhen(true)] out ProviderSpecification? specification
+  ) {
+    specification = null;
+    return false;
+  }
 }

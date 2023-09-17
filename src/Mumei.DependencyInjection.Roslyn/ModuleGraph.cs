@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Mumei.DependencyInjection.Module.Markers;
 using Mumei.DependencyInjection.Roslyn.Module;
+using Mumei.Roslyn;
 using Mumei.Roslyn.Extensions;
 using Mumei.Roslyn.Reflection;
 
@@ -49,16 +50,16 @@ internal sealed class ModuleGraph {
     Compilation compilation,
     ReadOnlySpan<CompilationModuleDeclaration> moduleDeclarations
   ) {
-    var entrypoints = new ArrayBuilder<CompilationModuleDeclaration>();
+    var rootModules = new ArrayBuilder<CompilationModuleDeclaration>();
     foreach (var module in moduleDeclarations) {
       var sm = compilation.GetSemanticModel(module.Syntax.SyntaxTree);
-      if (!module.Syntax.TryGetAttribute(sm, EntrypointAttribute.FullName, out _)) {
+      if (!module.Syntax.TryGetAttribute(sm, RootModuleAttribute.FullName, out _)) {
         continue;
       }
 
-      entrypoints.Add(module);
+      rootModules.Add(module);
     }
 
-    return entrypoints.ToImmutableArrayAndFree();
+    return rootModules.ToImmutableArrayAndFree();
   }
 }

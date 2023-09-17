@@ -1,6 +1,7 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
-namespace Mumei.DependencyInjection.Roslyn.Module; 
+namespace Mumei.DependencyInjection.Roslyn.Module;
 
 /// <summary>
 /// A provider configuration within a module
@@ -18,4 +19,10 @@ internal class ModuleProviderConfiguration {
   public bool ShouldApplyToAll { get; set; }
   public MethodInfo ConfigurationMethod { get; set; }
 
+  public static bool TryCreateFromMethod(
+    MethodInfo method,
+    [NotNullWhen(true)] out ModuleProviderConfiguration? providerConfiguration
+  ) {
+    throw new NotImplementedException();
+  }
 }

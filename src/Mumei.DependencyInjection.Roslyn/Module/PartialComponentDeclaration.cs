@@ -1,3 +1,13 @@
-﻿namespace Mumei.DependencyInjection.Roslyn.Module;
+﻿using System.Diagnostics.CodeAnalysis;
+using Mumei.Roslyn.Reflection;
 
-internal struct PartialComponentDeclaration { }
+namespace Mumei.DependencyInjection.Roslyn.Module;
+
+internal struct PartialComponentDeclaration {
+  public static bool TryCreateFromAttribute(
+    CompilationAttribute attribute,
+    [NotNullWhen(true)] out PartialComponentDeclaration? component
+  ) {
+    throw new NotImplementedException();
+  }
+}

@@ -6,6 +6,7 @@
         <IsRoslynComponent>true</IsRoslynComponent>
         <RootNamespace>Mumei.DependencyInjection.Roslyn</RootNamespace>
         <PackageId>Mumei.DependencyInjection.Roslyn</PackageId>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>

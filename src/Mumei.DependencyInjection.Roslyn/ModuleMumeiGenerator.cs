@@ -26,7 +26,7 @@ internal struct CompilationComponentDeclaration {
 public class ModuleMumeiGenerator : IIncrementalGenerator {
   private static readonly string MumeiModuleAttributeName = typeof(ModuleAttribute).FullName!;
   private static readonly string MumeiComponentAttributeName = typeof(ComponentAttribute).FullName!;
-  private static readonly string MumeiEntrypointAttributeName = typeof(EntrypointAttribute).FullName!;
+  private static readonly string MumeiEntrypointAttributeName = typeof(RootModuleAttribute).FullName!;
 
   public void Initialize(IncrementalGeneratorInitializationContext context) {
     var moduleDeclarations = context.SyntaxProvider

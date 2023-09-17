@@ -1,16 +1,18 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Mumei.DependencyInjection.Module.Markers;
 using Mumei.DependencyInjection.Module.Registration;
 using Mumei.DependencyInjection.Roslyn.Module;
+using Mumei.Roslyn;
 using Mumei.Roslyn.Reflection;
 
 namespace Mumei.DependencyInjection.Roslyn;
 
 internal ref struct ModuleLoader {
-  private readonly Type _rootModule;
+  private readonly CompilationType _rootModule;
   private readonly Compilation _compilation;
   private readonly ReadOnlySpan<CompilationModuleDeclaration> _moduleDeclarations;
   private readonly ReadOnlySpan<CompilationComponentDeclaration> _componentDeclarations;
@@ -19,7 +21,7 @@ internal ref struct ModuleLoader {
   private ArrayBuilder<PartialComponentDeclaration> _components = new();
 
   private ModuleLoader(
-    Type rootModule,
+    CompilationType rootModule,
     Compilation compilation,
     ReadOnlySpan<CompilationModuleDeclaration> moduleDeclarations,
     ReadOnlySpan<CompilationComponentDeclaration> componentDeclarations
@@ -36,27 +38,34 @@ internal ref struct ModuleLoader {
     ReadOnlySpan<CompilationModuleDeclaration> moduleDeclarations,
     ReadOnlySpan<CompilationComponentDeclaration> componentDeclarations
   ) {
-    var rootModuleType = rootModule.Symbol.ToType();
+    var rootModuleType = new CompilationType(rootModule.Symbol);
     var loader = new ModuleLoader(rootModuleType, compilation, moduleDeclarations, componentDeclarations);
     // Add global modules to root
     return loader.ResolveModuleRecursively(rootModuleType);
   }
 
-  private ModuleDeclaration ResolveModuleRecursively(Type moduleType) {
-    var attributes = moduleType.GetCustomAttributes();
+  private ModuleDeclaration ResolveModuleRecursively(CompilationType moduleCompilationType) {
+    var attributes = moduleCompilationType.GetAttributes();
+
     var importsBuilder = new ArrayBuilder<ModuleDeclaration>();
     var dynamicProviderBindersBuilder = new ArrayBuilder<DynamicProviderBinder>();
     var isGlobal = false;
+    var componentsBuilder = new ArrayBuilder<PartialComponentDeclaration>();
 
     foreach (var attribute in attributes) {
       if (TryGetModuleImport(attribute, out var importedModule)) {
-        var resolvedImport = ResolveModuleRecursively(importedModule);
+        var resolvedImport = ResolveModuleRecursively(importedModule.Value);
         importsBuilder.Add(resolvedImport);
         continue;
       }
 
-      if (TryGetDynamicProviderBinder(attribute, out var dynamicProviderBinder)) {
+      if (DynamicProviderBinder.TryCreateFromAttribute(attribute, out var dynamicProviderBinder)) {
         dynamicProviderBindersBuilder.Add(dynamicProviderBinder);
+        continue;
+      }
+
+      if (PartialComponentDeclaration.TryCreateFromAttribute(attribute, out var componentDeclaration)) {
+        componentsBuilder.Add(componentDeclaration.Value);
         continue;
       }
 
@@ -68,18 +77,50 @@ internal ref struct ModuleLoader {
       Debug.Assert(false, "Found an unknown attribute on a module.");
     }
 
+    var providersBuilder = new ArrayBuilder<ProviderSpecification>();
+    var forwardRefsBuilder = new ArrayBuilder<ForwardRefSpecification>();
+
+    List<PropertyInfo> properties = null!; // moduleCompilationType.GetProperties();
+    foreach (var property in properties) {
+      if (ProviderSpecification.TryCreateFromProperty(property, out var provider)) {
+        providersBuilder.Add(provider);
+      }
+
+      if (ForwardRefSpecification.TryCreateFromProperty(property, out var forwardRefSpecification)) {
+        forwardRefsBuilder.Add(forwardRefSpecification);
+      }
+
+      // We don't know what this property is used for, ignore it
+    }
+
+    var providerConfigurationsBuilder = new ArrayBuilder<ModuleProviderConfiguration>();
+    var factoryProvidersBuilder = new ArrayBuilder<FactoryProviderSpecification>();
+    List<MethodInfo> methods = null; // moduleCompilationType.GetMethods();
+    foreach (var method in methods) {
+      if (ModuleProviderConfiguration.TryCreateFromMethod(method, out var providerConfiguration)) {
+        providerConfigurationsBuilder.Add(providerConfiguration);
+      }
+
+      if (FactoryProviderSpecification.TryCreateFromMethod(method, out var facotryProvider)) {
+        factoryProvidersBuilder.Add(facotryProvider);
+      }
+
+      // We don't know what this method is used for, ignore it
+    }
+
+
     var imports = importsBuilder.ToImmutableArrayAndFree();
     var module = new ModuleDeclaration {
-      Name = moduleType.Name,
-      DeclaringType = moduleType,
+      Name = moduleCompilationType.Name,
+      DeclaringType = moduleCompilationType,
       Imports = imports,
-      Exports = default,
-      Components = default,
-      DynamicProviderBinders = default,
-      Providers = default,
-      ProviderConfigurations = default,
-      Properties = default,
-      Methods = default
+      Components = componentsBuilder.ToImmutableArrayAndFree(),
+      DynamicProviderBinders = dynamicProviderBindersBuilder.ToImmutableArrayAndFree(),
+      Providers = providersBuilder.ToImmutableArrayAndFree(),
+      ProviderConfigurations = providerConfigurationsBuilder.ToImmutableArrayAndFree(),
+      Properties = properties.ToImmutableArray(),
+      Methods = methods.ToImmutableArray(),
+      FactoryProviders = factoryProvidersBuilder.ToImmutableArrayAndFree()
     };
 
     foreach (var import in imports) {
@@ -89,19 +130,19 @@ internal ref struct ModuleLoader {
     if (isGlobal) {
       _globalModules.Add(module);
     }
-      
+
     return module;
   }
 
-  private static bool TryGetModuleImport(Attribute attribute, [NotNullWhen(true)] out Type? importedModule) {
-    if (attribute is ImportAttribute importAttribute) {
-      importedModule = importAttribute.Module;
+  private static bool TryGetModuleImport(CompilationAttribute attribute,
+    [NotNullWhen(true)] out CompilationType? importedModule) {
+    if (attribute.Is<ImportAttribute>()) {
+      importedModule = attribute.GetArgument<CompilationType>();
       return true;
     }
 
-    var attributeType = attribute.GetType();
-    if (attributeType.GetGenericTypeDefinition() == typeof(ImportAttribute<>)) {
-      importedModule = attributeType.GetGenericArguments()[0];
+    if (attribute.IsConstructedGenericTypeOf(typeof(ImportAttribute<>))) {
+      importedModule = attribute.Type.GetFirstTypeArgument();
       return true;
     }
 
@@ -109,21 +150,7 @@ internal ref struct ModuleLoader {
     return false;
   }
 
-  private static bool IsGlobalModuleAttribute(Attribute attribute) {
+  private static bool IsGlobalModuleAttribute(CompilationAttribute attribute) {
     return attribute is GlobalModuleAttribute;
-  }
-
-  private static bool TryGetDynamicProviderBinder(
-    Attribute attribute,
-    [NotNullWhen(true)] out Type? dynamicProviderBinder
-  ) {
-    var attributeType = attribute.GetType();
-    if (attributeType.GetGenericTypeDefinition() == typeof(DynamicallyBindAttribute<>)) {
-      dynamicProviderBinder = attributeType.GetGenericArguments()[0];
-      return true;
-    }
-
-    dynamicProviderBinder = null!;
-    return false;
   }
 }
