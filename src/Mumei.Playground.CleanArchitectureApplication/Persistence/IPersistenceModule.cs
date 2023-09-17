@@ -12,7 +12,7 @@ public partial interface IPersistenceModule : IModule {
   public IOrderComponent Ordering { get; }
 }
 
-[Import<IOrderComponent>]
+[Contributes<IOrderComponent>]
 public partial interface IPersistenceModule {
   [Scoped<UnitOfWork>]
   public IUnitOfWork UnitOfWork { get; }

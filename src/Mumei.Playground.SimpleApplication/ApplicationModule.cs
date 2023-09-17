@@ -7,7 +7,7 @@ using WeatherApplication.Features.Weather;
 
 namespace WeatherApplication;
 
-[Entrypoint]
+[RootModule]
 [Import<WeatherModule>]
 [Import<CommonModule>]
 public partial interface IApplicationModule { }

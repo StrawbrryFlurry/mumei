@@ -85,7 +85,7 @@ public sealed class λWeatherModule : WeatherModule {
     }
 
     if (resolveInSelf) {
-      throw NullInjector.Exception(token);
+      NullInjector.Throw(token);
     }
 
     if ((flags & InjectFlags.Host) != 0) {
@@ -96,7 +96,8 @@ public sealed class λWeatherModule : WeatherModule {
       return default;
     }
 
-    throw NullInjector.Exception(token);
+    NullInjector.Throw(token);
+    return default;
   }
 }
 

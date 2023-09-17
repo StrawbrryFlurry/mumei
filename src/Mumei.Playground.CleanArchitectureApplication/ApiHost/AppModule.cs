@@ -16,7 +16,7 @@ public partial interface IAppModule : IModule {
   public IPresentationModule PresentationModule { get; }
 }
 
-[Entrypoint]
+[RootModule]
 [Import<IDomainModule>]
 [Import<IApplicationModule>]
 [Import<IPersistenceModule>]

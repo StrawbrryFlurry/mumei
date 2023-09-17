@@ -14,8 +14,7 @@ public partial class CommonModule {
   [Scoped]
   public abstract HttpClient HttpClient { get; }
 
-  [Scoped]
-  [Provide]
+  [ProvideScoped]
   public ILogger<TCategory> CreateLogger<TCategory>() {
     return _loggerFactory.CreateLogger<TCategory>();
   }

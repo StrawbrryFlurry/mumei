@@ -13,4 +13,4 @@ public sealed class ImportAttribute : Attribute {
 }
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = true)]
-public sealed class ImportAttribute<TModule> : Attribute { }
+public sealed class ImportAttribute<TModule> : Attribute where TModule : IModule { }

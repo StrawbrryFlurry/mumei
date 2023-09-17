@@ -1,4 +1,5 @@
-﻿using Mumei.DependencyInjection.Injector.Behavior;
+﻿using System.Diagnostics.CodeAnalysis;
+using Mumei.DependencyInjection.Injector.Behavior;
 
 namespace Mumei.DependencyInjection.Injector.Implementation;
 
@@ -19,7 +20,8 @@ public sealed class NullInjector : IInjector {
     throw new NullInjectorException(token, scope);
   }
 
-  public static NullInjectorException Exception(object token, IInjector? scope = null) {
+  [DoesNotReturn]
+  public static void Throw(object token, IInjector? scope = null) {
     throw new NullInjectorException(token, scope);
   }
 

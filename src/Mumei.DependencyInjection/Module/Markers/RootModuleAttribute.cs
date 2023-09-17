@@ -6,4 +6,6 @@
 ///   for example by calling PlatformInjector.CreateEnvironment{TRootModule} in the application startup.
 /// </summary>
 [AttributeUsage(AttributeTargets.Interface)]
-public sealed class RootModuleAttribute : Attribute { }
+public sealed class RootModuleAttribute : Attribute {
+  public static readonly string FullName = typeof(RootModuleAttribute).FullName!;
+}
