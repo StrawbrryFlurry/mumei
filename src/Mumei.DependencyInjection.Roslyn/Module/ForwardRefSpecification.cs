@@ -7,7 +7,7 @@ internal sealed class ForwardRefSpecification {
   public ModuleDeclaration Parent { get; }
 
   public static bool TryCreateFromProperty(
-    PropertyInfo property,
+    in PropertyInfo property,
     [NotNullWhen(true)] out ForwardRefSpecification? spec
   ) {
     spec = default!;

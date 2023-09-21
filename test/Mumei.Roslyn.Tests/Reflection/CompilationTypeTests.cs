@@ -88,7 +88,7 @@ public sealed class CompilationTypeTests {
     var actual = s.BaseType!.ToCompilationType().GetTypeArguments();
 
     actual.ToArray().Should().HaveCount(1)
-      .And.AllBeOfType<CompilationType>()
+      .And.AllBeOfType<RoslynType>()
       .And.Subject.First().GetFullName().Should().Be(typeof(int).FullName);
   }
 
@@ -119,7 +119,7 @@ public sealed class CompilationTypeTests {
     var actual = s.BaseType!.ToCompilationType().GetTypeArguments();
 
     actual.ToArray().Should().HaveCount(2)
-      .And.AllBeOfType<CompilationType>()
+      .And.AllBeOfType<RoslynType>()
       .And.Subject
       .Select(x => x.GetFullName()).Should().ContainInOrder(new[] { typeof(int).FullName, typeof(string).FullName });
   }
@@ -146,7 +146,7 @@ public sealed class CompilationTypeTests {
     var actual = s.ToCompilationType().GetAttributes();
 
     actual.ToArray().Should().HaveCount(1)
-      .And.AllBeOfType<CompilationAttribute>()
+      .And.AllBeOfType<RoslynAttribute>()
       .And.Subject.First().Type.GetFullName().Should().Be(typeof(AttributeUsageAttribute).FullName);
   }
 
@@ -173,7 +173,7 @@ public sealed class CompilationTypeTests {
     var actual = s.ToCompilationType().GetAttributes();
 
     actual.ToArray().Should().HaveCount(2)
-      .And.AllBeOfType<CompilationAttribute>()
+      .And.AllBeOfType<RoslynAttribute>()
       .And.Subject.Select(x => x.Type.GetFullName()).Should().ContainInOrder(new[] {
         typeof(AttributeUsageAttribute).FullName,
         $"{nameof(GenericAttribute)}`1"

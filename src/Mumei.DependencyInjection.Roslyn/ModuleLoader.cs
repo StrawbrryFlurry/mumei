@@ -12,7 +12,7 @@ using Mumei.Roslyn.Reflection;
 namespace Mumei.DependencyInjection.Roslyn;
 
 internal ref struct ModuleLoader {
-  private readonly CompilationType _rootModule;
+  private readonly RoslynType _rootModule;
   private readonly Compilation _compilation;
   private readonly ReadOnlySpan<CompilationModuleDeclaration> _moduleDeclarations;
   private readonly ReadOnlySpan<CompilationComponentDeclaration> _componentDeclarations;
@@ -21,7 +21,7 @@ internal ref struct ModuleLoader {
   private ArrayBuilder<PartialComponentDeclaration> _components = new();
 
   private ModuleLoader(
-    CompilationType rootModule,
+    RoslynType rootModule,
     Compilation compilation,
     ReadOnlySpan<CompilationModuleDeclaration> moduleDeclarations,
     ReadOnlySpan<CompilationComponentDeclaration> componentDeclarations
@@ -38,22 +38,22 @@ internal ref struct ModuleLoader {
     ReadOnlySpan<CompilationModuleDeclaration> moduleDeclarations,
     ReadOnlySpan<CompilationComponentDeclaration> componentDeclarations
   ) {
-    var rootModuleType = new CompilationType(rootModule.Symbol);
+    var rootModuleType = new RoslynType(rootModule.Symbol);
     var loader = new ModuleLoader(rootModuleType, compilation, moduleDeclarations, componentDeclarations);
     // Add global modules to root
     return loader.ResolveModuleRecursively(rootModuleType);
   }
 
-  private ModuleDeclaration ResolveModuleRecursively(CompilationType moduleCompilationType) {
-    var attributes = moduleCompilationType.GetAttributes();
-
+  private ModuleDeclaration ResolveModuleRecursively(RoslynType moduleCompilationType) {
+    var isGlobal = false;
     var importsBuilder = new ArrayBuilder<ModuleDeclaration>();
     var dynamicProviderBindersBuilder = new ArrayBuilder<DynamicProviderBinder>();
-    var isGlobal = false;
     var componentsBuilder = new ArrayBuilder<PartialComponentDeclaration>();
 
-    foreach (var attribute in attributes) {
-      if (TryGetModuleImport(attribute, out var importedModule)) {
+    using var attributes = moduleCompilationType.GetAttributesTemp();
+    for (var i = 0; i < attributes.Length; i++) {
+      ref readonly var attribute = ref attributes[i];
+      if (TryGetModuleImport(in attribute, out var importedModule)) {
         var resolvedImport = ResolveModuleRecursively(importedModule.Value);
         importsBuilder.Add(resolvedImport);
         continue;
@@ -95,19 +95,21 @@ internal ref struct ModuleLoader {
 
     var providerConfigurationsBuilder = new ArrayBuilder<ModuleProviderConfiguration>();
     var factoryProvidersBuilder = new ArrayBuilder<FactoryProviderSpecification>();
-    List<MethodInfo> methods = null; // moduleCompilationType.GetMethods();
-    foreach (var method in methods) {
+    using var methods = moduleCompilationType.GetMethodsTemp();
+    for (var i = 0; i < methods.Length; i++) {
+      ref readonly var method = ref methods[i];
       if (ModuleProviderConfiguration.TryCreateFromMethod(method, out var providerConfiguration)) {
         providerConfigurationsBuilder.Add(providerConfiguration);
+        continue;
       }
 
       if (FactoryProviderSpecification.TryCreateFromMethod(method, out var facotryProvider)) {
         factoryProvidersBuilder.Add(facotryProvider);
+        continue;
       }
 
       // We don't know what this method is used for, ignore it
     }
-
 
     var imports = importsBuilder.ToImmutableArrayAndFree();
     var module = new ModuleDeclaration {
@@ -118,8 +120,6 @@ internal ref struct ModuleLoader {
       DynamicProviderBinders = dynamicProviderBindersBuilder.ToImmutableArrayAndFree(),
       Providers = providersBuilder.ToImmutableArrayAndFree(),
       ProviderConfigurations = providerConfigurationsBuilder.ToImmutableArrayAndFree(),
-      Properties = properties.ToImmutableArray(),
-      Methods = methods.ToImmutableArray(),
       FactoryProviders = factoryProvidersBuilder.ToImmutableArrayAndFree()
     };
 
@@ -134,10 +134,12 @@ internal ref struct ModuleLoader {
     return module;
   }
 
-  private static bool TryGetModuleImport(CompilationAttribute attribute,
-    [NotNullWhen(true)] out CompilationType? importedModule) {
+  private static bool TryGetModuleImport(
+    in RoslynAttribute attribute,
+    [NotNullWhen(true)] out RoslynType? importedModule
+  ) {
     if (attribute.Is<ImportAttribute>()) {
-      importedModule = attribute.GetArgument<CompilationType>();
+      importedModule = attribute.Type.GetFirstTypeArgument();
       return true;
     }
 
@@ -150,7 +152,7 @@ internal ref struct ModuleLoader {
     return false;
   }
 
-  private static bool IsGlobalModuleAttribute(CompilationAttribute attribute) {
-    return attribute is GlobalModuleAttribute;
+  private static bool IsGlobalModuleAttribute(in RoslynAttribute attribute) {
+    return attribute.Is<GlobalModuleAttribute>();
   }
 }

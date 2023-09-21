@@ -5,8 +5,8 @@ namespace Mumei.Roslyn.Testing.Comp;
 public static class CompilationExtensions {
   public static TSymbol GetSymbolByName<TSymbol>(this Compilation compilation, string name)
     where TSymbol : ISymbol {
-    var x = compilation.GetSymbolsWithName(name, SymbolFilter.All);
-    return x.OfType<TSymbol>().First();
+    var s = compilation.GetSymbolsWithName(name, SymbolFilter.All);
+    return s.OfType<TSymbol>().First();
   }
 
   public static INamedTypeSymbol GetTypeSymbol(this Compilation compilation, string typeName) {

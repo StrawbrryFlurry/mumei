@@ -14,17 +14,57 @@ public ref struct ArrayBuilder<TElement> {
   private int _count = 0;
   private int _capacity = 0;
 
+  private Span<TElement> SlicedElements {
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    get => _elements[.._count];
+  }
+
+  public static ArrayBuilder<TElement> Empty => new();
+
   public ArrayBuilder() {
     _elements = _rentedArray = Array.Empty<TElement>();
   }
 
-  public ArrayBuilder(int initialCapacity) {
+  /// <summary>
+  /// Consumers may use the <see cref="CreateWithApproximateSize(int)"/> method to create a builder
+  /// with an initial capacity which ensures that the builder does not rent an array with a
+  /// suboptimal size.
+  /// </summary>
+  /// <param name="initialCapacity"></param>
+  /// <exception cref="ArgumentOutOfRangeException"></exception>
+  internal ArrayBuilder(int initialCapacity) {
     if (initialCapacity < 0) {
       throw new ArgumentOutOfRangeException(nameof(initialCapacity));
     }
 
     SetBackingArray(AllocateArray(initialCapacity));
     _capacity = initialCapacity;
+  }
+
+  public static ArrayBuilder<TElement> CreateWithApproximateSize(int sizeHint) {
+    return new ArrayBuilder<TElement>(GetCapacityForSize(sizeHint));
+  }
+
+  public static ArrayBuilder<TElement> CreateWithApproximateSize(double sizeHint) {
+    return new ArrayBuilder<TElement>(GetCapacityForSize((int)sizeHint));
+  }
+
+  private static int GetCapacityForSize(int count) {
+    if (count < 0) {
+      return 0;
+    }
+
+    // Prefer common array sizes
+    return count switch {
+      <= DefaultCapacity => DefaultCapacity,
+      <= 8 => 8,
+      <= 16 => 16,
+      <= 32 => 32,
+      <= 64 => 64,
+      <= 128 => 128,
+      <= 256 => 256,
+      _ => count
+    };
   }
 
   private int LastIndex => _capacity - 1;
@@ -37,7 +77,7 @@ public ref struct ArrayBuilder<TElement> {
   public TElement[] ToArrayAndFree() {
     var array = new TElement[_count];
 
-    DangerousAsSpanWithoutOwnership().CopyTo(array);
+    SlicedElements.CopyTo(array);
     Free();
 
     return array;
@@ -49,11 +89,10 @@ public ref struct ArrayBuilder<TElement> {
   /// </summary>
   /// <returns>A new array containing all the elements of the builder</returns>
   public ImmutableArray<TElement> ToImmutableArrayAndFree() {
-    var elementsWithActualLength = DangerousAsSpanWithoutOwnership();
     // The ImmutableArray constructor will create a new array from the span,
     // so we can give it a cut-down version of the array we rented, avoiding
     // allocating the correctly sized array twice.
-    var array = ImmutableArray.Create(elementsWithActualLength);
+    var array = ImmutableArray.Create(SlicedElements);
     Free();
     return array;
   }
@@ -66,7 +105,7 @@ public ref struct ArrayBuilder<TElement> {
   public Span<TElement> ToSpanAndFree() {
     Span<TElement> backingArray = new TElement[_count];
 
-    DangerousAsSpanWithoutOwnership().CopyTo(backingArray);
+    SlicedElements.CopyTo(backingArray);
     Free();
 
     return backingArray;
@@ -82,6 +121,11 @@ public ref struct ArrayBuilder<TElement> {
     return new ReadOnlySpan<TElement>(ToArrayAndFree());
   }
 
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public TemporarySpan<TElement> AsRefForfeitOwnership() {
+    return new TemporarySpan<TElement>(SlicedElements, _rentedArray);
+  }
+
   /// <summary>
   /// Returns a span that includes all elements in the builder, useful for
   /// iterating over the elements or copying them to another span.
@@ -94,12 +138,12 @@ public ref struct ArrayBuilder<TElement> {
   /// <returns></returns>
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public ReadOnlySpan<TElement> DangerousAsSpanWithoutOwnership() {
-    return _elements[.._count];
+    return SlicedElements;
   }
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   internal Span<TElement> DangerousAsWriteableSpanWithoutOwnership() {
-    return _elements[.._count];
+    return SlicedElements;
   }
 
   internal void Free() {
@@ -137,7 +181,7 @@ public ref struct ArrayBuilder<TElement> {
       return;
     }
 
-    if (_count == LastIndex) {
+    if (_count >= LastIndex) {
       Grow(_count + 1);
       AddElement(element);
       return;

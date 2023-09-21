@@ -8,11 +8,10 @@ internal sealed class DynamicProviderBinder {
   public ModuleDeclaration Parent { get; }
 
   public static bool TryCreateFromAttribute(
-    CompilationAttribute attribute,
+    in RoslynAttribute attribute,
     [NotNullWhen(true)] out DynamicProviderBinder? dynamicProviderBinder
   ) {
-    var attributeType = attribute.GetType();
-    if (attributeType.GetGenericTypeDefinition() == typeof(DynamicallyBindAttribute<>)) {
+    if (attribute.IsConstructedGenericTypeOf(typeof(DynamicallyBindAttribute<>))) {
       dynamicProviderBinder = null!; // attributeType.GetGenericArguments()[0];
       return true;
     }

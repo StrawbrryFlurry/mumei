@@ -23,7 +23,7 @@ internal sealed class ProviderSpecification {
   public int ProviderLifetime { get; set; }
 
   public static bool TryCreateFromProperty(
-    PropertyInfo property,
+    in PropertyInfo property,
     [NotNullWhen(true)] out ProviderSpecification? specification
   ) {
     specification = null;

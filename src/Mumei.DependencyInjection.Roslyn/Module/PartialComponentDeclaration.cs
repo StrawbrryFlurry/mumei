@@ -5,7 +5,7 @@ namespace Mumei.DependencyInjection.Roslyn.Module;
 
 internal struct PartialComponentDeclaration {
   public static bool TryCreateFromAttribute(
-    CompilationAttribute attribute,
+    in RoslynAttribute attribute,
     [NotNullWhen(true)] out PartialComponentDeclaration? component
   ) {
     throw new NotImplementedException();
