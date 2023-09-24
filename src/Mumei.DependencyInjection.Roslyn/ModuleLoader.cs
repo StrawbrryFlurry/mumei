@@ -1,7 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Mumei.DependencyInjection.Module.Markers;
 using Mumei.DependencyInjection.Module.Registration;
@@ -14,32 +11,24 @@ namespace Mumei.DependencyInjection.Roslyn;
 internal ref struct ModuleLoader {
   private readonly RoslynType _rootModule;
   private readonly Compilation _compilation;
-  private readonly ReadOnlySpan<CompilationModuleDeclaration> _moduleDeclarations;
-  private readonly ReadOnlySpan<CompilationComponentDeclaration> _componentDeclarations;
 
   private ArrayBuilder<ModuleDeclaration> _globalModules = new();
   private ArrayBuilder<PartialComponentDeclaration> _components = new();
 
   private ModuleLoader(
     RoslynType rootModule,
-    Compilation compilation,
-    ReadOnlySpan<CompilationModuleDeclaration> moduleDeclarations,
-    ReadOnlySpan<CompilationComponentDeclaration> componentDeclarations
+    Compilation compilation
   ) {
     _rootModule = rootModule;
     _compilation = compilation;
-    _moduleDeclarations = moduleDeclarations;
-    _componentDeclarations = componentDeclarations;
   }
 
   public static ModuleDeclaration ResolveModule(
     CompilationModuleDeclaration rootModule,
-    Compilation compilation,
-    ReadOnlySpan<CompilationModuleDeclaration> moduleDeclarations,
-    ReadOnlySpan<CompilationComponentDeclaration> componentDeclarations
+    Compilation compilation
   ) {
     var rootModuleType = new RoslynType(rootModule.Symbol);
-    var loader = new ModuleLoader(rootModuleType, compilation, moduleDeclarations, componentDeclarations);
+    var loader = new ModuleLoader(rootModuleType, compilation);
     // Add global modules to root
     return loader.ResolveModuleRecursively(rootModuleType);
   }
@@ -49,7 +38,7 @@ internal ref struct ModuleLoader {
     var importsBuilder = new ArrayBuilder<ModuleDeclaration>();
     var dynamicProviderBindersBuilder = new ArrayBuilder<DynamicProviderBinder>();
     var componentsBuilder = new ArrayBuilder<PartialComponentDeclaration>();
-    var providersBuilder = new ArrayBuilder<IProviderSpec>();
+    var providersBuilder = new ArrayBuilder<IProviderDeclaration>();
 
     using var attributes = moduleCompilationType.GetAttributesTemp();
     for (var i = 0; i < attributes.Length; i++) {
@@ -64,6 +53,7 @@ internal ref struct ModuleLoader {
 
       if (PartialComponentDeclaration.TryCreateFromAttribute(attribute, out var componentDeclaration)) {
         componentsBuilder.Add(componentDeclaration);
+        _components.Add(componentDeclaration);
         continue;
       }
 
@@ -76,40 +66,39 @@ internal ref struct ModuleLoader {
         isGlobal = true;
         continue;
       }
-
-      Debug.Assert(false, "Found an unknown attribute on a module.");
     }
 
     using var properties = moduleCompilationType.GetPropertiesTemp();
     for (var index = 0; index < properties.Length; index++) {
       var property = properties[index];
       var propertyAttributes = property.GetAttributesTemp();
-      if (ProviderSpecification.TryCreateFromProperty(property, propertyAttributes, out var provider)) {
+      if (ProviderDeclaration.TryCreateFromProperty(property, propertyAttributes, out var provider)) {
         providersBuilder.Add(provider);
       }
 
-      if (ForwardRefSpecification.TryCreateFromProperty(
-            property,
-            propertyAttributes,
-            out var forwardRefSpecification
-          )) {
-        providersBuilder.Add(forwardRefSpecification);
+      if (UseExistingProviderDeclaration.TryCreateFromProperty(property, attributes, out var useExistingProvider)) {
+        providersBuilder.Add(useExistingProvider);
+      }
+
+      if (ForwardRefDeclaration.TryCreateFromProperty(property, propertyAttributes, out var forwardRefProvider)) {
+        providersBuilder.Add(forwardRefProvider);
       }
 
       // We don't know what this property is used for, ignore it
     }
 
-    var providerConfigurationsBuilder = new ArrayBuilder<ProviderConfigurationSpec>();
+    var providerConfigurationsBuilder = new ArrayBuilder<ProviderConfigurationDeclaration>();
     using var methods = moduleCompilationType.GetMethodsTemp();
     for (var i = 0; i < methods.Length; i++) {
       var method = methods[i];
       var methodAttributes = method.GetAttributesTemp();
-      if (FactoryProviderSpecification.TryCreateFromMethod(method, methodAttributes, out var facotryProvider)) {
+      if (FactoryProviderDeclaration.TryCreateFromMethod(method, methodAttributes, out var facotryProvider)) {
         providersBuilder.Add(facotryProvider);
         continue;
       }
 
-      if (ProviderConfigurationSpec.TryCreateFromMethod(method, methodAttributes, out var providerConfiguration)) {
+      if (ProviderConfigurationDeclaration.TryCreateFromMethod(method, methodAttributes,
+            out var providerConfiguration)) {
         providerConfigurationsBuilder.Add(providerConfiguration);
         continue;
       }

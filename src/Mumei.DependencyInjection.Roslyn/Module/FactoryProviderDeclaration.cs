@@ -7,7 +7,7 @@ using Mumei.Roslyn.Reflection;
 
 namespace Mumei.DependencyInjection.Roslyn.Module;
 
-public sealed class FactoryProviderSpecification : IProviderSpec {
+public sealed class FactoryProviderDeclaration : IProviderDeclaration {
   public required ImmutableArray<RoslynType> Dependencies { get; init; }
   public required object? ProviderToken { get; init; }
   public required RoslynType ProviderType { get; init; }
@@ -21,7 +21,7 @@ public sealed class FactoryProviderSpecification : IProviderSpec {
   public static bool TryCreateFromMethod(
     in RoslynMethodInfo method,
     in TemporarySpan<RoslynAttribute> attributes,
-    [NotNullWhen(true)] out FactoryProviderSpecification? factoryProvider
+    [NotNullWhen(true)] out FactoryProviderDeclaration? factoryProvider
   ) {
     InjectorLifetime? lifetime = null;
     object? proivderToken = null;
@@ -54,7 +54,7 @@ public sealed class FactoryProviderSpecification : IProviderSpec {
       return false;
     }
 
-    factoryProvider = new FactoryProviderSpecification {
+    factoryProvider = new FactoryProviderDeclaration {
       Lifetime = lifetime.Value,
       ProviderToken = proivderToken,
       ProviderType = method.ReturnType,

@@ -3,6 +3,6 @@ using Mumei.Roslyn.Reflection;
 
 namespace Mumei.DependencyInjection.Roslyn.Module;
 
-internal interface IProviderSpec {
+internal interface IProviderDeclaration {
   public RoslynType ProviderType { get; }
 }

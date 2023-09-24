@@ -15,7 +15,7 @@ namespace Mumei.DependencyInjection.Roslyn.Module;
 /// }
 /// </code>
 /// </summary>
-internal sealed class ProviderSpecification : IProviderSpec {
+internal sealed class ProviderDeclaration : IProviderDeclaration {
   public required RoslynPropertyInfo DeclarationProperty { get; init; }
   public required RoslynType ProviderType { get; init; }
   public required RoslynType ImplementationType { get; init; }
@@ -29,7 +29,7 @@ internal sealed class ProviderSpecification : IProviderSpec {
   public static bool TryCreateFromProperty(
     in RoslynPropertyInfo property,
     TemporarySpan<RoslynAttribute> attributes,
-    [NotNullWhen(true)] out ProviderSpecification? specification
+    [NotNullWhen(true)] out ProviderDeclaration? specification
   ) {
     var isMultiProvider = false;
     object? customProviderToken = null;
@@ -101,7 +101,7 @@ internal sealed class ProviderSpecification : IProviderSpec {
       return false;
     }
 
-    specification = new ProviderSpecification {
+    specification = new ProviderDeclaration {
       DeclarationProperty = property,
       ImplementationType = scopedProvider.ImplementationType,
       ProviderType = scopedProvider.ProviderType,

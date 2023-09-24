@@ -33,15 +33,13 @@ internal sealed class ModuleGraph {
 
   private static ModuleDeclaration ResolveEntrypointModule(
     Compilation compilation,
-    CompilationModuleDeclaration entrypointDeclaration,
+    CompilationModuleDeclaration rootModuleDeclaration,
     ReadOnlySpan<CompilationModuleDeclaration> moduleDeclarations,
     ReadOnlySpan<CompilationComponentDeclaration> componentDeclarations
   ) {
     return ModuleLoader.ResolveModule(
-      entrypointDeclaration,
-      compilation,
-      moduleDeclarations,
-      componentDeclarations
+      rootModuleDeclaration,
+      compilation
     );
   }
 

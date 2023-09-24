@@ -13,8 +13,8 @@ internal sealed class ModuleDeclaration {
   public required ImmutableArray<PartialComponentDeclaration> Components { get; init; }
   public required ImmutableArray<DynamicProviderBinder> DynamicProviderBinders { get; init; }
 
-  public required ImmutableArray<IProviderSpec> Providers { get; init; }
-  public required ImmutableArray<ProviderConfigurationSpec> ProviderConfigurations { get; init; }
+  public required ImmutableArray<IProviderDeclaration> Providers { get; init; }
+  public required ImmutableArray<ProviderConfigurationDeclaration> ProviderConfigurations { get; init; }
 
   public void Realize(ModuleDeclaration parent) {
     Parent = parent;

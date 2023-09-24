@@ -7,7 +7,7 @@ using Mumei.Roslyn.Reflection;
 
 namespace Mumei.DependencyInjection.Roslyn.Module;
 
-internal sealed class ForwardRefSpecification : IProviderSpec {
+internal sealed class ForwardRefDeclaration : IProviderDeclaration {
   public required ForwardRefSource Source { get; init; }
   public required RoslynPropertyInfo Property { get; init; }
 
@@ -16,7 +16,7 @@ internal sealed class ForwardRefSpecification : IProviderSpec {
   public static bool TryCreateFromProperty(
     in RoslynPropertyInfo property,
     in TemporarySpan<RoslynAttribute> attributes,
-    [NotNullWhen(true)] out ForwardRefSpecification? spec
+    [NotNullWhen(true)] out ForwardRefDeclaration? spec
   ) {
     for (var i = 0; i < attributes.Length; i++) {
       var attribute = attributes[i];
@@ -26,7 +26,7 @@ internal sealed class ForwardRefSpecification : IProviderSpec {
 
       var forwardRefSource = attribute.GetArgument<ForwardRefSource?>(nameof(ForwardRefAttribute.Source), 0)
                              ?? ForwardRefSource.Default;
-      spec = new ForwardRefSpecification {
+      spec = new ForwardRefDeclaration {
         Source = forwardRefSource,
         Property = property,
         ProviderType = property.Type
