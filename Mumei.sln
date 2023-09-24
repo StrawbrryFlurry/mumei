@@ -25,7 +25,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.AspNetCore.Common", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.Playground.SimpleApplication", "src\Mumei.Playground.SimpleApplication\Mumei.Playground.SimpleApplication.csproj", "{FAC6F7E4-4C02-4388-BAD9-91B3D7ECFAD1}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Playground", "Playground", "{F2800B3D-A01D-4716-94DB-C6DC19630B58}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_Playground", "_Playground", "{F2800B3D-A01D-4716-94DB-C6DC19630B58}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mumei.Playground.CleanArchitectureApplication", "src/Mumei.Playground.CleanArchitectureApplication\Mumei.Playground.CleanArchitectureApplication.csproj", "{83C638DC-6D7D-4BD9-9473-D81F1FD58F33}"
 EndProject
