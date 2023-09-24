@@ -20,4 +20,4 @@ public sealed class ComponentAttribute : Attribute {
 ///   Declares that the component of type <typeparamref name="TComponent" /> is part of this module
 /// </summary>
 /// <typeparam name="TComponent">The component type to add to this module</typeparam>
-public sealed class ComponentAttribute<TComponent> : DependencyRegistrationAttribute<TComponent> { }
+public sealed class ComponentAttribute<TComponent> : Attribute { }

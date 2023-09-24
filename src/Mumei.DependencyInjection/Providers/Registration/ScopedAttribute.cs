@@ -1,8 +1,5 @@
 ﻿namespace Mumei.DependencyInjection.Providers.Registration;
 
-public class ScopedAttribute<TProvider, TImplementation> :
-  DependencyRegistrationAttribute<TProvider, TImplementation> where TImplementation : TProvider { }
+public sealed class ScopedAttribute<TProvider> : Attribute { }
 
-public class ScopedAttribute<TProvider> : DependencyRegistrationAttribute<TProvider> { }
-
-public class ScopedAttribute : Attribute { }
+public sealed class ScopedAttribute : Attribute { }

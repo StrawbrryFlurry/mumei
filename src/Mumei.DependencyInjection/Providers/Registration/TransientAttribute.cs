@@ -2,8 +2,7 @@
 
 public sealed class TransientAttribute : Attribute { }
 
-public class TransientAttribute<TProvider>
-  : DependencyRegistrationAttribute<TProvider> { }
+public sealed class TransientAttribute<TProvider> : Attribute { }
 
 /// <summary>
 ///   Adds a transient provider to the module without making
@@ -13,4 +12,4 @@ public class TransientAttribute<TProvider>
 /// <typeparam name="TImplementation"></typeparam>
 public class InternalTransientAttribute<TProvider, TImplementation> : Attribute { }
 
-public class InternalTransientAttribute<TProvider> : TransientAttribute<TProvider> { }
+public class InternalTransientAttribute<TProvider> : Attribute { }
