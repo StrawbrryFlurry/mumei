@@ -24,13 +24,12 @@ internal ref struct ModuleLoader {
   }
 
   public static ModuleDeclaration ResolveModule(
-    CompilationModuleDeclaration rootModule,
+    RoslynType rootModule,
     Compilation compilation
   ) {
-    var rootModuleType = new RoslynType(rootModule.Symbol);
-    var loader = new ModuleLoader(rootModuleType, compilation);
+    var loader = new ModuleLoader(rootModule, compilation);
     // Add global modules to root
-    return loader.ResolveModuleRecursively(rootModuleType);
+    return loader.ResolveModuleRecursively(rootModule);
   }
 
   private ModuleDeclaration ResolveModuleRecursively(RoslynType moduleCompilationType) {

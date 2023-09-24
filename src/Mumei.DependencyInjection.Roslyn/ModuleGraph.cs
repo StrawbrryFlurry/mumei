@@ -20,9 +20,10 @@ internal sealed class ModuleGraph {
     var realizedEntrypoints = new ModuleDeclaration[entrypoints.Length];
 
     for (var i = 0; i < entrypoints.Length; i++) {
+      var entrypoint = new RoslynType(entrypoints[i].Symbol);
       realizedEntrypoints[i] = ResolveEntrypointModule(
         compilation,
-        entrypoints[i],
+        entrypoint,
         moduleDeclarations,
         componentDeclarations
       );
@@ -33,7 +34,7 @@ internal sealed class ModuleGraph {
 
   private static ModuleDeclaration ResolveEntrypointModule(
     Compilation compilation,
-    CompilationModuleDeclaration rootModuleDeclaration,
+    RoslynType rootModuleDeclaration,
     ReadOnlySpan<CompilationModuleDeclaration> moduleDeclarations,
     ReadOnlySpan<CompilationComponentDeclaration> componentDeclarations
   ) {

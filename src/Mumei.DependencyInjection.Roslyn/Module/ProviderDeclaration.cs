@@ -110,7 +110,7 @@ internal sealed class ProviderDeclaration : IProviderDeclaration {
       IsMulti = isMultiProvider,
       MultiProviderScope = multiProviderScope
     };
-    return false;
+    return true;
   }
 
   private static bool TryGetScopedProivder<TConstructedGenericType>(
