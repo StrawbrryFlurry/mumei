@@ -13,14 +13,14 @@
 ///   provider to be merged is contained in the scope of the resolution strategy.
 /// </summary>
 public class MultiAttribute : Attribute {
-  public MultiAttribute(MultiProviderResolutionStrategy strategy = MultiProviderResolutionStrategy.Module) {
-    Strategy = strategy;
+  public MultiAttribute(MultiProviderScope scope = MultiProviderScope.Default) {
+    Scope = scope;
   }
 
-  public MultiProviderResolutionStrategy Strategy { get; }
+  public MultiProviderScope Scope { get; }
 }
 
-public enum MultiProviderResolutionStrategy {
+public enum MultiProviderScope {
   /// <summary>
   ///   All providers with the same token in this module
   ///   will be grouped together as a multi provider.
@@ -37,5 +37,7 @@ public enum MultiProviderResolutionStrategy {
   ///   The provider will be grouped with all other app multi
   ///   provider tokens within this application module.
   /// </summary>
-  App
+  App,
+
+  Default = Module
 }

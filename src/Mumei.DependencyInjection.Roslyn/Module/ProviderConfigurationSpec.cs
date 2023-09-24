@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using Mumei.DependencyInjection.Providers.Registration;
+using Mumei.Roslyn;
 using Mumei.Roslyn.Reflection;
 
 namespace Mumei.DependencyInjection.Roslyn.Module;
@@ -12,11 +14,8 @@ namespace Mumei.DependencyInjection.Roslyn.Module;
 /// }
 /// </code>
 /// </summary>
-internal sealed class ModuleProviderConfiguration {
-  public ModuleDeclaration Declaration { get; set; }
+internal sealed class ProviderConfigurationSpec {
   public Type ProviderType { get; set; }
-
-  public List<Type> TargetProviders { get; set; } = new();
   public bool ShouldApplyToAll { get; set; }
 
   private RoslynMethodInfo _configurationMethod;
@@ -24,9 +23,17 @@ internal sealed class ModuleProviderConfiguration {
 
   public static bool TryCreateFromMethod(
     in RoslynMethodInfo method,
-    [NotNullWhen(true)] out ModuleProviderConfiguration? providerConfiguration
+    in TemporarySpan<RoslynAttribute> attributes,
+    [NotNullWhen(true)] out ProviderConfigurationSpec? providerConfiguration
   ) {
-    providerConfiguration = new ModuleProviderConfiguration {
+    for (var i = 0; i < attributes.Length; i++) {
+      var attribute = attributes[i];
+      if (attribute.IsConstructedGenericTypeOf(typeof(ConfigureForAttribute<>))) { }
+
+      if (attribute.Is<ConfigureAttribute>()) { }
+    }
+
+    providerConfiguration = new ProviderConfigurationSpec {
       ConfigurationMethod = method
     };
     return true;

@@ -11,7 +11,7 @@ public sealed class CompilationTypeTests {
   public void GetFullName_ReturnsTypeName_WhenTypeIsInGlobalNamespace() {
     var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(TypeInGlobalNamespace);
 
-    var actual = s.ToCompilationType().GetFullName();
+    var actual = new RoslynType(s).GetFullName();
 
     actual.Should().Be(nameof(TypeInGlobalNamespace));
   }
@@ -26,7 +26,7 @@ public sealed class CompilationTypeTests {
   public void GetFullName_ReturnsFullTypeName_WhenTypeIsInNamespace() {
     var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(TypeInNamespace);
 
-    var actual = s.ToCompilationType().GetFullName();
+    var actual = new RoslynType(s).GetFullName();
 
     actual.Should().Be($"NamespaceOne.{nameof(TypeInNamespace)}");
   }
@@ -41,7 +41,7 @@ public sealed class CompilationTypeTests {
   public void GetFullName_ReturnsFullTypeName_WhenTypeIsInNestedNamespace() {
     var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(TypeInNestedNamespace);
 
-    var actual = s.ToCompilationType().GetFullName();
+    var actual = new RoslynType(s).GetFullName();
 
     actual.Should().Be($"NamespaceOne.NamespaceTwo.{nameof(TypeInNestedNamespace)}");
   }
@@ -55,7 +55,7 @@ public sealed class CompilationTypeTests {
   public void GetFullName_ReturnsTypeNameWithGenericParameterCount_WhenTypeIsGenericAndInGlobalNamespace() {
     var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(GenericTypeInGlobalNamespace);
 
-    var actual = s.ToCompilationType().GetFullName();
+    var actual = new RoslynType(s).GetFullName();
 
     actual.Should().Be($"{nameof(GenericTypeInGlobalNamespace)}`1");
   }
@@ -64,7 +64,7 @@ public sealed class CompilationTypeTests {
   public void GetTypeArguments_ReturnsEmptySpan_WhenTypeIsNotGeneric() {
     var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(TypeInGlobalNamespace);
 
-    var actual = s.ToCompilationType().GetTypeArguments();
+    var actual = new RoslynType(s).GetTypeArguments();
 
     actual.ToArray().Should().BeEmpty();
   }
@@ -85,7 +85,7 @@ public sealed class CompilationTypeTests {
   public void GetTypeArguments_ReturnsOneType_WhenTypeIsGenericAndHasOneArgument() {
     var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(ConstructedGenericTypeWithOneArgument);
 
-    var actual = s.BaseType!.ToCompilationType().GetTypeArguments();
+    var actual = new RoslynType(s.BaseType).GetTypeArguments();
 
     actual.ToArray().Should().HaveCount(1)
       .And.AllBeOfType<RoslynType>()
@@ -96,7 +96,7 @@ public sealed class CompilationTypeTests {
   public void GetFirstTypeArgument_ReturnsType_WhenTypeIsGenericAndHasOneArgument() {
     var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(ConstructedGenericTypeWithOneArgument);
 
-    var actual = s.BaseType!.ToCompilationType().GetFirstTypeArgument();
+    var actual = new RoslynType(s.BaseType).GetFirstTypeArgument();
 
     actual.GetFullName().Should().Be(typeof(int).FullName);
   }
@@ -116,7 +116,7 @@ public sealed class CompilationTypeTests {
   public void GetTypeArguments_ReturnsTwoTypes_WhenTypeIsGenericAndHasTwoArguments() {
     var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(ConstructedGenericTypeWithTwoArguments);
 
-    var actual = s.BaseType!.ToCompilationType().GetTypeArguments();
+    var actual = new RoslynType(s.BaseType).GetTypeArguments();
 
     actual.ToArray().Should().HaveCount(2)
       .And.AllBeOfType<RoslynType>()
@@ -128,7 +128,7 @@ public sealed class CompilationTypeTests {
   public void GetAttributes_ReturnsEmptySpan_WhenTypeHasNoAttributes() {
     var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(TypeInGlobalNamespace);
 
-    var actual = s.ToCompilationType().GetAttributes();
+    var actual = new RoslynType(s).GetAttributes();
 
     actual.ToArray().Should().BeEmpty();
   }
@@ -143,7 +143,7 @@ public sealed class CompilationTypeTests {
   public void GetAttributes_ReturnsOneAttribute_WhenTypeHasOneAttribute() {
     var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(TypeWithAttribute, s => s.WithUsing<Attribute>());
 
-    var actual = s.ToCompilationType().GetAttributes();
+    var actual = new RoslynType(s).GetAttributes();
 
     actual.ToArray().Should().HaveCount(1)
       .And.AllBeOfType<RoslynAttribute>()
@@ -170,7 +170,7 @@ public sealed class CompilationTypeTests {
       TypeWithTwoAttributes, s => s.WithUsing<Attribute>().WithUsing<Attribute>()
     );
 
-    var actual = s.ToCompilationType().GetAttributes();
+    var actual = new RoslynType(s).GetAttributes();
 
     actual.ToArray().Should().HaveCount(2)
       .And.AllBeOfType<RoslynAttribute>()

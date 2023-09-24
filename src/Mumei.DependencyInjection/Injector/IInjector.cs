@@ -2,6 +2,41 @@
 
 namespace Mumei.DependencyInjection.Injector;
 
+/// <summary>
+/// TODO: For super speedy provider lookup:
+/// All injectors(modules) contain a Map{long, long} where the
+/// key is a unique type id (constructed from the type's full name at compile time)
+/// and the value is the index of the module's provider in the global provider binding array.
+/// All module's bindings are stored in that global array and each of them gets a unique index.
+/// <code>
+/// class WeatherModule {
+///   public WeatherServiceBinding __WeatherServiceBinding { get; init; }
+///
+///   public T? Get{T}(IInjector? scope = null, InjectFlags flags = InjectFlags.None) {
+///     var typeId = typeof(T).GetTypeId(); // this needs to be fast!
+///     if (_moduleProviders.TryGetValue(typeId, out var index)) {
+///       return InjectorView.Bindings[index].Get(this, scope, flags);
+///     }
+///   }
+/// 
+///   public static long[] _moduleProviderBloomFilter = { ... }
+/// 
+///   public static readonly FastLongKeyedMap{long, long} _moduleProviders = {
+///     { WEATHER_SERVICE_TYPE_ID, 2 }
+///   }
+/// }
+///
+/// class InjectorView {
+///   static readonly Binding[] Bindings = {
+///     RootInjector.Injector,
+///     WeatherModule.Injector,
+///     WeatherModule.__WeatherServiceBinding
+///   };
+/// }
+/// </code>
+/// Other modules importing WeatherModule can now just check the bloom filters up the injector chain
+/// until they find a match, then point to the global binding array.
+/// </summary>
 public interface IInjector {
   /// <summary>
   ///   The injector that was used to create this injector.

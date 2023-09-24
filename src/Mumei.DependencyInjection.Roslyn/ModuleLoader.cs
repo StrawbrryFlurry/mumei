@@ -49,23 +49,26 @@ internal ref struct ModuleLoader {
     var importsBuilder = new ArrayBuilder<ModuleDeclaration>();
     var dynamicProviderBindersBuilder = new ArrayBuilder<DynamicProviderBinder>();
     var componentsBuilder = new ArrayBuilder<PartialComponentDeclaration>();
+    var providersBuilder = new ArrayBuilder<IProviderSpec>();
 
     using var attributes = moduleCompilationType.GetAttributesTemp();
     for (var i = 0; i < attributes.Length; i++) {
-      ref readonly var attribute = ref attributes[i];
+      var attribute = attributes[i];
+
+      // These checks are ordered by frequency of occurrence      
       if (TryGetModuleImport(in attribute, out var importedModule)) {
         var resolvedImport = ResolveModuleRecursively(importedModule.Value);
         importsBuilder.Add(resolvedImport);
         continue;
       }
 
-      if (DynamicProviderBinder.TryCreateFromAttribute(attribute, out var dynamicProviderBinder)) {
-        dynamicProviderBindersBuilder.Add(dynamicProviderBinder);
+      if (PartialComponentDeclaration.TryCreateFromAttribute(attribute, out var componentDeclaration)) {
+        componentsBuilder.Add(componentDeclaration);
         continue;
       }
 
-      if (PartialComponentDeclaration.TryCreateFromAttribute(attribute, out var componentDeclaration)) {
-        componentsBuilder.Add(componentDeclaration.Value);
+      if (DynamicProviderBinder.TryCreateFromAttribute(attribute, out var dynamicProviderBinder)) {
+        dynamicProviderBindersBuilder.Add(dynamicProviderBinder);
         continue;
       }
 
@@ -77,34 +80,37 @@ internal ref struct ModuleLoader {
       Debug.Assert(false, "Found an unknown attribute on a module.");
     }
 
-    var providersBuilder = new ArrayBuilder<ProviderSpecification>();
-    var forwardRefsBuilder = new ArrayBuilder<ForwardRefSpecification>();
-
-    List<PropertyInfo> properties = null!; // moduleCompilationType.GetProperties();
-    foreach (var property in properties) {
-      if (ProviderSpecification.TryCreateFromProperty(property, out var provider)) {
+    using var properties = moduleCompilationType.GetPropertiesTemp();
+    for (var index = 0; index < properties.Length; index++) {
+      var property = properties[index];
+      var propertyAttributes = property.GetAttributesTemp();
+      if (ProviderSpecification.TryCreateFromProperty(property, propertyAttributes, out var provider)) {
         providersBuilder.Add(provider);
       }
 
-      if (ForwardRefSpecification.TryCreateFromProperty(property, out var forwardRefSpecification)) {
-        forwardRefsBuilder.Add(forwardRefSpecification);
+      if (ForwardRefSpecification.TryCreateFromProperty(
+            property,
+            propertyAttributes,
+            out var forwardRefSpecification
+          )) {
+        providersBuilder.Add(forwardRefSpecification);
       }
 
       // We don't know what this property is used for, ignore it
     }
 
-    var providerConfigurationsBuilder = new ArrayBuilder<ModuleProviderConfiguration>();
-    var factoryProvidersBuilder = new ArrayBuilder<FactoryProviderSpecification>();
+    var providerConfigurationsBuilder = new ArrayBuilder<ProviderConfigurationSpec>();
     using var methods = moduleCompilationType.GetMethodsTemp();
     for (var i = 0; i < methods.Length; i++) {
-      ref readonly var method = ref methods[i];
-      if (ModuleProviderConfiguration.TryCreateFromMethod(method, out var providerConfiguration)) {
-        providerConfigurationsBuilder.Add(providerConfiguration);
+      var method = methods[i];
+      var methodAttributes = method.GetAttributesTemp();
+      if (FactoryProviderSpecification.TryCreateFromMethod(method, methodAttributes, out var facotryProvider)) {
+        providersBuilder.Add(facotryProvider);
         continue;
       }
 
-      if (FactoryProviderSpecification.TryCreateFromMethod(method, out var facotryProvider)) {
-        factoryProvidersBuilder.Add(facotryProvider);
+      if (ProviderConfigurationSpec.TryCreateFromMethod(method, methodAttributes, out var providerConfiguration)) {
+        providerConfigurationsBuilder.Add(providerConfiguration);
         continue;
       }
 
@@ -119,8 +125,7 @@ internal ref struct ModuleLoader {
       Components = componentsBuilder.ToImmutableArrayAndFree(),
       DynamicProviderBinders = dynamicProviderBindersBuilder.ToImmutableArrayAndFree(),
       Providers = providersBuilder.ToImmutableArrayAndFree(),
-      ProviderConfigurations = providerConfigurationsBuilder.ToImmutableArrayAndFree(),
-      FactoryProviders = factoryProvidersBuilder.ToImmutableArrayAndFree()
+      ProviderConfigurations = providerConfigurationsBuilder.ToImmutableArrayAndFree()
     };
 
     foreach (var import in imports) {

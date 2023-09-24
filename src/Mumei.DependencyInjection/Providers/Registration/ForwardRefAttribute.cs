@@ -13,14 +13,16 @@ public enum ForwardRefSource {
   /// Declares that the provider is available through the parent injector, same as <see cref="Parent"/>,
   /// but disables static analysis for the provider when building the dependency graph.
   /// </summary>
-  Dynamic
+  Dynamic,
+
+  Default = Parent
 }
 
 [AttributeUsage(AttributeTargets.Property)]
 public sealed class ForwardRefAttribute : Attribute {
   public ForwardRefSource Source { get; }
 
-  public ForwardRefAttribute(ForwardRefSource source = ForwardRefSource.Parent) {
+  public ForwardRefAttribute(ForwardRefSource source = ForwardRefSource.Default) {
     Source = source;
   }
 }

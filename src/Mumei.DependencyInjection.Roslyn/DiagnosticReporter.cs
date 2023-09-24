@@ -10,4 +10,6 @@ internal ref struct DiagnosticReporter {
   }
 
   public void ReportNoForwardRefImpl() { }
+
+  public void ReportNoProviderTokenProvided() { }
 }

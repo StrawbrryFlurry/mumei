@@ -1,5 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
+using Mumei.DependencyInjection.Injector.Registration;
+using Mumei.DependencyInjection.Providers.Registration;
+using Mumei.Roslyn;
+using Mumei.Roslyn.Reflection;
 
 namespace Mumei.DependencyInjection.Roslyn.Module;
 
@@ -12,21 +15,128 @@ namespace Mumei.DependencyInjection.Roslyn.Module;
 /// }
 /// </code>
 /// </summary>
-internal sealed class ProviderSpecification {
-  public ModuleDeclaration Declaration { get; set; }
-  public PropertyInfo DeclarationProperty { get; set; }
-  public Type ProviderType { get; set; }
-  public string ProviderName { get; set; }
-  public object ProviderToken { get; set; }
-  public Type ImplementationType { get; set; }
+internal sealed class ProviderSpecification : IProviderSpec {
+  public required RoslynPropertyInfo DeclarationProperty { get; init; }
+  public required RoslynType ProviderType { get; init; }
+  public required RoslynType ImplementationType { get; init; }
+  public required object? ProviderToken { get; init; }
 
-  public int ProviderLifetime { get; set; }
+  public required InjectorLifetime ProviderLifetime { get; init; }
+
+  public required bool IsMulti { get; init; }
+  public required MultiProviderScope MultiProviderScope { get; init; }
 
   public static bool TryCreateFromProperty(
-    in PropertyInfo property,
+    in RoslynPropertyInfo property,
+    TemporarySpan<RoslynAttribute> attributes,
     [NotNullWhen(true)] out ProviderSpecification? specification
   ) {
-    specification = null;
+    var isMultiProvider = false;
+    object? customProviderToken = null;
+    var scopedProvider = default(ScopedProvider);
+    var multiProviderScope = default(MultiProviderScope);
+
+    for (var i = 0; i < attributes.Length; i++) {
+      var attribute = attributes[i];
+      if (
+        TryGetScopedProivder<SingletonAttribute>(
+          property,
+          attribute,
+          typeof(SingletonAttribute<>),
+          out var implementationType)
+      ) {
+        scopedProvider = new ScopedProvider {
+          ProviderType = property.Type,
+          ImplementationType = implementationType,
+          ProviderLifetime = InjectorLifetime.Singleton
+        };
+        continue;
+      }
+
+      if (
+        TryGetScopedProivder<ScopedAttribute>(
+          property,
+          attribute,
+          typeof(ScopedAttribute<>),
+          out implementationType)
+      ) {
+        scopedProvider = new ScopedProvider {
+          ProviderType = property.Type,
+          ImplementationType = implementationType,
+          ProviderLifetime = InjectorLifetime.Scoped
+        };
+        continue;
+      }
+
+      if (
+        TryGetScopedProivder<TransientAttribute>(
+          property,
+          attribute,
+          typeof(TransientAttribute<>),
+          out implementationType)
+      ) {
+        scopedProvider = new ScopedProvider {
+          ProviderType = property.Type,
+          ImplementationType = implementationType,
+          ProviderLifetime = InjectorLifetime.Transient
+        };
+        continue;
+      }
+
+      if (attribute.Is<MultiAttribute>()) {
+        isMultiProvider = true;
+        multiProviderScope = MultiProviderScopeCollector.CollectFromAttribute(attribute);
+        continue;
+      }
+
+      if (attribute.Is<ProvideAttribute>()) {
+        customProviderToken = ProviderTokenCollector.CollectFromProvideAttribute(attribute, default);
+      }
+
+      // We don't know this attribute, ignore it
+    }
+
+    if (scopedProvider.ProviderType == default) {
+      specification = default;
+      return false;
+    }
+
+    specification = new ProviderSpecification {
+      DeclarationProperty = property,
+      ImplementationType = scopedProvider.ImplementationType,
+      ProviderType = scopedProvider.ProviderType,
+      ProviderLifetime = scopedProvider.ProviderLifetime,
+      ProviderToken = customProviderToken ?? scopedProvider.ProviderType,
+      IsMulti = isMultiProvider,
+      MultiProviderScope = multiProviderScope
+    };
     return false;
+  }
+
+  private static bool TryGetScopedProivder<TConstructedGenericType>(
+    scoped in RoslynPropertyInfo property,
+    scoped in RoslynAttribute attribute,
+    Type openProviderType,
+    out RoslynType implementationType
+  ) where TConstructedGenericType : Attribute {
+    if (attribute.Is<TConstructedGenericType>()) {
+      implementationType = property.Type;
+      return true;
+    }
+
+    if (attribute.IsConstructedGenericTypeOf(openProviderType)) {
+      implementationType = attribute.Type.GetFirstTypeArgument();
+      return true;
+    }
+
+    implementationType = default;
+    return false;
+  }
+
+  private ref struct ScopedProvider {
+    public required RoslynType ProviderType { get; init; }
+    public required RoslynType ImplementationType { get; init; }
+
+    public required InjectorLifetime ProviderLifetime { get; init; }
   }
 }

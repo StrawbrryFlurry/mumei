@@ -1,6 +1,27 @@
 ﻿namespace Mumei.DependencyInjection.Providers.Registration;
 
 /// <summary>
+/// Configures the provider to be retrievable by a custom provider token
+/// that can be specified using the <see cref="ProvideAttribute"/> constructor.
+/// <remarks>
+/// The provider token needs to be a compile time constant and must also be provided 
+/// </remarks>
+/// </summary>
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property)]
+public sealed class ProvideAttribute : Attribute {
+  public string? Token { get; }
+
+  public ProvideAttribute() { }
+
+  public ProvideAttribute(string token) {
+    Token = token;
+  }
+}
+
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property)]
+public sealed class ProvideAttribute<TProviderToken> : Attribute { }
+
+/// <summary>
 ///   Marks a method as a factory provider binding to the module.
 ///   The return type of the method will be used as the provider token,
 ///   while the return value will be used as it's instance.
@@ -12,22 +33,10 @@
 /// }
 /// </code>
 /// </summary>
-[AttributeUsage(AttributeTargets.Method)]
-public abstract class ProvideAttribute : Attribute {
-  public ProvideAttribute() { }
+public sealed class ProvideSingletonAttribute : Attribute { }
 
-  public ProvideAttribute(string token) {
-    Token = token;
-  }
+/// <inheritdoc cref="ProvideSingletonAttribute"/>
+public sealed class ProvideTransientAttribute : Attribute { }
 
-  public string? Token { get; }
-}
-
-/// <inheritdoc cref="ProvideAttribute"/>
-public sealed class ProivdeSingletonAttribute : ProvideAttribute { }
-
-/// <inheritdoc cref="ProvideAttribute"/>
-public sealed class ProvideTransientAttribute : ProvideAttribute { }
-
-/// <inheritdoc cref="ProvideAttribute"/>
-public sealed class ProvideScopedAttribute : ProvideAttribute { }
+/// <inheritdoc cref="ProvideSingletonAttribute"/>
+public sealed class ProvideScopedAttribute : Attribute { }

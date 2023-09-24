@@ -1,8 +1,6 @@
 ﻿namespace Mumei.DependencyInjection.Providers.Registration;
 
-public class TransientAttribute<TProvider, TImplementation>
-  : DependencyRegistrationAttribute<TProvider, TImplementation>
-  where TImplementation : TProvider { }
+public sealed class TransientAttribute : Attribute { }
 
 public class TransientAttribute<TProvider>
   : DependencyRegistrationAttribute<TProvider> { }
@@ -13,8 +11,6 @@ public class TransientAttribute<TProvider>
 /// </summary>
 /// <typeparam name="TProvider"></typeparam>
 /// <typeparam name="TImplementation"></typeparam>
-public class InternalTransientAttribute<TProvider, TImplementation> :
-  TransientAttribute<TProvider, TImplementation>
-  where TImplementation : TProvider { }
+public class InternalTransientAttribute<TProvider, TImplementation> : Attribute { }
 
 public class InternalTransientAttribute<TProvider> : TransientAttribute<TProvider> { }

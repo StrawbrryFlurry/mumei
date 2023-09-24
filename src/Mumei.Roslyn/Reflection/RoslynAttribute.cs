@@ -29,6 +29,55 @@ public readonly struct RoslynAttribute {
     var unboundSelfType = AttributeClass!.ConstructUnboundGenericType()!.ToCompilationType();
     return unboundSelfType.GetFullName() == unboundAttributeType.FullName;
   }
+
+  public TArgument? GetArgument<TArgument>(string propertyName, int ctorArgumentIndex) {
+    return GetNamedArgument<TArgument>(propertyName) ?? GetCtorArgument<TArgument>(ctorArgumentIndex);
+  }
+
+  public TArgument? GetArgument<TArgument>(string propertyName, string ctorArgumentName) {
+    return GetNamedArgument<TArgument>(propertyName) ?? GetCtorArgument<TArgument>(ctorArgumentName);
+  }
+
+  public TArgument? GetCtorArgument<TArgument>(string ctorArgumentName) {
+    if (_attributeData.AttributeConstructor is null) {
+      return default;
+    }
+
+    // Using a span here doesn't make much sense since the number of parameters is usually very small
+    var parameters = _attributeData.AttributeConstructor.Parameters;
+    for (var i = 0; i < parameters.Length; i++) {
+      if (parameters[i].Name == ctorArgumentName) {
+        return _attributeData.ConstructorArguments[i].GetValue<TArgument>();
+      }
+    }
+
+    return default;
+  }
+
+  public TArgument? GetCtorArgument<TArgument>(int ctorArgumentIdx) {
+    if (_attributeData.AttributeConstructor is null) {
+      return default;
+    }
+
+    if (ctorArgumentIdx >= _attributeData.ConstructorArguments.Length) {
+      return default;
+    }
+
+    var argument = _attributeData.ConstructorArguments[ctorArgumentIdx];
+    return argument.GetValue<TArgument>();
+  }
+
+  public TArgument? GetNamedArgument<TArgument>(string propertyName) {
+    var namedArguments = _attributeData.NamedArguments;
+    for (var i = 0; i < namedArguments.Length; i++) {
+      var namedArgument = namedArguments[i];
+      if (namedArgument.Key == propertyName) {
+        return namedArgument.Value.GetValue<TArgument>();
+      }
+    }
+
+    return default;
+  }
 }
 
 public static class CompilationAttributeExtensions {
