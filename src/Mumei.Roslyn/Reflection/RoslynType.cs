@@ -124,7 +124,7 @@ public readonly struct RoslynType {
     var m = members.AsSpan();
     for (var i = 0; i < m.Length; i++) {
       var method = m[i];
-      if (method is IMethodSymbol ms) {
+      if (method is IMethodSymbol { MethodKind: MethodKind.Ordinary } ms) {
         methodsBag.Add(new RoslynMethodInfo(ms));
       }
     }

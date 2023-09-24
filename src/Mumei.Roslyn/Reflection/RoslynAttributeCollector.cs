@@ -5,11 +5,13 @@ namespace Mumei.Roslyn.Reflection;
 
 public readonly ref struct RoslynAttributeCollector {
   public static TemporarySpan<RoslynAttribute> GetAttributesTemp(ISymbol symbol) {
-    return GetAttributesBag(symbol.GetAttributes()).AsRefForfeitOwnership();
+    var symbolAttributes = symbol.GetAttributes();
+    return GetAttributesBag(symbolAttributes).AsRefForfeitOwnership();
   }
 
   public static ReadOnlySpan<RoslynAttribute> GetAttributes(ISymbol symbol) {
-    return GetAttributesBag(symbol.GetAttributes()).ToReadOnlySpanAndFree();
+    var symbolAttributes = symbol.GetAttributes();
+    return GetAttributesBag(symbolAttributes).ToReadOnlySpanAndFree();
   }
 
   private static ArrayBuilder<RoslynAttribute> GetAttributesBag(ImmutableArray<AttributeData> attributes) {

@@ -22,6 +22,10 @@ public readonly struct RoslynAttribute {
   }
 
   public bool IsConstructedGenericTypeOf(Type unboundAttributeType) {
+    if (!Type.IsGenericType) {
+      return false;
+    }
+
     if (unboundAttributeType is { IsGenericType: false } or { IsConstructedGenericType: true }) {
       unboundAttributeType = unboundAttributeType.GetGenericTypeDefinition();
     }
