@@ -27,6 +27,12 @@ public sealed class MetadataReferenceCollection {
     }
   }
 
+  public void AddReferences(ReadOnlySpan<Type> assemblyTypes) {
+    foreach (var assemblyType in assemblyTypes) {
+      AddReference(assemblyType);
+    }
+  }
+
   public void AddReference(Type assemblyType) {
     var assemblyLocation = assemblyType.Assembly.Location;
     if (_metadataReferences.ContainsKey(assemblyLocation)) {

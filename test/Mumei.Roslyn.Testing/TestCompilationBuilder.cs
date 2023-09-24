@@ -30,6 +30,26 @@ public sealed class TestCompilationBuilder {
     return this;
   }
 
+  public TestCompilationBuilder AddSource(TypeSource source) {
+    _sources.Add(CSharpSyntaxTree.ParseText(source.Source, path: source.Name));
+    _metadataReferences.AddReferences(source.TypeReferences);
+
+    foreach (var sourceSourceReference in source.SourceReferences) {
+      AddSource(sourceSourceReference);
+    }
+
+    return this;
+  }
+
+  public static TestCompilationBuilder CreateFromSources(params TypeSource[] sources) {
+    var builder = new TestCompilationBuilder();
+    foreach (var source in sources) {
+      builder.AddSource(source);
+    }
+
+    return builder;
+  }
+
   public TestCompilationBuilder AddSource(string source, Action<SourceFileBuilder>? configure = null) {
     var sourceFileBuilder = new SourceFileBuilder(source);
     configure?.Invoke(sourceFileBuilder);

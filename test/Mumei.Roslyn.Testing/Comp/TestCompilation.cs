@@ -5,6 +5,13 @@ namespace Mumei.Roslyn.Testing.Comp;
 
 public static class TestCompilation {
   public static TSymbol GetSymbolByNameFromSource<TSymbol>(
+    TypeSource source
+  ) where TSymbol : ISymbol {
+    return TestCompilationBuilder.CreateFromSources(source).Build().GetSymbolByName<TSymbol>(source.Name);
+  }
+
+
+  public static TSymbol GetSymbolByNameFromSource<TSymbol>(
     string source,
     Action<SourceFileBuilder>? configure = null,
     [CallerArgumentExpression(nameof(source))]

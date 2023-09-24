@@ -1,11 +1,13 @@
 ﻿using Microsoft.CodeAnalysis;
 using Mumei.Roslyn.Reflection;
 using Mumei.Roslyn.Testing.Comp;
+using Mumei.Roslyn.Testing.Template;
 
 namespace Mumei.Roslyn.Tests.Reflection;
 
 public sealed class CompilationTypeTests {
-  private const string TypeInGlobalNamespace = $$"""public class {{nameof(TypeInGlobalNamespace)}} { }""";
+  private static readonly CompilationType TypeInGlobalNamespace =
+    $$"""public class {{nameof(TypeInGlobalNamespace)}} { }""";
 
   [Fact]
   public void GetFullName_ReturnsTypeName_WhenTypeIsInGlobalNamespace() {
@@ -16,7 +18,7 @@ public sealed class CompilationTypeTests {
     actual.Should().Be(nameof(TypeInGlobalNamespace));
   }
 
-  private const string TypeInNamespace =
+  private static readonly CompilationType TypeInNamespace =
     $$"""
       namespace NamespaceOne;
       public class {{nameof(TypeInNamespace)}} { }
@@ -31,7 +33,7 @@ public sealed class CompilationTypeTests {
     actual.Should().Be($"NamespaceOne.{nameof(TypeInNamespace)}");
   }
 
-  private const string TypeInNestedNamespace =
+  private static readonly CompilationType TypeInNestedNamespace =
     $$"""
       namespace NamespaceOne.NamespaceTwo;
       public class {{nameof(TypeInNestedNamespace)}} { }
@@ -46,7 +48,7 @@ public sealed class CompilationTypeTests {
     actual.Should().Be($"NamespaceOne.NamespaceTwo.{nameof(TypeInNestedNamespace)}");
   }
 
-  private const string GenericTypeInGlobalNamespace =
+  private static readonly CompilationType GenericTypeInGlobalNamespace =
     $$"""
       public class {{nameof(GenericTypeInGlobalNamespace)}}<T> { }
       """;
@@ -69,16 +71,16 @@ public sealed class CompilationTypeTests {
     actual.ToArray().Should().BeEmpty();
   }
 
-  private const string GenericTypeWithOneArgument =
+  private static readonly CompilationType GenericTypeWithOneArgument =
     $$"""
       public class {{nameof(GenericTypeWithOneArgument)}}<T> { }
       """;
 
-  private const string ConstructedGenericTypeWithOneArgument =
+  private static readonly CompilationType ConstructedGenericTypeWithOneArgument =
     $$"""
       {{GenericTypeWithOneArgument}}
 
-      public class {{nameof(ConstructedGenericTypeWithOneArgument)}} : {{nameof(GenericTypeWithOneArgument)}}<int> { }
+      public class {{nameof(ConstructedGenericTypeWithOneArgument)}} : {{GenericTypeWithOneArgument:display}}<int> { }
       """;
 
   [Fact]
@@ -101,12 +103,12 @@ public sealed class CompilationTypeTests {
     actual.GetFullName().Should().Be(typeof(int).FullName);
   }
 
-  private const string GenericTypeWithTwoArguments =
+  private static readonly CompilationType GenericTypeWithTwoArguments =
     $$"""
       public class {{nameof(GenericTypeWithTwoArguments)}}<T1, T2> { }
       """;
 
-  private const string ConstructedGenericTypeWithTwoArguments =
+  private static readonly CompilationType ConstructedGenericTypeWithTwoArguments =
     $$"""
       {{GenericTypeWithTwoArguments}}
       public class {{nameof(ConstructedGenericTypeWithTwoArguments)}} : {{nameof(GenericTypeWithTwoArguments)}}<int, string> { }
@@ -133,15 +135,15 @@ public sealed class CompilationTypeTests {
     actual.ToArray().Should().BeEmpty();
   }
 
-  private const string TypeWithAttribute =
+  private static readonly CompilationType TypeWithAttribute =
     $$"""
-      [AttributeUsage(AttributeTargets.Class)]
+      [{{typeof(AttributeUsageAttribute):display}}(AttributeTargets.Class)]
       public class {{nameof(TypeWithAttribute)}} { }
       """;
 
   [Fact]
   public void GetAttributes_ReturnsOneAttribute_WhenTypeHasOneAttribute() {
-    var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(TypeWithAttribute, s => s.WithUsing<Attribute>());
+    var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(TypeWithAttribute);
 
     var actual = new RoslynType(s).GetAttributes();
 
@@ -150,25 +152,21 @@ public sealed class CompilationTypeTests {
       .And.Subject.First().Type.GetFullName().Should().Be(typeof(AttributeUsageAttribute).FullName);
   }
 
-  private const string GenericAttribute =
+  private static readonly CompilationType GenericAttribute =
     $$"""
       public class {{nameof(GenericAttribute)}}<T> : Attribute { }
       """;
 
-  private const string TypeWithTwoAttributes =
+  private static readonly CompilationType TypeWithTwoAttributes =
     $$"""
-      {{GenericAttribute}}
-
-      [AttributeUsage(AttributeTargets.Class)]
-      [{{nameof(GenericAttribute)}}<string>]
+      [{{typeof(AttributeUsageAttribute):display}}(AttributeTargets.Class)]
+      [{{GenericAttribute:display}}<string>]
       public class {{nameof(TypeWithTwoAttributes)}} { }
       """;
 
   [Fact]
   public void GetAttributes_ReturnsTwoAttributes_WhenTypeHasTwoAttributes() {
-    var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(
-      TypeWithTwoAttributes, s => s.WithUsing<Attribute>().WithUsing<Attribute>()
-    );
+    var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(TypeWithTwoAttributes);
 
     var actual = new RoslynType(s).GetAttributes();
 

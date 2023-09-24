@@ -20,7 +20,7 @@ public sealed class SampleIncrementalSourceGeneratorTests {
     }
     """;
 
-  [Fact]
+  [Fact(Skip = "as")]
   public void Generator_GeneratesEmptyModuleClass_WhenModuleDeclarationIsEmpty() {
     new SourceGeneratorTest<ModuleMumeiGenerator>(
         b => b

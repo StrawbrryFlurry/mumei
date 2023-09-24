@@ -1,20 +1,19 @@
 ﻿using Microsoft.CodeAnalysis;
 using Mumei.Roslyn.Reflection;
 using Mumei.Roslyn.Testing.Comp;
+using Mumei.Roslyn.Testing.Template;
 
 namespace Mumei.Roslyn.Tests.Reflection;
 
 public sealed class CompilationAttributeTests {
-  private const string AttributeDeclaration =
+  private static readonly CompilationType SimpleAttribute =
     $$"""
-      public class {{nameof(AttributeDeclaration)}}Attribute : System.Attribute { }
+      public class {{nameof(SimpleAttribute)}} : {{typeof(Attribute)}} { }
       """;
 
-  private const string UsingAttributeDeclaration =
+  private static readonly CompilationType UsingAttributeDeclaration =
     $$"""
-      {{AttributeDeclaration}}
-
-      [{{nameof(AttributeDeclaration)}}]
+      {{SimpleAttribute}}
       public class {{nameof(UsingAttributeDeclaration)}} { }
       """;
 
@@ -28,9 +27,9 @@ public sealed class CompilationAttributeTests {
     actual.Type.Should().Be(new RoslynType(attribute.AttributeClass!));
   }
 
-  private const string UsingGlobalAttribute =
+  private static readonly CompilationType UsingGlobalAttribute =
     $$"""
-      [System.Obsolete]
+      {{typeof(ObsoleteAttribute)}}
       public class {{nameof(UsingGlobalAttribute)}} { }
       """;
 
@@ -52,18 +51,15 @@ public sealed class CompilationAttributeTests {
     actual.Is<AttributeUsageAttribute>().Should().BeFalse();
   }
 
-  private const string UsingGenericAttribute =
+  private static readonly CompilationType UsingGenericAttribute =
     $$"""
-      [{{nameof(GenericAttribute<int>)}}<int>]
+      {{typeof(GenericAttribute<int>)}}
       public class {{nameof(UsingGenericAttribute)}} { }
       """;
 
   [Fact]
   public void IsConstructedGenericTypeOf_ReturnsTrue_WhenAttributeIsConstructedGenericTypeOfGivenType() {
-    var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(
-      UsingGenericAttribute,
-      s => s.WithUsing<GenericAttribute<int>>()
-    );
+    var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(UsingGenericAttribute);
 
     var actual = new RoslynAttribute(GetNthAttributeFromTypeSymbol(s));
 
@@ -72,29 +68,24 @@ public sealed class CompilationAttributeTests {
 
   [Fact]
   public void IsConstructedGenericTypeOf_ReturnsFalse_WhenAttributeIsNotConstructedGenericTypeOfGivenType() {
-    var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(
-      UsingGenericAttribute,
-      s => s.WithUsing<GenericAttribute<int>>()
-    );
+    var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(UsingGenericAttribute);
 
     var actual = new RoslynAttribute(GetNthAttributeFromTypeSymbol(s));
 
     actual.IsConstructedGenericTypeOf(typeof(GenericAttributeWithTwoArguments<,>)).Should().BeFalse();
   }
 
-  private const string AttributeWithCtorArguments =
+  private static readonly CompilationType AttributeWithCtorArgumentsAttribute =
     $$"""
-      public class {{nameof(AttributeWithCtorArguments)}}Attribute : System.Attribute {
-        public {{nameof(AttributeWithCtorArguments)}}Attribute(int value) { }
-        public {{nameof(AttributeWithCtorArguments)}}Attribute(int foo, string bar) { }
+      public class {{nameof(AttributeWithCtorArgumentsAttribute)}} : {{typeof(Attribute)}} {
+        public {{nameof(AttributeWithCtorArgumentsAttribute)}}(int value) { }
+        public {{nameof(AttributeWithCtorArgumentsAttribute)}}(int foo, string bar) { }
       }
       """;
 
-  private const string UsingAttributeWithOneCtorArgument =
+  private static readonly CompilationType UsingAttributeWithOneCtorArgument =
     $$"""
-      {{AttributeWithCtorArguments}}
-
-      [{{nameof(AttributeWithCtorArguments)}}(42)]
+      {{AttributeWithCtorArgumentsAttribute.Call(42):attribute}}
       public class {{nameof(UsingAttributeWithOneCtorArgument)}} { }
       """;
 
@@ -127,11 +118,9 @@ public sealed class CompilationAttributeTests {
     actual.GetArgument<int?>("", "value").Should().Be(42);
   }
 
-  private const string UsingAttributeWithTwoCtorArguments =
+  private static readonly CompilationType UsingAttributeWithTwoCtorArguments =
     $$"""
-      {{AttributeWithCtorArguments}}
-
-      [{{nameof(AttributeWithCtorArguments)}}(42, "bar")]
+      {{AttributeWithCtorArgumentsAttribute.Call(42, "bar"):attribute}}
       public class {{nameof(UsingAttributeWithTwoCtorArguments)}} { }
       """;
 
@@ -155,19 +144,17 @@ public sealed class CompilationAttributeTests {
     actual.GetArgument<string?>("", "bar").Should().Be("bar");
   }
 
-  private const string AttributeWithProperties =
+  private static readonly CompilationType AttributeWithPropertiesAttribute =
     $$"""
-      public class {{nameof(AttributeWithProperties)}}Attribute : System.Attribute {
+      public class {{nameof(AttributeWithPropertiesAttribute)}} : {{typeof(Attribute)}} {
         public int Foo { get; set; }
         public string Bar { get; set; }
       }
       """;
 
-  private const string UsingAttributeWithOneProperty =
+  private static readonly CompilationType UsingAttributeWithOneProperty =
     $$"""
-      {{AttributeWithProperties}}
-
-      [{{nameof(AttributeWithProperties)}}(Foo = 42)]
+      [{{AttributeWithPropertiesAttribute:display}}(Foo = 42)]
       public class {{nameof(UsingAttributeWithOneProperty)}} { }
       """;
 
@@ -201,11 +188,9 @@ public sealed class CompilationAttributeTests {
     actual.GetArgument<int>("Foo", "").Should().Be(42);
   }
 
-  private const string UsingAttributeWithTwoProperties =
+  private static readonly CompilationType UsingAttributeWithTwoProperties =
     $$"""
-      {{AttributeWithProperties}}
-
-      [{{nameof(AttributeWithProperties)}}(Foo = 42, Bar = "bar")]
+      [{{AttributeWithPropertiesAttribute:display}}(Foo = 42, Bar = "bar")]
       public class {{nameof(UsingAttributeWithTwoProperties)}} { }
       """;
 
