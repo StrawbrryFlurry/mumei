@@ -222,6 +222,8 @@ public ref struct ArrayBuilder<TElement> {
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   private void GrowWithoutInitValue(int capacity) {
+    // TODO: When we grow, don't return the current buffer but instead
+    // rent a new one and keep it as the continuation of the current one.
     var newCapacity = _capacity * 2;
     if (newCapacity < capacity) {
       newCapacity = capacity;
