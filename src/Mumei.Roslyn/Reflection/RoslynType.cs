@@ -18,28 +18,6 @@ public readonly struct RoslynType {
     _symbol = symbol;
   }
 
-  public static bool operator ==(RoslynType left, RoslynType right) {
-    return left.Equals(right);
-  }
-
-  public static bool operator !=(RoslynType left, RoslynType right) {
-    return !(left == right);
-  }
-
-  public override int GetHashCode() {
-#pragma warning disable RS1024
-    return _symbol.GetHashCode();
-#pragma warning restore RS1024
-  }
-
-  public override bool Equals(object? obj) {
-    return obj is RoslynType other && Equals(other);
-  }
-
-  public bool Equals(RoslynType other) {
-    return SymbolEqualityComparer.Default.Equals(_symbol, other._symbol);
-  }
-
   public RoslynType GetFirstTypeArgument() {
     if (IsGenericType) {
       return new RoslynType(GenericSymbol.TypeArguments[0]);
@@ -156,10 +134,26 @@ public readonly struct RoslynType {
     nameBuilder.AddRange(symbol.Name.AsSpan());
     nameBuilder.Add('.');
   }
-}
 
-public static class RoslynTypeExtensions {
-  internal static RoslynType ToCompilationType(this ITypeSymbol typeDeclarationSyntax) {
-    return new RoslynType(typeDeclarationSyntax);
+  public static bool operator ==(RoslynType left, RoslynType right) {
+    return left.Equals(right);
+  }
+
+  public static bool operator !=(RoslynType left, RoslynType right) {
+    return !(left == right);
+  }
+
+  public override int GetHashCode() {
+#pragma warning disable RS1024
+    return _symbol.GetHashCode();
+#pragma warning restore RS1024
+  }
+
+  public override bool Equals(object? obj) {
+    return obj is RoslynType other && Equals(other);
+  }
+
+  public bool Equals(RoslynType other) {
+    return SymbolEqualityComparer.Default.Equals(_symbol, other._symbol);
   }
 }

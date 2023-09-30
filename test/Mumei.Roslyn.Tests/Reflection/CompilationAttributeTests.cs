@@ -19,7 +19,7 @@ public sealed class CompilationAttributeTests {
 
   [Fact]
   public void Type_ReturnsBackingCompilationTypeForSymbol() {
-    var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(UsingAttributeDeclaration);
+    var s = TestCompilation.CompileTypeSymbol(UsingAttributeDeclaration);
     var attribute = GetNthAttributeFromTypeSymbol(s);
 
     var actual = new RoslynAttribute(attribute);
@@ -35,7 +35,7 @@ public sealed class CompilationAttributeTests {
 
   [Fact]
   public void Is_ReturnsTrue_WhenAttributeIsOfGivenType() {
-    var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(UsingGlobalAttribute);
+    var s = TestCompilation.CompileTypeSymbol(UsingGlobalAttribute);
 
     var actual = new RoslynAttribute(GetNthAttributeFromTypeSymbol(s));
 
@@ -44,7 +44,7 @@ public sealed class CompilationAttributeTests {
 
   [Fact]
   public void Is_ReturnsFalse_WhenAttributeIsNotOfGivenType() {
-    var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(UsingGlobalAttribute);
+    var s = TestCompilation.CompileTypeSymbol(UsingGlobalAttribute);
 
     var actual = new RoslynAttribute(GetNthAttributeFromTypeSymbol(s));
 
@@ -59,7 +59,7 @@ public sealed class CompilationAttributeTests {
 
   [Fact]
   public void IsConstructedGenericTypeOf_ReturnsTrue_WhenAttributeIsConstructedGenericTypeOfGivenType() {
-    var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(UsingGenericAttribute);
+    var s = TestCompilation.CompileTypeSymbol(UsingGenericAttribute);
 
     var actual = new RoslynAttribute(GetNthAttributeFromTypeSymbol(s));
 
@@ -68,7 +68,7 @@ public sealed class CompilationAttributeTests {
 
   [Fact]
   public void IsConstructedGenericTypeOf_ReturnsFalse_WhenAttributeIsNotConstructedGenericTypeOfGivenType() {
-    var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(UsingGenericAttribute);
+    var s = TestCompilation.CompileTypeSymbol(UsingGenericAttribute);
 
     var actual = new RoslynAttribute(GetNthAttributeFromTypeSymbol(s));
 
@@ -91,7 +91,7 @@ public sealed class CompilationAttributeTests {
 
   [Fact]
   public void GetArgument_ReturnsNull_WhenAttributeHasNoCtorArguments() {
-    var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(UsingAttributeDeclaration);
+    var s = TestCompilation.CompileTypeSymbol(UsingAttributeDeclaration);
 
     var actual = new RoslynAttribute(GetNthAttributeFromTypeSymbol(s));
 
@@ -100,7 +100,7 @@ public sealed class CompilationAttributeTests {
 
   [Fact]
   public void GetArgument_ReturnsNull_WhenAttributeHasNoCtorArgumentWithMatchingName() {
-    var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(UsingAttributeWithOneCtorArgument);
+    var s = TestCompilation.CompileTypeSymbol(UsingAttributeWithOneCtorArgument);
     var attribute = GetNthAttributeFromTypeSymbol(s);
 
     var actual = new RoslynAttribute(attribute);
@@ -110,7 +110,7 @@ public sealed class CompilationAttributeTests {
 
   [Fact]
   public void GetArgument_ReturnsCtorArgumentWithMatchingName_WhenAttributeHasOneCtorArgument() {
-    var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(UsingAttributeWithOneCtorArgument);
+    var s = TestCompilation.CompileTypeSymbol(UsingAttributeWithOneCtorArgument);
     var attribute = GetNthAttributeFromTypeSymbol(s);
 
     var actual = new RoslynAttribute(attribute);
@@ -126,7 +126,7 @@ public sealed class CompilationAttributeTests {
 
   [Fact]
   public void GetArgument_ReturnsCtorArgumentWithMatchingName_WhenAttributeHasTwoCtorArgumentsAndIsFirstArgument() {
-    var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(UsingAttributeWithTwoCtorArguments);
+    var s = TestCompilation.CompileTypeSymbol(UsingAttributeWithTwoCtorArguments);
     var attribute = GetNthAttributeFromTypeSymbol(s);
 
     var actual = new RoslynAttribute(attribute);
@@ -136,7 +136,7 @@ public sealed class CompilationAttributeTests {
 
   [Fact]
   public void GetArgument_ReturnsCtorArgumentWithMatchingName_WhenAttributeHasTwoCtorArgumentsIsSecondArgument() {
-    var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(UsingAttributeWithTwoCtorArguments);
+    var s = TestCompilation.CompileTypeSymbol(UsingAttributeWithTwoCtorArguments);
     var attribute = GetNthAttributeFromTypeSymbol(s);
 
     var actual = new RoslynAttribute(attribute);
@@ -160,7 +160,7 @@ public sealed class CompilationAttributeTests {
 
   [Fact]
   public void GetArgument_ReturnsNull_WhenAttributeHasNoProperties() {
-    var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(UsingAttributeDeclaration);
+    var s = TestCompilation.CompileTypeSymbol(UsingAttributeDeclaration);
     var attribute = GetNthAttributeFromTypeSymbol(s);
 
     var actual = new RoslynAttribute(attribute);
@@ -170,7 +170,7 @@ public sealed class CompilationAttributeTests {
 
   [Fact]
   public void GetArgument_ReturnsNull_WhenAttributeHasNoPropertyWithMatchingName() {
-    var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(UsingAttributeWithOneProperty);
+    var s = TestCompilation.CompileTypeSymbol(UsingAttributeWithOneProperty);
     var attribute = GetNthAttributeFromTypeSymbol(s);
 
     var actual = new RoslynAttribute(attribute);
@@ -180,7 +180,7 @@ public sealed class CompilationAttributeTests {
 
   [Fact]
   public void GetArgument_ReturnsPropertyWithMatchingName_WhenAttributeHasOneProperty() {
-    var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(UsingAttributeWithOneProperty);
+    var s = TestCompilation.CompileTypeSymbol(UsingAttributeWithOneProperty);
     var attribute = GetNthAttributeFromTypeSymbol(s);
 
     var actual = new RoslynAttribute(attribute);
@@ -196,7 +196,7 @@ public sealed class CompilationAttributeTests {
 
   [Fact]
   public void GetArgument_ReturnsPropertyWithMatchingName_WhenAttributeHasTwoPropertiesAndIsFirstProperty() {
-    var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(UsingAttributeWithTwoProperties);
+    var s = TestCompilation.CompileTypeSymbol(UsingAttributeWithTwoProperties);
     var attribute = GetNthAttributeFromTypeSymbol(s);
 
     var actual = new RoslynAttribute(attribute);
@@ -206,7 +206,7 @@ public sealed class CompilationAttributeTests {
 
   [Fact]
   public void GetArgument_ReturnsPropertyWithMatchingName_WhenAttributeHasTwoPropertiesAndIsSecondProperty() {
-    var s = TestCompilation.GetSymbolByNameFromSource<ITypeSymbol>(UsingAttributeWithTwoProperties);
+    var s = TestCompilation.CompileTypeSymbol(UsingAttributeWithTwoProperties);
     var attribute = GetNthAttributeFromTypeSymbol(s);
 
     var actual = new RoslynAttribute(attribute);

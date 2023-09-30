@@ -13,12 +13,14 @@ namespace Mumei.Roslyn.Testing.Template;
 public struct CompilationType : IEquatable<CompilationType>, ITemplateFormattable {
   private string _name;
   private string _namespace = "";
+  private int _typeArgumentCount;
 
   private HashSet<Type> _typeReferences;
   private HashSet<CompilationType> _sourceReferences;
   private StringBuilder _builder;
 
-  public string Name => $"{_namespace}{(_namespace is "" ? "" : ".")}{_name}";
+  public string FullName => $"{_namespace}{(_namespace is "" ? "" : ".")}{_name}";
+  public string MetadataName => _typeArgumentCount > 0 ? $"{FullName}`{_typeArgumentCount}" : FullName;
 
   public IEnumerable<CompilationType> ReferencedSources => _sourceReferences.Concat(ImmutableArray.Create(this));
 
@@ -50,6 +52,12 @@ public struct CompilationType : IEquatable<CompilationType>, ITemplateFormattabl
       return;
     }
 
+    if (format == "typeargs") {
+      _typeArgumentCount = s.Split(",").Length;
+      _builder.Append(s);
+      return;
+    }
+
     AppendFormatted(s);
   }
 
@@ -77,6 +85,8 @@ public struct CompilationType : IEquatable<CompilationType>, ITemplateFormattabl
   public TypeSource ToSource() {
     return new TypeSource {
       Name = _name,
+      FullName = FullName,
+      MetadataName = MetadataName,
       Text = _builder.ToString(),
       TypeReferences = _typeReferences.ToImmutableArray(),
       SourceReferences = _sourceReferences.ToImmutableArray()
@@ -89,9 +99,9 @@ public struct CompilationType : IEquatable<CompilationType>, ITemplateFormattabl
     }
 
     return format switch {
-      CompilationTemplateFormat.Display => Name,
-      CompilationTemplateFormat.Attribute => $"[{Name}]",
-      _ => Name
+      CompilationTemplateFormat.Display => FullName,
+      CompilationTemplateFormat.Attribute => $"[{FullName}]",
+      _ => FullName
     };
   }
 
@@ -104,11 +114,11 @@ public struct CompilationType : IEquatable<CompilationType>, ITemplateFormattabl
   }
 
   public override int GetHashCode() {
-    return Name.GetHashCode();
+    return FullName.GetHashCode();
   }
 
   public override string ToString() {
-    return Name;
+    return FullName;
   }
 
   public static bool operator ==(CompilationType left, CompilationType right) {

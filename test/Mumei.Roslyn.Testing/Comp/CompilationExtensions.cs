@@ -15,7 +15,7 @@ public static class CompilationExtensions {
   }
 
   public static INamedTypeSymbol GetTypeSymbol(this Compilation compilation, CompilationType type) {
-    return compilation.GetTypeByMetadataName(type.Name)!;
+    return compilation.GetTypeByMetadataName(type.FullName)!;
   }
 
   public static TMember GetTypeMemberSymbol<TMember>(this Compilation compilation,

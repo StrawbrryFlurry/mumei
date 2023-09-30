@@ -10,7 +10,6 @@ public static class TestCompilation {
     return TestCompilationBuilder.CreateFromSources(source).Build().GetSymbolByName<TSymbol>(source.Name);
   }
 
-
   public static TSymbol GetSymbolByNameFromSource<TSymbol>(
     string source,
     Action<SourceFileBuilder>? configure = null,
@@ -22,5 +21,22 @@ public static class TestCompilation {
 
   public static Compilation CompileFromSource(string source, Action<SourceFileBuilder>? configure = null) {
     return new TestCompilationBuilder().AddSource(source, configure).Build();
+  }
+
+  public static Compilation FromSource(params TypeSource[] sources) {
+    return TestCompilationBuilder.CreateFromSources(sources).Build();
+  }
+
+  public static ITypeSymbol CompileTypeSymbol(TypeSource source) {
+    return FromSource(source).GetTypeSymbol(source.MetadataName);
+  }
+
+  public static ITypeSymbol CompileTypeSymbol(TypeSource source, out Compilation compilation) {
+    compilation = FromSource(source);
+    return compilation.GetTypeSymbol(source.MetadataName);
+  }
+
+  public static T CompileToSymbol<T>(TypeSource source) {
+    return (T)FromSource(source).GetTypeSymbol(source.MetadataName);
   }
 }

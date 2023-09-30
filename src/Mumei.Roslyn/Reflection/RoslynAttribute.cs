@@ -7,7 +7,7 @@ public readonly struct RoslynAttribute {
 
   private INamedTypeSymbol AttributeClass => _attributeData.AttributeClass!;
 
-  public RoslynType Type => AttributeClass.ToCompilationType();
+  public RoslynType Type => new(AttributeClass);
 
   public RoslynAttribute(AttributeData attributeData) {
     if (attributeData.AttributeClass is null) {
@@ -18,7 +18,7 @@ public readonly struct RoslynAttribute {
   }
 
   public bool Is<TAttribute>() where TAttribute : Attribute {
-    return AttributeClass?.ToCompilationType().GetFullName() == typeof(TAttribute).FullName;
+    return Type.GetFullName() == typeof(TAttribute).FullName;
   }
 
   public bool IsConstructedGenericTypeOf(Type unboundAttributeType) {
@@ -30,7 +30,7 @@ public readonly struct RoslynAttribute {
       unboundAttributeType = unboundAttributeType.GetGenericTypeDefinition();
     }
 
-    var unboundSelfType = AttributeClass!.ConstructUnboundGenericType()!.ToCompilationType();
+    var unboundSelfType = new RoslynType(AttributeClass!.ConstructUnboundGenericType());
     return unboundSelfType.GetFullName() == unboundAttributeType.FullName;
   }
 

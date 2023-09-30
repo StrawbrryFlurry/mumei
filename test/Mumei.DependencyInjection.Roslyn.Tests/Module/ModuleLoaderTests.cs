@@ -11,8 +11,6 @@ using Xunit;
 namespace Mumei.DependencyInjection.Roslyn.Tests.Module;
 
 public sealed class ModuleLoaderTests {
-  
-  
   private static readonly CompilationType IWeatherService =
     $$"""
       {{"Weather":namespace}}
@@ -44,11 +42,7 @@ public sealed class ModuleLoaderTests {
 
   [Fact]
   public void Boop() {
-    var sourceText = IWeatherModule.ToSource().Text;
-
-
-    var c = TestCompilationBuilder.CreateFromSources(IWeatherModule).Build();
-    var s = c.GetTypeSymbol(IWeatherModule);
+    var s = TestCompilation.CompileTypeSymbol(IWeatherModule, out var c);
     var r = ModuleLoader.ResolveModule(new RoslynType(s), c);
   }
 }

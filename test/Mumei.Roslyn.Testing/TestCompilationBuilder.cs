@@ -51,14 +51,6 @@ public sealed class TestCompilationBuilder {
     return builder;
   }
 
-  public static Compilation CompileSources(params TypeSource[] sources) {
-    return CreateFromSources(sources).Build();
-  }
-
-  public static T CompileSourceToSymbol<T>(TypeSource source) {
-    return (T)CreateFromSources(source).Build().GetTypeSymbol(source.Name);
-  }
-
   public TestCompilationBuilder AddSource(string source, Action<SourceFileBuilder>? configure = null) {
     var sourceFileBuilder = new SourceFileBuilder(source);
     configure?.Invoke(sourceFileBuilder);

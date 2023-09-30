@@ -68,8 +68,8 @@ internal ref struct ModuleLoader {
     }
 
     using var properties = moduleCompilationType.GetPropertiesTemp();
-    for (var index = 0; index < properties.Length; index++) {
-      var property = properties[index];
+    for (var i = 0; i < properties.Length; i++) {
+      var property = properties[i];
       var propertyAttributes = property.GetAttributesTemp();
       if (ProviderDeclaration.TryCreateFromProperty(property, propertyAttributes, out var provider)) {
         providersBuilder.Add(provider);
