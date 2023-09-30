@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Mumei.Roslyn.Testing.Template;
 
 namespace Mumei.Roslyn.Testing.Comp;
 
@@ -11,6 +12,10 @@ public static class CompilationExtensions {
 
   public static INamedTypeSymbol GetTypeSymbol(this Compilation compilation, string typeName) {
     return compilation.GetTypeByMetadataName(typeName)!; // We assume consumers know their type names
+  }
+
+  public static INamedTypeSymbol GetTypeSymbol(this Compilation compilation, CompilationType type) {
+    return compilation.GetTypeByMetadataName(type.Name)!;
   }
 
   public static TMember GetTypeMemberSymbol<TMember>(this Compilation compilation,

@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Mumei.Roslyn.Testing.Comp;
 
 namespace Mumei.Roslyn.Testing;
 
@@ -31,7 +32,7 @@ public sealed class TestCompilationBuilder {
   }
 
   public TestCompilationBuilder AddSource(TypeSource source) {
-    _sources.Add(CSharpSyntaxTree.ParseText(source.Source, path: source.Name));
+    _sources.Add(CSharpSyntaxTree.ParseText(source.Text, path: source.Name));
     _metadataReferences.AddReferences(source.TypeReferences);
 
     foreach (var sourceSourceReference in source.SourceReferences) {
@@ -48,6 +49,14 @@ public sealed class TestCompilationBuilder {
     }
 
     return builder;
+  }
+
+  public static Compilation CompileSources(params TypeSource[] sources) {
+    return CreateFromSources(sources).Build();
+  }
+
+  public static T CompileSourceToSymbol<T>(TypeSource source) {
+    return (T)CreateFromSources(source).Build().GetTypeSymbol(source.Name);
   }
 
   public TestCompilationBuilder AddSource(string source, Action<SourceFileBuilder>? configure = null) {

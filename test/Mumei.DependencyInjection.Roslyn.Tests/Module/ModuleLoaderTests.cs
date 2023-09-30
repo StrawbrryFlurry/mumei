@@ -11,8 +11,12 @@ using Xunit;
 namespace Mumei.DependencyInjection.Roslyn.Tests.Module;
 
 public sealed class ModuleLoaderTests {
+  
+  
   private static readonly CompilationType IWeatherService =
     $$"""
+      {{"Weather":namespace}}
+
       public interface {{nameof(IWeatherService)}} {
         public string GetWeather();
       }
@@ -20,25 +24,31 @@ public sealed class ModuleLoaderTests {
 
   private static readonly CompilationType WeatherService =
     $$"""
+      {{"Weather":namespace}}
+
       public class {{nameof(WeatherService)}} : {{IWeatherService}} {
         public string GetWeather() => "Sunny";
       }
       """;
 
-  public static readonly CompilationType IWeatherModule =
+  private static readonly CompilationType IWeatherModule =
     $$"""
-      {{typeof(ModuleAttribute):Format.Name}}
+      {{"Weather":namespace}}
+
+      {{typeof(ModuleAttribute)}}
       public interface {{nameof(IWeatherModule)}} {
         {{typeof(ScopedAttribute<>).Args(WeatherService)}}
         public {{IWeatherService}} WeatherService { get; }
       }
       """;
 
-
   [Fact]
-  public void ResolveRoot() {
+  public void Boop() {
+    var sourceText = IWeatherModule.ToSource().Text;
+
+
     var c = TestCompilationBuilder.CreateFromSources(IWeatherModule).Build();
-    var s = c.GetTypeSymbol(IWeatherModule.Name);
+    var s = c.GetTypeSymbol(IWeatherModule);
     var r = ModuleLoader.ResolveModule(new RoslynType(s), c);
   }
 }

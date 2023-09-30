@@ -16,7 +16,7 @@ public readonly struct ConstructedCompilationGenericType : ITemplateFormattable 
     s.AppendLiteral(actualName);
     s.AppendLiteral("<");
     foreach (var argument in Arguments) {
-      s.AppendFormatted(argument);
+      s.AppendFormatted(argument.ToString(CompilationTemplateFormat.Display, null));
     }
 
     s.AppendLiteral(">");
@@ -27,8 +27,8 @@ public readonly struct ConstructedCompilationGenericType : ITemplateFormattable 
     }
 
     return format switch {
-      CompilationTemplateFormat.Display => actualName,
-      CompilationTemplateFormat.Attribute => $"[{actualName}]",
+      CompilationTemplateFormat.Display => display,
+      CompilationTemplateFormat.Attribute => $"[{display}]",
       _ => display
     };
   }
