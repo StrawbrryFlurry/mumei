@@ -18,6 +18,10 @@ public readonly struct RoslynType {
     _symbol = symbol;
   }
 
+  public bool IsDefault() {
+    return _symbol is null;
+  }
+
   public RoslynType GetFirstTypeArgument() {
     if (IsGenericType) {
       return new RoslynType(GenericSymbol.TypeArguments[0]);
@@ -133,6 +137,22 @@ public readonly struct RoslynType {
 
     nameBuilder.AddRange(symbol.Name.AsSpan());
     nameBuilder.Add('.');
+  }
+
+  public static bool operator ==(RoslynType left, ITypeSymbol right) {
+    return SymbolEqualityComparer.Default.Equals(left._symbol, right);
+  }
+
+  public static bool operator !=(RoslynType left, ITypeSymbol right) {
+    return !(left == right);
+  }
+
+  public static bool operator ==(ITypeSymbol left, RoslynType right) {
+    return right == left;
+  }
+
+  public static bool operator !=(ITypeSymbol left, RoslynType right) {
+    return !(right == left);
   }
 
   public static bool operator ==(RoslynType left, RoslynType right) {

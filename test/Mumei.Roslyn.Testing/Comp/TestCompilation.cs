@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
+using Mumei.Roslyn.Testing.Template;
 
 namespace Mumei.Roslyn.Testing.Comp;
 
@@ -34,6 +35,10 @@ public static class TestCompilation {
   public static ITypeSymbol CompileTypeSymbol(TypeSource source, out Compilation compilation) {
     compilation = FromSource(source);
     return compilation.GetTypeSymbol(source.MetadataName);
+  }
+
+  public static ITypeSymbol CompileTypeSymbol(CompilationType source, out Compilation compilation) {
+    return CompileTypeSymbol(source.ToSource(), out compilation);
   }
 
   public static T CompileToSymbol<T>(TypeSource source) {

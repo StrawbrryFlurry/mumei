@@ -23,13 +23,14 @@ internal ref struct ModuleLoader {
     _compilation = compilation;
   }
 
-  public static ModuleDeclaration ResolveModule(
-    RoslynType rootModule,
+  public static ModuleDeclaration ResolveRootModule(
+    ITypeSymbol rootModule,
     Compilation compilation
   ) {
-    var loader = new ModuleLoader(rootModule, compilation);
+    var rootModuleType = new RoslynType(rootModule);
+    var loader = new ModuleLoader(rootModuleType, compilation);
     // Add global modules to root
-    return loader.ResolveModuleRecursively(rootModule);
+    return loader.ResolveModuleRecursively(rootModuleType);
   }
 
   private ModuleDeclaration ResolveModuleRecursively(RoslynType moduleCompilationType) {
@@ -43,7 +44,7 @@ internal ref struct ModuleLoader {
     for (var i = 0; i < attributes.Length; i++) {
       var attribute = attributes[i];
 
-      // These checks are ordered by frequency of occurrence      
+      // These checks are ordered by frequency of occurrence
       if (TryGetModuleImport(in attribute, out var importedModule)) {
         var resolvedImport = ResolveModuleRecursively(importedModule.Value);
         importsBuilder.Add(resolvedImport);

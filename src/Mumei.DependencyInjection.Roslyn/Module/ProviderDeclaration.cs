@@ -96,7 +96,7 @@ internal sealed class ProviderDeclaration : IProviderDeclaration {
       // We don't know this attribute, ignore it
     }
 
-    if (scopedProvider.ProviderType == default) {
+    if (scopedProvider.ProviderType.IsDefault()) {
       specification = default;
       return false;
     }
