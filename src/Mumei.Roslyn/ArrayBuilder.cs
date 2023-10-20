@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 namespace Mumei.Roslyn;
 
-public ref struct ArrayBuilder<TElement> {
+public ref partial struct ArrayBuilder<TElement> {
   private const int DefaultCapacity = 4;
 
   private Span<TElement> _elements;
@@ -151,10 +151,6 @@ public ref struct ArrayBuilder<TElement> {
     this = default;
   }
 
-  public Enumerator GetEnumerator() {
-    return new Enumerator(_elements, _count);
-  }
-
   public void AddRange(IEnumerable<TElement> elements) {
     foreach (var element in elements) {
       Add(element);
@@ -206,6 +202,11 @@ public ref struct ArrayBuilder<TElement> {
   private void Grow(int capacity) {
     Debug.Assert(_count < capacity);
 
+    if (_rentedArray.Length >= capacity) {
+      _capacity = capacity;
+      return;
+    }
+
     // Don't jump for the more common grow case
     if (_capacity is not 0) {
       GrowWithoutInitValue(capacity);
@@ -252,35 +253,6 @@ public ref struct ArrayBuilder<TElement> {
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
   private void FreeBackingArray() {
     ArrayPool<TElement>.Shared.Return(_rentedArray);
-  }
-
-  public ref struct Enumerator {
-    private readonly Span<TElement> _span;
-    private readonly int _actualLength;
-    private int _index;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal Enumerator(Span<TElement> span, int actualLength) {
-      _span = span;
-      _actualLength = actualLength;
-      _index = -1;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool MoveNext() {
-      var idx = _index + 1;
-      if (idx >= _actualLength) {
-        return false;
-      }
-
-      _index = idx;
-      return true;
-    }
-
-    public readonly ref readonly TElement Current {
-      [MethodImpl(MethodImplOptions.AggressiveInlining)]
-      get => ref _span[_index];
-    }
   }
 }
 
