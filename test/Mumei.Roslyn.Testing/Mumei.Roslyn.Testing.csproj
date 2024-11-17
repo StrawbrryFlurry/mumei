@@ -2,6 +2,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
   </ItemGroup>
+  
   <ItemGroup>
     <ProjectReference Include="..\..\src\Mumei.Roslyn\Mumei.Roslyn.csproj"/>
   </ItemGroup>

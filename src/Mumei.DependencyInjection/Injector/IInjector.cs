@@ -8,6 +8,7 @@ namespace Mumei.DependencyInjection.Injector;
 /// key is a unique type id (constructed from the type's full name at compile time)
 /// and the value is the index of the module's provider in the global provider binding array.
 /// All module's bindings are stored in that global array and each of them gets a unique index.
+/// The lookup could be vectorized if we know all type ids at compile time and therefore not use a map?
 /// <code>
 /// class WeatherModule {
 ///   public WeatherServiceBinding __WeatherServiceBinding { get; init; }

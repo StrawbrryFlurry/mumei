@@ -1,5 +1,4 @@
-﻿using CleanArchitectureApplication.ApiHost.Generated;
-using CleanArchitectureApplication.Application;
+﻿using CleanArchitectureApplication.Application;
 using CleanArchitectureApplication.Domain;
 using CleanArchitectureApplication.Persistence;
 using CleanArchitectureApplication.Presentation;

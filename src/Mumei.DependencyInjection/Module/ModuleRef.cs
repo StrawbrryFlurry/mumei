@@ -4,6 +4,7 @@ using Mumei.DependencyInjection.Injector.Behavior;
 
 namespace Mumei.DependencyInjection.Module;
 
+// TODO: this should not be a class but it's members should be generated into the implementer
 public abstract class ModuleRef<TModule> : IModuleRef<TModule> where TModule : IModule {
   public IInjector Parent { get; }
   public Type Type { get; } = typeof(TModule);

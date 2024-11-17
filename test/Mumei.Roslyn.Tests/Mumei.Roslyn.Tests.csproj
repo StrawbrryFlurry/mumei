@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    <ItemGroup>
-        <ProjectReference Include="..\..\src\Mumei.Roslyn\Mumei.Roslyn.csproj"/>
-        <ProjectReference Include="..\Mumei.Roslyn.Testing\Mumei.Roslyn.Testing.csproj"/>
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Mumei.Roslyn\Mumei.Roslyn.csproj"/>
+    <ProjectReference Include="..\Mumei.Roslyn.Testing\Mumei.Roslyn.Testing.csproj"/>
+  </ItemGroup>
 </Project>

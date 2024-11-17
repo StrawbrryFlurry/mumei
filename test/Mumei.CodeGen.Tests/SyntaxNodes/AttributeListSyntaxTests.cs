@@ -1,102 +1,97 @@
 ﻿using System.Runtime.CompilerServices;
-using Moq;
 using Mumei.CodeGen.SyntaxNodes;
 using Mumei.CodeGen.SyntaxWriters;
 
 namespace Mumei.CodeGen.Tests.SyntaxNodes;
 
 public class AttributeListSyntaxTests {
-  private readonly SyntaxTypeContext _ctx = new();
+    private readonly SyntaxTypeContext _ctx = new();
 
-  [Fact]
-  public void Clone_ReturnsNewAttributeListWithClonedAttributes() {
-    var sut = new AttributeListSyntax();
-    sut.AddAttribute<StateMachineAttribute>();
+    [Fact]
+    public void Clone_ReturnsNewAttributeListWithClonedAttributes() {
+        var sut = new AttributeListSyntax();
+        sut.AddAttribute<StateMachineAttribute>();
 
-    var clone = sut.Clone<AttributeListSyntax>();
+        var clone = sut.Clone<AttributeListSyntax>();
 
-    clone.Parent.Should().BeNull();
-    clone.ElementAt(0).Parent.Should().Be(clone);
-  }
-
-  [Fact]
-  public void AddAttribute_SetsSelfAsParent() {
-    var sut = new AttributeListSyntax();
-
-    sut.AddAttribute<StateMachineAttribute>();
-
-    sut.ElementAt(0).Parent.Should().Be(sut);
-  }
-
-  [Fact]
-  public void AddAttribute_SetsSelfAsParent_WhenOverloadIsPositionalArguments() {
-    var sut = new AttributeListSyntax();
-
-    sut.AddAttribute<StateMachineAttribute>(new object());
-
-    sut.ElementAt(0).Parent.Should().Be(sut);
-  }
-
-  [Fact]
-  public void AddAttribute_SetsSelfAsParent_WhenOverloadIsPositionalAndNamedArguments() {
-    var sut = new AttributeListSyntax();
-
-    sut.AddAttribute<StateMachineAttribute>(new Dictionary<NamedAttributeParameter, object>());
-
-    sut.ElementAt(0).Parent.Should().Be(sut);
-  }
-
-  [Fact]
-  public void WriteAsSyntax_CallsWriteAsSyntaxForAllAttributesInList() {
-    var sut = new AttributeListSyntax();
-    var writer = new TypeAwareSyntaxWriter(_ctx);
-
-    var attributes = new List<Mock<AttributeSyntax>> {
-      new(typeof(StateMachineAttribute)),
-      new(typeof(StateMachineAttribute)),
-      new(typeof(StateMachineAttribute))
-    };
-
-    foreach (var attribute in attributes) {
-      sut.Add(attribute.Object);
+        clone.Parent.Should().BeNull();
+        clone.ElementAt(0).Parent.Should().Be(clone);
     }
 
-    sut.WriteAsSyntax(writer);
+    [Fact]
+    public void AddAttribute_SetsSelfAsParent() {
+        var sut = new AttributeListSyntax();
 
-    attributes.All(a => a.Invocations[0].Method.Name == nameof(AttributeSyntax.WriteAsSyntax)).Should().BeTrue();
-  }
+        sut.AddAttribute<StateMachineAttribute>();
 
-  [Fact]
-  public void WriteAsSyntax_WritesEmptyString_WhenListHasNoAttributes() {
-    var sut = new AttributeListSyntax();
-    var writer = new TypeAwareSyntaxWriter(_ctx);
+        sut.ElementAt(0).Parent.Should().Be(sut);
+    }
 
-    sut.WriteAsSyntax(writer);
+    [Fact]
+    public void AddAttribute_SetsSelfAsParent_WhenOverloadIsPositionalArguments() {
+        var sut = new AttributeListSyntax();
 
-    writer.ToSyntax().Should().Be("");
-  }
+        sut.AddAttribute<StateMachineAttribute>(new object());
 
-  [Fact]
-  public void WriteAsSyntax_WritesSingleAttribute_WhenListHasOneAttribute() {
-    var sut = new AttributeListSyntax();
-    sut.AddAttribute<StateMachineAttribute>();
-    var writer = new TypeAwareSyntaxWriter(_ctx);
+        sut.ElementAt(0).Parent.Should().Be(sut);
+    }
 
-    sut.WriteAsSyntax(writer);
+    [Fact]
+    public void AddAttribute_SetsSelfAsParent_WhenOverloadIsPositionalAndNamedArguments() {
+        var sut = new AttributeListSyntax();
 
-    writer.ToSyntax().Should().Be("[StateMachine()]");
-  }
+        sut.AddAttribute<StateMachineAttribute>(new Dictionary<NamedAttributeParameter, object>());
 
-  [Fact]
-  public void WriteAsSyntax_AppliesSeparationStrategy_WhenWritingMultipleAttributes() {
-    var sut = new AttributeListSyntax(SeparationStrategy.NewLine);
-    sut.AddAttribute<StateMachineAttribute>();
-    sut.AddAttribute<StateMachineAttribute>();
-    var writer = new TypeAwareSyntaxWriter(_ctx);
+        sut.ElementAt(0).Parent.Should().Be(sut);
+    }
 
-    sut.WriteAsSyntax(writer);
+    [Fact]
+    public void WriteAsSyntax_CallsWriteAsSyntaxForAllAttributesInList() {
+        var sut = new AttributeListSyntax() {
+            new AttributeSyntax(typeof(StateMachineAttribute)),
+            new AttributeSyntax(typeof(StateMachineAttribute)),
+            new AttributeSyntax(typeof(StateMachineAttribute))
+        };
+        var writer = new TypeAwareSyntaxWriter(_ctx);
 
-    writer.ToSyntax().Should().Be(Line("[StateMachine()]") +
-                                  "[StateMachine()]");
-  }
+        sut.WriteAsSyntax(writer);
+
+        writer.ToSyntax().Should().Be("""
+                                      [StateMachine()][StateMachine()][StateMachine()]
+                                      """);
+    }
+
+    [Fact]
+    public void WriteAsSyntax_WritesEmptyString_WhenListHasNoAttributes() {
+        var sut = new AttributeListSyntax();
+        var writer = new TypeAwareSyntaxWriter(_ctx);
+
+        sut.WriteAsSyntax(writer);
+
+        writer.ToSyntax().Should().Be("");
+    }
+
+    [Fact]
+    public void WriteAsSyntax_WritesSingleAttribute_WhenListHasOneAttribute() {
+        var sut = new AttributeListSyntax();
+        sut.AddAttribute<StateMachineAttribute>();
+        var writer = new TypeAwareSyntaxWriter(_ctx);
+
+        sut.WriteAsSyntax(writer);
+
+        writer.ToSyntax().Should().Be("[StateMachine()]");
+    }
+
+    [Fact]
+    public void WriteAsSyntax_AppliesSeparationStrategy_WhenWritingMultipleAttributes() {
+        var sut = new AttributeListSyntax(SeparationStrategy.NewLine);
+        sut.AddAttribute<StateMachineAttribute>();
+        sut.AddAttribute<StateMachineAttribute>();
+        var writer = new TypeAwareSyntaxWriter(_ctx);
+
+        sut.WriteAsSyntax(writer);
+
+        writer.ToSyntax().Should().Be(Line("[StateMachine()]") +
+                                      "[StateMachine()]");
+    }
 }

@@ -70,7 +70,7 @@ public ref partial struct ArrayBuilder<TElement> {
   private int LastIndex => _capacity - 1;
 
   /// <summary>
-  /// Returns a new <see cref="Array"/> containing all elements of the builder.
+  /// Returns a new <see cref="TElement[]"/> containing all elements of the builder.
   /// The builder cannot be used after this operation.
   /// </summary>
   /// <returns>A new array containing all the elements of the builder</returns>

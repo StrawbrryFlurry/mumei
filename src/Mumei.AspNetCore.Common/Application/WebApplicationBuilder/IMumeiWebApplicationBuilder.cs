@@ -1,4 +1,5 @@
-﻿using Mumei.DependencyInjection.Injector;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Mumei.DependencyInjection.Injector;
 
 namespace Mumei.AspNetCore.Common.Application;
 
