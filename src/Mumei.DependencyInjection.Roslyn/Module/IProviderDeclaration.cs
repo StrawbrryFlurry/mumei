@@ -1,5 +1,4 @@
-﻿using Mumei.DependencyInjection.Injector.Registration;
-using Mumei.Roslyn.Reflection;
+﻿using Mumei.Roslyn.Reflection;
 
 namespace Mumei.DependencyInjection.Roslyn.Module;
 

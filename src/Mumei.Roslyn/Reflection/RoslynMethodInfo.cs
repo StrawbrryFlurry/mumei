@@ -24,7 +24,7 @@ public readonly struct RoslynMethodInfo {
 
   private ArrayBuilder<RoslynType> GetParametersBag() {
     var parameters = _symbol.Parameters;
-    var builder = ArrayBuilder<RoslynType>.CreateWithApproximateSize(parameters.Length);
+    var builder = new ArrayBuilder<RoslynType>(parameters.Length);
     for (var i = 0; i < parameters.Length; i++) {
       builder.Add(new RoslynType(parameters[i].Type));
     }

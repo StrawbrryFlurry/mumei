@@ -11,121 +11,128 @@ namespace Mumei.Roslyn.Testing.Template;
 // be a problem since we are only using this in tests.
 [InterpolatedStringHandler]
 public struct CompilationType : IEquatable<CompilationType>, ITemplateFormattable {
-  private string _name;
-  private string _namespace = "";
-  private int _typeArgumentCount;
+    private string _name;
+    private string _namespace = "";
+    private int _typeArgumentCount;
 
-  private HashSet<Type> _typeReferences;
-  private HashSet<CompilationType> _sourceReferences;
-  private StringBuilder _builder;
+    private HashSet<Type> _typeReferences;
+    private HashSet<CompilationType> _sourceReferences;
+    private StringBuilder _builder;
 
-  public string FullName => $"{_namespace}{(_namespace is "" ? "" : ".")}{_name}";
-  public string MetadataName => _typeArgumentCount > 0 ? $"{FullName}`{_typeArgumentCount}" : FullName;
+    public string FullName => $"{_namespace}{(_namespace is "" ? "" : ".")}{_name}";
+    public string MetadataName => _typeArgumentCount > 0 ? $"{FullName}`{_typeArgumentCount}" : FullName;
 
-  public IEnumerable<CompilationType> ReferencedSources => _sourceReferences.Concat(ImmutableArray.Create(this));
+    public IEnumerable<CompilationType> ReferencedSources => _sourceReferences.Concat(ImmutableArray.Create(this));
 
-  public IEnumerable<Type> ReferencedTypes => _typeReferences;
+    public IEnumerable<Type> ReferencedTypes => _typeReferences;
 
-  public CompilationType(int literalLength, int formattedCount, [CallerMemberName] string memberName = "") {
-    _name = memberName;
-    _typeReferences = new HashSet<Type>();
-    _sourceReferences = new HashSet<CompilationType>();
-    _builder = new StringBuilder(literalLength);
-  }
+    public static Type Name => typeof(CompilationType);
 
-  public static implicit operator TypeSource(CompilationType compilationType) {
-    return compilationType.ToSource();
-  }
-
-  public void AppendLiteral(string s) {
-    _builder.Append(s);
-  }
-
-  public void AppendFormatted(string s) {
-    _builder.Append(s);
-  }
-
-  public void AppendFormatted(string s, string format) {
-    if (format == "namespace") {
-      _namespace = s;
-      _builder.Append($"namespace {s};");
-      return;
+    public CompilationType(int literalLength, int formattedCount, [CallerMemberName] string memberName = "") {
+        _name = memberName;
+        _typeReferences = new HashSet<Type>();
+        _sourceReferences = new HashSet<CompilationType>();
+        _builder = new StringBuilder(literalLength);
     }
 
-    if (format == "typeargs") {
-      _typeArgumentCount = s.Split(",").Length;
-      _builder.Append(s);
-      return;
+    public static implicit operator TypeSource(CompilationType compilationType) {
+        return compilationType.ToSource();
     }
 
-    AppendFormatted(s);
-  }
-
-  public void AppendFormatted(Type t, string? format = null) {
-    _typeReferences.Add(t);
-    AppendFormattable(new CompilationTypeFormattable(t), format);
-  }
-
-  public void AppendFormatted(ITemplateFormattable formattable, string? format = null) {
-    foreach (var s in formattable.ReferencedSources) {
-      _sourceReferences.Add(s);
+    public void AppendLiteral(string s) {
+        _builder.Append(s);
     }
 
-    foreach (var t in formattable.ReferencedTypes) {
-      _typeReferences.Add(t);
+    public void AppendFormatted(string s) {
+        _builder.Append(s);
     }
 
-    AppendFormattable(formattable, format);
-  }
+    public void AppendFormatted(string s, string format) {
+        if (format == "namespace") {
+            _namespace = s;
+            _builder.Append($"namespace {s};");
+            return;
+        }
 
-  private void AppendFormattable(IFormattable formattable, string? format = null) {
-    _builder.Append(formattable.ToString(format, null));
-  }
+        if (format == "typeargs") {
+            _typeArgumentCount = s.Split(",").Length;
+            _builder.Append(s);
+            return;
+        }
 
-  public TypeSource ToSource() {
-    return new TypeSource {
-      Name = _name,
-      FullName = FullName,
-      MetadataName = MetadataName,
-      Text = _builder.ToString(),
-      TypeReferences = _typeReferences.ToImmutableArray(),
-      SourceReferences = _sourceReferences.ToImmutableArray()
-    };
-  }
-
-  public string ToString(string? format, IFormatProvider? formatProvider) {
-    if (_name.EndsWith("Attribute")) {
-      format ??= CompilationTemplateFormat.Attribute;
+        AppendFormatted(s);
     }
 
-    return format switch {
-      CompilationTemplateFormat.Display => FullName,
-      CompilationTemplateFormat.Attribute => $"[{FullName}]",
-      _ => FullName
-    };
-  }
+    public void AppendFormatted(Type t, string? format = null) {
+        if (t == Name) {
+            AppendLiteral(_name);
+            return;
+        }
 
-  public bool Equals(CompilationType other) {
-    return _name == other._name;
-  }
+        _typeReferences.Add(t);
+        AppendFormattable(new CompilationTypeFormattable(t), format);
+    }
 
-  public override bool Equals(object? obj) {
-    return obj is CompilationType other && Equals(other);
-  }
+    public void AppendFormatted(ITemplateFormattable formattable, string? format = null) {
+        foreach (var s in formattable.ReferencedSources) {
+            _sourceReferences.Add(s);
+        }
 
-  public override int GetHashCode() {
-    return FullName.GetHashCode();
-  }
+        foreach (var t in formattable.ReferencedTypes) {
+            _typeReferences.Add(t);
+        }
 
-  public override string ToString() {
-    return FullName;
-  }
+        AppendFormattable(formattable, format);
+    }
 
-  public static bool operator ==(CompilationType left, CompilationType right) {
-    return left.Equals(right);
-  }
+    private void AppendFormattable(IFormattable formattable, string? format = null) {
+        _builder.Append(formattable.ToString(format, null));
+    }
 
-  public static bool operator !=(CompilationType left, CompilationType right) {
-    return !(left == right);
-  }
+    public TypeSource ToSource() {
+        return new TypeSource {
+            Name = _name,
+            FullName = FullName,
+            MetadataName = MetadataName,
+            Text = _builder.ToString(),
+            TypeReferences = _typeReferences.ToImmutableArray(),
+            SourceReferences = _sourceReferences.ToImmutableArray()
+        };
+    }
+
+    public string ToString(string? format, IFormatProvider? formatProvider) {
+        if (_name.EndsWith("Attribute")) {
+            format ??= CompilationTemplateFormat.Attribute;
+        }
+
+        return format switch {
+            CompilationTemplateFormat.Display => FullName,
+            CompilationTemplateFormat.Attribute => $"[{FullName}]",
+            _ => FullName
+        };
+    }
+
+    public bool Equals(CompilationType other) {
+        return _name == other._name;
+    }
+
+    public override bool Equals(object? obj) {
+        return obj is CompilationType other && Equals(other);
+    }
+
+    public override int GetHashCode() {
+        return FullName.GetHashCode();
+    }
+
+    public override string ToString() {
+        return FullName;
+    }
+
+    public static bool operator ==(CompilationType left, CompilationType right) {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(CompilationType left, CompilationType right) {
+        return !(left == right);
+    }
 }
