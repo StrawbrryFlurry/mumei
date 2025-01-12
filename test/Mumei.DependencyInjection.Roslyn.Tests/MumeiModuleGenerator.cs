@@ -1,4 +1,3 @@
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.DependencyInjection.Module;
 using Mumei.DependencyInjection.Module.Markers;
 using Mumei.Roslyn.Testing;
