@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Mumei.Roslyn.SourceCodeReferenceGenerator\Mumei.Roslyn.SourceCodeReferenceGenerator.csproj"/>
+  </ItemGroup>
+</Project>
