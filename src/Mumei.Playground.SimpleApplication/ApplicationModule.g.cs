@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Mumei.DependencyInjection.Injector;
+﻿using Mumei.DependencyInjection.Injector;
 using Mumei.DependencyInjection.Injector.Behavior;
 using Mumei.DependencyInjection.Injector.Implementation;
 using Mumei.Playground.SimpleApplication.Common;

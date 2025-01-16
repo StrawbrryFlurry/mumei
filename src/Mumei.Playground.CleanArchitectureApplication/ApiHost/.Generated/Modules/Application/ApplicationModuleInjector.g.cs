@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Runtime.CompilerServices;
 using CleanArchitectureApplication.ApiHost.Generated;
 using CleanArchitectureApplication.Domain.Ordering;
 using Mumei.DependencyInjection.Injector;
