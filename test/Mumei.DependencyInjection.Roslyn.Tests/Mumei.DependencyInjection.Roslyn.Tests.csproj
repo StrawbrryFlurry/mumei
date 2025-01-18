@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <PackageReference Include="FluentAssertions"/>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Mumei.DependencyInjection.Roslyn\Mumei.DependencyInjection.Roslyn.csproj"/>
     <ProjectReference Include="..\..\src\Mumei.DependencyInjection\Mumei.DependencyInjection.csproj"/>
     <ProjectReference Include="..\Mumei.DependencyInjection.Tests\Mumei.DependencyInjection.Tests.csproj"/>

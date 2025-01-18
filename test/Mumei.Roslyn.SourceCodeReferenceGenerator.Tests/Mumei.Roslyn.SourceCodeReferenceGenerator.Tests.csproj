@@ -4,6 +4,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentAssertions"/>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Mumei.Roslyn.SourceCodeReferenceGenerator\Mumei.Roslyn.SourceCodeReferenceGenerator.csproj"/>
   </ItemGroup>
 </Project>

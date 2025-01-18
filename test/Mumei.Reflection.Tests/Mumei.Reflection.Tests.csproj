@@ -4,6 +4,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentAssertions"/>
+  </ItemGroup>
+  
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Mumei.Reflection\Mumei.Reflection.csproj"/>
   </ItemGroup>
 </Project>

@@ -1,8 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
+    <PackageReference Include="FluentAssertions"/>
   </ItemGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Mumei.Roslyn\Mumei.Roslyn.csproj"/>
   </ItemGroup>

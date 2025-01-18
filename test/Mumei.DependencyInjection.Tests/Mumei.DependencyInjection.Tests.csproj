@@ -2,6 +2,10 @@
   <Import Project="..\..\src\Mumei.Roslyn.SourceCodeReferenceGenerator\Mumei.Roslyn.SourceCodeReferenceGenerator.targets"/>
 
   <ItemGroup>
+    <PackageReference Include="FluentAssertions"/>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Mumei.DependencyInjection.Roslyn\Mumei.DependencyInjection.Roslyn.csproj"/>
     <ProjectReference Include="..\Mumei.Roslyn.Testing\Mumei.Roslyn.Testing.csproj"/>
     <ProjectReference Include="..\..\src\Mumei.Roslyn.SourceCodeReferenceGenerator\Mumei.Roslyn.SourceCodeReferenceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>

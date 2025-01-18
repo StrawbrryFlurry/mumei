@@ -9,7 +9,6 @@
 
   <!-- Test package references -->
   <ItemGroup>
-    <PackageReference Include="FluentAssertions"/>
     <PackageReference Include="Microsoft.NET.Test.Sdk"/>
     <PackageReference Include="xunit.v3"/>
   </ItemGroup>
