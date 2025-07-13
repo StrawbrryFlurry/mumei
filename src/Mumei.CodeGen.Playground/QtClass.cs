@@ -39,6 +39,10 @@ public sealed class QtClass : IQtType {
         return null!;
     }
 
+    public QtField<object> Field(string name) {
+        return null!;
+    }
+
     public QtField<object> AddField(
         AccessModifier modifiers,
         IQtType type,
@@ -112,15 +116,34 @@ public sealed class QtClass : IQtType {
     ) {
         return null!;
     }
+
+    public QtMethod<object> BindTemplateMethod<TTemplate>(
+        TTemplate template,
+        Func<TTemplate, Delegate> methodSelector
+    ) where TTemplate : QtClassTemplate<TTemplate> {
+        throw new CompileTimeComponentUsedAtRuntimeException();
+    }
 }
 
 public sealed class QtMethod<TReturnType> : IQtInvokable<TReturnType> {
+    public QtMethod<TReturnType> WithName(string name) {
+        return this;
+    }
+
+    public QtMethod<TReturnType> WithTypeParameters(params QtTypeParameter[] typeParameters) {
+        return this;
+    }
+
+    public QtMethod<TReturnType> WithParameters(params IQtParameter[] parameters) {
+        return this;
+    }
+
     public TReturnType Invoke(IQtThis target) {
-        throw new NotSupportedException();
+        throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
     public TDynamicReturnType DynamicInvoke<TDynamicReturnType>(IQtThis target) {
-        throw new NotSupportedException();
+        throw new CompileTimeComponentUsedAtRuntimeException();
     }
 }
 
@@ -132,50 +155,50 @@ public static class QtMethod {
         public MethodBuilderTypeArgumentsProvider TypeArguments { get; set; }
 
         public T Interpolate<T>(IQtSyntaxTemplateInterpolator interpolator) {
-            throw new NotSupportedException();
+            throw new CompileTimeComponentUsedAtRuntimeException();
         }
 
         public void ForEach<T>(T[] source, Action<T, QtMethodBuilderCtx> action) where T : IQtTemplateBindable {
-            throw new NotSupportedException();
+            throw new CompileTimeComponentUsedAtRuntimeException();
         }
 
         public T Return<T>(T value) {
-            throw new NotSupportedException();
+            throw new CompileTimeComponentUsedAtRuntimeException();
         }
     }
 
     public sealed class MethodBuilderArgumentsProvider {
         public T Inject<T>(int idx) {
-            throw new NotSupportedException();
+            throw new CompileTimeComponentUsedAtRuntimeException();
         }
 
         public IQtCompileTimeValue<Arg.T1> Inject(IQtType type, int idx) {
-            throw new NotSupportedException();
+            throw new CompileTimeComponentUsedAtRuntimeException();
         }
     }
 
     public sealed class MethodBuilderTypeArgumentsProvider {
         public Type Get(string name) {
-            throw new NotSupportedException();
+            throw new CompileTimeComponentUsedAtRuntimeException();
         }
     }
 }
 
 public sealed class QtField<T> : IQtCompileTimeValue<T>, IQtTemplateBindable {
     public T Get(IQtThis target) {
-        throw new NotSupportedException();
+        throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
     public TDynamic DynamicGet<TDynamic>(IQtThis target) {
-        throw new NotSupportedException();
+        throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
     public void Set(IQtThis target, T value) {
-        throw new NotSupportedException();
+        throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
     public void DynamicSet<TDynamic>(IQtThis target, TDynamic value) {
-        throw new NotSupportedException();
+        throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
     public T1 As<T1>() {
@@ -193,6 +216,9 @@ file sealed class Example {
 
         var cls = new QtClass();
         var parentField = cls.AddField<IInjector>(Private | Readonly, "_parent");
+
+        var ijt = new InjectorTemplate(modules);
+        cls.BindTemplateMethod(ijt, t => t.Get);
 
         var tProvider = TypeParam("TProvider");
         cls.AddMethod(
@@ -226,6 +252,55 @@ file sealed class Example {
     }
 }
 
+public class InjectorTemplate(
+    QtField<IInjector>[] modules
+) : QtClassTemplate<InjectorTemplate>, IInjector {
+    public IInjector Parent { get; }
+
+    public TProvider Get<TProvider>(IInjector? scope = null, InjectFlags flags = InjectFlags.None) {
+        throw new NotImplementedException();
+    }
+
+    public object Get(object token, IInjector? scope = null, InjectFlags flags = InjectFlags.None) {
+        throw new NotImplementedException();
+    }
+
+    public bool TryGet(object token, IInjector scope, InjectFlags flags, out object? instance) {
+        if ((flags & InjectFlags.SkipSelf) != 0) {
+            return Parent.TryGet(token, scope, flags & ~InjectFlags.SkipSelf, out instance);
+        }
+
+        foreach (var compModule in CompTimeIterate(modules)) {
+            if (compModule.Get(this).TryGet(token, scope, flags, out instance)) {
+                return true;
+            }
+        }
+
+        instance = null!;
+        return false;
+    }
+}
+
+public abstract class QtClassTemplate<TSelf> : IQtThis where TSelf : QtClassTemplate<TSelf> {
+    public IEnumerable<TE> CompTimeIterate<TE>(IEnumerable<TE> compileTimeIterableSelector) where TE : IQtTemplateBindable {
+        throw new CompileTimeComponentUsedAtRuntimeException();
+    }
+
+    public T As<T>() {
+        throw new CompileTimeComponentUsedAtRuntimeException();
+    }
+}
+
+public abstract class QtInterceptorMethodTemplate {
+    public T Invoke<T>() {
+        throw new CompileTimeComponentUsedAtRuntimeException();
+    }
+
+    public Arg.TThis This { get; set; }
+    public object[] InvocationArguments { get; set; }
+    public MethodInfo Method { get; set; }
+}
+
 public interface IInjector {
     public IInjector Parent { get; }
     public TProvider Get<TProvider>(IInjector? scope = null, InjectFlags flags = InjectFlags.None);
@@ -251,6 +326,6 @@ public sealed class QtTypeParameter : IQtType {
     public Type TypeOf { get; }
 
     public static implicit operator QtTypeParameter(string name) {
-        throw new NotSupportedException();
+        throw new CompileTimeComponentUsedAtRuntimeException();
     }
 }

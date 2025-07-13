@@ -10,7 +10,7 @@ namespace Mumei.CodeGen.Playground;
 
 public static partial class Impl {
     public static void ImplAsync() {
-        var i = (ProxyAsyncMethodStateInfo i) => {
+        var methodImpl = (ProxyAsyncMethodBuilderCtx i) => {
             var λsourceCtLinkedWithAssertionContext = CancellationTokenSource.CreateLinkedTokenSource(i.CancellationToken);
             var λsubject = new AsyncDelegateAssertionSubject<Task<Arg.TReturn>>(
                 λcancellationToken => i.InvokeAsync(λcancellationToken),
@@ -33,7 +33,7 @@ public static partial class Impl {
     }
 }
 
-internal class ProxyAsyncMethodStateInfo : IQtSyntaxProvider<InvocationExpressionSyntax> {
+internal class ProxyAsyncMethodBuilderCtx : IQtSyntaxProvider<InvocationExpressionSyntax> {
     public InvocationExpressionSyntax Syntax { get; }
 
     public Task<Arg.TReturn> InvokeAsync(CancellationToken cancellationToken = default) {
