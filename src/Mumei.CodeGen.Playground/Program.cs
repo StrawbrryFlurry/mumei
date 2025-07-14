@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Playground;
+using Mumei.CodeGen.Qt.Qt;
 using static Global;
 using static Mumei.CodeGen.Playground.AccessModifier;
 

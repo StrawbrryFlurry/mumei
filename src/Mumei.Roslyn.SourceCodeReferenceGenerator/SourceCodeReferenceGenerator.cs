@@ -1,4 +1,6 @@
 using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -32,7 +34,7 @@ public class SourceCodeReferenceGenerator : IIncrementalGenerator {
           public string FullyQualifiedName { get; init; }
         }
 
-        internal static class SourceCode {
+        internal static partial class SourceCode {
           public static SourceCodeTypeRef Of<T>() {
               throw new global::System.NotImplementedException();
           }
@@ -159,13 +161,51 @@ public class SourceCodeReferenceGenerator : IIncrementalGenerator {
     ) {
         processedTypes ??= new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
 
-        var refNode = targetType.DeclaringSyntaxReferences.First().GetSyntax();
-        var globalized = TypeToGloballyQualifiedIdentifierRewriter.GlobalizeIdentifiers(
+        if (targetType.DeclaringSyntaxReferences.First().GetSyntax() is not MemberDeclarationSyntax refNode) {
+            throw new InvalidOperationException("Type does not have a declaration");
+        }
+
+        var (typeReferences, aliases) = TypeUsageTracker.FindUsedTypes(
             compilation.GetSemanticModel(refNode.SyntaxTree),
-            refNode,
-            out var typeReferences
+            refNode
         );
-        var sourceCode = globalized.NormalizeWhitespace().ToFullString();
+
+        var usingDirectives = typeReferences
+            .Distinct(SymbolEqualityComparer.Default)
+            .Where(x => x!.DeclaringSyntaxReferences.IsEmpty)
+            .Select(t => t!.ContainingNamespace.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat))
+            .Select(x => UsingDirective(ParseName(x)))
+            .ToList();
+
+        foreach (var alias in aliases.Distinct(SymbolEqualityComparer.Default).OfType<IAliasSymbol>()) {
+            usingDirectives.Add(
+                UsingDirective(
+                    NameEquals(alias.Name),
+                    ParseTypeName(alias.Target.Name) // Later we prolly want to spit out all types into their original namespace
+                )
+            );
+        }
+
+        var sourceCodeNode = refNode;
+        if (refNode is ClassDeclarationSyntax classDecl) {
+            if (classDecl.Modifiers.Any(SyntaxKind.FileKeyword)) {
+                sourceCodeNode = classDecl.WithModifiers(
+                    TokenList(classDecl.Modifiers.Where(x => !x.IsKind(SyntaxKind.FileKeyword)))
+                );
+            }
+
+            if (classDecl.Modifiers.Any(SyntaxKind.PrivateKeyword)) {
+                sourceCodeNode = classDecl.WithModifiers(
+                    TokenList(classDecl.Modifiers.Where(x => !x.IsKind(SyntaxKind.PrivateKeyword)))
+                );
+            }
+        }
+
+        var compilationUnitWithUsings = CompilationUnit()
+            .WithUsings(List(usingDirectives))
+            .AddMembers(sourceCodeNode);
+
+        var sourceCode = compilationUnitWithUsings.NormalizeWhitespace().ToFullString();
         var references = MakeSourceTypeReferencesArray(compilation, typeReferences, processedTypes);
 
         return ObjectCreationExpression(ParseTypeName("global::SourceCodeFactory.SourceCodeTypeRef"))
@@ -175,7 +215,7 @@ public class SourceCodeReferenceGenerator : IIncrementalGenerator {
                         LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(targetType.Name))
                     ),
                     AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, IdentifierName("SourceCode"),
-                        LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(sourceCode))
+                        RawStringLiteral(sourceCode)
                     ),
                     AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, IdentifierName("References"),
                         references
@@ -202,6 +242,14 @@ public class SourceCodeReferenceGenerator : IIncrementalGenerator {
 
         var elements = new List<ExpressionSyntax>();
         foreach (var type in typeReferences) {
+            if (!processedTypes.Add(type)) {
+                continue;
+            }
+
+            if (type is ITypeParameterSymbol) {
+                continue;
+            }
+
             if (type.DeclaringSyntaxReferences.IsEmpty) {
                 elements.Add(
                     ObjectCreationExpression(ParseTypeName("global::SourceCodeFactory.AssemblyTypeRef"))
@@ -229,4 +277,13 @@ public class SourceCodeReferenceGenerator : IIncrementalGenerator {
             elements.Select(Argument)
         )));
     }
+
+    public static LiteralExpressionSyntax RawStringLiteral(string value) {
+        return (LiteralExpressionSyntax)ParseExpression($""""""""""""""""
+                                                         """"""""""""
+                                                         {value}
+                                                         """"""""""""
+                                                         """""""""""""""");
+    }
+
 }

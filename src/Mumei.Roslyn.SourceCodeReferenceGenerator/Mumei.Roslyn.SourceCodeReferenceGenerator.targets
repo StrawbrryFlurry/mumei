@@ -1,5 +1,5 @@
 ﻿<Project>
   <PropertyGroup>
-    <InterceptorsPreviewNamespaces>$(InterceptorsNamespaces);$(RootNamespace).Generated</InterceptorsPreviewNamespaces>
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);$(RootNamespace).Generated</InterceptorsNamespaces>
   </PropertyGroup>
 </Project>

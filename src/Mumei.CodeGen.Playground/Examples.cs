@@ -53,13 +53,13 @@ internal class ProxyAsyncMethodBuilderCtx : IQtSyntaxProvider<InvocationExpressi
 }
 
 public readonly struct MinimalExpression<TSyntax> : IQtSyntaxFunctor<TSyntax, string> where TSyntax : SyntaxNode {
-    public static QtSyntaxTemplateItem<string> Invoke(IQtSyntaxProvider<TSyntax> provider) {
+    public QtSyntaxTemplateItem<string> Invoke(IQtSyntaxProvider<TSyntax> provider) {
         return TemplateResult.String(provider.Syntax.ToString());
     }
 }
 
 public readonly struct FullExpression<TSyntax> : IQtSyntaxFunctor<TSyntax, string> where TSyntax : SyntaxNode {
-    public static QtSyntaxTemplateItem<string> Invoke(IQtSyntaxProvider<TSyntax> provider) {
+    public QtSyntaxTemplateItem<string> Invoke(IQtSyntaxProvider<TSyntax> provider) {
         var parentStatement = provider.Syntax.FirstAncestorOrSelf<StatementSyntax>();
         return TemplateResult.String(parentStatement!.ToString());
     }

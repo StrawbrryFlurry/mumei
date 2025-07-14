@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Mumei.CodeGen.Qt\Mumei.CodeGen.Qt.csproj"/>
     <ProjectReference Include="..\Mumei.DependencyInjection\Mumei.DependencyInjection.csproj"/>
   </ItemGroup>
 

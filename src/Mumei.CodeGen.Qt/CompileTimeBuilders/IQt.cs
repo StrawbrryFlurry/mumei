@@ -12,7 +12,7 @@ public interface IQtSyntaxProvider<TSyntax> where TSyntax : SyntaxNode {
 }
 
 public interface IQtSyntaxFunctor<TSyntax, TResult> where TSyntax : SyntaxNode {
-    public static abstract QtSyntaxTemplateItem<TResult> Invoke(IQtSyntaxProvider<TSyntax> provider);
+    public abstract QtSyntaxTemplateItem<TResult> Invoke(IQtSyntaxProvider<TSyntax> provider);
 }
 
 public interface IQtSyntaxTemplateInterpolator { }
