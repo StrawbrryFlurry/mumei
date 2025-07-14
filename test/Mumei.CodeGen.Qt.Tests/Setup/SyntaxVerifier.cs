@@ -37,7 +37,8 @@ internal readonly struct SyntaxVerificationExpectation {
 }
 
 internal sealed class SyntaxVerifier {
-    public static void Verify(ISyntaxRepresentable representable, SyntaxVerificationExpectation expected) {
+    public static void Verify<TRepresentable>(TRepresentable representable, SyntaxVerificationExpectation expected)
+        where TRepresentable : ISyntaxRepresentable {
         try {
             Assert.Equal(
                 representable.ToSyntaxInternal().TrimEnd(),

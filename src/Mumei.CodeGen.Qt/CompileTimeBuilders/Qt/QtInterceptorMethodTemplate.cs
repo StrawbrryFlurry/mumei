@@ -31,46 +31,41 @@ public abstract class QtAsyncInterceptorMethodTemplate : IQtInterceptorMethodTem
     }
 }
 
-public abstract class QtDynamicInterceptorMethodTemplate : IQtDynamicInterceptorMethodTemplate {
-    protected abstract Arg.TReturn Implementation();
-
-    public T InvokeAsync<T>() {
-        throw new CompileTimeComponentUsedAtRuntimeException();
-    }
-
-    public object[] InvocationArguments { get; set; }
-    public MethodInfo Method { get; set; }
-
-    public Arg.TReturn Return<T>(T valueOrVoid) {
-        throw new CompileTimeComponentUsedAtRuntimeException();
-    }
-
-    public T As<T>() {
-        throw new CompileTimeComponentUsedAtRuntimeException();
-    }
-}
-
-public abstract class QtDynamicAsyncInterceptorMethodTemplate : IQtDynamicInterceptorMethodTemplate {
-    protected abstract Task<Arg.TReturn> Implementation();
-
-    public Task<T> Invoke<T>() {
-        throw new CompileTimeComponentUsedAtRuntimeException();
-    }
-
-    public object[] InvocationArguments { get; set; }
-    public MethodInfo Method { get; set; }
-
-    public CancellationToken CancellationToken { get; set; }
-
-    public Arg.TReturn Return<T>(T valueOrVoid) {
-        throw new CompileTimeComponentUsedAtRuntimeException();
-    }
-
-    public T As<T>() {
-        throw new CompileTimeComponentUsedAtRuntimeException();
-    }
-}
-
 public interface IQtInterceptorMethodTemplate : IQtThis;
 
-public interface IQtDynamicInterceptorMethodTemplate : IQtThis;
+public delegate CompileTimeUnknown DeclareQtInterceptorMethod(QtDynamicInterceptorMethodCtx ctx);
+
+public delegate CompileTimeUnknown DeclareQtInterceptorMethodWithRefs<TTemplateReferences>(QtDynamicInterceptorMethodCtx ctx, TTemplateReferences refs);
+
+public readonly ref struct QtDynamicInterceptorMethodCtx {
+    public object[] InvocationArguments { get; }
+    public MethodInfo Method { get; }
+
+    public T Invoke<T>() {
+        throw new CompileTimeComponentUsedAtRuntimeException();
+    }
+
+    public CompileTimeUnknown Return<T>(T value) {
+        throw new CompileTimeComponentUsedAtRuntimeException();
+    }
+
+
+    public CompileTimeUnknown Return() {
+        throw new CompileTimeComponentUsedAtRuntimeException();
+    }
+}
+
+public readonly ref struct QtDynamicAsyncInterceptorMethodCtx {
+    public object[] InvocationArguments { get; }
+    public MethodInfo Method { get; }
+
+    public CancellationToken CancellationToken { get; }
+
+    public Task<T> InvokeAsync<T>() {
+        throw new CompileTimeComponentUsedAtRuntimeException();
+    }
+
+    public CompileTimeUnknown Return<T>(T valueOrVoid) {
+        throw new CompileTimeComponentUsedAtRuntimeException();
+    }
+}

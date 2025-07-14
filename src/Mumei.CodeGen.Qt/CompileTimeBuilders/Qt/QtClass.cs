@@ -1,6 +1,9 @@
-﻿using Mumei.CodeGen.Playground;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Mumei.CodeGen.Playground;
 using Mumei.CodeGen.Playground.Qt;
+using Mumei.CodeGen.Playground.Roslyn;
 using Mumei.CodeGen.Qt.Output;
+using Mumei.Roslyn;
 
 namespace Mumei.CodeGen.Qt.Qt;
 
@@ -10,7 +13,7 @@ public interface IQtParameter : IQtType {
 
 public interface IQtInvokable<TReturn> : IQtTemplateBindable;
 
-public interface IQtTemplateBindable;
+public interface IQtTemplateBindable : ISyntaxRepresentable;
 
 public interface IQtCompileTimeValue<out TValue> {
     public TActual As<TActual>();
@@ -18,21 +21,33 @@ public interface IQtCompileTimeValue<out TValue> {
 
 public interface IQtThis : IQtCompileTimeValue<Arg.TThis>;
 
-public sealed class QtClass(
+public interface IQtTypeDeclaration;
+
+internal readonly struct QtDeclarationPtr<T>(
+    List<T> declarationRef,
+    int declarationIdx
+) {
+    public void Update(T newDeclaration) {
+        declarationRef[declarationIdx] = newDeclaration;
+    }
+}
+
+public readonly struct QtClass(
     AccessModifier modifiers,
     string name,
     QtTypeParameter[]? typeParameters = null!
-) : IQtType {
-    public QtTypeParameterCollection TypeParameters { get; } = new(typeParameters);
+) : IQtType, IQtTypeDeclaration {
+    public QtTypeParameterList TypeParameters { get; } = new(typeParameters);
 
-    private readonly List<IQtComponent> _fields = new();
+    private readonly List<QtFieldCore> _fields = new();
+    private readonly List<QtMethodCore> _methods = new();
 
     public QtField<CompileTimeUnknown> AddField(
         AccessModifier modifiers,
         IQtType type,
         string name
     ) {
-        return null!;
+        return default!;
     }
 
     public QtField<TField> AddField<TField>(
@@ -40,12 +55,12 @@ public sealed class QtClass(
         string name
     ) {
         var field = new QtField<TField>(modifiers, name);
-        _fields.Add(field);
+        _fields.Add(field.Field);
         return field;
     }
 
     public QtField<CompileTimeUnknown> Field(string name) {
-        return null!;
+        return default!;
     }
 
     public QtField<CompileTimeUnknown> AddField(
@@ -54,14 +69,14 @@ public sealed class QtClass(
         string name,
         IQtCompileTimeValue<CompileTimeUnknown> defaultValue
     ) {
-        return null!;
+        return default!;
     }
 
     public QtProperty<T> AddProperty<T>(
         AccessModifier modifiers,
         string name
     ) {
-        return null!;
+        return default!;
     }
 
     public QtMethod<Unit> AddMethod<TBindingCtx>(
@@ -69,10 +84,10 @@ public sealed class QtClass(
         string name,
         QtTypeParameter[] typeParameters,
         IQtType[] parameters,
-        Action<IQtThis, TBindingCtx, QtMethod.QtMethodBuilderCtx> implementation,
+        Action<IQtThis, TBindingCtx, QtMethodLegacy.QtMethodBuilderCtx> implementation,
         TBindingCtx bindingCtx
     ) {
-        return null!;
+        return default!;
     }
 
     public QtMethod<CompileTimeUnknown> AddMethod<TBindingCtx>(
@@ -81,19 +96,19 @@ public sealed class QtClass(
         string name,
         QtTypeParameter[] typeParameters,
         IQtType[] parameters, // Needs support for IQtParameter (out parammeters)
-        Func<IQtThis, TBindingCtx, QtMethod.QtMethodBuilderCtx, object> implementation,
+        Func<IQtThis, TBindingCtx, QtMethodLegacy.QtMethodBuilderCtx, object> implementation,
         TBindingCtx bindingCtx
     ) {
-        return null!;
+        return default!;
     }
 
     public QtMethod<TReturnType> AddMethod<TReturnType>(
         AccessModifier modifiers,
         string name,
         IQtType[] parameters,
-        Func<IQtThis, QtMethod.QtMethodBuilderCtx, TReturnType> implementation
+        Func<IQtThis, QtMethodLegacy.QtMethodBuilderCtx, TReturnType> implementation
     ) {
-        return null!;
+        return default!;
     }
 
     public QtMethod<CompileTimeUnknown> AddMethod(
@@ -101,32 +116,32 @@ public sealed class QtClass(
         string name,
         Delegate implementation
     ) {
-        return null!;
+        return default!;
     }
 
     public QtMethod<Unit> AddProxyMethod(
         AccessModifier modifiers,
         string name,
-        Action<IQtThis, QtMethod.QtProxyMethodBuilderCtx> implementation
+        Action<IQtThis, QtMethodLegacy.QtProxyMethodBuilderCtx> implementation
     ) {
-        return null!;
+        return default!;
     }
 
     public QtMethod<TReturnType> AddProxyMethod<TReturnType>(
         AccessModifier modifiers,
         string name,
-        Func<IQtThis, QtMethod.QtProxyMethodBuilderCtx, TReturnType> implementation
+        Func<IQtThis, QtMethodLegacy.QtProxyMethodBuilderCtx, TReturnType> implementation
     ) {
-        return null!;
+        return default!;
     }
 
     public QtMethod<CompileTimeUnknown> AddProxyMethod(
         AccessModifier modifiers,
         IQtType returnType,
         string name,
-        Func<IQtThis, QtMethod.QtProxyMethodBuilderCtx, object> implementation
+        Func<IQtThis, QtMethodLegacy.QtProxyMethodBuilderCtx, object> implementation
     ) {
-        return null!;
+        return default!;
     }
 
     public QtMethod<CompileTimeUnknown> BindTemplateMethod<TTemplate>(
@@ -142,11 +157,37 @@ public sealed class QtClass(
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
-    public QtMethod<CompileTimeUnknown> BindDynamicTemplateProxyMethod<TTemplate>(
-        TTemplate template
-    ) where TTemplate : IQtDynamicInterceptorMethodTemplate {
+    public QtMethod<CompileTimeUnknown> BindDynamicTemplateInterceptMethod(
+        InvocationExpressionSyntax invocationToProxy,
+        DeclareQtInterceptorMethod declaration
+    ) {
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
+
+    public QtMethod<CompileTimeUnknown> __BindDynamicTemplateInterceptMethod(
+        InvocationExpressionSyntax invocationToProxy,
+        __DynamicallyBoundSourceCode code
+    ) {
+        var decl = new QtDeclarationPtr<QtMethodCore>(_methods, _methods.Count + 1); // This isn't thread-safe, prolly doesn't matter though
+        var factory = new RoslynQtMethodFactory();
+        var method = factory.CreateProxyMethodForInvocation(
+            invocationToProxy,
+            new __DynamicallyBoundSourceCode(),
+            decl
+        );
+
+        _methods.Add(method.Method);
+        return method;
+    }
+
+    public QtMethod<CompileTimeUnknown> BindDynamicTemplateInterceptMethod<TTemplateReferences>(
+        InvocationExpressionSyntax invocationToProxy,
+        TTemplateReferences refs,
+        DeclareQtInterceptorMethodWithRefs<TTemplateReferences> declaration
+    ) {
+        throw new CompileTimeComponentUsedAtRuntimeException();
+    }
+
 
     public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         writer.WriteFormatted(
@@ -163,11 +204,12 @@ public sealed class QtClass(
             writer.WriteLine();
         }
 
+        foreach (var method in _methods) {
+            method.WriteSyntax(writer);
+            writer.WriteLine();
+        }
+
         writer.UnIndent();
         writer.WriteLine("}");
     }
 }
-
-public sealed class Unit;
-
-public sealed class CompileTimeUnknown;

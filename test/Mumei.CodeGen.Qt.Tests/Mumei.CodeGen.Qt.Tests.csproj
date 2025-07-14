@@ -3,8 +3,14 @@
     <Using Include="Xunit"/>
   </ItemGroup>
 
+  <PropertyGroup>
+    <NoWarn>xUnit1051</NoWarn>
+  </PropertyGroup>
+
+  <Import Project="..\..\src\Mumei.Roslyn.SourceCodeReferenceGenerator\Mumei.Roslyn.SourceCodeReferenceGenerator.targets"/>
+
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Mumei.CodeGen.Qt\Mumei.CodeGen.Qt.csproj"/>
+    <ProjectReference Include="..\..\src\Mumei.CodeGen.Qt\Mumei.CodeGen.Qt.csproj" OutputItemType="Analyzer"/>
     <ProjectReference Include="..\..\src\Mumei.Roslyn.SourceCodeReferenceGenerator\Mumei.Roslyn.SourceCodeReferenceGenerator.csproj" OutputItemType="Analyzer"/>
     <ProjectReference Include="..\Mumei.Roslyn.Testing\Mumei.Roslyn.Testing.csproj"/>
   </ItemGroup>

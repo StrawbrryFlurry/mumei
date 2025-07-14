@@ -1,18 +1,31 @@
-﻿using Mumei.CodeGen.Qt.Qt;
+﻿using Mumei.CodeGen.Playground;
+using Mumei.CodeGen.Qt.Output;
 
-namespace Mumei.CodeGen.Playground;
+namespace Mumei.CodeGen.Qt.Qt;
 
-public sealed class QtMethod<TReturnType> : IQtInvokable<TReturnType> {
-    public QtMethod<TReturnType> WithName(string name) {
-        return this;
-    }
+public readonly struct QtMethod<TReturnType> : IQtInvokable<TReturnType> {
+    private readonly QtDeclarationPtr<QtMethodCore> _declarationPtr;
 
-    public QtMethod<TReturnType> WithTypeParameters(params QtTypeParameter[] typeParameters) {
-        return this;
-    }
+    internal QtMethodCore Method { get; }
 
-    public QtMethod<TReturnType> WithParameters(params IQtParameter[] parameters) {
-        return this;
+    internal QtMethod(
+        string name,
+        AccessModifier modifiers,
+        IQtType returnType,
+        QtTypeParameterList typeParameters,
+        QtParameterList parameters,
+        IQtMethodRepresentation representation,
+        QtDeclarationPtr<QtMethodCore> declarationPtr
+    ) {
+        _declarationPtr = declarationPtr;
+        Method = new QtMethodCore(
+            modifiers,
+            name,
+            returnType,
+            typeParameters,
+            parameters,
+            representation
+        );
     }
 
     public TReturnType Invoke(IQtThis target) {
@@ -22,41 +35,55 @@ public sealed class QtMethod<TReturnType> : IQtInvokable<TReturnType> {
     public TDynamicReturnType DynamicInvoke<TDynamicReturnType>(IQtThis target) {
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
+
+    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+        Method.WriteSyntax(writer, format);
+    }
 }
 
-public static class QtMethod {
-    public sealed class QtProxyMethodBuilderCtx { }
-
-    public sealed class QtMethodBuilderCtx {
-        public MethodBuilderArgumentsProvider Arguments { get; }
-        public MethodBuilderTypeArgumentsProvider TypeArguments { get; set; }
-
-        public T Interpolate<T>(IQtSyntaxTemplateInterpolator interpolator) {
-            throw new CompileTimeComponentUsedAtRuntimeException();
+internal readonly struct QtMethodCore(
+    AccessModifier modifiers,
+    string name,
+    IQtType returnType,
+    QtTypeParameterList typeParameters,
+    QtParameterList parameters,
+    IQtMethodRepresentation representation
+) : IQtTemplateBindable {
+    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+        writer.WriteFormatted($"{modifiers} {returnType:g} {name}{typeParameters}({parameters})");
+        if (!typeParameters.Constraints.IsEmpty) {
+            writer.WriteFormatted($" {typeParameters.Constraints}");
         }
 
-        public void ForEach<T>(T[] source, Action<T, QtMethodBuilderCtx> action) where T : IQtTemplateBindable {
-            throw new CompileTimeComponentUsedAtRuntimeException();
+        if (modifiers.IsAbstract()) {
+            writer.Write(";");
+            return;
         }
+    }
+}
 
-        public T Return<T>(T value) {
-            throw new CompileTimeComponentUsedAtRuntimeException();
+internal interface IQtMethodRepresentation : ISyntaxRepresentable;
+
+public delegate QtMethodBuilder.Configured ConfigureQtMethod(QtMethodBuilder.StartDecl builder);
+
+public static class QtMethodBuilder {
+    public ref struct StartDecl {
+        public ReturnsDecl Modifiers(AccessModifier accessModifier) {
+            return new ReturnsDecl { };
         }
     }
 
-    public sealed class MethodBuilderArgumentsProvider {
-        public T Inject<T>(int idx) {
-            throw new CompileTimeComponentUsedAtRuntimeException();
-        }
-
-        public IQtCompileTimeValue<Arg.T1> Inject(IQtType type, int idx) {
-            throw new CompileTimeComponentUsedAtRuntimeException();
+    public ref struct ReturnsDecl {
+        public ParametersDecl Returns(string name) {
+            return new ParametersDecl { };
         }
     }
 
-    public sealed class MethodBuilderTypeArgumentsProvider {
-        public Type Get(string name) {
-            throw new CompileTimeComponentUsedAtRuntimeException();
+    public ref struct ParametersDecl {
+        public Configured Takes(string name) {
+            return new Configured { };
         }
     }
+
+    public ref struct Configured { }
 }

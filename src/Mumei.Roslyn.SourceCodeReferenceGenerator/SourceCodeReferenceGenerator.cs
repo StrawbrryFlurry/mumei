@@ -38,6 +38,13 @@ public class SourceCodeReferenceGenerator : IIncrementalGenerator {
           public static SourceCodeTypeRef Of<T>() {
               throw new global::System.NotImplementedException();
           }
+          
+          public static TSyntaxNode OfSyntax<TSyntaxNode>(
+            global::System.Action code,
+            Func<TSyntaxNode, bool>? predicate = null
+          ) where TSyntaxNode : global::Microsoft.CodeAnalysis.SyntaxNode {
+              throw new global::System.NotImplementedException();
+          }
         }
         """;
 
@@ -51,7 +58,7 @@ public class SourceCodeReferenceGenerator : IIncrementalGenerator {
             .CreateSyntaxProvider(
                 (s, _) => s is InvocationExpressionSyntax {
                     Expression: MemberAccessExpressionSyntax {
-                        Name.Identifier.ValueText: "Of", Expression: IdentifierNameSyntax { Identifier.Text: "SourceCode" }
+                        Name.Identifier.ValueText: "Of" or "OfSyntax", Expression: IdentifierNameSyntax { Identifier.Text: "SourceCode" }
                     }
                 },
                 (ctx, _) => {

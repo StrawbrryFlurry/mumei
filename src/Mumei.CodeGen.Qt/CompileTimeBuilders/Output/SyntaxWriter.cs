@@ -1,5 +1,7 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics.SymbolStore;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using Mumei.CodeGen.Playground;
 
@@ -33,6 +35,23 @@ public readonly ref struct FormattableSyntaxWritable {
         _writer.Write(modifier.AsCSharpString());
     }
 
+    public void AppendFormatted(ParameterModifier parameterModifier) {
+        if (parameterModifier == ParameterModifier.None) {
+            return;
+        }
+
+        if (parameterModifier.HasFlag(ParameterModifier.This)) {
+            _writer.Write("this ");
+        }
+
+        _writer.Write(parameterModifier switch {
+            ParameterModifier.In => "in ",
+            ParameterModifier.Out => "out ",
+            ParameterModifier.Ref => "ref ",
+            _ => ""
+        });
+    }
+
     public void WriteInto<TWriter>(TWriter writer) where TWriter : ISyntaxWriter {
         writer.Write(_writer);
     }
@@ -51,6 +70,12 @@ public interface ISyntaxWriter {
     /// </summary>
     /// <param name="text"></param>
     public ISyntaxWriter Write(string text);
+
+    /// <summary>
+    ///   Appends text to the current line.
+    /// </summary>
+    /// <param name="text"></param>
+    public ISyntaxWriter Write(ReadOnlySpan<char> text);
 
     /// <summary>
     ///   Appends text to the current line.
@@ -132,6 +157,14 @@ public class SyntaxWriter : ISyntaxWriter {
     public ISyntaxWriter Write(string text) {
         TryWriteIndent();
         _code.Append(text);
+        return this;
+    }
+
+    public unsafe ISyntaxWriter Write(ReadOnlySpan<char> text) {
+        fixed (char* p = text) {
+            _code.Append(p, text.Length);
+        }
+
         return this;
     }
 

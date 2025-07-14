@@ -3,10 +3,11 @@ using Mumei.CodeGen.Qt.Qt;
 
 namespace Mumei.CodeGen.Playground;
 
-public sealed class QtTypeParameter : IQtType {
+public readonly struct QtTypeParameter : IQtType {
     public Type TypeOf { get; }
-
     public string Name { get; }
+
+    public string Constraint { get; }
 
     public static implicit operator QtTypeParameter(string name) {
         throw new CompileTimeComponentUsedAtRuntimeException();
@@ -17,9 +18,11 @@ public sealed class QtTypeParameter : IQtType {
     }
 }
 
-public readonly struct QtTypeParameterCollection(
+public readonly struct QtTypeParameterList(
     QtTypeParameter[]? typeParameters
-) : IQtComponent {
+) : IQtTemplateBindable {
+    public ConstraintImpl Constraints { get; } = new();
+
     public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         if (typeParameters is null) {
             return;
@@ -35,5 +38,13 @@ public readonly struct QtTypeParameterCollection(
         }
 
         writer.Write(">");
+    }
+
+    public readonly struct ConstraintImpl : IQtTemplateBindable {
+        public bool IsEmpty => true;
+
+        public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+            throw new NotImplementedException();
+        }
     }
 }

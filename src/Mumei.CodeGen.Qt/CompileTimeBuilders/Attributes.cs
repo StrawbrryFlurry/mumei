@@ -7,6 +7,7 @@ public enum AccessModifier {
     PublicReadonly,
     PublicSealed,
     PublicStatic,
+    PublicAbstract,
     Private,
     PrivateReadonly,
     PrivateSealed,
@@ -17,7 +18,20 @@ public enum AccessModifier {
     Internal,
     InternalSealed,
     InternalStatic,
+    File,
+    FileReadonly,
+    FileSealed,
+    FileStatic,
     Readonly
+}
+
+[Flags]
+public enum ParameterModifier {
+    None = 0,
+    This = 1 << 0,
+    Ref = 1 << 5,
+    Out = 1 << 6,
+    In = 1 << 7
 }
 
 public static class AccessModifierExtensions {
@@ -37,9 +51,17 @@ public static class AccessModifierExtensions {
             AccessModifier.Internal => "internal",
             AccessModifier.InternalSealed => "internal sealed",
             AccessModifier.InternalStatic => "internal static",
+            AccessModifier.File => "file",
+            AccessModifier.FileSealed => "file sealed",
+            AccessModifier.FileStatic => "file static",
+            AccessModifier.FileReadonly => "file readonly",
             AccessModifier.Readonly => "readonly",
             _ => throw new ArgumentOutOfRangeException(nameof(modifier), modifier, null)
         };
+    }
+
+    public static bool IsAbstract(this AccessModifier modifier) {
+        return modifier is AccessModifier.PublicAbstract;
     }
 
     public static AccessModifierRepresentable Represent(this AccessModifier modifier) {

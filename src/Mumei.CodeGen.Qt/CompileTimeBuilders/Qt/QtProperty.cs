@@ -1,4 +1,5 @@
-﻿using Mumei.CodeGen.Qt.Qt;
+﻿using Mumei.CodeGen.Qt.Output;
+using Mumei.CodeGen.Qt.Qt;
 
 namespace Mumei.CodeGen.Playground;
 
@@ -6,6 +7,8 @@ public sealed class QtProperty<T> : IQtCompileTimeValue<T>, IQtTemplateBindable 
     public TActual As<TActual>() {
         throw new NotImplementedException();
     }
+
+    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter { }
 }
 
 public static class QtProperty {

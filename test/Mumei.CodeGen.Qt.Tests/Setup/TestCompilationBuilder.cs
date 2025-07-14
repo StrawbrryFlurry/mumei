@@ -91,7 +91,7 @@ public sealed class TestCompilationBuilder {
         seenTexts ??= [];
         if (reference is SourceCodeTypeRef sctr) {
             if (seenTexts.Add(sctr.SourceCode)) {
-                AddSource(sctr.SourceCode);
+                AddSource(sctr.TypeName, sctr.SourceCode);
             }
 
             foreach (var innerRefs in sctr.References) {
