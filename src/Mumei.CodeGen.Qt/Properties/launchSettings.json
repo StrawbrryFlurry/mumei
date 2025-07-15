@@ -1,0 +1,9 @@
+﻿{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "DebugRoslynSourceGenerator": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../../test/Mumei.CodeGen.Qt.Tests/Mumei.CodeGen.Qt.Tests.csproj"
+    }
+  }
+}

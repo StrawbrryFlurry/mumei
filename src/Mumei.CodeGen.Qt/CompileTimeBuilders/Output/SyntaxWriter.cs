@@ -1,7 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.Diagnostics.SymbolStore;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
 using System.Text;
 using Mumei.CodeGen.Playground;
 
@@ -31,6 +28,10 @@ public readonly ref struct FormattableSyntaxWritable {
         representable.WriteSyntax(_writer, format);
     }
 
+    public void AppendFormatted(Type type, string? format = null) {
+        RuntimeTypeSerializer.SerializeInto(_writer, type, format);
+    }
+
     public void AppendFormatted(AccessModifier modifier) {
         _writer.Write(modifier.AsCSharpString());
     }
@@ -58,36 +59,26 @@ public readonly ref struct FormattableSyntaxWritable {
 }
 
 public interface ISyntaxWriter {
-    public int IndentLevel { get; set; }
-
     public void Indent();
-    public void UnIndent();
-
-    public void SetIndentLevel(int level);
+    public void Dedent();
 
     /// <summary>
     ///   Appends text to the current line.
     /// </summary>
     /// <param name="text"></param>
-    public ISyntaxWriter Write(string text);
-
-    /// <summary>
-    ///   Appends text to the current line.
-    /// </summary>
-    /// <param name="text"></param>
-    public ISyntaxWriter Write(ReadOnlySpan<char> text);
+    public void Write(ReadOnlySpan<char> text);
 
     /// <summary>
     ///   Appends text to the current line.
     /// </summary>
     /// <param name="builder"></param>
-    public ISyntaxWriter Write(StringBuilder builder);
+    public void Write(StringBuilder builder);
 
     /// <summary>
     ///   Appends text to the current line.
     /// </summary>
     /// <param name="writer"></param>
-    public ISyntaxWriter Write<TSyntaxWriter>(TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter;
+    public void Write<TSyntaxWriter>(TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter;
 
     /// <summary>
     ///   Writes a new line to the code buffer
@@ -95,17 +86,16 @@ public interface ISyntaxWriter {
     ///   the line with a newline.
     /// </summary>
     /// <param name="line"></param>
-    public ISyntaxWriter WriteLine(string line);
+    public void WriteLine(string line);
 
-    public ISyntaxWriter WriteLine();
+    public void WriteLine();
 
     /// <summary>
     ///   Writes an empty line to the stream
     /// </summary>
     /// <returns></returns>
-    public ISyntaxWriter WriteFormatted(FormattableSyntaxWritable writable);
+    public void WriteFormatted(FormattableSyntaxWritable writable);
 
-    public string GetIndent();
     public string ToSyntax();
 }
 
@@ -116,7 +106,7 @@ public class SyntaxWriter : ISyntaxWriter {
     private readonly StringBuilder _code = new();
 
     private string _indentString = "";
-    internal string NewLine = Environment.NewLine;
+    internal const string NewLine = "\n";
 
     private bool _requiresIndent = true;
 
@@ -124,7 +114,7 @@ public class SyntaxWriter : ISyntaxWriter {
         get;
         set {
             field = value > 0 ? value : 0;
-            RecalculateIndent();
+            RecalculateIndent(ref _indentString, value);
         }
     }
 
@@ -132,10 +122,21 @@ public class SyntaxWriter : ISyntaxWriter {
         IndentLevel = level;
     }
 
-    public ISyntaxWriter WriteFormatted(FormattableSyntaxWritable writable) {
+    public void WriteFormatted(FormattableSyntaxWritable writable) {
         TryWriteIndent();
         writable.WriteInto(this);
-        return this;
+    }
+
+    public void WriteFormattedLine(FormattableSyntaxWritable writable) {
+        TryWriteIndent();
+        writable.WriteInto(this);
+        WriteLine();
+    }
+
+    public void WriteFormattedBlock(FormattableSyntaxWritable writable) {
+        TryWriteIndent();
+        writable.WriteInto(this);
+        WriteLine();
     }
 
     public string GetIndent() {
@@ -150,7 +151,7 @@ public class SyntaxWriter : ISyntaxWriter {
         IndentLevel++;
     }
 
-    public void UnIndent() {
+    public void Dedent() {
         IndentLevel--;
     }
 
@@ -160,36 +161,31 @@ public class SyntaxWriter : ISyntaxWriter {
         return this;
     }
 
-    public unsafe ISyntaxWriter Write(ReadOnlySpan<char> text) {
+    public unsafe void Write(ReadOnlySpan<char> text) {
         fixed (char* p = text) {
             _code.Append(p, text.Length);
         }
-
-        return this;
     }
 
-    public ISyntaxWriter Write(StringBuilder builder) {
+    public void Write(StringBuilder builder) {
         TryWriteIndent();
         _code.Append(builder);
-        return this;
     }
 
-    public ISyntaxWriter Write<TSyntaxWriter>(TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
+    public void Write<TSyntaxWriter>(TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
         TryWriteIndent();
         if (writer is SyntaxWriter thisImpl) {
             _code.Append(thisImpl._code);
-            return this;
+            return;
         }
 
         _code.Append(writer.ToSyntax());
-        return this;
     }
 
-    public ISyntaxWriter WriteLine(string line) {
+    public void WriteLine(string line) {
         TryWriteIndent();
         _code.AppendLine(line);
         _requiresIndent = true;
-        return this;
     }
 
     private void TryWriteIndent() {
@@ -199,22 +195,21 @@ public class SyntaxWriter : ISyntaxWriter {
         }
     }
 
-    public ISyntaxWriter WriteSyntax<TRepresentable>(TRepresentable representable) where TRepresentable : ISyntaxRepresentable {
+    public void WriteSyntax<TRepresentable>(TRepresentable representable) where TRepresentable : ISyntaxRepresentable {
         TryWriteIndent();
         representable.WriteSyntax(this);
-        return this;
     }
 
-    public ISyntaxWriter WriteLine() {
+    public void WriteLine() {
         TryWriteIndent();
         _code.Append(NewLine);
         _requiresIndent = true;
-        return this;
     }
 
-    private void RecalculateIndent() {
-        var indentationCharCount = IndentLevel * IndentSpacing;
-        _indentString = indentationCharCount switch {
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void RecalculateIndent(ref string indentString, int indentLevel) {
+        var indentationCharCount = indentLevel * IndentSpacing;
+        indentString = indentationCharCount switch {
             0 => "",
             2 => "  ",
             4 => "    ",
@@ -226,5 +221,9 @@ public class SyntaxWriter : ISyntaxWriter {
             16 => "                ",
             _ => new string(IndentChar, indentationCharCount)
         };
+    }
+
+    public override string ToString() {
+        return ToSyntax();
     }
 }

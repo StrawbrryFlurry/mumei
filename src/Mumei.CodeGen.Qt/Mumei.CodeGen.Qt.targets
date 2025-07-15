@@ -1,0 +1,5 @@
+﻿<Project>
+  <PropertyGroup>
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);Mumei.CodeGen.Qt.Generated</InterceptorsNamespaces>
+  </PropertyGroup>
+</Project>

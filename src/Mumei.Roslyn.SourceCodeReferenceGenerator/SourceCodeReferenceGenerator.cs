@@ -98,7 +98,7 @@ public class SourceCodeReferenceGenerator : IIncrementalGenerator {
             #pragma warning disable
             namespace System.Runtime.CompilerServices {
                 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-                file sealed class InterceptsLocationAttribute(string filePath, int line, int column) : Attribute;
+                file sealed class InterceptsLocationAttribute(int version, string data) : Attribute;
             }
             #pragma warning enable
             """).Members.First();
@@ -129,12 +129,8 @@ public class SourceCodeReferenceGenerator : IIncrementalGenerator {
             )
         );
 
-        var ofMethodLocation = invocation.Expression is MemberAccessExpressionSyntax memberAccessExpressionSyntax
-            ? memberAccessExpressionSyntax.Name.GetLocation().GetLineSpan()
-            : throw new InvalidOperationException("Invalid invocation expression");
-
-        var line = ofMethodLocation.StartLinePosition.Line + 1;
-        var column = ofMethodLocation.StartLinePosition.Character + 1;
+        var sm = compilation.GetSemanticModel(invocation.SyntaxTree);
+        var location = sm.GetInterceptableLocation(invocation);
 
         interceptMethod = interceptMethod.WithBody(body)
             .WithAttributeLists(
@@ -144,13 +140,10 @@ public class SourceCodeReferenceGenerator : IIncrementalGenerator {
                             ParseName("System.Runtime.CompilerServices.InterceptsLocation"),
                             AttributeArgumentList(SeparatedList([
                                 AttributeArgument(
-                                    LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(invocation.SyntaxTree.FilePath))
+                                    LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(location!.Version))
                                 ),
                                 AttributeArgument(
-                                    LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(line))
-                                ),
-                                AttributeArgument(
-                                    LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(column))
+                                    LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(location.Data))
                                 )
                             ]))
                         )

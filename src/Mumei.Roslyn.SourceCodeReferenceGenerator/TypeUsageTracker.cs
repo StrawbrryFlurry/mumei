@@ -45,6 +45,21 @@ internal sealed class TypeUsageTracker : CSharpSyntaxWalker {
         base.VisitInvocationExpression(node);
     }
 
+    public override void VisitVariableDeclaration(VariableDeclarationSyntax node) {
+        if (node.Type.IsVar) {
+            base.VisitVariableDeclaration(node);
+            return;
+        }
+
+        var type = _sm.GetSymbolInfo(node.Type).Symbol as ITypeSymbol;
+        if (type is null) {
+            return;
+        }
+
+        _typeReferences.Add(type);
+        base.VisitVariableDeclaration(node);
+    }
+
     private void TryTrackIdentifierType(
         SemanticModel sm,
         IdentifierNameSyntax node

@@ -14,6 +14,8 @@ public sealed class QtClassTestsDynamicInterceptorMethod {
             SourceCode.Of<Templates.BindDynamicTemplateInterceptMethod>()
         ).Build();
 
+        QtCompilationScope.SetActiveScope(compilation);
+
         var cls = new QtClass(AccessModifier.FileStatic, "TestClass");
 
         var x = compilation.SyntaxTrees.First(x => x.FilePath == nameof(BindDynamicTemplateInterceptMethod));

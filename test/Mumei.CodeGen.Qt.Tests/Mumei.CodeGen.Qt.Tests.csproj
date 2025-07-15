@@ -7,6 +7,7 @@
     <NoWarn>xUnit1051</NoWarn>
   </PropertyGroup>
 
+  <Import Project="..\..\src\Mumei.CodeGen.Qt\Mumei.CodeGen.Qt.targets"/>
   <Import Project="..\..\src\Mumei.Roslyn.SourceCodeReferenceGenerator\Mumei.Roslyn.SourceCodeReferenceGenerator.targets"/>
 
   <ItemGroup>

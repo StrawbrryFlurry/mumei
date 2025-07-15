@@ -2,6 +2,13 @@
 
 namespace Mumei.CodeGen.Qt;
 
-internal sealed class QtCompilationScope {
-    internal readonly Compilation _compilation;
+public sealed class QtCompilationScope {
+    internal Compilation Compilation { get; init; }
+    private static AsyncLocal<QtCompilationScope> _activeScope { get; } = new();
+
+    public static QtCompilationScope ActiveScope => _activeScope.Value ?? throw new InvalidOperationException();
+
+    public static void SetActiveScope(Compilation scope) {
+        _activeScope.Value = new QtCompilationScope { Compilation = scope };
+    }
 }

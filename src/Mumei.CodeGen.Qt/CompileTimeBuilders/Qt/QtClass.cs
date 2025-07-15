@@ -3,7 +3,6 @@ using Mumei.CodeGen.Playground;
 using Mumei.CodeGen.Playground.Qt;
 using Mumei.CodeGen.Playground.Roslyn;
 using Mumei.CodeGen.Qt.Output;
-using Mumei.Roslyn;
 
 namespace Mumei.CodeGen.Qt.Qt;
 
@@ -169,10 +168,10 @@ public readonly struct QtClass(
         __DynamicallyBoundSourceCode code
     ) {
         var decl = new QtDeclarationPtr<QtMethodCore>(_methods, _methods.Count + 1); // This isn't thread-safe, prolly doesn't matter though
-        var factory = new RoslynQtMethodFactory();
+        var factory = new RoslynQtMethodFactory(QtCompilationScope.ActiveScope);
         var method = factory.CreateProxyMethodForInvocation(
             invocationToProxy,
-            new __DynamicallyBoundSourceCode(),
+            code,
             decl
         );
 
@@ -209,7 +208,7 @@ public readonly struct QtClass(
             writer.WriteLine();
         }
 
-        writer.UnIndent();
+        writer.Dedent();
         writer.WriteLine("}");
     }
 }

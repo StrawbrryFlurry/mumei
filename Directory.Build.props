@@ -2,7 +2,7 @@
   <!-- Framework and Language config -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>Preview</LangVersion>
   </PropertyGroup>
 
   <!-- Build config -->

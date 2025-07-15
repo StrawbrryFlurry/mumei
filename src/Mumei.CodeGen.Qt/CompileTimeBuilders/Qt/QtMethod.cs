@@ -15,6 +15,7 @@ public readonly struct QtMethod<TReturnType> : IQtInvokable<TReturnType> {
         QtTypeParameterList typeParameters,
         QtParameterList parameters,
         IQtMethodRepresentation representation,
+        QtAttributeList attributes,
         QtDeclarationPtr<QtMethodCore> declarationPtr
     ) {
         _declarationPtr = declarationPtr;
@@ -24,7 +25,8 @@ public readonly struct QtMethod<TReturnType> : IQtInvokable<TReturnType> {
             returnType,
             typeParameters,
             parameters,
-            representation
+            representation,
+            attributes
         );
     }
 
@@ -47,7 +49,8 @@ internal readonly struct QtMethodCore(
     IQtType returnType,
     QtTypeParameterList typeParameters,
     QtParameterList parameters,
-    IQtMethodRepresentation representation
+    IQtMethodRepresentation representation,
+    QtAttributeList attributes
 ) : IQtTemplateBindable {
     public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         writer.WriteFormatted($"{modifiers} {returnType:g} {name}{typeParameters}({parameters})");
@@ -59,10 +62,20 @@ internal readonly struct QtMethodCore(
             writer.Write(";");
             return;
         }
+
+        representation.WriteSyntax(writer);
     }
 }
 
 internal interface IQtMethodRepresentation : ISyntaxRepresentable;
+
+internal sealed class StaticQtMethodRepresentation(
+    string s
+) : IQtMethodRepresentation {
+    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+        writer.Write(s);
+    }
+}
 
 public delegate QtMethodBuilder.Configured ConfigureQtMethod(QtMethodBuilder.StartDecl builder);
 
