@@ -24,7 +24,9 @@ internal struct ValueSyntaxWriter() : ISyntaxWriter {
 
     public void Write(StringBuilder builder) { }
 
-    public void Write<TSyntaxWriter>(TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter { }
+    public void WriteFrom<TSyntaxWriter>(TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter { }
+
+    public void Write<TRepresentable>(TRepresentable representable, string? format = null) where TRepresentable : ISyntaxRepresentable { }
 
     public void WriteLine(string line) { }
 

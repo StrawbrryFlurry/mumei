@@ -54,7 +54,7 @@ public readonly ref struct FormattableSyntaxWritable {
     }
 
     public void WriteInto<TWriter>(TWriter writer) where TWriter : ISyntaxWriter {
-        writer.Write(_writer);
+        writer.WriteFrom(_writer);
     }
 }
 
@@ -78,7 +78,9 @@ public interface ISyntaxWriter {
     ///   Appends text to the current line.
     /// </summary>
     /// <param name="writer"></param>
-    public void Write<TSyntaxWriter>(TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter;
+    public void WriteFrom<TSyntaxWriter>(TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter;
+
+    public void Write<TRepresentable>(TRepresentable representable, string? format = null) where TRepresentable : ISyntaxRepresentable;
 
     /// <summary>
     ///   Writes a new line to the code buffer
@@ -172,7 +174,7 @@ public class SyntaxWriter : ISyntaxWriter {
         _code.Append(builder);
     }
 
-    public void Write<TSyntaxWriter>(TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
+    public void WriteFrom<TSyntaxWriter>(TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
         TryWriteIndent();
         if (writer is SyntaxWriter thisImpl) {
             _code.Append(thisImpl._code);
@@ -195,9 +197,9 @@ public class SyntaxWriter : ISyntaxWriter {
         }
     }
 
-    public void WriteSyntax<TRepresentable>(TRepresentable representable) where TRepresentable : ISyntaxRepresentable {
+    public void Write<TRepresentable>(TRepresentable representable, string? format = null) where TRepresentable : ISyntaxRepresentable {
         TryWriteIndent();
-        representable.WriteSyntax(this);
+        representable.WriteSyntax(this, format);
     }
 
     public void WriteLine() {

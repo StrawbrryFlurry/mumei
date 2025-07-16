@@ -20,7 +20,7 @@ public readonly struct QtParameter(
 }
 
 public readonly struct QtParameterList(
-    ImmutableArray<QtParameter> parameters
+    QtParameter[] parameters
 ) : IQtTemplateBindable {
     public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         for (var i = 0; i < parameters.Length; i++) {

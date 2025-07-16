@@ -125,7 +125,7 @@ public readonly struct RoslynType {
             AppendNamespaceRecursiveReverse(_symbol.ContainingNamespace, ref nameBuilder);
         }
 
-        nameBuilder.AddRange(Name);
+        nameBuilder.AddRange(Name.AsSpan());
 
         return nameBuilder.ToStringAndFree();
     }

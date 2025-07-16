@@ -1,4 +1,5 @@
-﻿using Mumei.CodeGen.Playground;
+﻿using System.Runtime.CompilerServices;
+using Mumei.CodeGen.Playground;
 using Mumei.CodeGen.Qt.Output;
 
 namespace Mumei.CodeGen.Qt.Qt;
@@ -52,6 +53,8 @@ internal readonly struct QtMethodCore(
     IQtMethodRepresentation representation,
     QtAttributeList attributes
 ) : IQtTemplateBindable {
+    public string Name => name;
+
     public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         writer.WriteFormatted($"{modifiers} {returnType:g} {name}{typeParameters}({parameters})");
         if (!typeParameters.Constraints.IsEmpty) {
@@ -65,6 +68,11 @@ internal readonly struct QtMethodCore(
 
         representation.WriteSyntax(writer);
     }
+}
+
+public readonly struct QtMethodStub {
+    public required string Name { get; init; }
+    public required bool IsThisCall { get; init; }
 }
 
 internal interface IQtMethodRepresentation : ISyntaxRepresentable;
@@ -99,4 +107,51 @@ public static class QtMethodBuilder {
     }
 
     public ref struct Configured { }
+}
+
+internal interface IQtInvocationTarget : IQtTemplateBindable { }
+
+internal sealed class QtThisInvocationTarget : IQtInvocationTarget {
+    public static readonly QtThisInvocationTarget Instance = new();
+    private QtThisInvocationTarget() { }
+
+    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+        writer.Write("this");
+    }
+}
+
+internal sealed class QtInstanceInvocationTarget(
+    string instanceIdentifier
+) : IQtInvocationTarget {
+    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+        writer.Write(instanceIdentifier);
+    }
+}
+
+internal sealed class QtStaticTypeInvocationTarget(
+    IQtType target
+) : IQtInvocationTarget {
+    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+        writer.Write(target, "g");
+    }
+}
+
+internal readonly struct QtInvocation : IQtTemplateBindable {
+    public required IQtInvocationTarget Target { get; init; }
+    public required QtMethodStub Method { get; init; }
+    public required QtTypeArgumentList TypeArguments { get; init; }
+    public required QtArgumentList Arguments { get; init; }
+
+    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+        writer.Write(Target);
+        writer.Write(".");
+        writer.Write(Method.Name);
+        if (!TypeArguments.IsEmpty) {
+            writer.WriteFormatted($"<{TypeArguments}>");
+        }
+
+        writer.Write("(");
+        writer.Write(Arguments);
+        writer.Write(")");
+    }
 }
