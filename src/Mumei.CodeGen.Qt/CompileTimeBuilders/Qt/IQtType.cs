@@ -26,7 +26,7 @@ file sealed class QtRuntimeType(
     Type t,
     QtTypeAttribute attributes = QtTypeAttribute.None
 ) : IQtType {
-    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         if (attributes.HasFlag(QtTypeAttribute.ByRef)) {
             writer.Write("ref ");
         }
@@ -39,6 +39,7 @@ file sealed class QtRuntimeType(
             writer.Write("*");
         }
 
-        RuntimeTypeSerializer.SerializeInto(writer, t, format);
+        var w = writer;
+        RuntimeTypeSerializer.SerializeInto(ref w, t, format);
     }
 }

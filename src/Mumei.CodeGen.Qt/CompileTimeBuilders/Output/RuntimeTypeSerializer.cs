@@ -2,7 +2,7 @@
 
 internal static class RuntimeTypeSerializer {
     public static void SerializeInto<TSyntaxWriter>(
-        in TSyntaxWriter writer,
+        ref TSyntaxWriter writer,
         Type type,
         string? format = null
     ) where TSyntaxWriter : ISyntaxWriter {
@@ -37,13 +37,13 @@ internal static class RuntimeTypeSerializer {
                 writer.Write(", ");
             }
 
-            SerializeInto(writer, genericArguments[i], format);
+            SerializeInto(ref writer, genericArguments[i], format);
         }
 
         writer.Write(">");
     }
 
-    private static bool TryWriteShortForm<TSyntaxWriter>(Type type, TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
+    private static bool TryWriteShortForm<TSyntaxWriter>(Type type, in TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
         if (type.IsPrimitive) {
             writer.Write(type switch {
                 not null when type == typeof(int) => "int",

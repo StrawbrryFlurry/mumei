@@ -3,7 +3,7 @@
 namespace Mumei.CodeGen.Qt.Qt;
 
 public readonly struct QtArgument : IQtTemplateBindable {
-    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter { }
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter { }
 }
 
 public readonly struct QtArgumentList(
@@ -17,5 +17,5 @@ public readonly struct QtArgumentList(
         set => arguments[idx] = value;
     }
 
-    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter { }
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter { }
 }

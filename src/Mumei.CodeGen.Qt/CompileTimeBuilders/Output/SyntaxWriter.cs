@@ -1,64 +1,13 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
-using Mumei.CodeGen.Playground;
+using Microsoft.CodeAnalysis.Emit;
 
 namespace Mumei.CodeGen.Qt.Output;
 
-[InterpolatedStringHandler]
-public readonly ref struct FormattableSyntaxWritable {
-    private readonly SyntaxWriter _writer;
-
-    public FormattableSyntaxWritable(int literalLength, int formattedCount, [CallerMemberName] string memberName = "") {
-        _writer = new SyntaxWriter();
-    }
-
-    public void AppendLiteral(string s) {
-        _writer.Write(s);
-    }
-
-    public void AppendFormatted(string s) {
-        _writer.Write(s);
-    }
-
-    public void AppendFormatted<TRepresentable>(TRepresentable representable) where TRepresentable : ISyntaxRepresentable {
-        representable.WriteSyntax(_writer);
-    }
-
-    public void AppendFormatted<TRepresentable>(TRepresentable representable, string format) where TRepresentable : ISyntaxRepresentable {
-        representable.WriteSyntax(_writer, format);
-    }
-
-    public void AppendFormatted(Type type, string? format = null) {
-        RuntimeTypeSerializer.SerializeInto(_writer, type, format);
-    }
-
-    public void AppendFormatted(AccessModifier modifier) {
-        _writer.Write(modifier.AsCSharpString());
-    }
-
-    public void AppendFormatted(ParameterModifier parameterModifier) {
-        if (parameterModifier == ParameterModifier.None) {
-            return;
-        }
-
-        if (parameterModifier.HasFlag(ParameterModifier.This)) {
-            _writer.Write("this ");
-        }
-
-        _writer.Write(parameterModifier switch {
-            ParameterModifier.In => "in ",
-            ParameterModifier.Out => "out ",
-            ParameterModifier.Ref => "ref ",
-            _ => ""
-        });
-    }
-
-    public void WriteInto<TWriter>(TWriter writer) where TWriter : ISyntaxWriter {
-        writer.WriteFrom(_writer);
-    }
-}
-
 public interface ISyntaxWriter {
+    public int Length { get; }
+
     public void Indent();
     public void Dedent();
 
@@ -66,7 +15,7 @@ public interface ISyntaxWriter {
     ///   Appends text to the current line.
     /// </summary>
     /// <param name="text"></param>
-    public void Write(ReadOnlySpan<char> text);
+    public void Write(in ReadOnlySpan<char> text);
 
     /// <summary>
     ///   Appends text to the current line.
@@ -74,13 +23,10 @@ public interface ISyntaxWriter {
     /// <param name="builder"></param>
     public void Write(StringBuilder builder);
 
-    /// <summary>
-    ///   Appends text to the current line.
-    /// </summary>
-    /// <param name="writer"></param>
-    public void WriteFrom<TSyntaxWriter>(TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter;
+    public void CopyTo<TSyntaxWriter>(ref TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter;
+    public void CopyTo(Span<char> buffer);
 
-    public void Write<TRepresentable>(TRepresentable representable, string? format = null) where TRepresentable : ISyntaxRepresentable;
+    public void Write<TRepresentable>(in TRepresentable representable, string? format = null) where TRepresentable : ISyntaxRepresentable;
 
     /// <summary>
     ///   Writes a new line to the code buffer
@@ -96,12 +42,14 @@ public interface ISyntaxWriter {
     ///   Writes an empty line to the stream
     /// </summary>
     /// <returns></returns>
-    public void WriteFormatted(FormattableSyntaxWritable writable);
+    public void WriteFormatted(in FormattableSyntaxWritable writable);
 
     public string ToSyntax();
 }
 
 public class SyntaxWriter : ISyntaxWriter {
+    public int Length => _code.Length;
+
     internal const char IndentChar = ' ';
     internal const int IndentSpacing = 4;
 
@@ -124,20 +72,23 @@ public class SyntaxWriter : ISyntaxWriter {
         IndentLevel = level;
     }
 
-    public void WriteFormatted(FormattableSyntaxWritable writable) {
+    public void WriteFormatted(in FormattableSyntaxWritable writable) {
         TryWriteIndent();
-        writable.WriteInto(this);
+        var @this = this;
+        writable.CopyToAndDispose(ref @this);
     }
 
-    public void WriteFormattedLine(FormattableSyntaxWritable writable) {
+    public void WriteFormattedLine(in FormattableSyntaxWritable writable) {
         TryWriteIndent();
-        writable.WriteInto(this);
+        var @this = this;
+        writable.CopyToAndDispose(ref @this);
         WriteLine();
     }
 
-    public void WriteFormattedBlock(FormattableSyntaxWritable writable) {
+    public void WriteFormattedBlock(in FormattableSyntaxWritable writable) {
         TryWriteIndent();
-        writable.WriteInto(this);
+        var @this = this;
+        writable.CopyToAndDispose(ref @this);
         WriteLine();
     }
 
@@ -163,7 +114,7 @@ public class SyntaxWriter : ISyntaxWriter {
         return this;
     }
 
-    public unsafe void Write(ReadOnlySpan<char> text) {
+    public unsafe void Write(in ReadOnlySpan<char> text) {
         fixed (char* p = text) {
             _code.Append(p, text.Length);
         }
@@ -174,7 +125,15 @@ public class SyntaxWriter : ISyntaxWriter {
         _code.Append(builder);
     }
 
-    public void WriteFrom<TSyntaxWriter>(TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
+    public void CopyTo<TSyntaxWriter>(ref TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
+        writer.Write(_code.ToString());
+    }
+
+    public void CopyTo(Span<char> buffer) {
+        _code.ToString().AsSpan().CopyTo(buffer);
+    }
+
+    public void WriteFrom<TSyntaxWriter>(in TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
         TryWriteIndent();
         if (writer is SyntaxWriter thisImpl) {
             _code.Append(thisImpl._code);
@@ -197,9 +156,10 @@ public class SyntaxWriter : ISyntaxWriter {
         }
     }
 
-    public void Write<TRepresentable>(TRepresentable representable, string? format = null) where TRepresentable : ISyntaxRepresentable {
+    public void Write<TRepresentable>(in TRepresentable representable, string? format = null) where TRepresentable : ISyntaxRepresentable {
         TryWriteIndent();
-        representable.WriteSyntax(this, format);
+        var @this = this;
+        representable.WriteSyntax(ref @this, format);
     }
 
     public void WriteLine() {

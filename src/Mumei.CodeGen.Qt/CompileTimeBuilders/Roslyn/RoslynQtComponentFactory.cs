@@ -79,7 +79,7 @@ internal readonly ref struct RoslynQtComponentFactory() {
 file sealed class QtRoslynType(
     ITypeSymbol typeSymbol
 ) : IQtType {
-    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         writer.Write(typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
     }
 }

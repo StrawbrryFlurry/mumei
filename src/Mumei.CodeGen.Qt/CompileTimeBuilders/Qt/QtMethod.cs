@@ -39,8 +39,8 @@ public readonly struct QtMethod<TReturnType> : IQtInvokable<TReturnType> {
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
-    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
-        Method.WriteSyntax(writer, format);
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+        Method.WriteSyntax(ref writer, format);
     }
 }
 
@@ -55,7 +55,7 @@ internal readonly struct QtMethodCore(
 ) : IQtTemplateBindable {
     public string Name => name;
 
-    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         writer.WriteFormatted($"{modifiers} {returnType:g} {name}{typeParameters}({parameters})");
         if (!typeParameters.Constraints.IsEmpty) {
             writer.WriteFormatted($" {typeParameters.Constraints}");
@@ -66,7 +66,7 @@ internal readonly struct QtMethodCore(
             return;
         }
 
-        representation.WriteSyntax(writer);
+        representation.WriteSyntax(ref writer);
     }
 }
 
@@ -80,7 +80,7 @@ internal interface IQtMethodRepresentation : ISyntaxRepresentable;
 internal sealed class StaticQtMethodRepresentation(
     string s
 ) : IQtMethodRepresentation {
-    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         writer.Write(s);
     }
 }
@@ -115,7 +115,7 @@ internal sealed class QtThisInvocationTarget : IQtInvocationTarget {
     public static readonly QtThisInvocationTarget Instance = new();
     private QtThisInvocationTarget() { }
 
-    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         writer.Write("this");
     }
 }
@@ -123,7 +123,7 @@ internal sealed class QtThisInvocationTarget : IQtInvocationTarget {
 internal sealed class QtInstanceInvocationTarget(
     string instanceIdentifier
 ) : IQtInvocationTarget {
-    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         writer.Write(instanceIdentifier);
     }
 }
@@ -131,7 +131,7 @@ internal sealed class QtInstanceInvocationTarget(
 internal sealed class QtStaticTypeInvocationTarget(
     IQtType target
 ) : IQtInvocationTarget {
-    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         writer.Write(target, "g");
     }
 }
@@ -142,7 +142,7 @@ internal readonly struct QtInvocation : IQtTemplateBindable {
     public required QtTypeArgumentList TypeArguments { get; init; }
     public required QtArgumentList Arguments { get; init; }
 
-    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         writer.Write(Target);
         writer.Write(".");
         writer.Write(Method.Name);

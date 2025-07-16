@@ -13,7 +13,7 @@ public readonly struct QtTypeParameter : IQtType {
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
-    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         throw new NotImplementedException();
     }
 }
@@ -23,7 +23,7 @@ public readonly struct QtTypeParameterList(
 ) : IQtTemplateBindable {
     public ConstraintImpl Constraints { get; } = new();
 
-    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         if (typeParameters is null) {
             return;
         }
@@ -43,7 +43,7 @@ public readonly struct QtTypeParameterList(
     public readonly struct ConstraintImpl : IQtTemplateBindable {
         public bool IsEmpty => true;
 
-        public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+        public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
             throw new NotImplementedException();
         }
     }

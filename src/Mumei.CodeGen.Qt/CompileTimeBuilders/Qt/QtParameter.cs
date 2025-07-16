@@ -14,7 +14,7 @@ public readonly struct QtParameter(
 
     public ParameterModifier Modifiers { get; } = modifiers;
 
-    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         writer.WriteFormatted($"{Modifiers}{Type:g} {Name}");
     }
 }
@@ -22,14 +22,14 @@ public readonly struct QtParameter(
 public readonly struct QtParameterList(
     QtParameter[] parameters
 ) : IQtTemplateBindable {
-    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         for (var i = 0; i < parameters.Length; i++) {
             var parameter = parameters[i];
             if (i > 0) {
                 writer.Write(", ");
             }
 
-            parameter.WriteSyntax(writer, format);
+            parameter.WriteSyntax(ref writer, format);
         }
     }
 }

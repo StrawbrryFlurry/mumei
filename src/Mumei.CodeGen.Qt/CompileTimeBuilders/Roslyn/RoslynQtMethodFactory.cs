@@ -23,7 +23,7 @@ file readonly ref struct DynamicSourceCodeBinder(
     private readonly string[] _template = code.CodeTemplate;
     private readonly SourceCodeBinderCtx _ctx = ctx;
 
-    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         var t = _template;
         foreach (var section in t) {
             if (!section.StartsWith(__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeStart)) {
@@ -105,7 +105,7 @@ internal readonly ref struct RoslynQtMethodFactory(
         };
         var binder = new DynamicSourceCodeBinder(sourceCode, InvocationExpressionSourceCodeBinder.Instance, ref bindingCtx);
         var syntaxWriter = new SyntaxWriter();
-        binder.WriteSyntax(syntaxWriter);
+        binder.WriteSyntax(ref syntaxWriter);
 
         var method = new QtMethod<CompileTimeUnknown>(
             "QtProxy__" + ((MemberAccessExpressionSyntax)invocationToProxy.Expression).Name.Identifier.Text,

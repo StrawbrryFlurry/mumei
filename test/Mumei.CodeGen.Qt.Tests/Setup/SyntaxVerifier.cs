@@ -27,7 +27,7 @@ internal readonly struct SyntaxVerificationExpectation {
 
     public void AppendFormatted(Type t, string? format = null!) {
         var writer = new SyntaxWriter();
-        QtType.ForRuntimeType(t).WriteSyntax(writer, format);
+        QtType.ForRuntimeType(t).WriteSyntax(ref writer, format);
         _writer.WriteFrom(writer);
     }
 

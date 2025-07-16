@@ -188,7 +188,7 @@ public readonly struct QtClass(
     }
 
 
-    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         writer.WriteFormatted(
             $$"""
               {{modifiers}} class{{TypeParameters}} {{name}} {
@@ -199,12 +199,12 @@ public readonly struct QtClass(
         writer.Indent();
 
         foreach (var field in _fields) {
-            field.WriteSyntax(writer);
+            field.WriteSyntax(ref writer);
             writer.WriteLine();
         }
 
         foreach (var method in _methods) {
-            method.WriteSyntax(writer);
+            method.WriteSyntax(ref writer);
             writer.WriteLine();
         }
 

@@ -37,7 +37,7 @@ public readonly struct QtField<T> : IQtCompileTimeValue<T>, IQtTemplateBindable 
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
-    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter { }
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter { }
 }
 
 internal readonly struct QtFieldCore : IQtTemplateBindable {
@@ -66,7 +66,7 @@ internal readonly struct QtFieldCore : IQtTemplateBindable {
         _type = type;
     }
 
-    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         writer.WriteFormatted(
             $$"""
               {{_modifiers}} {{_type:g}} {{_name}};

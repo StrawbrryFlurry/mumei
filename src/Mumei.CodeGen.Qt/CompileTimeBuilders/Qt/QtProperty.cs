@@ -8,7 +8,7 @@ public sealed class QtProperty<T> : IQtCompileTimeValue<T>, IQtTemplateBindable 
         throw new NotImplementedException();
     }
 
-    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter { }
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter { }
 }
 
 public static class QtProperty {

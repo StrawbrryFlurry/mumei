@@ -76,7 +76,7 @@ public readonly struct AccessModifierRepresentable(
         return new AccessModifierRepresentable(modifier);
     }
 
-    public void WriteSyntax<TSyntaxWriter>(in TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         writer.Write(modifier.AsCSharpString());
     }
 }
