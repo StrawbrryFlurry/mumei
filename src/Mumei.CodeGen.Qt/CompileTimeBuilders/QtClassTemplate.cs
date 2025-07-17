@@ -1,4 +1,5 @@
-﻿using Mumei.CodeGen.Qt.Qt;
+﻿using Mumei.CodeGen.Qt.Output;
+using Mumei.CodeGen.Qt.Qt;
 
 namespace Mumei.CodeGen.Playground;
 
@@ -9,5 +10,9 @@ public abstract class QtClassTemplate<TSelf> : IQtThis where TSelf : QtClassTemp
 
     public T As<T>() {
         throw new CompileTimeComponentUsedAtRuntimeException();
+    }
+
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+        throw new NotImplementedException();
     }
 }

@@ -6,11 +6,13 @@
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <PolyStringInterpolation>true</PolyStringInterpolation>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="PolySharp">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="PolyfillLib"/>
+    <PackageReference Include="System.Memory"/>
   </ItemGroup>
 
   <ItemGroup>

@@ -15,9 +15,8 @@
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="9.0.0" />
-    <PackageVersion Include="PolySharp" Version="1.15.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageVersion>
+    <PackageVersion Include="PolyfillLib" Version="8.7.3" />
+    <PackageVersion Include="PolySharp" Version="1.15.0" />
+    <PackageVersion Include="System.Memory" Version="4.6.3" />
   </ItemGroup>
 </Project>

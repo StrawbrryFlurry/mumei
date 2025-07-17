@@ -23,6 +23,10 @@ public readonly struct QtTypeParameterList(
 ) : IQtTemplateBindable {
     public ConstraintImpl Constraints { get; } = new();
 
+    public static QtTypeParameterList Builder(int capacity) {
+        return new QtTypeParameterList(new QtTypeParameter[capacity]);
+    }
+
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         if (typeParameters is null) {
             return;

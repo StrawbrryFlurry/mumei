@@ -3,7 +3,7 @@
 namespace Mumei.CodeGen.Qt;
 
 public sealed class QtCompilationScope {
-    internal Compilation Compilation { get; init; }
+    public required Compilation Compilation { get; init; }
     private static AsyncLocal<QtCompilationScope> _activeScope { get; } = new();
 
     public static QtCompilationScope ActiveScope => _activeScope.Value ?? throw new InvalidOperationException();

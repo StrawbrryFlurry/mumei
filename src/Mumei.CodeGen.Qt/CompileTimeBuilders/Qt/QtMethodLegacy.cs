@@ -28,7 +28,7 @@ public static class QtMethodLegacy {
             throw new CompileTimeComponentUsedAtRuntimeException();
         }
 
-        public IQtCompileTimeValue<Arg.T1> Inject(IQtType type, int idx) {
+        public IQtCompileTimeValue Inject(IQtType type, int idx) {
             throw new CompileTimeComponentUsedAtRuntimeException();
         }
     }

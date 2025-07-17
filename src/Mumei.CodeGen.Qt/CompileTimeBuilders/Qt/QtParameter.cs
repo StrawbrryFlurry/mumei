@@ -7,7 +7,8 @@ namespace Mumei.CodeGen.Qt.Qt;
 public readonly struct QtParameter(
     string name,
     IQtType type,
-    ParameterModifier modifiers = ParameterModifier.None
+    ParameterModifier modifiers = ParameterModifier.None,
+    IQtCompileTimeValue? defaultValue = null
 ) : IQtTemplateBindable {
     public string Name { get; } = name;
     public IQtType Type { get; } = type;
@@ -22,6 +23,14 @@ public readonly struct QtParameter(
 public readonly struct QtParameterList(
     QtParameter[] parameters
 ) : IQtTemplateBindable {
+    internal static QtParameterList Builder(int capacity) {
+        return new QtParameterList(new QtParameter[capacity]);
+    }
+
+    internal QtParameter this[int index] {
+        set => parameters[index] = value;
+    }
+
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         for (var i = 0; i < parameters.Length; i++) {
             var parameter = parameters[i];

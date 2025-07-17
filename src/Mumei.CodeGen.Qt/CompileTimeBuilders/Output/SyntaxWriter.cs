@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis.Emit;
+using Polyfills;
 
 namespace Mumei.CodeGen.Qt.Output;
 
@@ -27,6 +28,8 @@ public interface ISyntaxWriter {
     public void CopyTo(Span<char> buffer);
 
     public void Write<TRepresentable>(in TRepresentable representable, string? format = null) where TRepresentable : ISyntaxRepresentable;
+
+    public void WriteLiteral<T>(T literal) where T : notnull;
 
     /// <summary>
     ///   Writes a new line to the code buffer
@@ -114,10 +117,8 @@ public class SyntaxWriter : ISyntaxWriter {
         return this;
     }
 
-    public unsafe void Write(in ReadOnlySpan<char> text) {
-        fixed (char* p = text) {
-            _code.Append(p, text.Length);
-        }
+    public void Write(in ReadOnlySpan<char> text) {
+        _code.Append(text);
     }
 
     public void Write(StringBuilder builder) {
@@ -141,6 +142,13 @@ public class SyntaxWriter : ISyntaxWriter {
         }
 
         _code.Append(writer.ToSyntax());
+    }
+
+    public void WriteLiteral<T>(T literal) where T : notnull {
+        TryWriteIndent();
+        var b = new DefaultInterpolatedStringHandler();
+        b.AppendFormatted(literal);
+        _code.Append(b.Text);
     }
 
     public void WriteLine(string line) {

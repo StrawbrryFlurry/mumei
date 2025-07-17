@@ -3,7 +3,7 @@ using Mumei.CodeGen.Qt.Qt;
 
 namespace Mumei.CodeGen.Playground;
 
-public sealed class QtProperty<T> : IQtCompileTimeValue<T>, IQtTemplateBindable {
+public sealed class QtProperty<T> : IQtCompileTimeValue, IQtTemplateBindable {
     public TActual As<TActual>() {
         throw new NotImplementedException();
     }

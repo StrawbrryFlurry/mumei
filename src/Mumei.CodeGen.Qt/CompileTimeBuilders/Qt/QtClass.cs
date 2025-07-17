@@ -3,6 +3,7 @@ using Mumei.CodeGen.Playground;
 using Mumei.CodeGen.Playground.Qt;
 using Mumei.CodeGen.Playground.Roslyn;
 using Mumei.CodeGen.Qt.Output;
+using Mumei.CodeGen.Qt.Roslyn;
 
 namespace Mumei.CodeGen.Qt.Qt;
 
@@ -14,11 +15,7 @@ public interface IQtInvokable<TReturn> : IQtTemplateBindable;
 
 public interface IQtTemplateBindable : ISyntaxRepresentable;
 
-public interface IQtCompileTimeValue<out TValue> {
-    public TActual As<TActual>();
-};
-
-public interface IQtThis : IQtCompileTimeValue<Arg.TThis>;
+public interface IQtThis { }
 
 public interface IQtTypeDeclaration;
 
@@ -66,7 +63,7 @@ public readonly struct QtClass(
         AccessModifier modifiers,
         IQtType type,
         string name,
-        IQtCompileTimeValue<CompileTimeUnknown> defaultValue
+        IQtCompileTimeValue defaultValue
     ) {
         return default!;
     }

@@ -6,8 +6,18 @@ using Mumei.CodeGen.Qt.Qt;
 
 namespace Mumei.CodeGen.Playground.Roslyn;
 
-internal readonly ref struct RoslynQtComponentFactory() {
-    private readonly Compilation _compilation = QtCompilationScope.ActiveScope.Compilation;
+internal readonly ref struct RoslynQtComponentFactory(
+    QtCompilationScope scope
+) {
+    private readonly Compilation _compilation = scope.Compilation;
+
+    public QtParameterList ParametersOf(
+        IMethodSymbol method
+    ) {
+        var result = QtParameterList.Builder(method.Parameters.Length);
+
+        return result;
+    }
 
     public QtInvocation Invocation(
         InvocationExpressionSyntax invocation

@@ -7,6 +7,7 @@ using Mumei.CodeGen.Playground.Qt;
 using Mumei.CodeGen.Playground.Roslyn;
 using Mumei.CodeGen.Qt.Output;
 using Mumei.CodeGen.Qt.Qt;
+using Mumei.CodeGen.Qt.Roslyn;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Mumei.CodeGen.Qt;

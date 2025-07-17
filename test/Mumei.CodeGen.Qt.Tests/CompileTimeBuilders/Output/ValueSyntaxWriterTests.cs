@@ -10,6 +10,18 @@ public sealed class ValueSyntaxWriterTests {
     }
 
     [Fact]
+    public void Default() {
+        var vsw = default(ValueSyntaxWriter);
+        Assert.Equal("", vsw.ToString());
+    }
+
+    [Fact]
+    public void StackAllocatedBuffer() {
+        var vsw = new ValueSyntaxWriter(stackalloc char[ValueSyntaxWriter.StackBufferSize]);
+        Assert.Equal("", vsw.ToString());
+    }
+
+    [Fact]
     public void Write_Single() {
         var vsw = new ValueSyntaxWriter();
 
@@ -67,6 +79,35 @@ public sealed class ValueSyntaxWriterTests {
 
         var actual = vsw.ToString();
         Assert.Equal(expected, actual, ignoreLineEndingDifferences: true);
+    }
+
+    [Fact]
+    public void Write_StackAllocatedBuffer() {
+        var vsw = new ValueSyntaxWriter(stackalloc char[ValueSyntaxWriter.StackBufferSize]);
+
+        vsw.Write("Hello, Mumei!");
+
+        Assert.Equal("Hello, Mumei!", vsw.ToString());
+    }
+
+    [Fact]
+    public void Write_StackAllocatedBuffer_WriteExceedsInitialBuffer() {
+        var vsw = new ValueSyntaxWriter(stackalloc char[8]);
+
+        vsw.Write("Hello, Mumei!");
+
+        Assert.Equal("Hello, Mumei!", vsw.ToString());
+    }
+
+    [Fact]
+    public void WriteLiteral() {
+        var vsw = new ValueSyntaxWriter();
+
+        vsw.WriteLiteral(42);
+
+        vsw.WriteLiteral(" is the answer");
+
+        Assert.Equal("42 is the answer", vsw.ToString());
     }
 
     [Fact]

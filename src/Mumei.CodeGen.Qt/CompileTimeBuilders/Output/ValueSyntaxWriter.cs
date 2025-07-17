@@ -4,7 +4,10 @@ using System.Text;
 
 namespace Mumei.CodeGen.Qt.Output;
 
+// If only we had allows ref struct (sigh)
 public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
+    public const int StackBufferSize = 256;
+
     internal const char IndentChar = SyntaxWriter.IndentChar;
     internal const int IndentSpacing = SyntaxWriter.IndentSpacing;
     internal const string NewLine = SyntaxWriter.NewLine;
@@ -12,11 +15,11 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
     public int Length => _bufferPosition;
 
     private string _indentString = "";
-    private int _indentLevel = 0;
+    private int _indentLevel;
 
     private char* _buffer;
     private int _bufferLength;
-    private int _bufferPosition = 0;
+    private int _bufferPosition;
     private char[]? _rentedBuffer;
 
     private bool _requiresIndent = true;
@@ -61,10 +64,26 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
         var s = builder.ToString();
         if (TryWriteIndent(s.Length)) {
             WriteCoreUnsafe(s);
+            return;
         }
-        else {
-            WriteCore(s);
+
+        WriteCore(s);
+    }
+
+    public void WriteLiteral<T>(T literal) where T : notnull {
+        // We can only use the SpanFormattable implementation for <T>
+        // in certain runtimes. We could duplicate the implementation based
+        // on the runtime here, but the DefaultInterpolatedStringHandler does
+        // essentially the same thing, albeit with a slight overhead since
+        // it allocates its own buffer.
+        var b = new DefaultInterpolatedStringHandler();
+        b.AppendFormatted(literal);
+        if (TryWriteIndent(b.Text.Length)) {
+            WriteCoreUnsafe(b.Text);
+            return;
         }
+
+        WriteCore(b.Text);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -184,9 +203,11 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
         return false;
     }
 
-    public readonly void Dispose() {
+    public void Dispose() {
         if (_rentedBuffer is not null) {
             ArrayPool<char>.Shared.Return(_rentedBuffer);
         }
+
+        this = default;
     }
 }

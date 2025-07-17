@@ -3,7 +3,7 @@ using Mumei.CodeGen.Qt.Qt;
 
 namespace Mumei.CodeGen.Playground;
 
-public readonly struct QtField<T> : IQtCompileTimeValue<T>, IQtTemplateBindable {
+public readonly struct QtField<T> : IQtCompileTimeValue, IQtTemplateBindable {
     internal QtFieldCore Field { get; }
 
     public QtField(
