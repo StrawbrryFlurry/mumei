@@ -70,21 +70,67 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
         WriteCore(s);
     }
 
+#if NET6_0_OR_GREATER
     public void WriteLiteral<T>(T literal) where T : notnull {
-        // We can only use the SpanFormattable implementation for <T>
-        // in certain runtimes. We could duplicate the implementation based
-        // on the runtime here, but the DefaultInterpolatedStringHandler does
-        // essentially the same thing, albeit with a slight overhead since
-        // it allocates its own buffer.
-        var b = new DefaultInterpolatedStringHandler();
-        b.AppendFormatted(literal);
-        if (TryWriteIndent(b.Text.Length)) {
-            WriteCoreUnsafe(b.Text);
+        if (literal is string s) {
+            WriteCore(s);
             return;
         }
 
-        WriteCore(b.Text);
+        if (literal is char c) {
+            WriteCore(new ReadOnlySpan<char>(ref c));
+            return;
+        }
+
+        if (literal is ISpanFormattable sf) {
+            TryWriteIndent(0);
+            var buffer = new Span<char>(_buffer, _bufferLength)[_bufferPosition..];
+
+            TryWriteLiteral:
+            var success = sf.TryFormat(buffer, out var written, default, null);
+            if (!success) {
+                EnsureBufferCapacity(written);
+                goto TryWriteLiteral;
+            }
+
+            _bufferPosition += written
+            return;
+        }
+
+        var str = literal.ToString();
+        if (str is null) {
+            TryWriteIndent(0);
+            return;
+        }
+
+        if (TryWriteIndent(str.Length)) {
+            WriteCoreUnsafe(str);
+            return;
+        }
+
+        WriteCore(str);
     }
+#else
+    public void WriteLiteral<T>(T literal) where T : notnull {
+        if (literal is string s) {
+            WriteCore(s);
+            return;
+        }
+
+        if (literal is char c) {
+            WriteCore([c]);
+            return;
+        }
+
+        var str = literal.ToString();
+        if (TryWriteIndent(str.Length)) {
+            WriteCoreUnsafe(str);
+            return;
+        }
+
+        WriteCore(str);
+    }
+#endif
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void WriteLine(string line) {

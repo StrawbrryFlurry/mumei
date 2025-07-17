@@ -2,7 +2,6 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Playground;
-using Mumei.CodeGen.Playground.Roslyn;
 using Mumei.CodeGen.Qt.Output;
 using Mumei.CodeGen.Qt.Qt;
 using Mumei.Roslyn.Reflection;
@@ -90,14 +89,11 @@ internal readonly ref struct RoslynQtMethodFactory(
         var factory = new RoslynQtComponentFactory(scope);
 
         var method = new QtMethod<CompileTimeUnknown>(
-            "QtProxy__" + ((MemberAccessExpressionSyntax)invocationToProxy.Expression).Name.Identifier.Text,
+            "QtProxy__" + methodSymbol.Name,
             AccessModifier.FileStatic,
-            QtType.ForRuntimeType(typeof(bool)),
-            new QtTypeParameterList(),
-            new QtParameterList([
-                new QtParameter("first", QtType.ForRuntimeType<IEnumerable<int>>(), ParameterModifier.This),
-                new QtParameter("second", QtType.ForRuntimeType<IEnumerable<int>>())
-            ]),
+            factory.Type(methodSymbol.ReturnType),
+            new QtTypeParameterList(), // Since this is a proxy method, all types need to be bound to the types at the call site
+            factory.ParametersOf(methodSymbol),
             new StaticQtMethodRepresentation(syntaxWriter.ToString()),
             new QtAttributeList(),
             declPtr

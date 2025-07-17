@@ -6,13 +6,8 @@
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <PolyStringInterpolation>true</PolyStringInterpolation>
-  </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="PolyfillLib"/>
-    <PackageReference Include="System.Memory"/>
+    <PackageReference Include="Polysharp"/>
   </ItemGroup>
 
   <ItemGroup>

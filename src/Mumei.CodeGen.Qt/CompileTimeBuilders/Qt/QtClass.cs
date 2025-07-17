@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Playground;
 using Mumei.CodeGen.Playground.Qt;
-using Mumei.CodeGen.Playground.Roslyn;
 using Mumei.CodeGen.Qt.Output;
 using Mumei.CodeGen.Qt.Roslyn;
 
@@ -33,7 +32,7 @@ public readonly struct QtClass(
     string name,
     QtTypeParameter[]? typeParameters = null!
 ) : IQtType, IQtTypeDeclaration {
-    public QtTypeParameterList TypeParameters { get; } = new(typeParameters);
+    public QtTypeParameterList TypeParameters { get; } = new(typeParameters ?? []);
 
     private readonly List<QtFieldCore> _fields = new();
     private readonly List<QtMethodCore> _methods = new();

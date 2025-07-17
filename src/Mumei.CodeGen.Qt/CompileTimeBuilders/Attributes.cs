@@ -26,12 +26,14 @@ public enum AccessModifier {
 }
 
 [Flags]
-public enum ParameterModifier {
+public enum ParameterAttributes {
     None = 0,
     This = 1 << 0,
     Ref = 1 << 5,
     Out = 1 << 6,
-    In = 1 << 7
+    In = 1 << 7,
+    Params = 1 << 8,
+    Readonly = 1 << 9
 }
 
 public static class AccessModifierExtensions {

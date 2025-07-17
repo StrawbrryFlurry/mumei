@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Mumei.CodeGen.Playground;
+﻿using Mumei.CodeGen.Playground;
 using Mumei.CodeGen.Qt.Output;
 
 namespace Mumei.CodeGen.Qt.Qt;
@@ -16,22 +15,22 @@ public static class QtCompileTimeValue {
     }
 }
 
-internal sealed class QtLiteralCompileTimeValue<T> : IQtCompileTimeValue where T : notnull {
-    private readonly T _value;
-
-    public QtLiteralCompileTimeValue(T value) {
-        _value = value;
-    }
-
+internal sealed class QtLiteralCompileTimeValue<T>(
+    T value
+) : IQtCompileTimeValue
+    where T : notnull {
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
-        writer.WriteLiteral(_value);
+        if (typeof(T) == typeof(string)) {
+            writer.Write("\"");
+            writer.WriteLiteral(value);
+            writer.Write("\"");
+            return;
+        }
+
+        writer.WriteLiteral(value);
     }
 
     public TActual As<TActual>() {
-        if (_value is TActual actual) {
-            return actual;
-        }
-
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
 }

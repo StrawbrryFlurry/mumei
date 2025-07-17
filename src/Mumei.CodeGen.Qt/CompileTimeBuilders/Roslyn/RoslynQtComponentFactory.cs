@@ -1,22 +1,117 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Mumei.CodeGen.Qt;
+using Mumei.CodeGen.Playground;
 using Mumei.CodeGen.Qt.Output;
 using Mumei.CodeGen.Qt.Qt;
 
-namespace Mumei.CodeGen.Playground.Roslyn;
+namespace Mumei.CodeGen.Qt.Roslyn;
 
 internal readonly ref struct RoslynQtComponentFactory(
     QtCompilationScope scope
 ) {
     private readonly Compilation _compilation = scope.Compilation;
 
+    public IQtCompileTimeValue CompileTimeValue<TValue>(TValue value) {
+        if (value is null) {
+            return QtCompileTimeValue.Null;
+        }
+
+        if (value is IQtCompileTimeValue compileTimeValue) {
+            return compileTimeValue;
+        }
+
+#pragma warning disable CS8714 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'notnull' constraint.
+        return QtCompileTimeValue.ForLiteral(value);
+#pragma warning restore CS8714 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'notnull' constraint.
+    }
+
+    public QtTypeParameterList TypeParametersOf(
+        IMethodSymbol methodSymbol
+    ) {
+        var typeParameters = methodSymbol.TypeParameters;
+        var result = QtTypeParameterList.Builder(typeParameters.Length);
+        for (var i = 0; i < typeParameters.Length; i++) {
+            var typeParameter = typeParameters[i];
+            result[i] = TypeParameter(typeParameter);
+        }
+
+        return result;
+    }
+
+    public QtTypeParameter TypeParameter(
+        ITypeParameterSymbol typeParameter
+    ) {
+        var name = typeParameter.Name;
+
+        return new QtTypeParameter {
+            Name = name,
+            Constraint = null
+        };
+    }
+
     public QtParameterList ParametersOf(
         IMethodSymbol method
     ) {
-        var result = QtParameterList.Builder(method.Parameters.Length);
+        var additionalThisArg = method.IsExtensionMethod ? 1 : 0;
+        var result = QtParameterList.Builder(method.Parameters.Length + additionalThisArg);
+        var parameters = method.Parameters;
+
+        if (method.IsExtensionMethod) {
+            result[0] = new QtParameter {
+                Name = "__this",
+                Type = Type(method.ReceiverType!),
+                DefaultValue = null,
+                Attributes = ParameterAttributes.This
+            };
+        }
+
+        for (var i = 0; i < parameters.Length; i++) {
+            var parameter = parameters[i];
+            result[i + additionalThisArg] = Parameter(parameter);
+        }
 
         return result;
+    }
+
+    public QtParameter Parameter(IParameterSymbol parameter) {
+        var type = Type(parameter.Type);
+        var attributes = ParameterAttributes.None;
+
+        if (parameter.RefKind == RefKind.Ref) {
+            attributes |= ParameterAttributes.Ref;
+        }
+        else if (parameter.RefKind == RefKind.RefReadOnlyParameter) {
+            attributes |= ParameterAttributes.Ref | ParameterAttributes.Readonly;
+        }
+        else if (parameter.RefKind == RefKind.Out) {
+            attributes |= ParameterAttributes.Out;
+        }
+        else if (parameter.RefKind == RefKind.In) {
+            attributes |= ParameterAttributes.In;
+        }
+
+        if (parameter.IsParams) {
+            attributes |= ParameterAttributes.Params;
+        }
+
+        if (parameter.IsThis) {
+            attributes |= ParameterAttributes.This;
+        }
+
+        if (attributes != ParameterAttributes.None) {
+            attributes &= ~ParameterAttributes.None;
+        }
+
+        var defaultValue = parameter.HasExplicitDefaultValue
+            ? CompileTimeValue(parameter.ExplicitDefaultValue)
+            : null;
+
+        return new QtParameter {
+            Name = parameter.Name,
+            Type = type,
+            DefaultValue = defaultValue,
+            Attributes = attributes
+        };
     }
 
     public QtInvocation Invocation(
@@ -81,7 +176,7 @@ internal readonly ref struct RoslynQtComponentFactory(
         return _compilation.GetSemanticModel(node.SyntaxTree);
     }
 
-    private IQtType Type(ITypeSymbol type) {
+    public IQtType Type(ITypeSymbol type) {
         return new QtRoslynType(type);
     }
 }

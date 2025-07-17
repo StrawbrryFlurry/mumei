@@ -1,8 +1,5 @@
-﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Text;
-using Microsoft.CodeAnalysis.Emit;
-using Polyfills;
 
 namespace Mumei.CodeGen.Qt.Output;
 
@@ -117,8 +114,15 @@ public class SyntaxWriter : ISyntaxWriter {
         return this;
     }
 
-    public void Write(in ReadOnlySpan<char> text) {
-        _code.Append(text);
+    public unsafe void Write(in ReadOnlySpan<char> text) {
+        TryWriteIndent();
+        if (text.Length <= 0) {
+            return;
+        }
+
+        fixed (char* ptr = &text.GetPinnableReference()) {
+            _code.Append(ptr, text.Length);
+        }
     }
 
     public void Write(StringBuilder builder) {
@@ -146,9 +150,7 @@ public class SyntaxWriter : ISyntaxWriter {
 
     public void WriteLiteral<T>(T literal) where T : notnull {
         TryWriteIndent();
-        var b = new DefaultInterpolatedStringHandler();
-        b.AppendFormatted(literal);
-        _code.Append(b.Text);
+        _code.Append(literal);
     }
 
     public void WriteLine(string line) {

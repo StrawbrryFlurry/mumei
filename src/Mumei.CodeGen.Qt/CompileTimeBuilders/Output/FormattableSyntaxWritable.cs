@@ -37,19 +37,24 @@ public ref struct FormattableSyntaxWritable {
         _writer.Write(modifier.AsCSharpString());
     }
 
-    public void AppendFormatted(ParameterModifier parameterModifier) {
-        if (parameterModifier == ParameterModifier.None) {
+    public void AppendFormatted(ParameterAttributes attributes) {
+        if (attributes == ParameterAttributes.None) {
             return;
         }
 
-        if (parameterModifier.HasFlag(ParameterModifier.This)) {
+        if (attributes.HasFlag(ParameterAttributes.This)) {
             _writer.Write("this ");
         }
 
-        _writer.Write(parameterModifier switch {
-            ParameterModifier.In => "in ",
-            ParameterModifier.Out => "out ",
-            ParameterModifier.Ref => "ref ",
+        if (attributes.HasFlag(ParameterAttributes.Readonly)) {
+            _writer.Write("readonly ");
+        }
+
+        _writer.Write(attributes switch {
+            ParameterAttributes.In => "in ",
+            ParameterAttributes.Out => "out ",
+            ParameterAttributes.Ref => "ref ",
+            ParameterAttributes.Params => "params ",
             _ => ""
         });
     }

@@ -4,19 +4,18 @@ using Mumei.CodeGen.Qt.Output;
 
 namespace Mumei.CodeGen.Qt.Qt;
 
-public readonly struct QtParameter(
-    string name,
-    IQtType type,
-    ParameterModifier modifiers = ParameterModifier.None,
-    IQtCompileTimeValue? defaultValue = null
-) : IQtTemplateBindable {
-    public string Name { get; } = name;
-    public IQtType Type { get; } = type;
-
-    public ParameterModifier Modifiers { get; } = modifiers;
+public readonly struct QtParameter : IQtTemplateBindable {
+    public required string Name { get; init; }
+    public required IQtType Type { get; init; }
+    public required IQtCompileTimeValue? DefaultValue { get; init; }
+    public required ParameterAttributes Attributes { get; init; }
 
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
-        writer.WriteFormatted($"{Modifiers}{Type:g} {Name}");
+        writer.WriteFormatted($"{Attributes}{Type:g} {Name}");
+        if (DefaultValue is not null) {
+            writer.Write(" = ");
+            writer.Write(DefaultValue);
+        }
     }
 }
 
@@ -38,7 +37,7 @@ public readonly struct QtParameterList(
                 writer.Write(", ");
             }
 
-            parameter.WriteSyntax(ref writer, format);
+            writer.Write(parameter);
         }
     }
 }
