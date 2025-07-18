@@ -93,7 +93,7 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
                 goto TryWriteLiteral;
             }
 
-            _bufferPosition += written
+            _bufferPosition += written;
             return;
         }
 
