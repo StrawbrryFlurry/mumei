@@ -66,19 +66,22 @@ internal sealed class SyntaxVerifier {
     public static void VerifyRegex<TRepresentable>(TRepresentable representable, SyntaxVerificationExpectation expected)
         where TRepresentable : ISyntaxRepresentable {
 
+        var actual = representable.ToSyntaxInternal().TrimEnd();
+        var expectedString = expected.ToString();
+
         var doesMatch = WildcardMatcher.Matches(
-            representable.ToSyntaxInternal().TrimEnd(),
-            expected.ToString()
+            actual,
+            expectedString
         );
         if (!doesMatch) {
             throw new XunitException(
                 $"""
                  Syntax verification failed.
                  Expected:
-                 {expected}
+                 {expectedString}
 
                  Actual:
-                 {representable.ToSyntaxInternal()}
+                 {actual}
                  """
             );
         }

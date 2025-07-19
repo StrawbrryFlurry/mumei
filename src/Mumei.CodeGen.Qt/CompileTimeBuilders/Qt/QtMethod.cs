@@ -68,9 +68,10 @@ internal readonly struct QtMethodCore(
             return;
         }
 
-        writer.Write("{");
+        writer.Write(" ");
+        writer.WriteLine("{");
         writer.Indent();
-        writer.Write(codeBlock);
+        writer.WriteBlock(codeBlock);
         writer.Dedent();
         writer.Write("}");
     }

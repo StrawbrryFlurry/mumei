@@ -40,6 +40,7 @@ public sealed class QtClassTestsDynamicInterceptorMethod {
                         Arguments = ctx.InvocationArguments,
                         Method = ctx.Method
                     });
+
                     throw;
                 }
 
@@ -51,21 +52,22 @@ public sealed class QtClassTestsDynamicInterceptorMethod {
             cls,
             $$"""
               file static class TestClass {
-                  public static bool QtProxy__SequenceEqual(this {{typeof(IEnumerable<int>):g}} λthis, {{typeof(IEnumerable<int>):g}} λsecond) {
+                  file static bool QtProxy__SequenceEqual(this {{typeof(IEnumerable<int>):g}} λthis, {{typeof(IEnumerable<int>):g}} λsecond) {
                       bool result;
                       try {
                           result = (bool){{typeof(Enumerable):g}}.SequenceEqual<int>(λthis, λsecond);
-                      } 
+                      }
                       catch ({{typeof(Exception):g}} e) {
                           {{typeof(Console):g}}.WriteLine(e);
                           {{typeof(Console):g}}.WriteLine(new {
                               Arguments = [ λthis, λsecond ],
-                              Method = [ANY]
+                              Method = *
                           });
+                          
                           throw;
                       }
 
-                      return ctx.Return(result);
+                      return result;
                   }
               }
               """

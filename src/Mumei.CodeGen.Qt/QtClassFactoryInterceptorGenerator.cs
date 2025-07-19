@@ -176,7 +176,6 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
     ) {
         var whitespaceToSkip = DetermineAccidentalTriviaIndentCount(source);
         var result = new ValueSyntaxWriter(stackalloc char[ValueSyntaxWriter.StackBufferSize]);
-        var walker = new SpanWalker<char>(source);
 
         while (source.Length != 0) {
             var lineEnd = source.IndexOf("\n");
@@ -255,7 +254,7 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
                 return base.VisitInvocationExpression(node);
             }
 
-            return MakeMakerLiteralFor(memberAccess.Name.Identifier);
+            return MakeMakerLiteralFor(memberAccess.Name.Identifier, node);
         }
 
         public override SyntaxNode? VisitMemberAccessExpression(MemberAccessExpressionSyntax node) {
@@ -264,10 +263,10 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
                 return base.VisitMemberAccessExpression(node);
             }
 
-            return MakeMakerLiteralFor(node.Name.Identifier);
+            return MakeMakerLiteralFor(node.Name.Identifier, node);
         }
 
-        private IdentifierNameSyntax MakeMakerLiteralFor(SyntaxToken identifier) {
+        private IdentifierNameSyntax MakeMakerLiteralFor(SyntaxToken identifier, SyntaxNode sourceNode) {
             var binderKey = identifier.Text switch {
                 nameof(QtDynamicInterceptorMethodCtx.Invoke) => ProxyInvocationExpressionBindingContext.BindInvocation,
                 nameof(QtDynamicInterceptorMethodCtx.Method) => ProxyInvocationExpressionBindingContext.BindMethodInfo,
@@ -276,8 +275,9 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
             };
 
             return IdentifierName(
-                $"{__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeStart}{binderKey}{__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeEnd}"
-            );
+                    $"{__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeStart}{binderKey}{__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeEnd}"
+                ).WithLeadingTrivia(sourceNode.GetLeadingTrivia())
+                .WithTrailingTrivia(sourceNode.GetTrailingTrivia());
         }
     }
 

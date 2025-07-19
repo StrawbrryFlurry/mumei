@@ -1,5 +1,6 @@
 ﻿using System.Buffers;
 using System.Diagnostics;
+using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -135,7 +136,7 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
 #endif
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void WriteLine(string line) {
+    public void WriteLine(in ReadOnlySpan<char> line) {
         if (TryWriteIndent(line.Length + NewLine.Length)) {
             WriteCoreUnsafe(line);
             WriteCoreUnsafe(NewLine);
@@ -150,14 +151,12 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void WriteLine() {
-        if (TryWriteIndent(NewLine.Length)) {
-            WriteCoreUnsafe(NewLine);
-        }
-        else {
-            WriteCore(NewLine);
-        }
-
+        WriteCore(NewLine);
         _requiresIndent = true;
+    }
+
+    public void WriteBlock(in ReadOnlySpan<char> block) {
+        SyntaxWriter.WriteBlock(ref this, block);
     }
 
     public void WriteFormatted(in FormattableSyntaxWritable writable) {
@@ -255,11 +254,9 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
         return false;
     }
 
-    public void Dispose() {
+    public readonly void Dispose() {
         if (_rentedBuffer is not null) {
             ArrayPool<char>.Shared.Return(_rentedBuffer);
         }
-
-        this = default;
     }
 }

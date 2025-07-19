@@ -67,12 +67,12 @@ public ref struct FormattableSyntaxWritable {
         });
     }
 
-    public void CopyToAndDispose<TWriter>(ref TWriter writer) where TWriter : ISyntaxWriter {
+    public readonly void CopyToAndDispose<TWriter>(ref TWriter writer) where TWriter : ISyntaxWriter {
         _writer.CopyTo(ref writer);
         _writer.Dispose();
     }
 
-    public void CopyToAndDispose(Span<char> buffer) {
+    public readonly void CopyToAndDispose(Span<char> buffer) {
         _writer.CopyTo(buffer);
         _writer.Dispose();
     }

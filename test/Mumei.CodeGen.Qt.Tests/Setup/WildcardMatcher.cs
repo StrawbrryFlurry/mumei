@@ -3,31 +3,25 @@
 namespace Mumei.CodeGen.Qt.Tests.Setup;
 
 public static partial class WildcardMatcher {
-    public static bool Matches(string text, string pattern, bool ignoreWhitespace = true) {
-        var regexPattern = pattern
-            .Replace("*", ".*?") // * matches any characters
-            .Replace("?", ".") // ? matches single character
-            .Replace("[ANY]", ".*?"); // [ANY] matches any characters
+    public static bool Matches(string text, string pattern) {
+        text = TrimEachLine(text.ReplaceLineEndings("\n"));
+        pattern = TrimEachLine(pattern.ReplaceLineEndings("\n"));
 
-        if (ignoreWhitespace) {
-            regexPattern = NormalizeWhitespaceRegex().Replace(regexPattern, @"\s+");
-            // regexPattern = NormalizeLineEndingsRegex().Replace(regexPattern, "\n");
-        }
+        var regexPattern = Regex.Escape(pattern)
+            .Replace("\\*", ".*?") // * matches any characters
+            .Replace("\\?", ".") // ? matches single character
+            .Replace("\\[ANY\\]", ".*?"); // [ANY] matches any characters
+
 
         return Regex.IsMatch(text, regexPattern, RegexOptions.Singleline);
     }
 
-    private static string NormalizeWhitespace(string input) {
-        return NormalizeWhitespaceRegex().Replace(input, " ").Trim();
+    private static string TrimEachLine(string text) {
+        var lines = text.Split('\n');
+        for (var i = 0; i < lines.Length; i++) {
+            lines[i] = lines[i].TrimEnd();
+        }
+
+        return string.Join("\n", lines);
     }
-
-    [GeneratedRegex(@"\s+")]
-    private static partial Regex NormalizeWhitespaceRegex();
-
-    private static string NormalizeLineEndings(string input) {
-        return NormalizeLineEndingsRegex().Replace(input, "\n");
-    }
-
-    [GeneratedRegex(@"\r\n?|\n")]
-    private static partial Regex NormalizeLineEndingsRegex();
 }

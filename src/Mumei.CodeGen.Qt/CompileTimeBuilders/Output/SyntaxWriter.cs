@@ -34,9 +34,11 @@ public interface ISyntaxWriter {
     ///   the line with a newline.
     /// </summary>
     /// <param name="line"></param>
-    public void WriteLine(string line);
+    public void WriteLine(in ReadOnlySpan<char> line);
 
     public void WriteLine();
+
+    public void WriteBlock(in ReadOnlySpan<char> block);
 
     /// <summary>
     ///   Writes an empty line to the stream
@@ -70,6 +72,11 @@ public class SyntaxWriter : ISyntaxWriter {
 
     public void SetIndentLevel(int level) {
         IndentLevel = level;
+    }
+
+    public void WriteBlock(in ReadOnlySpan<char> block) {
+        var @this = this;
+        WriteBlock(ref @this, block);
     }
 
     public void WriteFormatted(in FormattableSyntaxWritable writable) {
@@ -153,9 +160,9 @@ public class SyntaxWriter : ISyntaxWriter {
         _code.Append(literal);
     }
 
-    public void WriteLine(string line) {
-        TryWriteIndent();
-        _code.AppendLine(line);
+    public void WriteLine(in ReadOnlySpan<char> line) {
+        Write(line);
+        _code.AppendLine();
         _requiresIndent = true;
     }
 
@@ -173,7 +180,6 @@ public class SyntaxWriter : ISyntaxWriter {
     }
 
     public void WriteLine() {
-        TryWriteIndent();
         _code.Append(NewLine);
         _requiresIndent = true;
     }
@@ -193,6 +199,45 @@ public class SyntaxWriter : ISyntaxWriter {
             16 => "                ",
             _ => new string(IndentChar, indentationCharCount)
         };
+    }
+
+    internal static void WriteBlock<TWriter>(
+        ref TWriter writer,
+        in ReadOnlySpan<char> block
+    ) where TWriter : ISyntaxWriter {
+        if (block.IsEmpty) {
+            return;
+        }
+
+        var remainingLines = block;
+        while (!remainingLines.IsEmpty) {
+            var lineEnd = DetermineLineEnd(remainingLines, out var toSkip);
+            var line = remainingLines[..lineEnd];
+            writer.WriteLine(line);
+            remainingLines = remainingLines[(lineEnd + toSkip)..];
+        }
+
+        static int DetermineLineEnd(ReadOnlySpan<char> remainingLines, out int toSkip) {
+            var nextNewLine = remainingLines.IndexOf('\n');
+            if (remainingLines.IsEmpty) {
+                toSkip = 0;
+                return 0;
+            }
+
+            if (nextNewLine == -1) {
+                toSkip = 0;
+                return remainingLines.Length;
+            }
+
+            if (nextNewLine == 0) {
+                toSkip = 0;
+                return 0;
+            }
+
+            var skipCarriageReturn = remainingLines[nextNewLine - 1] is '\r';
+            toSkip = skipCarriageReturn ? 2 : 1;
+            return skipCarriageReturn ? nextNewLine - 1 : nextNewLine;
+        }
     }
 
     public override string ToString() {
