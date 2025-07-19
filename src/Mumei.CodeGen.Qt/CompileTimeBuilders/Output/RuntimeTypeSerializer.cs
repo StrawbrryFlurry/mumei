@@ -6,8 +6,12 @@ internal static class RuntimeTypeSerializer {
         Type type,
         string? format = null
     ) where TSyntaxWriter : ISyntaxWriter {
+        if (format == "t") {
+            writer.WriteFormatted($"typeof(");
+        }
+
         if (TryWriteShortForm(type, writer)) {
-            return;
+            goto WriteEndOfType;
         }
 
         if (format is "g" or "global") {
@@ -26,8 +30,8 @@ internal static class RuntimeTypeSerializer {
 
         writer.Write(name);
 
-        if (!type.IsGenericType) {
-            return;
+        if (!type.IsConstructedGenericType) {
+            goto WriteEndOfType;
         }
 
         writer.Write("<");
@@ -41,6 +45,11 @@ internal static class RuntimeTypeSerializer {
         }
 
         writer.Write(">");
+
+        WriteEndOfType:
+        if (format == "t") {
+            writer.Write(")");
+        }
     }
 
     private static bool TryWriteShortForm<TSyntaxWriter>(Type type, in TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {

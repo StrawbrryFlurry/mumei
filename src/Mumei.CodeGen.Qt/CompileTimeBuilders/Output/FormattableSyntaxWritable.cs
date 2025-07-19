@@ -17,15 +17,23 @@ public ref struct FormattableSyntaxWritable {
         _writer.Write(s);
     }
 
-    public void AppendFormatted(string s) {
+    public void AppendFormatted(string s, string? format = null) {
+        if (format == "q") {
+            _writer.Write("\"");
+        }
+
         _writer.Write(s);
+
+        if (format == "q") {
+            _writer.Write("\"");
+        }
     }
 
-    public void AppendFormatted<TRepresentable>(TRepresentable representable) where TRepresentable : ISyntaxRepresentable {
+    public void AppendFormatted<TRepresentable>(in TRepresentable representable) where TRepresentable : ISyntaxRepresentable {
         representable.WriteSyntax(ref _writer);
     }
 
-    public void AppendFormatted<TRepresentable>(TRepresentable representable, string format) where TRepresentable : ISyntaxRepresentable {
+    public void AppendFormatted<TRepresentable>(in TRepresentable representable, string format) where TRepresentable : ISyntaxRepresentable {
         representable.WriteSyntax(ref _writer, format);
     }
 
@@ -59,12 +67,12 @@ public ref struct FormattableSyntaxWritable {
         });
     }
 
-    public readonly void CopyToAndDispose<TWriter>(ref TWriter writer) where TWriter : ISyntaxWriter {
+    public void CopyToAndDispose<TWriter>(ref TWriter writer) where TWriter : ISyntaxWriter {
         _writer.CopyTo(ref writer);
         _writer.Dispose();
     }
 
-    public readonly void CopyToAndDispose(Span<char> buffer) {
+    public void CopyToAndDispose(Span<char> buffer) {
         _writer.CopyTo(buffer);
         _writer.Dispose();
     }

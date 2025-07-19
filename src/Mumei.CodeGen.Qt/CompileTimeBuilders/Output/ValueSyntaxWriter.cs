@@ -1,10 +1,12 @@
 ﻿using System.Buffers;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Mumei.CodeGen.Qt.Output;
 
 // If only we had allows ref struct (sigh)
+[DebuggerDisplay("{DebuggerDisplay(),nq}")]
 public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
     public const int StackBufferSize = 256;
 
@@ -231,6 +233,10 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
         var s = new string(_buffer, 0, _bufferPosition);
         Dispose();
         return s;
+    }
+
+    private string DebuggerDisplay() {
+        return new string(_buffer, 0, _bufferPosition);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

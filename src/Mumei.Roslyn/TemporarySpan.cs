@@ -3,24 +3,6 @@ using System.Runtime.CompilerServices;
 
 namespace Mumei.Roslyn;
 
-/// <summary>
-/// Wraps a <see cref="Span{T}"/>, giving
-/// consumers temporary access to it's contents. The Span
-/// is by design volatile and is not meant to be used outside
-/// of the current operation scope. Consumers
-/// may copy or mutate the contents of the span, but
-/// must not store a reference to the span itself. The
-/// instance must be disposed when the consumer is done using it.
-///<remarks>
-/// Using the instance after it has been disposed may result in
-/// undefined behavior.
-/// 
-/// Not disposing the instance will result in performance
-/// issues and cause additional memory to be allocated,
-/// which might not be freed.
-/// </remarks>
-/// </summary>
-/// <typeparam name="T">The type of the Span's content</typeparam>
 public ref struct TemporarySpan<T> {
     private readonly ReadOnlySpan<T> _span;
     private readonly T[]? _rentedArray;

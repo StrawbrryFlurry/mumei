@@ -58,7 +58,7 @@ public class TypeToGloballyQualifiedIdentifierRewriter(
                 Argument(targetMemberAccess.Expression),
                 ..invocation.ArgumentList.Arguments
             ]))
-        );
+        ).WithLeadingTrivia(node.GetLeadingTrivia()).WithTrailingTrivia(node.GetTrailingTrivia());
     }
 
     public static bool TryGlobalizeIdentifier(
@@ -92,7 +92,7 @@ public class TypeToGloballyQualifiedIdentifierRewriter(
 
         globalizedIdentifier = IdentifierName(
             identifierType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
-        );
+        ).WithLeadingTrivia(node.GetLeadingTrivia()).WithTrailingTrivia(node.GetTrailingTrivia());
         return true;
     }
 

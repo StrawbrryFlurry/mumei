@@ -152,9 +152,16 @@ public readonly struct QtClass(
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
+    public QtMethod<CompileTimeUnknown> BindDynamicTemplateInterceptMethod<TReturn>(
+        InvocationExpressionSyntax invocationToProxy,
+        DeclareQtInterceptorMethod<TReturn> declaration
+    ) {
+        throw new CompileTimeComponentUsedAtRuntimeException();
+    }
+
     public QtMethod<CompileTimeUnknown> BindDynamicTemplateInterceptMethod(
         InvocationExpressionSyntax invocationToProxy,
-        DeclareQtInterceptorMethod declaration
+        DeclareQtInterceptorVoidMethod declaration
     ) {
         throw new CompileTimeComponentUsedAtRuntimeException();
     }

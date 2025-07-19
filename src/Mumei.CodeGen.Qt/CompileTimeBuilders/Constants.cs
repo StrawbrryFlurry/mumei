@@ -1,5 +1,13 @@
 ﻿namespace Mumei.CodeGen.Playground;
 
+internal static class IdentifierConstants {
+    public const string InternalMarker = "λ";
+
+    public static string Obfuscate(this string identifier) {
+        return $"{InternalMarker}{identifier}";
+    }
+}
+
 public static class Arg {
     public sealed class TThis { };
 

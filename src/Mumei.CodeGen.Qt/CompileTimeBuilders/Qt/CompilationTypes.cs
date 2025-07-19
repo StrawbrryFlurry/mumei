@@ -2,7 +2,10 @@
 
 namespace Mumei.CodeGen.Qt.Qt;
 
-public sealed class Unit;
+public sealed class Unit {
+    public static readonly Unit Value = new();
+    private Unit() { }
+};
 
 public sealed class CompileTimeUnknown;
 

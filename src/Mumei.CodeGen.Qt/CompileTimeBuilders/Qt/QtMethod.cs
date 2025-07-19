@@ -13,11 +13,11 @@ public readonly struct QtMethod<TReturnType> : IQtInvokable<TReturnType> {
         string name,
         AccessModifier modifiers,
         IQtType returnType,
-        QtTypeParameterList typeParameters,
-        QtParameterList parameters,
-        IQtMethodRepresentation representation,
-        QtAttributeList attributes,
-        QtDeclarationPtr<QtMethodCore> declarationPtr
+        in QtTypeParameterList typeParameters,
+        in QtParameterList parameters,
+        in QtCodeBlock codeBlock,
+        in QtAttributeList attributes,
+        in QtDeclarationPtr<QtMethodCore> declarationPtr
     ) {
         _declarationPtr = declarationPtr;
         Method = new QtMethodCore(
@@ -26,7 +26,7 @@ public readonly struct QtMethod<TReturnType> : IQtInvokable<TReturnType> {
             returnType,
             typeParameters,
             parameters,
-            representation,
+            codeBlock,
             attributes
         );
     }
@@ -50,12 +50,13 @@ internal readonly struct QtMethodCore(
     IQtType returnType,
     QtTypeParameterList typeParameters,
     QtParameterList parameters,
-    IQtMethodRepresentation representation,
+    QtCodeBlock codeBlock,
     QtAttributeList attributes
 ) : IQtTemplateBindable {
     public string Name => name;
 
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+        writer.Write(attributes);
         writer.WriteFormatted($"{modifiers} {returnType:g} {name}{typeParameters}({parameters})");
 
         if (!typeParameters.Constraints.IsEmpty) {
@@ -67,23 +68,17 @@ internal readonly struct QtMethodCore(
             return;
         }
 
-        representation.WriteSyntax(ref writer);
+        writer.Write("{");
+        writer.Indent();
+        writer.Write(codeBlock);
+        writer.Dedent();
+        writer.Write("}");
     }
 }
 
 public readonly struct QtMethodStub {
     public required string Name { get; init; }
     public required bool IsThisCall { get; init; }
-}
-
-internal interface IQtMethodRepresentation : ISyntaxRepresentable;
-
-internal sealed class StaticQtMethodRepresentation(
-    string s
-) : IQtMethodRepresentation {
-    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
-        writer.Write(s);
-    }
 }
 
 public delegate QtMethodBuilder.Configured ConfigureQtMethod(QtMethodBuilder.StartDecl builder);

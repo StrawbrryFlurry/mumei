@@ -62,4 +62,25 @@ internal sealed class SyntaxVerifier {
             );
         }
     }
+
+    public static void VerifyRegex<TRepresentable>(TRepresentable representable, SyntaxVerificationExpectation expected)
+        where TRepresentable : ISyntaxRepresentable {
+
+        var doesMatch = WildcardMatcher.Matches(
+            representable.ToSyntaxInternal().TrimEnd(),
+            expected.ToString()
+        );
+        if (!doesMatch) {
+            throw new XunitException(
+                $"""
+                 Syntax verification failed.
+                 Expected:
+                 {expected}
+
+                 Actual:
+                 {representable.ToSyntaxInternal()}
+                 """
+            );
+        }
+    }
 }

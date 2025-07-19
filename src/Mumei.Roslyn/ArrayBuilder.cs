@@ -113,11 +113,6 @@ public ref partial struct ArrayBuilder<TElement> {
         _elements = _rentedArray = resizedElements;
     }
 
-    /// <summary>
-    /// Returns a new <see cref="TElement[]"/> containing all elements of the builder.
-    /// The builder cannot be used after this operation.
-    /// </summary>
-    /// <returns>A new array containing all the elements of the builder</returns>
     public TElement[] ToArrayAndFree() {
         var array = new TElement[_count];
 
@@ -127,11 +122,6 @@ public ref partial struct ArrayBuilder<TElement> {
         return array;
     }
 
-    /// <summary>
-    /// Returns a new <see cref="ImmutableArray{T}"/> containing all elements of the builder.
-    /// The builder cannot be used after this operation.
-    /// </summary>
-    /// <returns>A new array containing all the elements of the builder</returns>
     public ImmutableArray<TElement> ToImmutableArrayAndFree() {
         // The ImmutableArray constructor will create a new array from the span,
         // so we can give it a cut-down version of the array we rented, avoiding
@@ -141,11 +131,6 @@ public ref partial struct ArrayBuilder<TElement> {
         return array;
     }
 
-    /// <summary>
-    /// Returns a new <see cref="Span{T}"/> containing all elements of the builder.
-    /// The builder cannot be used after this operation.
-    /// </summary>
-    /// <returns>A new span containing all the elements of the builder</returns>
     public Span<TElement> ToSpanAndFree() {
         Span<TElement> backingArray = new TElement[_count];
 
@@ -155,11 +140,6 @@ public ref partial struct ArrayBuilder<TElement> {
         return backingArray;
     }
 
-    /// <summary>
-    /// Returns a new <see cref="ReadOnlySpan{T}"/> containing all elements of the builder.
-    /// The builder cannot be used after this operation.
-    /// </summary>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ReadOnlySpan<TElement> ToReadOnlySpanAndFree() {
         return new ReadOnlySpan<TElement>(ToArrayAndFree());
@@ -170,16 +150,6 @@ public ref partial struct ArrayBuilder<TElement> {
         return new TemporarySpan<TElement>(Elements, _rentedArray);
     }
 
-    /// <summary>
-    /// Returns a span that includes all elements in the builder, useful for
-    /// iterating over the elements or copying them to another span.
-    /// Consumers DO NOT own the returned span and MUST NOT use it after
-    /// this builder instance has been used again, mutate it,
-    /// pass it to another method or otherwise leak it outside of it's owned context.
-    /// The backing array of the span is still used by the builder and will be changed
-    /// / updated it for future operations.
-    /// </summary>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ReadOnlySpan<TElement> DangerousAsSpanWithoutOwnership() {
         return Elements;

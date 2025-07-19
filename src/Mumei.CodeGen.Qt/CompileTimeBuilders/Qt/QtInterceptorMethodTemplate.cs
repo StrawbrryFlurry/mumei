@@ -33,7 +33,9 @@ public abstract class QtAsyncInterceptorMethodTemplate : IQtInterceptorMethodTem
 
 public interface IQtInterceptorMethodTemplate : IQtThis;
 
-public delegate CompileTimeUnknown DeclareQtInterceptorMethod(QtDynamicInterceptorMethodCtx ctx);
+public delegate TReturn DeclareQtInterceptorMethod<TReturn>(QtDynamicInterceptorMethodCtx ctx);
+
+public delegate void DeclareQtInterceptorVoidMethod(QtDynamicInterceptorMethodCtx ctx);
 
 public delegate CompileTimeUnknown DeclareQtInterceptorMethodWithRefs<TTemplateReferences>(QtDynamicInterceptorMethodCtx ctx, TTemplateReferences refs);
 

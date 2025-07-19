@@ -58,7 +58,7 @@ internal readonly ref struct RoslynQtComponentFactory(
 
         if (method.IsExtensionMethod) {
             result[0] = new QtParameter {
-                Name = "__this",
+                Name = "this".Obfuscate(),
                 Type = Type(method.ReceiverType!),
                 DefaultValue = null,
                 Attributes = ParameterAttributes.This
@@ -107,7 +107,7 @@ internal readonly ref struct RoslynQtComponentFactory(
             : null;
 
         return new QtParameter {
-            Name = parameter.Name,
+            Name = parameter.Name.Obfuscate(),
             Type = type,
             DefaultValue = defaultValue,
             Attributes = attributes
@@ -176,15 +176,7 @@ internal readonly ref struct RoslynQtComponentFactory(
         return _compilation.GetSemanticModel(node.SyntaxTree);
     }
 
-    public IQtType Type(ITypeSymbol type) {
-        return new QtRoslynType(type);
-    }
-}
-
-file sealed class QtRoslynType(
-    ITypeSymbol typeSymbol
-) : IQtType {
-    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
-        writer.Write(typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+    private IQtType Type(ITypeSymbol type) {
+        return QtType.ForRoslynType(type);
     }
 }

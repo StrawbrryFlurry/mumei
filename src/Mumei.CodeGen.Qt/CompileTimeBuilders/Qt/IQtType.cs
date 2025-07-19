@@ -1,4 +1,5 @@
-﻿using Mumei.CodeGen.Qt.Output;
+﻿using Microsoft.CodeAnalysis;
+using Mumei.CodeGen.Qt.Output;
 
 namespace Mumei.CodeGen.Qt.Qt;
 
@@ -11,6 +12,22 @@ public sealed class QtType {
 
     public static IQtType ForRuntimeType(Type t) {
         return new QtRuntimeType(t);
+    }
+
+    public static IQtType ForRoslynType(ITypeSymbol t) {
+        return new QtRoslynType(t);
+    }
+
+    public static IQtType ConstructRuntimeGenericType(
+        Type t,
+        params IQtType[] typeArguments
+    ) {
+        if (!t.IsGenericType) {
+            throw new ArgumentException($"Type '{t.FullName}' is not a generic type.", nameof(t));
+        }
+
+        var type = new QtRuntimeType(t);
+        return new CompositeQtType(type, typeArguments);
     }
 }
 
@@ -39,7 +56,62 @@ file sealed class QtRuntimeType(
             writer.Write("*");
         }
 
-        var w = writer;
-        RuntimeTypeSerializer.SerializeInto(ref w, t, format);
+        RuntimeTypeSerializer.SerializeInto(ref writer, t, format);
+    }
+
+    public override string ToString() {
+        return t.ToString();
+    }
+}
+
+file sealed class CompositeQtType(
+    IQtType type,
+    IQtType[] typeArguments
+) : IQtType {
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+        if (format == "t") {
+            writer.Write("typeof(");
+        }
+
+        writer.WriteFormatted($"{type:g}<");
+        for (var i = 0; i < typeArguments.Length; i++) {
+            if (i > 0) {
+                writer.Write(", ");
+            }
+
+            writer.Write(typeArguments[i]);
+        }
+
+        writer.Write(">");
+
+        if (format == "t") {
+            writer.Write(")");
+        }
+    }
+
+    public override string ToString() {
+        var sw = new ValueSyntaxWriter(stackalloc char[ValueSyntaxWriter.StackBufferSize]);
+        WriteSyntax(ref sw);
+        return sw.ToString();
+    }
+}
+
+file sealed class QtRoslynType(
+    ITypeSymbol typeSymbol
+) : IQtType {
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+        if (format == "t") {
+            writer.Write("typeof(");
+        }
+
+        writer.Write(typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+
+        if (format == "t") {
+            writer.Write(")");
+        }
+    }
+
+    public override string ToString() {
+        return typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
     }
 }

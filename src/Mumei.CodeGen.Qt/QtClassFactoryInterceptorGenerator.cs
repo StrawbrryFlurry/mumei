@@ -3,6 +3,7 @@ using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Mumei.CodeGen.Playground;
 using Mumei.CodeGen.Playground.Qt;
 using Mumei.CodeGen.Qt.Output;
 using Mumei.CodeGen.Qt.Qt;
@@ -75,15 +76,18 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
         var proxyId = NextId;
         var methodDeclaration = invocation.ArgumentList.Arguments[1];
 
+        var method = (IMethodSymbol)semanticModel.GetSymbolInfo(invocation).Symbol!;
         var v = new QtInterceptorMethodDeclarationVisitor(semanticModel).Visit(methodDeclaration.Expression);
+        BlockSyntax body;
         if (v is ParenthesizedLambdaExpressionSyntax complex) {
-            v = (BlockSyntax)complex.Body;
+            body = (BlockSyntax)complex.Body;
         }
         else {
-            v = ((SimpleLambdaExpressionSyntax)v).Body;
+            body = (BlockSyntax)((SimpleLambdaExpressionSyntax)v).Body;
         }
 
-        var sourceCodeSections = MakeDynamicallyBoundSourceCodeSections(v.NormalizeWhitespace().ToFullString());
+        var bodyStatements = body.Statements.ToFullString();
+        var sourceCodeSections = MakeDynamicallyBoundSourceCodeSections(bodyStatements);
 
         writer.WriteFormattedLine($"private static readonly string[] CachedSourceCodeTemplate_Intercept_{proxyId} = [");
         var ind = writer.IndentLevel;
@@ -111,8 +115,12 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
         writer.WriteFormattedLine($"in this {typeof(QtClass):g} self,");
         writer.WriteFormattedLine($"{typeof(InvocationExpressionSyntax):g} invocationToProxy,");
 
+        var templateMethodType = method.TypeParameters.IsEmpty
+            ? QtType.ForRuntimeType<DeclareQtInterceptorVoidMethod>()
+            : QtType.ConstructRuntimeGenericType(typeof(DeclareQtInterceptorMethod<>), QtType.ForRoslynType(method.TypeArguments[0]));
+
         writer.WriteFormattedLine(
-            $"{typeof(DeclareQtInterceptorMethod):g} declaration"
+            $"{templateMethodType:g} declaration"
         );
 
         writer.Dedent();
@@ -138,8 +146,9 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
     }
 
     private static string[] MakeDynamicallyBoundSourceCodeSections(
-        ReadOnlySpan<char> source
+        ReadOnlySpan<char> code
     ) {
+        var source = CleanUpCapturedSourceCode(code).AsSpan();
         // We could prolly make the binding of syntax nodes / context objs to the source code fully compile-time as well
         // Since we know all arguments and references of "external" code at this point.
         var result = ImmutableArray.CreateBuilder<string>();
@@ -160,6 +169,47 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
         }
 
         return result.ToArray();
+    }
+
+    private static string CleanUpCapturedSourceCode(
+        ReadOnlySpan<char> source
+    ) {
+        var whitespaceToSkip = DetermineAccidentalTriviaIndentCount(source);
+        var result = new ValueSyntaxWriter(stackalloc char[ValueSyntaxWriter.StackBufferSize]);
+        var walker = new SpanWalker<char>(source);
+
+        while (source.Length != 0) {
+            var lineEnd = source.IndexOf("\n");
+            lineEnd = lineEnd == -1 ? source.Length : lineEnd + 1; // Include the newline character in the line
+
+            var line = source[..lineEnd];
+
+            var whitespaceCount = 0;
+            var maxWhiteSpaceToSkip = Math.Min(whitespaceToSkip, line.Length);
+            for (var j = 0; j < maxWhiteSpaceToSkip; j++) {
+                if (!char.IsWhiteSpace(line[j]) || line[j] == '\n' || line[j] == '\r') {
+                    break;
+                }
+
+                whitespaceCount++;
+            }
+
+            var charsToRemove = Math.Min(whitespaceCount, whitespaceToSkip);
+
+            result.Write(line[charsToRemove..]);
+            source = source[lineEnd..];
+        }
+
+        return result.ToString();
+    }
+
+    private static int DetermineAccidentalTriviaIndentCount(in ReadOnlySpan<char> source) {
+        var indentChars = 0;
+        while (source[indentChars] is ' ' or '\t' && source[indentChars] != '\n' && indentChars < source.Length) {
+            indentChars++;
+        }
+
+        return indentChars;
     }
 
     private sealed class QtInterceptorMethodDeclarationVisitor(
@@ -205,10 +255,6 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
                 return base.VisitInvocationExpression(node);
             }
 
-            if (memberAccess.Name.Identifier.Text == "Return") {
-                return node.ArgumentList.Arguments.First().Expression;
-            }
-
             return MakeMakerLiteralFor(memberAccess.Name.Identifier);
         }
 
@@ -222,8 +268,15 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
         }
 
         private IdentifierNameSyntax MakeMakerLiteralFor(SyntaxToken identifier) {
+            var binderKey = identifier.Text switch {
+                nameof(QtDynamicInterceptorMethodCtx.Invoke) => ProxyInvocationExpressionBindingContext.BindInvocation,
+                nameof(QtDynamicInterceptorMethodCtx.Method) => ProxyInvocationExpressionBindingContext.BindMethodInfo,
+                nameof(QtDynamicInterceptorMethodCtx.InvocationArguments) => ProxyInvocationExpressionBindingContext.BindArguments,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
             return IdentifierName(
-                $"{__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeStart}{identifier.Text}{__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeEnd}"
+                $"{__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeStart}{binderKey}{__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeEnd}"
             );
         }
     }

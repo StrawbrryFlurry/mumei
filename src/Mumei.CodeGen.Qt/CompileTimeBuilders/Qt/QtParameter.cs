@@ -22,11 +22,16 @@ public readonly struct QtParameter : IQtTemplateBindable {
 public readonly struct QtParameterList(
     QtParameter[] parameters
 ) : IQtTemplateBindable {
+    public int Count => parameters.Length;
+
+    internal QtParameter[] Parameters => parameters;
+
     internal static QtParameterList Builder(int capacity) {
         return new QtParameterList(new QtParameter[capacity]);
     }
 
     internal QtParameter this[int index] {
+        get => parameters[index];
         set => parameters[index] = value;
     }
 

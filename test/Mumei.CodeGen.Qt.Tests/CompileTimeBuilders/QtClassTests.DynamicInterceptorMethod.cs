@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Playground;
-using Mumei.CodeGen.Playground.Qt;
 using Mumei.CodeGen.Qt.Qt;
 using Mumei.CodeGen.Qt.Tests.Setup;
 using SourceCodeFactory;
@@ -17,13 +16,17 @@ public sealed class QtClassTestsDynamicInterceptorMethod {
         QtCompilationScope.SetActiveScope(compilation);
 
         var cls = new QtClass(AccessModifier.FileStatic, "TestClass");
-
         var x = compilation.SyntaxTrees.First(x => x.FilePath == nameof(BindDynamicTemplateInterceptMethod));
         var invocation = x.GetRoot()
                 .DescendantNodesAndSelf(x => x is not InvocationExpressionSyntax)
                 .FirstOrDefault(x => x is InvocationExpressionSyntax)
             as InvocationExpressionSyntax;
 
+        // < >SM:field__Get(this)
+        // => _foo
+        // < >SM:Invoke
+        // => Enumerable.SequenceEqual(__first, __second)
+        // state.field.Get(ctx.This);
         cls.BindDynamicTemplateInterceptMethod(
             invocation!,
             static ctx => {
@@ -40,24 +43,24 @@ public sealed class QtClassTestsDynamicInterceptorMethod {
                     throw;
                 }
 
-                return ctx.Return(result);
+                return result;
             }
         );
 
-        SyntaxVerifier.Verify(
+        SyntaxVerifier.VerifyRegex(
             cls,
             $$"""
               file static class TestClass {
-                  public static bool QtProxy__SequenceEqual(this {{typeof(IEnumerable<int>):g}} first, {{typeof(IEnumerable<int>):g}} second) {
+                  public static bool QtProxy__SequenceEqual(this {{typeof(IEnumerable<int>):g}} λthis, {{typeof(IEnumerable<int>):g}} λsecond) {
                       bool result;
                       try {
-                          result = (bool)ctx.Invoke<{{typeof(BooleanLike)}}>();
+                          result = (bool){{typeof(Enumerable):g}}.SequenceEqual<int>(λthis, λsecond);
                       } 
                       catch ({{typeof(Exception):g}} e) {
                           {{typeof(Console):g}}.WriteLine(e);
                           {{typeof(Console):g}}.WriteLine(new {
-                              Arguments = ctx.InvocationArguments,
-                              Method = ctx.Method
+                              Arguments = [ λthis, λsecond ],
+                              Method = [ANY]
                           });
                           throw;
                       }
