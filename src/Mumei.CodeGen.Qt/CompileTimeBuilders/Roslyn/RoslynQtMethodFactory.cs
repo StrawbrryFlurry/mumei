@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Diagnostics;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Playground;
 using Mumei.CodeGen.Qt.Output;
@@ -47,40 +48,75 @@ internal readonly struct ProxyInvocationCallSiteInvokeBinder(
     InvocationExpressionSyntax invocation,
     IMethodSymbol method,
     QtParameterList parameters
-) : ISyntaxRepresentable {
-    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
-        var declaringType = QtType.ForRoslynType(method.ContainingType);
-        writer.WriteFormatted($"{declaringType:g}.{method.Name}");
+) {
+    public Unit BindInto<TSyntaxWriter>(ref TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
+        var callIsOnThisObj = !method.IsExtensionMethod;
+        var firstParameterIsThis = parameters[0].Attributes.HasFlag(ParameterAttributes.This);
+        var parametersRequiredForInvocation = firstParameterIsThis && callIsOnThisObj ? parameters.Memory[1..] : parameters.Memory;
+
+        if (method.IsStatic || method.IsExtensionMethod) {
+            var declaringType = QtType.ForRoslynType(method.ContainingType);
+            writer.Write(declaringType, "g");
+        }
+        else {
+            Debug.Assert(callIsOnThisObj);
+            var thisIdentifier = parameters[0].Name;
+            writer.Write(thisIdentifier);
+        }
+
+        writer.Write(".");
+
+        writer.Write(method.Name);
         if (method.TypeParameters.Length > 0) {
-            var typeParameters = method.TypeArguments.RepresentAsSeparatedList(QtType.ForRoslynType);
+            var typeParameters = method.TypeArguments.AsMemory().RepresentAsSeparatedList(QtType.ForRoslynType);
             writer.WriteFormatted($"<{typeParameters}>");
         }
 
         writer.Write("(");
-        var arguments = parameters.Parameters.RepresentAsSeparatedList(p => p.Name.Qt());
+        var arguments = parametersRequiredForInvocation.RepresentAsSeparatedList(p => p.Name.Qt());
         writer.Write(arguments);
         writer.Write(")");
+
+        return Unit.Value;
     }
 }
 
 internal readonly struct InvocationCallSiteMethodInfoBinder(
     IMethodSymbol method
-) : ISyntaxRepresentable {
-    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+) {
+    public Unit BindInto<TSyntaxWriter>(ref TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
         writer.WriteFormatted($"{typeof(MethodReflectionExtensions):g}.{nameof(MethodReflectionExtensions.GetMethod)}(");
         var declaringType = QtType.ForRoslynType(method.ContainingType);
-        var typeParameters = method.TypeParameters.RepresentAsQtArray(QtType.ForRoslynType);
-        var parameterTypes = method.Parameters.RepresentAsQtArray(p => QtType.ForRoslynType(p.Type));
+        var typeParameters = method.TypeParameters.AsMemory().RepresentAsQtArray(QtType.ForRoslynType);
+        var parameterTypes = method.Parameters.AsMemory().RepresentAsQtArray(p => QtType.ForRoslynType(p.Type));
         writer.WriteFormatted($"{declaringType:t}, {method.Name:q}, {typeParameters:t}, {parameterTypes:t}");
+
+        return Unit.Value;
     }
 }
 
 internal readonly struct InvocationCallSiteArgumentBinder(
     QtParameterList methodParameters
-) : ISyntaxRepresentable {
-    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
-        var argumentsArray = methodParameters.Parameters.RepresentAsQtArray(x => x.Name.Qt());
+) {
+    public Unit BindInto<TSyntaxWriter>(ref TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
+        var argumentsArray = methodParameters.RepresentAsQtArray((QtParameter x) => x.Name.Qt());
         writer.Write(argumentsArray);
+
+        return Unit.Value;
+    }
+}
+
+internal readonly struct ProxyInvocationThisBinder(
+    string? thisIdentifier,
+    IMethodSymbol methodSymbol
+) {
+    public Unit BindInto<TSyntaxWriter>(ref TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
+        if (methodSymbol.IsStatic) {
+            return Unit.Value;
+        }
+
+        writer.Write(thisIdentifier);
+        return Unit.Value;
     }
 }
 
@@ -103,42 +139,31 @@ internal sealed class ProxyInvocationExpressionBindingContext(
     in ProxyInvocationCallSiteInvokeBinder invocationBinder,
     in InvocationCallSiteArgumentBinder argumentBinder,
     in InvocationCallSiteMethodInfoBinder methodInfoBinder,
+    in ProxyInvocationThisBinder thisBinder,
     DynamicQtComponentBinder? dynamicQtComponentBinder = null
 ) : ISourceCodeBindingContext {
     public const string BindInvocation = "PxInvoke";
     public const string BindMethodInfo = "PxMethod";
     public const string BindArguments = "PxArguments";
+    public const string BindThis = "PxThis";
 
     private readonly ProxyInvocationCallSiteInvokeBinder _invocationBinder = invocationBinder;
     private readonly InvocationCallSiteArgumentBinder _argumentBinder = argumentBinder;
     private readonly InvocationCallSiteMethodInfoBinder _methodInfoBinder = methodInfoBinder;
+    private readonly ProxyInvocationThisBinder _thisBinder = thisBinder;
 
     public void WriteBindableSyntax<TSyntaxWriter>(
         ref TSyntaxWriter writer,
         in ReadOnlySpan<char> key
     ) where TSyntaxWriter : ISyntaxWriter {
         _ = key switch {
-            BindInvocation => WriteInvocation(ref writer),
-            BindMethodInfo => WriteMethodInfo(ref writer),
-            BindArguments => WriteArguments(ref writer),
+            BindInvocation => _invocationBinder.BindInto(ref writer),
+            BindMethodInfo => _methodInfoBinder.BindInto(ref writer),
+            BindArguments => _argumentBinder.BindInto(ref writer),
+            BindThis => _thisBinder.BindInto(ref writer),
             _ when dynamicQtComponentBinder?.CanBind(key) ?? false => dynamicQtComponentBinder.BindInto(key, ref writer),
             _ => throw new NotSupportedException($"Could not bind '{key.ToString()}' while binding proxy invocation of '{invocation.ToString()}'.")
         };
-    }
-
-    private Unit WriteArguments<TSyntaxWriter>(ref TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
-        writer.Write(_argumentBinder);
-        return Unit.Value;
-    }
-
-    private Unit WriteMethodInfo<TSyntaxWriter>(ref TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
-        writer.Write(_methodInfoBinder);
-        return Unit.Value;
-    }
-
-    private Unit WriteInvocation<TSyntaxWriter>(ref TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
-        writer.Write(_invocationBinder);
-        return Unit.Value;
     }
 }
 
@@ -158,7 +183,8 @@ internal readonly ref struct RoslynQtMethodFactory(
             invocationToProxy,
             new ProxyInvocationCallSiteInvokeBinder(invocationToProxy, methodSymbol, parameters),
             new InvocationCallSiteArgumentBinder(parameters),
-            new InvocationCallSiteMethodInfoBinder(methodSymbol)
+            new InvocationCallSiteMethodInfoBinder(methodSymbol),
+            new ProxyInvocationThisBinder()
         );
 
         var binder = new DynamicSourceCodeBinder(sourceCode);

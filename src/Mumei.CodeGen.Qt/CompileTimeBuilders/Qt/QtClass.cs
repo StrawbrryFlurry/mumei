@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Playground;
-using Mumei.CodeGen.Playground.Qt;
 using Mumei.CodeGen.Qt.Output;
 using Mumei.CodeGen.Qt.Roslyn;
 
@@ -14,7 +13,9 @@ public interface IQtInvokable<TReturn> : IQtTemplateBindable;
 
 public interface IQtTemplateBindable : ISyntaxRepresentable;
 
-public interface IQtThis { }
+public interface IQtThis {
+    public T Is<T>();
+}
 
 public interface IQtTypeDeclaration;
 
@@ -171,7 +172,7 @@ public readonly struct QtClass(
         __DynamicallyBoundSourceCode code
     ) {
         var decl = new QtDeclarationPtr<QtMethodCore>(_methods, _methods.Count + 1); // This isn't thread-safe, prolly doesn't matter though
-        var factory = new RoslynQtMethodFactory(QtCompilationScope.ActiveScope);
+        var factory = new RoslynQtMethodFactory(QtCompilationScope.Active);
         var method = factory.CreateProxyMethodForInvocation(
             invocationToProxy,
             code,
@@ -182,10 +183,18 @@ public readonly struct QtClass(
         return method;
     }
 
+    public QtMethod<TReturn> BindDynamicTemplateInterceptMethod<TReturn, TTemplateReferences>(
+        InvocationExpressionSyntax invocationToProxy,
+        TTemplateReferences refs,
+        DeclareQtInterceptorMethodWithRefs<TReturn, TTemplateReferences> declaration
+    ) {
+        throw new CompileTimeComponentUsedAtRuntimeException();
+    }
+
     public QtMethod<CompileTimeUnknown> BindDynamicTemplateInterceptMethod<TTemplateReferences>(
         InvocationExpressionSyntax invocationToProxy,
         TTemplateReferences refs,
-        DeclareQtInterceptorMethodWithRefs<TTemplateReferences> declaration
+        DeclareQtInterceptorVoidMethodWithRefs<TTemplateReferences> declaration
     ) {
         throw new CompileTimeComponentUsedAtRuntimeException();
     }

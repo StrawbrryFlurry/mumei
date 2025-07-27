@@ -1,6 +1,5 @@
 ﻿using System.Buffers;
 using System.Diagnostics;
-using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -168,6 +167,15 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
         var buffer = new Span<char>(_buffer, _bufferLength)[_bufferPosition..];
         writable.CopyToAndDispose(buffer);
         _bufferPosition += length;
+    }
+
+    public void WriteFormattedLine(in FormattableSyntaxWritable writable) {
+        WriteFormatted(writable);
+        WriteLine();
+    }
+
+    public void WriteFormattedBlock(in FormattableSyntaxWritable writable) {
+        throw new NotImplementedException();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

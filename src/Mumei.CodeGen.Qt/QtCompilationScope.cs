@@ -1,14 +1,28 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Mumei.CodeGen.Qt;
 
 public sealed class QtCompilationScope {
-    public required Compilation Compilation { get; init; }
-    private static AsyncLocal<QtCompilationScope> _activeScope { get; } = new();
+    public static QtCompilationScope Active => ActiveScope.Value ?? throw new InvalidOperationException();
+    private static AsyncLocal<QtCompilationScope> ActiveScope { get; } = new();
 
-    public static QtCompilationScope ActiveScope => _activeScope.Value ?? throw new InvalidOperationException();
+    public required Compilation Compilation { get; init; }
+
+    /// Tracks things like the reflection extensions 
+    private Dictionary<string, string> _globallyWrittenFiles = new();
+
+    internal readonly Dictionary<string, SourceText> GeneratedFiles = new();
 
     public static void SetActiveScope(Compilation scope) {
-        _activeScope.Value = new QtCompilationScope { Compilation = scope };
+        ActiveScope.Value = new QtCompilationScope { Compilation = scope };
+    }
+}
+
+public static class SourceProductionContextExtensions {
+    public static void AddSourceOutput(this in SourceProductionContext context, QtCompilationScope scope) {
+        foreach (var file in scope.GeneratedFiles) {
+            context.AddSource(file.Key, file.Value);
+        }
     }
 }

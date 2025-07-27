@@ -9,7 +9,7 @@ public ref struct FormattableSyntaxWritable {
 
     public int Length => _writer.Length;
 
-    public FormattableSyntaxWritable(int literalLength, int formattedCount, [CallerMemberName] string memberName = "") {
+    public FormattableSyntaxWritable(int literalLength, int formattedCount) {
         _writer = new ValueSyntaxWriter();
     }
 

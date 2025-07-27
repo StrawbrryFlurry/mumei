@@ -1,37 +1,60 @@
-﻿using System.Collections.Immutable;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Mumei.CodeGen.Qt.Output;
 
 namespace Mumei.CodeGen.Qt.Qt;
 
 internal static class QtRepresentable {
-    public static ArrayRepresentable<TState, TRepresentable> RepresentAsQtArray<TState, TRepresentable>(
-        this TState[] state,
-        Func<TState, TRepresentable> representationSelector
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ArrayRepresentable<DefaultMemoryAccessor<TElement>, TElement, TRepresentable> RepresentAsQtArray<TElement, TRepresentable>(
+        this ReadOnlyMemory<TElement> memory,
+        Func<TElement, TRepresentable> representationSelector
     ) where TRepresentable : ISyntaxRepresentable {
-        return new ArrayRepresentable<TState, TRepresentable>(state, representationSelector);
+        return RepresentAsQtArray(memory.AsMemoryAccessor(), representationSelector);
     }
 
-    public static ArrayRepresentable_ImmutableArray<TState, TRepresentable> RepresentAsQtArray<TState, TRepresentable>(
-        this in ImmutableArray<TState> state,
-        Func<TState, TRepresentable> representationSelector
-    ) where TRepresentable : ISyntaxRepresentable {
-        return new ArrayRepresentable_ImmutableArray<TState, TRepresentable>(state, representationSelector);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ArrayRepresentable<TMemeoryAccessor, TElement, TRepresentable> RepresentAsQtArray<TMemeoryAccessor, TElement, TRepresentable>(
+        this TMemeoryAccessor state,
+        Func<TElement, TRepresentable> representationSelector
+    ) where TMemeoryAccessor : IQtMemoryAccessor<TElement> where TRepresentable : ISyntaxRepresentable {
+        return new ArrayRepresentable<TMemeoryAccessor, TElement, TRepresentable>(state, representationSelector);
     }
 
-    public static SeparatedListRepresentable<TState, TRepresentable> RepresentAsSeparatedList<TState, TRepresentable>(
-        this TState[] state,
-        Func<TState, TRepresentable> representationSelector
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static SeparatedListRepresentable<DefaultMemoryAccessor<TElement>, TElement, TRepresentable> RepresentAsSeparatedList<TElement, TRepresentable>(
+        this Memory<TElement> memory,
+        Func<TElement, TRepresentable> representationSelector
     ) where TRepresentable : ISyntaxRepresentable {
-        return new SeparatedListRepresentable<TState, TRepresentable>(state, representationSelector);
+        return RepresentAsSeparatedList(memory.AsMemoryAccessor(), representationSelector);
     }
 
-    public static SeparatedListRepresentable_ImmutableArray<TState, TRepresentable> RepresentAsSeparatedList<TState, TRepresentable>(
-        this in ImmutableArray<TState> state,
-        Func<TState, TRepresentable> representationSelector
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static SeparatedListRepresentable<DefaultMemoryAccessor<TElement>, TElement, TRepresentable> RepresentAsSeparatedList<TElement, TRepresentable>(
+        this ReadOnlyMemory<TElement> memory,
+        Func<TElement, TRepresentable> representationSelector
     ) where TRepresentable : ISyntaxRepresentable {
-        return new SeparatedListRepresentable_ImmutableArray<TState, TRepresentable>(state, representationSelector);
+        return RepresentAsSeparatedList(memory.AsMemoryAccessor(), representationSelector);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static SeparatedListRepresentable<TMemoryAccessor, TElement, TRepresentable> RepresentAsSeparatedList<TMemoryAccessor, TElement, TRepresentable>(
+        this TMemoryAccessor state,
+        Func<TElement, TRepresentable> representationSelector
+    ) where TMemoryAccessor : IQtMemoryAccessor<TElement> where TRepresentable : ISyntaxRepresentable {
+        return new SeparatedListRepresentable<TMemoryAccessor, TElement, TRepresentable>(state, representationSelector);
+    }
+
+    public static DefaultMemoryAccessor<TElement> AsMemoryAccessor<TElement>(in this Memory<TElement> memory) {
+        return new DefaultMemoryAccessor<TElement>(memory);
+    }
+
+    public static DefaultMemoryAccessor<TElement> AsMemoryAccessor<TElement>(in this ReadOnlyMemory<TElement> memory) {
+        var writableMemory = MemoryMarshal.AsMemory(memory);
+        return new DefaultMemoryAccessor<TElement>(writableMemory);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static DefaultStringRepresentable Qt(this string s) {
         return new DefaultStringRepresentable(s);
     }
@@ -45,63 +68,39 @@ internal readonly struct DefaultStringRepresentable(
     }
 }
 
-// ReSharper disable once InconsistentNaming
-internal readonly struct ArrayRepresentable_ImmutableArray<TState, TRepresentable>(
-    ImmutableArray<TState> state,
-    Func<TState, TRepresentable> representationSelector
-) : ISyntaxRepresentable where TRepresentable : ISyntaxRepresentable {
+internal readonly struct ArrayRepresentable<TState, TElement, TRepresentable>(
+    TState state,
+    Func<TElement, TRepresentable> representationSelector
+) : ISyntaxRepresentable where TState : IQtMemoryAccessor<TElement> where TRepresentable : ISyntaxRepresentable {
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         writer.Write("[ ");
-        var listRepresenter = new SeparatedListRepresentable_ImmutableArray<TState, TRepresentable>(state, representationSelector);
-        writer.Write(listRepresenter, format);
-        writer.Write(" ]");
-    }
-}
-
-internal readonly struct ArrayRepresentable<TState, TRepresentable>(
-    TState[] state,
-    Func<TState, TRepresentable> representationSelector
-) : ISyntaxRepresentable where TRepresentable : ISyntaxRepresentable {
-    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
-        writer.Write("[ ");
-        var listRepresenter = new SeparatedListRepresentable<TState, TRepresentable>(state, representationSelector);
+        var listRepresenter = new SeparatedListRepresentable<TState, TElement, TRepresentable>(state, representationSelector);
         writer.Write(listRepresenter, format);
         writer.Write(" ]");
     }
 }
 
 // ReSharper disable once InconsistentNaming
-internal readonly struct SeparatedListRepresentable_ImmutableArray<TState, TRepresentable>(
-    ImmutableArray<TState> state,
-    Func<TState, TRepresentable> representationSelector
-) : ISyntaxRepresentable where TRepresentable : ISyntaxRepresentable {
+internal readonly struct SeparatedListRepresentable<TState, TElement, TRepresentable>(
+    TState state,
+    Func<TElement, TRepresentable> representationSelector
+) : ISyntaxRepresentable where TState : IQtMemoryAccessor<TElement> where TRepresentable : ISyntaxRepresentable {
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
-        for (var i = 0; i < state.Length; i++) {
+        var span = state.Memory.Span;
+        for (var i = 0; i < span.Length; i++) {
             if (i > 0) {
                 writer.Write(", ");
             }
 
-            var item = state[i];
+            var item = span[i];
             var representable = representationSelector(item);
             writer.Write(representable, format);
         }
     }
 }
 
-// ReSharper disable once InconsistentNaming
-internal readonly struct SeparatedListRepresentable<TState, TRepresentable>(
-    TState[] state,
-    Func<TState, TRepresentable> representationSelector
-) : ISyntaxRepresentable where TRepresentable : ISyntaxRepresentable {
-    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
-        for (var i = 0; i < state.Length; i++) {
-            if (i > 0) {
-                writer.Write(", ");
-            }
-
-            var item = state[i];
-            var representable = representationSelector(item);
-            writer.Write(representable, format);
-        }
-    }
+internal readonly struct DefaultMemoryAccessor<T>(
+    Memory<T> memory
+) : IQtMemoryAccessor<T> {
+    public Memory<T> Memory => memory;
 }

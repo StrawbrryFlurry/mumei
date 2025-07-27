@@ -130,25 +130,25 @@ internal readonly ref struct RoslynQtComponentFactory(
         };
     }
 
-    private IQtInvocationTarget InvocationReplayTarget(
+    private QtExpression InvocationReplayTarget(
         InvocationExpressionSyntax invocation,
         IMethodSymbol method
     ) {
         if (method.IsStatic || method.IsExtensionMethod) {
             var declaringType = Type(method.ContainingType);
-            return new QtStaticTypeInvocationTarget(declaringType);
+            return QtExpression.ForBindable(declaringType);
         }
 
         // Missing an invocation target, has to be an implicit call to a non-static instance method.
         if (invocation.Expression is IdentifierNameSyntax or GenericNameSyntax) {
-            return QtThisInvocationTarget.Instance;
+            return QtExpression.ForExpression("this");
         }
 
         if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess) {
             throw new NotSupportedException("Found a non-static, non-instance method invocation without a valid target expression.");
         }
 
-        return new QtInstanceInvocationTarget(memberAccess.ToString());
+        return QtExpression.ForExpression(memberAccess.ToString());
     }
 
     private QtArgumentList ReplayArguments(

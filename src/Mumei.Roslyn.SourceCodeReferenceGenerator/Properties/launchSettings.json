@@ -3,7 +3,7 @@
   "profiles": {
     "DebugRoslynSourceGenerator": {
       "commandName": "DebugRoslynComponent",
-      "targetProject": "../../test/Mumei.Roslyn.Tests/Mumei.Roslyn.Tests.csproj"
+      "targetProject": "../../test/Mumei.CodeGen.Qt.Tests/Mumei.CodeGen.Qt.Tests.csproj"
     }
   }
 }

@@ -4,7 +4,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Playground;
-using Mumei.CodeGen.Playground.Qt;
 using Mumei.CodeGen.Qt.Output;
 using Mumei.CodeGen.Qt.Qt;
 using Mumei.CodeGen.Qt.Roslyn;
@@ -17,7 +16,7 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
     public void Initialize(IncrementalGeneratorInitializationContext context) {
         var dynamicSourceCodeProvider = context.SyntaxProvider.CreateSyntaxProvider(
             (node, _) => node is InvocationExpressionSyntax {
-                Expression: MemberAccessExpressionSyntax { Name.Identifier.Text: "BindDynamicTemplateInterceptMethod" }
+                Expression: MemberAccessExpressionSyntax { Name.Identifier.Text: nameof(QtClass.BindDynamicTemplateInterceptMethod) }
             } invocation,
             (ctx, _) => {
                 return (ctx.Node, ctx.SemanticModel);
@@ -215,6 +214,7 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
         SemanticModel sm
     ) : TypeToGloballyQualifiedIdentifierRewriter(sm) {
         private string? _ctxIdentifier;
+        private string? _stateIdentifier;
 
         public override SyntaxNode? VisitSimpleLambdaExpression(SimpleLambdaExpressionSyntax node) {
             if (_ctxIdentifier is not null) {
@@ -227,21 +227,30 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
 
         public override SyntaxNode? VisitParenthesizedLambdaExpression(ParenthesizedLambdaExpressionSyntax node) {
             if (_ctxIdentifier is not null) {
-                base.VisitParenthesizedLambdaExpression(node);
+                return base.VisitParenthesizedLambdaExpression(node);
             }
 
-            if (node.ParameterList.Parameters.Count == 1) {
+            var isSimpleDynamicBinding = node.ParameterList.Parameters.Count == 1;
+            if (isSimpleDynamicBinding) {
                 _ctxIdentifier = node.ParameterList.Parameters[0].Identifier.Text;
-            }
-            else {
-                throw new InvalidOperationException("Expected a single parameter in the lambda expression.");
+                return base.VisitParenthesizedLambdaExpression(node);
             }
 
-            return base.VisitParenthesizedLambdaExpression(node);
+            var isDynamicBindingWithState = node.ParameterList.Parameters.Count == 2;
+            if (isDynamicBindingWithState) {
+                _ctxIdentifier = node.ParameterList.Parameters[0].Identifier.Text;
+                _stateIdentifier = node.ParameterList.Parameters[1].Identifier.Text;
+                return base.VisitParenthesizedLambdaExpression(node);
+            }
+
+            throw new InvalidOperationException(
+                "Expected either a simple dynamic binding with one parameter or a dynamic binding with state with two parameters."
+            );
         }
 
         public override SyntaxNode? VisitInvocationExpression(InvocationExpressionSyntax node) {
             Debug.Assert(_ctxIdentifier is not null);
+
             if (node.Expression is not MemberAccessExpressionSyntax memberAccess) {
                 return base.VisitInvocationExpression(node);
             }
@@ -268,6 +277,7 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
 
         private IdentifierNameSyntax MakeMakerLiteralFor(SyntaxToken identifier, SyntaxNode sourceNode) {
             var binderKey = identifier.Text switch {
+                nameof(QtDynamicInterceptorMethodCtx.This) => ProxyInvocationExpressionBindingContext.BindThis,
                 nameof(QtDynamicInterceptorMethodCtx.Invoke) => ProxyInvocationExpressionBindingContext.BindInvocation,
                 nameof(QtDynamicInterceptorMethodCtx.Method) => ProxyInvocationExpressionBindingContext.BindMethodInfo,
                 nameof(QtDynamicInterceptorMethodCtx.InvocationArguments) => ProxyInvocationExpressionBindingContext.BindArguments,

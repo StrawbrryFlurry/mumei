@@ -46,6 +46,9 @@ public interface ISyntaxWriter {
     /// <returns></returns>
     public void WriteFormatted(in FormattableSyntaxWritable writable);
 
+    public void WriteFormattedLine(in FormattableSyntaxWritable writable);
+    public void WriteFormattedBlock(in FormattableSyntaxWritable writable);
+
     public string ToSyntax();
 }
 

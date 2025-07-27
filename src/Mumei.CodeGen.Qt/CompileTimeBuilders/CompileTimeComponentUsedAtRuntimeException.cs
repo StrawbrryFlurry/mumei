@@ -1,4 +1,4 @@
-﻿namespace Mumei.CodeGen.Playground;
+﻿namespace Mumei.CodeGen.Qt;
 
 public sealed class CompileTimeComponentUsedAtRuntimeException() : InvalidOperationException(
     "A compile-time method or template was used at runtime. " +

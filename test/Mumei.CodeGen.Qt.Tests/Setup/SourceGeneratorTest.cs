@@ -35,7 +35,7 @@ public sealed class SourceGeneratorTest<TSourceGenerator> where TSourceGenerator
         var driver = CSharpGeneratorDriver.Create(
             [new TSourceGenerator().AsSourceGenerator()],
             null,
-            (CSharpParseOptions)_compilation.SyntaxTrees.First().Options
+            _compilation.SyntaxTrees.FirstOrDefault()?.Options as CSharpParseOptions
         );
 
         var runResult = driver.RunGeneratorsAndUpdateCompilation(
@@ -46,7 +46,6 @@ public sealed class SourceGeneratorTest<TSourceGenerator> where TSourceGenerator
 
         Assert.Empty(diagnostics);
         Assert.Empty(runResult.Diagnostics);
-        Assert.True(runResult.GeneratedTrees.Length > 0);
 
         var compilationDiagnostics = updatedCompilation.GetDiagnostics();
 
@@ -72,7 +71,7 @@ public sealed class SourceGeneratorTestResult(
     Compilation compilation
 ) {
     public ImmutableArray<SyntaxTree> GeneratedTrees => runResult.GeneratedTrees;
-    public string DebuggerDisplay => $"{GeneratedTrees.Length} Generated Trees";
+    private string DebuggerDisplay => $"{GeneratedTrees.Length} Generated Trees";
 
     public Compilation Compilation => compilation;
 

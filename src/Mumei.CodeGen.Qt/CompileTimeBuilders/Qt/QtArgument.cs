@@ -3,7 +3,17 @@
 namespace Mumei.CodeGen.Qt.Qt;
 
 public readonly struct QtArgument : IQtTemplateBindable {
-    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter { }
+    public required QtExpression Expression { get; init; }
+    public string? NamedIdentifier { get; init; }
+
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+        if (NamedIdentifier is not null) {
+            writer.Write(NamedIdentifier);
+            writer.Write(": ");
+        }
+
+        writer.Write(Expression);
+    }
 }
 
 public readonly struct QtArgumentList(

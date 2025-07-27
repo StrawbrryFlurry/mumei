@@ -174,6 +174,7 @@ public class SourceCodeReferenceGenerator : IIncrementalGenerator {
             .Distinct(SymbolEqualityComparer.Default)
             .Where(x => x!.DeclaringSyntaxReferences.IsEmpty)
             .Select(t => t!.ContainingNamespace.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat))
+            .Distinct()
             .Select(x => UsingDirective(ParseName(x)))
             .ToList();
 
@@ -199,6 +200,10 @@ public class SourceCodeReferenceGenerator : IIncrementalGenerator {
                     TokenList(classDecl.Modifiers.Where(x => !x.IsKind(SyntaxKind.PrivateKeyword)))
                 );
             }
+
+            var strippedDuplicateMembersAlreadyCoveredByImportedTypes =
+                classDecl.Members.Where(x => x is not ClassDeclarationSyntax cls || typeReferences.Any(t => t.Name == cls.Identifier.Text));
+            sourceCodeNode = ((ClassDeclarationSyntax)sourceCodeNode).WithMembers(List(strippedDuplicateMembersAlreadyCoveredByImportedTypes));
         }
 
         var compilationUnitWithUsings = CompilationUnit()

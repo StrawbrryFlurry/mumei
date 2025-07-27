@@ -36,6 +36,15 @@ internal sealed class TypeUsageTracker : CSharpSyntaxWalker {
         base.VisitIdentifierName(node);
     }
 
+    public override void VisitParameter(ParameterSyntax node) {
+        if (node.Type is null) {
+            return;
+        }
+
+        TryTrackType(node.Type);
+        base.VisitParameter(node);
+    }
+
     public override void VisitInvocationExpression(InvocationExpressionSyntax node) {
         var targetMethod = _sm.GetSymbolInfo(node).Symbol as IMethodSymbol;
         if (targetMethod?.IsExtensionMethod ?? false) {
@@ -60,6 +69,38 @@ internal sealed class TypeUsageTracker : CSharpSyntaxWalker {
         base.VisitVariableDeclaration(node);
     }
 
+    public override void VisitBaseList(BaseListSyntax node) {
+        foreach (var baseType in node.Types) {
+            TryTrackType(baseType.Type);
+        }
+
+        base.VisitBaseList(node);
+    }
+
+    private void TryTrackType(TypeSyntax typeSyntax) {
+        var type = _sm.GetSymbolInfo(typeSyntax).Symbol as ITypeSymbol;
+        if (type is null) {
+            return;
+        }
+
+        TryTrackType(type);
+    }
+
+    private void TryTrackType(ITypeSymbol typeSymbol) {
+        _typeReferences.Add(typeSymbol);
+        if (typeSymbol is not INamedTypeSymbol namedType) {
+            return;
+        }
+
+        if (!namedType.IsGenericType || namedType.IsUnboundGenericType) {
+            return;
+        }
+
+        foreach (var typeArguments in namedType.TypeArguments) {
+            TryTrackType(typeArguments);
+        }
+    }
+
     private void TryTrackIdentifierType(
         SemanticModel sm,
         IdentifierNameSyntax node
@@ -82,7 +123,7 @@ internal sealed class TypeUsageTracker : CSharpSyntaxWalker {
             return;
         }
 
-        _typeReferences.Add(identifierType);
+        TryTrackType(identifierType);
 
         if (identifierType.ContainingNamespace.IsGlobalNamespace) {
             return;

@@ -108,36 +108,21 @@ public static class QtMethodBuilder {
 
 internal interface IQtInvocationTarget : IQtTemplateBindable { }
 
-internal sealed class QtThisInvocationTarget : IQtInvocationTarget {
-    public static readonly QtThisInvocationTarget Instance = new();
-    private QtThisInvocationTarget() { }
-
-    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
-        writer.Write("this");
-    }
-}
-
-internal sealed class QtInstanceInvocationTarget(
-    string instanceIdentifier
-) : IQtInvocationTarget {
-    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
-        writer.Write(instanceIdentifier);
-    }
-}
-
-internal sealed class QtStaticTypeInvocationTarget(
-    IQtType target
-) : IQtInvocationTarget {
-    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
-        writer.Write(target, "g");
-    }
-}
-
 internal readonly struct QtInvocation : IQtTemplateBindable {
-    public required IQtInvocationTarget Target { get; init; }
+    public required QtExpression Target { get; init; }
     public required QtMethodStub Method { get; init; }
     public required QtTypeArgumentList TypeArguments { get; init; }
     public required QtArgumentList Arguments { get; init; }
+
+    public static QtInvocation Static(IQtType target, QtMethodStub method, QtTypeArgumentList typeArguments, QtArgumentList arguments) {
+        var targetExpression = QtExpression.ForBindable(target);
+        return new QtInvocation {
+            Target = targetExpression,
+            Method = method,
+            TypeArguments = typeArguments,
+            Arguments = arguments
+        };
+    }
 
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         writer.Write(Target);
