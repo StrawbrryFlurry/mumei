@@ -52,7 +52,7 @@ public sealed class QtClassTestsDynamicInterceptorMethod {
             cls,
             $$"""
               file static class TestClass {
-                  file static bool QtProxy__SequenceEqual(this {{typeof(IEnumerable<int>):g}} λthis, {{typeof(IEnumerable<int>):g}} λsecond) {
+                  public static bool QtProxy__SequenceEqual(this {{typeof(IEnumerable<int>):g}} λthis, {{typeof(IEnumerable<int>):g}} λsecond) {
                       bool result;
                       try {
                           result = (bool){{typeof(Enumerable):g}}.SequenceEqual<int>(λthis, λsecond);

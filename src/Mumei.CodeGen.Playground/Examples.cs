@@ -12,7 +12,7 @@ public static partial class Impl {
     public static void ImplAsync() {
         var methodImpl = (ProxyAsyncMethodBuilderCtx i) => {
             var λsourceCtLinkedWithAssertionContext = CancellationTokenSource.CreateLinkedTokenSource(i.CancellationToken);
-            var λsubject = new AsyncDelegateAssertionSubject<Task<Arg.TReturn>>(
+            var λsubject = new AsyncDelegateAssertionSubject<Task<Qt.Arg.TReturn>>(
                 λcancellationToken => i.InvokeAsync(λcancellationToken),
                 async λcancellationToken => await i.InvokeAsync(λcancellationToken)
             ) {
@@ -36,11 +36,11 @@ public static partial class Impl {
 internal class ProxyAsyncMethodBuilderCtx : IQtSyntaxProvider<InvocationExpressionSyntax> {
     public InvocationExpressionSyntax Syntax { get; }
 
-    public Task<Arg.TReturn> InvokeAsync(CancellationToken cancellationToken = default) {
+    public Task<Qt.Arg.TReturn> InvokeAsync(CancellationToken cancellationToken = default) {
         return default;
     }
 
-    public Arg.TThis This { get; set; }
+    public Qt.Arg.TThis This { get; set; }
     public object[] InvocationArguments { get; set; }
     public MethodInfo Method { get; set; }
 
@@ -132,7 +132,7 @@ internal class ProxyMethodStateInfo<T> {
         return default;
     }
 
-    public Arg.TThis This { get; set; }
+    public Qt.Arg.TThis This { get; set; }
     public object[] InvocationArguments { get; set; }
     public MethodInfo Method { get; set; }
 }

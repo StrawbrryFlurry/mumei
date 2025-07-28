@@ -183,10 +183,10 @@ public readonly struct QtClass(
         return method;
     }
 
-    public QtMethod<TReturn> BindDynamicTemplateInterceptMethod<TReturn, TTemplateReferences>(
+    public QtMethod<TReturn> BindDynamicTemplateInterceptMethod<TTemplateReferences, TReturn>(
         InvocationExpressionSyntax invocationToProxy,
         TTemplateReferences refs,
-        DeclareQtInterceptorMethodWithRefs<TReturn, TTemplateReferences> declaration
+        DeclareQtInterceptorMethodWithRefs<TTemplateReferences, TReturn> declaration
     ) {
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
@@ -199,6 +199,23 @@ public readonly struct QtClass(
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
+    public QtMethod<CompileTimeUnknown> __BindDynamicTemplateInterceptMethod(
+        InvocationExpressionSyntax invocationToProxy,
+        __DynamicallyBoundSourceCode code,
+        QtDynamicComponentBinderCollection? dynamicComponentBinders
+    ) {
+        var decl = new QtDeclarationPtr<QtMethodCore>(_methods, _methods.Count + 1); // This isn't thread-safe, prolly doesn't matter though
+        var factory = new RoslynQtMethodFactory(QtCompilationScope.Active);
+        var method = factory.CreateProxyMethodForInvocation(
+            invocationToProxy,
+            code,
+            decl,
+            dynamicComponentBinders
+        );
+
+        _methods.Add(method.Method);
+        return method;
+    }
 
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         writer.WriteFormatted(

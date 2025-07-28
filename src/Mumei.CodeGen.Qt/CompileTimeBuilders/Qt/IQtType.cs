@@ -10,6 +10,10 @@ public sealed class QtType {
         return new QtRuntimeType(typeof(T));
     }
 
+    public static IQtType ForExpression(in QtExpression expression) {
+        return new QtExpressionType(expression);
+    }
+
     public static IQtType ForRuntimeType(Type t) {
         return new QtRuntimeType(t);
     }
@@ -113,5 +117,13 @@ file sealed class QtRoslynType(
 
     public override string ToString() {
         return typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+    }
+}
+
+file sealed class QtExpressionType(
+    QtExpression expression
+) : IQtType {
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+        writer.Write(expression);
     }
 }

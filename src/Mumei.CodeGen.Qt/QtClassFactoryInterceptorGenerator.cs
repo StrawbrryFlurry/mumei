@@ -1,9 +1,9 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Mumei.CodeGen.Playground;
 using Mumei.CodeGen.Qt.Output;
 using Mumei.CodeGen.Qt.Qt;
 using Mumei.CodeGen.Qt.Roslyn;
@@ -52,7 +52,15 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
         result.Indent();
 
         foreach (var (node, semanticModel) in code) {
-            WriteInterceptorMethod(
+            var invocation = node as InvocationExpressionSyntax ?? throw new InvalidOperationException("Expected InvocationExpressionSyntax");
+            var args = invocation.ArgumentList.Arguments;
+
+            if (args.Count == 3) {
+                WriteInterceptorMethodWithState(result, invocation, semanticModel, context);
+                continue;
+            }
+
+            WriteBasicInterceptorMethod(
                 result,
                 node as InvocationExpressionSyntax ?? throw new InvalidOperationException("Expected InvocationExpressionSyntax"),
                 semanticModel
@@ -67,12 +75,13 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
         context.AddSource("QtClassFactoryInterceptor.g.cs", result.ToSyntax());
     }
 
-    private void WriteInterceptorMethod(
+    private void WriteBasicInterceptorMethod(
         SyntaxWriter writer,
         InvocationExpressionSyntax invocation,
         SemanticModel semanticModel
     ) {
         var proxyId = NextId;
+
         var methodDeclaration = invocation.ArgumentList.Arguments[1];
 
         var method = (IMethodSymbol)semanticModel.GetSymbolInfo(invocation).Symbol!;
@@ -86,7 +95,7 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
         }
 
         var bodyStatements = body.Statements.ToFullString();
-        var sourceCodeSections = MakeDynamicallyBoundSourceCodeSections(bodyStatements);
+        var sourceCodeSections = MakeDynamicallyBoundSourceCodeSections(bodyStatements, out _);
 
         writer.WriteFormattedLine($"private static readonly string[] CachedSourceCodeTemplate_Intercept_{proxyId} = [");
         var ind = writer.IndentLevel;
@@ -132,7 +141,7 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
                   {{nameof(__DynamicallyBoundSourceCode.CodeTemplate)}} = CachedSourceCodeTemplate_Intercept_{{proxyId}},
               };
 
-              return self.__BindDynamicTemplateInterceptMethod(
+              return self.{{nameof(QtClass.__BindDynamicTemplateInterceptMethod)}}(
                 invocationToProxy,
                 sourceCode
               );
@@ -144,13 +153,208 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
         writer.WriteLine();
     }
 
+    private void WriteInterceptorMethodWithState(
+        SyntaxWriter writer,
+        InvocationExpressionSyntax invocation,
+        SemanticModel semanticModel,
+        SourceProductionContext ctx
+    ) {
+        var proxyId = NextId;
+
+        var methodDeclaration = invocation.ArgumentList.Arguments[2];
+
+        var method = (IMethodSymbol)semanticModel.GetSymbolInfo(invocation).Symbol!;
+        var v = new QtInterceptorMethodDeclarationVisitor(semanticModel).Visit(methodDeclaration.Expression);
+        BlockSyntax body;
+        if (v is ParenthesizedLambdaExpressionSyntax complex) {
+            body = (BlockSyntax)complex.Body;
+        }
+        else {
+            body = (BlockSyntax)((SimpleLambdaExpressionSyntax)v).Body;
+        }
+
+        var bodyStatements = body.Statements.ToFullString();
+        var sourceCodeSections = MakeDynamicallyBoundSourceCodeSections(bodyStatements, out var boundKeys);
+
+        var stateArg = invocation.ArgumentList.Arguments[1].Expression;
+        var stateType = semanticModel.GetTypeInfo(stateArg);
+        if (!stateType.Type?.IsAnonymousType ?? false) {
+            ctx.ReportDiagnostic(Diagnostic.Create(
+                    new DiagnosticDescriptor(
+                        "MOOM1000",
+                        "Invalid Template Reference Type",
+                        "The template reference type must be an anonymous type.",
+                        "Usage",
+                        DiagnosticSeverity.Error,
+                        true
+                    ),
+                    stateArg.GetLocation()
+                )
+            );
+            return;
+        }
+
+        var instantiateTemplateReferenceBindersExpr = WriteAdditionalReferenceStateBinders(writer, stateArg, semanticModel, boundKeys, proxyId);
+
+        writer.WriteFormattedLine($"private static readonly string[] CachedSourceCodeTemplate_Intercept_{proxyId} = [");
+        var ind = writer.IndentLevel;
+        writer.SetIndentLevel(0);
+        for (var i = 0; i < sourceCodeSections.Length; i++) {
+            if (i > 0) {
+                writer.WriteLine(",");
+            }
+
+            writer.WriteLine("\"\"\"\"\"\"\"\"\"\"\"\"");
+            var sourceCodeSection = sourceCodeSections[i];
+            writer.WriteLine(sourceCodeSection);
+            writer.Write("\"\"\"\"\"\"\"\"\"\"\"\"");
+        }
+
+        writer.SetIndentLevel(ind);
+        writer.WriteLine();
+        writer.WriteLine("];");
+        writer.WriteLine();
+
+        var location = semanticModel.GetInterceptableLocation(invocation);
+        writer.WriteLine(location!.GetInterceptsLocationAttributeSyntax());
+        writer.WriteFormattedLine($"public static {typeof(QtMethod<CompileTimeUnknown>):g} Intercept__{proxyId}<TTemplateReferences>(");
+        writer.Indent();
+        writer.WriteFormattedLine($"in this {typeof(QtClass):g} self,");
+        writer.WriteFormattedLine($"{typeof(InvocationExpressionSyntax):g} invocationToProxy,");
+
+        var refsArgType = QtType.ForRoslynType(method.TypeArguments[0]);
+        writer.WriteFormattedLine($"TTemplateReferences references,");
+
+        var templateMethodType = method.TypeParameters.Length == 1
+            ? QtType.ConstructRuntimeGenericType(
+                typeof(DeclareQtInterceptorVoidMethodWithRefs<>),
+                QtType.ForExpression(QtExpression.ForExpression("TTemplateReferences"))
+            )
+            : QtType.ConstructRuntimeGenericType(
+                typeof(DeclareQtInterceptorMethodWithRefs<,>),
+                refsArgType,
+                QtType.ForRoslynType(method.TypeArguments[1])
+            );
+
+        writer.WriteFormattedLine(
+            $"{templateMethodType:g} declaration"
+        );
+
+        writer.Dedent();
+        writer.WriteLine(") {");
+        writer.Indent();
+
+        writer.WriteFormattedBlock(
+            $$"""
+              var sourceCode = new {{typeof(__DynamicallyBoundSourceCode):g}}() {
+                  {{nameof(__DynamicallyBoundSourceCode.CodeTemplate)}} = CachedSourceCodeTemplate_Intercept_{{proxyId}},
+              };
+
+              var dynamicComponentBinders = {{instantiateTemplateReferenceBindersExpr}};
+              return self.{{nameof(QtClass.__BindDynamicTemplateInterceptMethod)}}(
+                invocationToProxy,
+                sourceCode,
+                dynamicComponentBinders
+              );
+              """
+        );
+
+        writer.Dedent();
+        writer.WriteLine("}");
+        writer.WriteLine();
+    }
+
+    private QtExpression WriteAdditionalReferenceStateBinders(
+        SyntaxWriter writer,
+        ExpressionSyntax stateObjectExpression,
+        SemanticModel semanticModel,
+        string[] bindingKeys,
+        string proxyId
+    ) {
+        var stateType = semanticModel.GetTypeInfo(stateObjectExpression).Type!;
+        var stateMemberProperties = stateType.GetMembers()
+            .OfType<IPropertySymbol>()
+            .ToDictionary(x => x.Name, x => x);
+
+        var stateBindings = new HashSet<string>();
+        foreach (var key in bindingKeys) {
+            var keySpan = key.AsSpan();
+            if (!keySpan.StartsWith(__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeStart)) {
+                continue;
+            }
+
+            keySpan = keySpan[__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeStart.Length..];
+            if (!keySpan.StartsWith(DynamicQtComponentBinder.BindDynamicComponent)) {
+                continue;
+            }
+
+            keySpan = keySpan[(DynamicQtComponentBinder.BindDynamicComponent.Length + 1)..]; // +1 to skip the ':'
+            if (!keySpan.StartsWith("QtArgState")) {
+                throw new NotSupportedException("Found invalid dynamic binding source: " + key);
+            }
+
+            var stateKey = keySpan[("QtArgState".Length + 1)..].ToString(); // +1 to skip the ':'
+            stateBindings.Add(stateKey);
+        }
+
+        if (stateBindings.Count == 0) {
+            return QtExpression.Null;
+        }
+
+        // Generate accessor for the state object
+        var stateAccessorClassName = $"QtArgStateAccessor__{proxyId}";
+        writer.WriteFormattedLine($"private sealed class {stateAccessorClassName} {{");
+        writer.Indent();
+        foreach (var stateMemberProperty in stateMemberProperties) {
+            var property = stateMemberProperty.Value;
+            var propertyType = QtType.ForRoslynType(property.Type);
+            writer.WriteLine($"public {propertyType:g} {property.Name} {{ get; }}");
+        }
+
+        writer.Dedent();
+        writer.WriteLine("}");
+
+        var stateBinders = ImmutableArray.CreateBuilder<QtExpression>(stateBindings.Count);
+        var syntaxNodeType = semanticModel.Compilation.GetTypeByMetadataName(typeof(SyntaxNode).FullName!);
+        foreach (var stateBinding in stateBindings) {
+            if (!stateMemberProperties.TryGetValue(stateBinding, out var stateProperty)) {
+                throw new InvalidOperationException("Could not find state property for key: " + stateBinding);
+            }
+
+            var syntaxNodeConversion = semanticModel.Compilation.ClassifyConversion(stateProperty.Type, syntaxNodeType);
+            var isSyntaxNode = syntaxNodeConversion.IsImplicit;
+            if (isSyntaxNode) {
+                var qtStateType = QtType.ForRoslynType(stateProperty.Type);
+                var binderBaseType = QtType.ConstructRuntimeGenericType(typeof(QtDynamicSyntaxNodeBinderBase<>), qtStateType);
+                var thisBinderClassName = $"QtArgStateBinder_{stateBinding}__{proxyId}";
+                writer.WriteFormattedLine(
+                    $"private sealed class {thisBinderClassName}({qtStateType:g} node) : {binderBaseType:g}(node) {{ }}");
+                var binderKey = DynamicQtComponentBinder.CreateDynamicComponentBinderKey($"QtArgState:{stateBinding}");
+                stateBinders.Add(
+                    QtExpression.ForExpression(
+                        $$"""
+
+                          { "{{binderKey}}", new {{thisBinderClassName}}({{typeof(Unsafe):g}}.As<TTemplateReferences, {{stateAccessorClassName}}>(ref references).{{stateBinding}}) }
+                          """
+                    )
+                );
+            }
+        }
+
+        var stateBinderExprs = stateBinders.ToArray().AsMemory().RepresentAsSeparatedList(x => x);
+        var createBinderExpression = QtExpression.ForExpression($"new {typeof(QtDynamicComponentBinderCollection):g}() {{ {stateBinderExprs} }}");
+        return createBinderExpression;
+    }
+
     private static string[] MakeDynamicallyBoundSourceCodeSections(
-        ReadOnlySpan<char> code
+        ReadOnlySpan<char> code,
+        out string[] boundKeys
     ) {
         var source = CleanUpCapturedSourceCode(code).AsSpan();
         // We could prolly make the binding of syntax nodes / context objs to the source code fully compile-time as well
         // Since we know all arguments and references of "external" code at this point.
         var result = ImmutableArray.CreateBuilder<string>();
+        var boundKeysBuilder = ImmutableArray.CreateBuilder<string>();
         while (true) {
             var markerIdx = source.IndexOf(__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeStart);
             if (markerIdx == -1) {
@@ -164,9 +368,11 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
             Debug.Assert(endIdx != -1);
             var identifier = source[..endIdx].ToString();
             result.Add(identifier);
+            boundKeysBuilder.Add(identifier);
             source = source[(endIdx + 1)..];
         }
 
+        boundKeys = boundKeysBuilder.ToArray();
         return result.ToArray();
     }
 
@@ -216,6 +422,9 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
         private string? _ctxIdentifier;
         private string? _stateIdentifier;
 
+        private const string _replaceStateExpressionWithAnnotationKind = "ReplaceStateExpressionWith";
+        private const string _replaceContextExpressionWithAnnotationKind = "ReplaceContextExpressionWith";
+
         public override SyntaxNode? VisitSimpleLambdaExpression(SimpleLambdaExpressionSyntax node) {
             if (_ctxIdentifier is not null) {
                 return base.VisitSimpleLambdaExpression(node);
@@ -255,24 +464,61 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
                 return base.VisitInvocationExpression(node);
             }
 
-            if (memberAccess.Expression is not IdentifierNameSyntax invokee) {
+            if (
+                memberAccess.Name is GenericNameSyntax {
+                    TypeArgumentList.Arguments.Count: 1,
+                    Identifier.Text: nameof(IQtThis.Is)
+                }
+            ) {
+                // Ignore all Is<> calls
+                // If we called Is<> on <This> we still want to visit the <This>
+                // expression to write the this binding into this place.
+                return Visit(memberAccess.Expression);
+            }
+
+            // This would be a call on the ctx object e.g. ctx.Invoke(...)
+            if (memberAccess.Expression is SimpleNameSyntax invokee) {
+                if (invokee.Identifier.Text == _ctxIdentifier) {
+                    return MakeMakerLiteralFor(memberAccess.Name.Identifier, node);
+                }
+
                 return base.VisitInvocationExpression(node);
             }
 
-            if (invokee.Identifier.Text != _ctxIdentifier) {
-                return base.VisitInvocationExpression(node);
+            // Since all state expressions are on the state object, invocations on the state object
+            // will (almost) always be a nested member access e.g. state.someRef.Invoke();
+            if (memberAccess.Expression is MemberAccessExpressionSyntax possibleStateAccess) {
+                if (possibleStateAccess.Expression is not SimpleNameSyntax stateIdentifier) {
+                    return base.VisitInvocationExpression(node);
+                }
+
+                if (stateIdentifier.Identifier.Text != _stateIdentifier) {
+                    return base.VisitInvocationExpression(node);
+                }
+
+                // Not suuper sure if we can even do something here, since most state binding
+                // is already handled by replacing the dynamic component binding - we'll see.
             }
 
-            return MakeMakerLiteralFor(memberAccess.Name.Identifier, node);
+            return base.VisitInvocationExpression(node);
+
         }
 
         public override SyntaxNode? VisitMemberAccessExpression(MemberAccessExpressionSyntax node) {
-            if (node.Expression is not IdentifierNameSyntax identifier ||
-                identifier.Identifier.Text != _ctxIdentifier) {
+            if (node.Expression is not SimpleNameSyntax identifier) {
                 return base.VisitMemberAccessExpression(node);
             }
 
-            return MakeMakerLiteralFor(node.Name.Identifier, node);
+            var identifierName = identifier.Identifier.Text;
+            if (identifierName == _ctxIdentifier) {
+                return MakeMakerLiteralFor(node.Name.Identifier, node);
+            }
+
+            if (identifierName == _stateIdentifier) {
+                return MakeMakerLiteralCore(DynamicQtComponentBinder.CreateDynamicComponentBinderKey($"QtArgState:{node.Name.Identifier.Text}"), node);
+            }
+
+            return base.VisitMemberAccessExpression(node);
         }
 
         private IdentifierNameSyntax MakeMakerLiteralFor(SyntaxToken identifier, SyntaxNode sourceNode) {
@@ -281,16 +527,20 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
                 nameof(QtDynamicInterceptorMethodCtx.Invoke) => ProxyInvocationExpressionBindingContext.BindInvocation,
                 nameof(QtDynamicInterceptorMethodCtx.Method) => ProxyInvocationExpressionBindingContext.BindMethodInfo,
                 nameof(QtDynamicInterceptorMethodCtx.InvocationArguments) => ProxyInvocationExpressionBindingContext.BindArguments,
+                nameof(QtDynamicInterceptorMethodCtx.Construct) => ProxyInvocationExpressionBindingContext.BindConstructInitializer,
                 _ => throw new ArgumentOutOfRangeException()
             };
 
+            return MakeMakerLiteralCore(binderKey, sourceNode);
+        }
+
+        private IdentifierNameSyntax MakeMakerLiteralCore(string markerExpr, SyntaxNode sourceNode) {
             return IdentifierName(
-                    $"{__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeStart}{binderKey}{__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeEnd}"
+                    $"{__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeStart}{markerExpr}{__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeEnd}"
                 ).WithLeadingTrivia(sourceNode.GetLeadingTrivia())
                 .WithTrailingTrivia(sourceNode.GetTrailingTrivia());
         }
     }
 
     private static string NextId => Guid.NewGuid().ToString("N");
-
 }

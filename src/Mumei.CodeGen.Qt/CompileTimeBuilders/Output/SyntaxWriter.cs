@@ -222,6 +222,11 @@ public class SyntaxWriter : ISyntaxWriter {
 
         static int DetermineLineEnd(ReadOnlySpan<char> remainingLines, out int toSkip) {
             var nextNewLine = remainingLines.IndexOf('\n');
+            if (nextNewLine == 0) {
+                toSkip = 1;
+                return 0;
+            }
+
             if (remainingLines.IsEmpty) {
                 toSkip = 0;
                 return 0;
@@ -230,11 +235,6 @@ public class SyntaxWriter : ISyntaxWriter {
             if (nextNewLine == -1) {
                 toSkip = 0;
                 return remainingLines.Length;
-            }
-
-            if (nextNewLine == 0) {
-                toSkip = 0;
-                return 0;
             }
 
             var skipCarriageReturn = remainingLines[nextNewLine - 1] is '\r';

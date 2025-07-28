@@ -49,6 +49,30 @@ internal readonly ref struct RoslynQtComponentFactory(
         };
     }
 
+    public QtParameterList InterceptParametersFor(
+        IMethodSymbol method
+    ) {
+        var additionalThisArg = !method.IsStatic ? 1 : 0;
+        var result = QtParameterList.Builder(method.Parameters.Length + additionalThisArg);
+        var parameters = method.Parameters;
+
+        if (additionalThisArg == 1) {
+            result[0] = new QtParameter {
+                Name = "this".Obfuscate(),
+                Type = Type(method.ReceiverType!),
+                DefaultValue = null,
+                Attributes = ParameterAttributes.This
+            };
+        }
+
+        for (var i = 0; i < parameters.Length; i++) {
+            var parameter = parameters[i];
+            result[i + additionalThisArg] = Parameter(parameter);
+        }
+
+        return result;
+    }
+
     public QtParameterList ParametersOf(
         IMethodSymbol method
     ) {

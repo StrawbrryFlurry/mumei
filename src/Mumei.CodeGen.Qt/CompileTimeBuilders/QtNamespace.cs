@@ -3,7 +3,7 @@ using Mumei.CodeGen.Qt.Qt;
 
 namespace Mumei.CodeGen.Qt;
 
-internal readonly struct QtNamespace(
+public readonly struct QtNamespace(
     string name,
     IQtTemplateBindable[] declarations
 ) : ISyntaxRepresentable {

@@ -11,9 +11,18 @@ public readonly struct QtExpression : IQtTemplateBindable {
         _dynamicExpression = o;
     }
 
+    public static QtExpression Null => new("null", null);
+
     public static QtExpression ForExpression(string expression) {
         return new QtExpression(expression, null);
     }
+
+    public static QtExpression ForExpression(FormattableSyntaxWritable expression) {
+        var outputWriter = new ValueSyntaxWriter(stackalloc char[ValueSyntaxWriter.StackBufferSize]);
+        expression.CopyToAndDispose(ref outputWriter);
+        return new QtExpression(outputWriter.ToString(), null);
+    }
+
 
     public static QtExpression ForBindable(IQtTemplateBindable dynamicExpression) {
         return new QtExpression(null, dynamicExpression);

@@ -46,4 +46,15 @@ public readonly struct QtParameterList(
             writer.Write(parameter);
         }
     }
+
+    public bool TryGetThisParameter(out QtParameter parameter) {
+        var first = parameters.Length > 0 ? parameters[0] : default;
+        if (first.Attributes.HasFlag(ParameterAttributes.This)) {
+            parameter = first;
+            return true;
+        }
+
+        parameter = default;
+        return false;
+    }
 }

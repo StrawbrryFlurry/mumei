@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Playground;
 using Mumei.CodeGen.Qt.Output;
@@ -13,6 +14,22 @@ public readonly ref struct __DynamicallyBoundSourceCode {
     internal const string DynamicallyBoundSourceCodeEnd = "ɵ";
 
     public required string[] CodeTemplate { get; init; }
+}
+
+public sealed class QtDynamicComponentBinderCollection : Dictionary<string, IQtTemplateBindable> { }
+
+public abstract class QtDynamicSyntaxNodeBinderBase<TTargetNode>(
+    TTargetNode node
+) : IQtTemplateBindable where TTargetNode : SyntaxNode {
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+        var syntaxString = node.NormalizeWhitespace().ToString();
+        writer.WriteFormattedLine($"(({typeof(TTargetNode):g}){typeof(SyntaxFactory):g}.{nameof(SyntaxFactory.ParseExpression)}(");
+        writer.WriteLine(new string('"', 8));
+        writer.WriteBlock(syntaxString);
+        writer.WriteLine();
+        writer.WriteLine(new string('"', 8));
+        writer.WriteLine("))");
+    }
 }
 
 file readonly ref struct DynamicSourceCodeBinder(
@@ -107,7 +124,7 @@ internal readonly struct InvocationCallSiteArgumentBinder(
 }
 
 internal readonly struct ProxyInvocationThisBinder(
-    string? thisIdentifier,
+    QtParameterList parameterList,
     IMethodSymbol methodSymbol
 ) {
     public Unit BindInto<TSyntaxWriter>(ref TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
@@ -115,22 +132,40 @@ internal readonly struct ProxyInvocationThisBinder(
             return Unit.Value;
         }
 
-        writer.Write(thisIdentifier);
+        if (!parameterList.TryGetThisParameter(out var thisParameter)) {
+            throw new InvalidOperationException("Expected a 'this' parameter to be present in the method parameters, but it was not found.");
+        }
+
+        writer.Write(thisParameter.Name);
         return Unit.Value;
     }
 }
 
 // We could prolly code-gen a struct binding context struct for each bindable location
 // that looks the same as the other binding contexts
-internal sealed class DynamicQtComponentBinder {
-    private readonly Dictionary<string, IQtTemplateBindable> _bindables = new();
+internal sealed class DynamicQtComponentBinder(
+    QtDynamicComponentBinderCollection binders
+) {
+    public const string BindDynamicComponent = "PxDynamicComponent";
+
+    private readonly Dictionary<string, IQtTemplateBindable> _bindables = binders;
 
     public bool CanBind(ReadOnlySpan<char> key) {
         return _bindables.ContainsKey(key.ToString());
     }
 
     public Unit BindInto<TSyntaxWriter>(ReadOnlySpan<char> key, ref TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
+        var keyString = key.ToString();
+        if (!_bindables.TryGetValue(keyString, out var bindable)) {
+            throw new InvalidOperationException($"No bindable found for key '{keyString}'.");
+        }
+
+        writer.Write(bindable);
         return Unit.Value;
+    }
+
+    public static string CreateDynamicComponentBinderKey(string s) {
+        return $"{BindDynamicComponent}:{s}";
     }
 }
 
@@ -146,6 +181,7 @@ internal sealed class ProxyInvocationExpressionBindingContext(
     public const string BindMethodInfo = "PxMethod";
     public const string BindArguments = "PxArguments";
     public const string BindThis = "PxThis";
+    public const string BindConstructInitializer = "PxConstructorInitializer";
 
     private readonly ProxyInvocationCallSiteInvokeBinder _invocationBinder = invocationBinder;
     private readonly InvocationCallSiteArgumentBinder _argumentBinder = argumentBinder;
@@ -173,18 +209,20 @@ internal readonly ref struct RoslynQtMethodFactory(
     public QtMethod<CompileTimeUnknown> CreateProxyMethodForInvocation(
         InvocationExpressionSyntax invocationToProxy,
         in __DynamicallyBoundSourceCode sourceCode,
-        in QtDeclarationPtr<QtMethodCore> declPtr
+        in QtDeclarationPtr<QtMethodCore> declPtr,
+        QtDynamicComponentBinderCollection? dynamicQtComponentBinder = null
     ) {
         var methodSymbol = scope.GetMethodSymbol(invocationToProxy);
 
         var factory = new RoslynQtComponentFactory(scope);
-        var parameters = factory.ParametersOf(methodSymbol);
+        var parameters = factory.InterceptParametersFor(methodSymbol);
         var invocationBindingContext = new ProxyInvocationExpressionBindingContext(
             invocationToProxy,
             new ProxyInvocationCallSiteInvokeBinder(invocationToProxy, methodSymbol, parameters),
             new InvocationCallSiteArgumentBinder(parameters),
             new InvocationCallSiteMethodInfoBinder(methodSymbol),
-            new ProxyInvocationThisBinder()
+            new ProxyInvocationThisBinder(parameters, methodSymbol),
+            dynamicQtComponentBinder is null ? null : new DynamicQtComponentBinder(dynamicQtComponentBinder)
         );
 
         var binder = new DynamicSourceCodeBinder(sourceCode);
@@ -192,7 +230,7 @@ internal readonly ref struct RoslynQtMethodFactory(
 
         var method = new QtMethod<CompileTimeUnknown>(
             "QtProxy__" + methodSymbol.Name,
-            AccessModifier.FileStatic,
+            AccessModifier.PublicStatic,
             QtType.ForRoslynType(methodSymbol.ReturnType),
             new QtTypeParameterList(), // Since this is a proxy method, all types need to be bound to the types at the call site
             parameters,

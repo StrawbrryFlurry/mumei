@@ -1,4 +1,4 @@
-﻿namespace Mumei.CodeGen.Playground;
+﻿namespace Mumei.CodeGen.Qt;
 
 internal static class IdentifierConstants {
     public const string InternalMarker = "λ";

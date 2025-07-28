@@ -1,11 +1,13 @@
 ﻿using System.Collections.Immutable;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
+using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Mumei.CodeGen.Playground;
+using Mumei.CodeGen.Qt.Output;
 using Mumei.CodeGen.Qt.Qt;
 using Mumei.CodeGen.Qt.Tests.CompileTimeBuilders.RoslynAsExpressionReplacement;
 using Mumei.CodeGen.Qt.Tests.Setup;
@@ -100,25 +102,35 @@ file sealed class CompilationScopeTestSourceGenerator : IIncrementalGenerator {
             return null;
         }
 
-        var cls = new QtClass(AccessModifier.FileStatic, "");
+        var cls = new QtClass(AccessModifier.FileStatic, "cls");
+
+        var compilation = sm.Compilation;
+        QtCompilationScope.SetActiveScope(compilation);
+
+        var lambdaType = QtType.ForRoslynType(invokedMethod.Parameters[0].Type);
 
         cls.BindDynamicTemplateInterceptMethod(
             invocation,
-            new { lambda },
-            (ctx, refs) => {
-                var px = (LambdaExpressionSyntax)SyntaxFactory.ParseExpression(refs.lambda.ToFullString());
+            new { lambda, lambdaType },
+            static (ctx, refs) => {
+                var px = (LambdaExpressionSyntax)SyntaxFactory.ParseExpression(refs.lambda.NormalizeWhitespace().ToFullString());
                 StatementSyntax[] statements = px.Body is BlockSyntax block
                     ? [..block.Statements]
                     : [SyntaxFactory.ExpressionStatement((ExpressionSyntax)px.Body)];
-                var x = new RoslynExpression<Action> {
+
+                var x = ctx.Construct<RoslynExpression<Action>>([refs.lambdaType], new RoslynExpression<Arg.T1> {
                     Parameters = [],
                     Statements = statements
-                };
+                });
 
                 ctx.This.Is<IRoslynExpressionReceivable<Action>>().ReceiveExpression(x);
             });
 
         var boundResult = new BoundCompilationResult();
+
+        var ns = new QtNamespace("Test", [cls]);
+        var r = ns.ToSyntaxInternal();
+        boundResult.AddResult("out.g.cs", SourceText.From(r, Encoding.UTF8));
         return boundResult;
     }
 
@@ -142,5 +154,10 @@ file sealed class CompilationScopeTestSourceGenerator : IIncrementalGenerator {
 
         private ImmutableArray<(string FilePath, SourceText text)>.Builder? _generatedFiles;
         public ImmutableArray<(string FilePath, SourceText text)>? GeneratedFiles => _generatedFiles?.ToImmutable();
+
+        public void AddResult(string filePath, SourceText text) {
+            _generatedFiles ??= ImmutableArray.CreateBuilder<(string FilePath, SourceText text)>();
+            _generatedFiles.Add((filePath, text));
+        }
     }
 }
