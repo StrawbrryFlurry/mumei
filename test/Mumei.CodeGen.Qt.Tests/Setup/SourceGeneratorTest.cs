@@ -49,6 +49,10 @@ public sealed class SourceGeneratorTest<TSourceGenerator> where TSourceGenerator
 
         var compilationDiagnostics = updatedCompilation.GetDiagnostics();
 
+        // Debug References
+        var firstGeneratedTree = runResult.GeneratedTrees.FirstOrDefault();
+        var firstDiagnostic = compilationDiagnostics.FirstOrDefault();
+
         if (compilationDiagnostics.Any()) {
 
             Assert.Multiple(compilationDiagnostics.Select<Diagnostic, Action>(diagnostic => {

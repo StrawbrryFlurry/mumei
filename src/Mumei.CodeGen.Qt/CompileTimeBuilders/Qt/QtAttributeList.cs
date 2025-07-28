@@ -4,21 +4,25 @@ namespace Mumei.CodeGen.Qt.Qt;
 
 public readonly struct QtAttribute(
     IQtType type,
-    IQtCompileTimeValue[]? arguments = null,
-    Dictionary<string, IQtCompileTimeValue>? namedArguments = null
+    QtExpression[]? arguments = null,
+    Dictionary<string, QtExpression>? namedArguments = null
 ) : IQtTemplateBindable {
     public static QtAttribute FromType<TAttribute>() where TAttribute : Attribute {
         return FromType(typeof(TAttribute));
     }
 
-    public static QtAttribute FromType<TAttribute>(params IQtCompileTimeValue[]? arguments) where TAttribute : Attribute {
+    public static QtAttribute FromType(IQtType type, QtExpression[] arguments) {
+        return new QtAttribute(type, arguments);
+    }
+
+    public static QtAttribute FromType<TAttribute>(params QtExpression[]? arguments) where TAttribute : Attribute {
         return new QtAttribute(
             QtType.ForRuntimeType<TAttribute>(),
             arguments
         );
     }
 
-    public static QtAttribute FromType<TAttribute>(Dictionary<string, IQtCompileTimeValue>? namedArguments) where TAttribute : Attribute {
+    public static QtAttribute FromType<TAttribute>(Dictionary<string, QtExpression>? namedArguments) where TAttribute : Attribute {
         return FromType(
             typeof(TAttribute),
             null,
@@ -28,8 +32,8 @@ public readonly struct QtAttribute(
 
     public static QtAttribute FromType(
         Type t,
-        IQtCompileTimeValue[]? arguments = null,
-        Dictionary<string, IQtCompileTimeValue>? namedArguments = null
+        QtExpression[]? arguments = null,
+        Dictionary<string, QtExpression>? namedArguments = null
     ) {
         return new QtAttribute(QtType.ForRuntimeType(t), arguments, namedArguments);
     }
@@ -68,7 +72,23 @@ public readonly struct QtAttribute(
 }
 
 public readonly struct QtAttributeList(
-    QtAttribute[] attributes
-) : IQtTemplateBindable {
-    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter { }
+    QtAttribute[]? attributes
+) : IQtTemplateBindable, IQtMemoryAccessor<QtAttribute> {
+    public static QtAttributeList Empty { get; } = new(Array.Empty<QtAttribute>());
+
+    public Memory<QtAttribute> Memory => attributes?.AsMemory() ?? Memory<QtAttribute>.Empty;
+
+    public static QtAttributeList With(params QtAttribute[] attributes) {
+        return new QtAttributeList(attributes);
+    }
+
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+        if (attributes?.Length == 0) {
+            return;
+        }
+
+        writer.Write("[");
+        writer.Write(Memory.RepresentAsSeparatedList(x => x));
+        writer.Write("]");
+    }
 }

@@ -28,6 +28,16 @@ internal readonly struct QtDeclarationPtr<T>(
     }
 }
 
+[Flags]
+public enum QtClassGenerationRequirements {
+    None = 0,
+    InterceptMethods = 1 << 0
+}
+
+public sealed record QtClassInfo {
+    public QtClassGenerationRequirements GenerationRequirements { get; set; } = QtClassGenerationRequirements.None;
+}
+
 public readonly struct QtClass(
     AccessModifier modifiers,
     string name,
@@ -37,6 +47,7 @@ public readonly struct QtClass(
 
     private readonly List<QtFieldCore> _fields = new();
     private readonly List<QtMethodCore> _methods = new();
+    internal readonly QtClassInfo ClassInfo = new();
 
     public QtField<CompileTimeUnknown> AddField(
         AccessModifier modifiers,
@@ -180,6 +191,7 @@ public readonly struct QtClass(
         );
 
         _methods.Add(method.Method);
+        TrackInterceptorMethod();
         return method;
     }
 
@@ -214,7 +226,12 @@ public readonly struct QtClass(
         );
 
         _methods.Add(method.Method);
+        TrackInterceptorMethod();
         return method;
+    }
+
+    private void TrackInterceptorMethod() {
+        ClassInfo.GenerationRequirements |= QtClassGenerationRequirements.InterceptMethods;
     }
 
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {

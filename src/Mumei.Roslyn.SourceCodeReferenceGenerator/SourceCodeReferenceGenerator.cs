@@ -172,8 +172,10 @@ public class SourceCodeReferenceGenerator : IIncrementalGenerator {
 
         var usingDirectives = typeReferences
             .Distinct(SymbolEqualityComparer.Default)
-            .Where(x => x!.DeclaringSyntaxReferences.IsEmpty)
+            .Where(x => !SymbolEqualityComparer.Default.Equals(x.ContainingNamespace, targetType.ContainingNamespace)) // Skip our own namespace
             .Select(t => t!.ContainingNamespace.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat))
+            .Where(x => !targetType.ContainingNamespace.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
+                .StartsWith(x)) // Skip namespaces we're implicitly part of
             .Distinct()
             .Select(x => UsingDirective(ParseName(x)))
             .ToList();
@@ -208,7 +210,7 @@ public class SourceCodeReferenceGenerator : IIncrementalGenerator {
 
         var compilationUnitWithUsings = CompilationUnit()
             .WithUsings(List(usingDirectives))
-            .AddMembers(sourceCodeNode);
+            .AddMembers(MakeQualifiedCompilationUnitMember(targetType, sourceCodeNode));
 
         var sourceCode = compilationUnitWithUsings.NormalizeWhitespace().ToFullString();
         var references = MakeSourceTypeReferencesArray(compilation, typeReferences, processedTypes);
@@ -227,6 +229,15 @@ public class SourceCodeReferenceGenerator : IIncrementalGenerator {
                     )
                 })
             ));
+    }
+
+    private static MemberDeclarationSyntax MakeQualifiedCompilationUnitMember(ITypeSymbol type, MemberDeclarationSyntax member) {
+        if (type.ContainingNamespace.IsGlobalNamespace) {
+            return member;
+        }
+
+        var ns = type.ContainingNamespace.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Substring("global::".Length);
+        return NamespaceDeclaration(ParseName(ns)).WithMembers([member]);
     }
 
     private static ExpressionSyntax MakeSourceTypeReferencesArray(
@@ -275,7 +286,7 @@ public class SourceCodeReferenceGenerator : IIncrementalGenerator {
                 continue;
             }
 
-            elements.Add(InstantiateSourceCodeTypeRef(compilation, type, processedTypes));
+            // elements.Add(InstantiateSourceCodeTypeRef(compilation, type, processedTypes));
         }
 
         return references.WithArgumentList(ArgumentList(SeparatedList(

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -11,17 +10,20 @@ using Mumei.CodeGen.Qt.Output;
 using Mumei.CodeGen.Qt.Qt;
 using Mumei.CodeGen.Qt.Tests.CompileTimeBuilders.RoslynAsExpressionReplacement;
 using Mumei.CodeGen.Qt.Tests.Setup;
-using Mumei.CodeGen.Qt.Tests.SyntaxTreeAsExpressionReplacement;
 using SourceCodeFactory;
 
-namespace Mumei.CodeGen.Qt.Tests;
+namespace Mumei.CodeGen.Qt.Tests.CompileTimeBuilders;
 
 public sealed class CompilationScopeTests {
     [Fact]
     public void CompilationScope() {
-        var result = new SourceGeneratorTest<CompilationScopeTestSourceGenerator>(SourceCode.Of<CompilationTestSource>()).Run();
+        var result = new SourceGeneratorTest<CompilationScopeTestSourceGenerator>(b =>
+            b.AddReference(SourceCode.Of<CompilationTestSource>())
+                .AddTypeReference<CSharpCompilation>()
+        ).Run();
         result.PassesAssemblyAction(x => {
-            var ts = Activator.CreateInstance(x.GetType(nameof(CompilationTestSource)))!;
+            var t = x.GetTypes().First(x => x.Name == nameof(CompilationTestSource));
+            var ts = Activator.CreateInstance(t)!;
             var result = ts.GetType().GetMethod(nameof(CompilationTestSource.TestInvocation)).Invoke(ts, []);
             var r = Unsafe.As<CompilationTestSource.TestReceivable>(result);
 
@@ -107,30 +109,44 @@ file sealed class CompilationScopeTestSourceGenerator : IIncrementalGenerator {
         var compilation = sm.Compilation;
         QtCompilationScope.SetActiveScope(compilation);
 
-        var lambdaType = QtType.ForRoslynType(invokedMethod.Parameters[0].Type);
-
         cls.BindDynamicTemplateInterceptMethod(
             invocation,
-            new { lambda, lambdaType },
+            new { lambda },
             static (ctx, refs) => {
                 var px = (LambdaExpressionSyntax)SyntaxFactory.ParseExpression(refs.lambda.NormalizeWhitespace().ToFullString());
                 StatementSyntax[] statements = px.Body is BlockSyntax block
                     ? [..block.Statements]
                     : [SyntaxFactory.ExpressionStatement((ExpressionSyntax)px.Body)];
 
-                var x = ctx.Construct<RoslynExpression<Action>>([refs.lambdaType], new RoslynExpression<Arg.T1> {
-                    Parameters = [],
-                    Statements = statements
-                });
+                ParameterSyntax[] parameters = px is SimpleLambdaExpressionSyntax spx ? [spx.Parameter]
+                    : px is ParenthesizedLambdaExpressionSyntax pplx ? [..pplx.ParameterList.Parameters]
+                    : [];
 
-                ctx.This.Is<IRoslynExpressionReceivable<Action>>().ReceiveExpression(x);
+                // We can replace the hardcoded Func type once we re-write this to use a method template which can be generic 
+                var x = new RoslynExpression<Func<string, bool>> {
+                    Parameters = parameters,
+                    Statements = statements
+                };
+
+                ctx.This.Is<IRoslynExpressionReceivable<Func<string, bool>>>().ReceiveExpression(x);
             });
 
         var boundResult = new BoundCompilationResult();
 
-        var ns = new QtNamespace("Test", [cls]);
-        var r = ns.ToSyntaxInternal();
-        boundResult.AddResult("out.g.cs", SourceText.From(r, Encoding.UTF8));
+        var ns = new QtNamespace($"{compilation.AssemblyName}.Generated", [cls]);
+        var writer = new SyntaxWriter();
+        writer.WriteLine(
+            """
+            #pragma warning disable
+            namespace System.Runtime.CompilerServices {
+                [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+                file sealed class InterceptsLocationAttribute(int version, string data) : Attribute;
+            }
+            #pragma warning enable
+            """
+        );
+        ns.WriteSyntax(ref writer);
+        boundResult.AddResult("out.g.cs", SourceText.From(writer.ToString(), Encoding.UTF8));
         return boundResult;
     }
 

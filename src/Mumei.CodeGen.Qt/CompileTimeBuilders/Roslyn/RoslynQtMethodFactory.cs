@@ -228,6 +228,7 @@ internal readonly ref struct RoslynQtMethodFactory(
         var binder = new DynamicSourceCodeBinder(sourceCode);
         var methodBody = binder.Bind(invocationBindingContext);
 
+        var interceptLocationAttribute = factory.InterceptLocationFor(invocationToProxy);
         var method = new QtMethod<CompileTimeUnknown>(
             "QtProxy__" + methodSymbol.Name,
             AccessModifier.PublicStatic,
@@ -235,7 +236,7 @@ internal readonly ref struct RoslynQtMethodFactory(
             new QtTypeParameterList(), // Since this is a proxy method, all types need to be bound to the types at the call site
             parameters,
             methodBody,
-            new QtAttributeList(),
+            QtAttributeList.With(interceptLocationAttribute),
             declPtr
         );
 

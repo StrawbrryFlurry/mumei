@@ -17,7 +17,7 @@ public sealed class TestCompilationBuilder {
 
     public CSharpParseOptions ParseOptions => new CSharpParseOptions(LanguageVersion.CSharp13)
         .WithFeatures([
-            new KeyValuePair<string, string>("InterceptorsNamespaces", $"{_assemblyName}.Paramita.Generated")
+            new KeyValuePair<string, string>("InterceptorsNamespaces", $"{_assemblyName}.Generated")
         ]);
 
     public TestCompilationBuilder WithAssemblyName(string assemblyName) {

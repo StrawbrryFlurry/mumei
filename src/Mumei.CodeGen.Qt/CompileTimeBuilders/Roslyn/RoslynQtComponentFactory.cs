@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Playground;
 using Mumei.CodeGen.Qt.Output;
@@ -71,6 +72,22 @@ internal readonly ref struct RoslynQtComponentFactory(
         }
 
         return result;
+    }
+
+    public QtAttribute InterceptLocationFor(
+        InvocationExpressionSyntax invocation
+    ) {
+        var sm = SemanticModel(invocation);
+        var location = sm.GetInterceptableLocation(invocation) ??
+                       throw new InvalidOperationException($"Unable to determine intercept location for invocation: {invocation}");
+        var interceptLocationAttributeType = QtType.ForExpression(QtExpression.ForExpression("System.Runtime.CompilerServices.InterceptsLocationAttribute"));
+        return QtAttribute.FromType(
+            interceptLocationAttributeType,
+            [
+                QtExpression.ForExpression(location.Version.ToString()),
+                QtExpression.ForExpression($"{location.Data:q}")
+            ]
+        );
     }
 
     public QtParameterList ParametersOf(

@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Mumei.CodeGen.Qt.Tests.SyntaxTreeAsExpressionReplacement;
+namespace Mumei.CodeGen.Qt.Tests.CompileTimeBuilders.RoslynAsExpressionReplacement;
 
 public sealed class RoslynExpression<TExpression> {
     public required ParameterSyntax[] Parameters { get; init; }
