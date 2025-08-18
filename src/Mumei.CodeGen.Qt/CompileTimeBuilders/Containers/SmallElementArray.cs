@@ -1,5 +1,4 @@
-﻿using System.Buffers;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -21,6 +20,11 @@ public readonly struct SmallElementArray<T> {
 
     private readonly int _length;
     public int Length => _length;
+
+    public unsafe ReadOnlySpan<T> Span => new(
+        Unsafe.AsPointer(ref Unsafe.AsRef(_element0)),
+        _length
+    );
 
     public static SmallElementArray<T> Empty => default;
 

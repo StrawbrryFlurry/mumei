@@ -84,14 +84,13 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
 
         var methodDeclaration = invocation.ArgumentList.Arguments[1];
 
-        var method = (IMethodSymbol)semanticModel.GetSymbolInfo(invocation).Symbol!;
+        var method = (IMethodSymbol) semanticModel.GetSymbolInfo(invocation).Symbol!;
         var v = new QtInterceptorMethodDeclarationVisitor(semanticModel).Visit(methodDeclaration.Expression);
         BlockSyntax body;
         if (v is ParenthesizedLambdaExpressionSyntax complex) {
-            body = (BlockSyntax)complex.Body;
-        }
-        else {
-            body = (BlockSyntax)((SimpleLambdaExpressionSyntax)v).Body;
+            body = (BlockSyntax) complex.Body;
+        } else {
+            body = (BlockSyntax) ((SimpleLambdaExpressionSyntax) v).Body;
         }
 
         var bodyStatements = body.Statements.ToFullString();
@@ -163,14 +162,13 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
 
         var methodDeclaration = invocation.ArgumentList.Arguments[2];
 
-        var method = (IMethodSymbol)semanticModel.GetSymbolInfo(invocation).Symbol!;
+        var method = (IMethodSymbol) semanticModel.GetSymbolInfo(invocation).Symbol!;
         var v = new QtInterceptorMethodDeclarationVisitor(semanticModel).Visit(methodDeclaration.Expression);
         BlockSyntax body;
         if (v is ParenthesizedLambdaExpressionSyntax complex) {
-            body = (BlockSyntax)complex.Body;
-        }
-        else {
-            body = (BlockSyntax)((SimpleLambdaExpressionSyntax)v).Body;
+            body = (BlockSyntax) complex.Body;
+        } else {
+            body = (BlockSyntax) ((SimpleLambdaExpressionSyntax) v).Body;
         }
 
         var bodyStatements = body.Statements.ToFullString();
@@ -473,6 +471,9 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
                 // Ignore all Is<> calls
                 // If we called Is<> on <This> we still want to visit the <This>
                 // expression to write the this binding into this place.
+                // TODO: Should we track what casts are performed here and validate
+                // that the the target type is a valid conversion for <this> when
+                // the resulting template is bound?
                 return Visit(memberAccess.Expression);
             }
 

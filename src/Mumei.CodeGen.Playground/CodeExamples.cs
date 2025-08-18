@@ -1,4 +1,5 @@
-﻿using Mumei.CodeGen.Qt.Qt;
+﻿using Mumei.CodeGen.Qt;
+using Mumei.CodeGen.Qt.Qt;
 using Mumei.DependencyInjection.Injector.Behavior;
 
 namespace Mumei.CodeGen.Playground;

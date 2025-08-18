@@ -1,8 +1,7 @@
-﻿using Mumei.CodeGen.Qt;
-using Mumei.CodeGen.Qt.Output;
+﻿using Mumei.CodeGen.Qt.Output;
 using Mumei.CodeGen.Qt.Qt;
 
-namespace Mumei.CodeGen.Playground;
+namespace Mumei.CodeGen.Qt;
 
 public abstract class QtClassTemplate<TSelf> : IQtThis where TSelf : QtClassTemplate<TSelf> {
     public IEnumerable<TE> CompTimeIterate<TE>(IEnumerable<TE> compileTimeIterableSelector) where TE : IQtTemplateBindable {

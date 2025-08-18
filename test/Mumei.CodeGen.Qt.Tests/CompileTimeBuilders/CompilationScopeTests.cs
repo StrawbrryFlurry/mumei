@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Operations;
 using Microsoft.CodeAnalysis.Text;
 using Mumei.CodeGen.Playground;
 using Mumei.CodeGen.Qt.Output;
@@ -28,7 +29,7 @@ public sealed class CompilationScopeTests {
             var r = Unsafe.As<CompilationTestSource.TestReceivable>(result);
 
             Assert.Equal("s", r.ParameterName);
-            Assert.Equal("s => s.Length > 0", r.Body);
+            Assert.Equal("s.Length > 0;", r.Body);
         });
     }
 }
@@ -58,7 +59,7 @@ file sealed class CompilationTestSource {
 file sealed class CompilationScopeTestSourceGenerator : IIncrementalGenerator {
     public void Initialize(IncrementalGeneratorInitializationContext context) {
         var results = context.SyntaxProvider.CreateSyntaxProvider(
-            static (node, ct) => Filter(node, ct),
+            Filter,
             static (ctx, cancellationToken) => Bind(ctx.Node, ctx.SemanticModel, cancellationToken)
         ).Where(static x => x is not null);
 
@@ -94,11 +95,15 @@ file sealed class CompilationScopeTestSourceGenerator : IIncrementalGenerator {
             return null;
         }
 
-        if (ModelExtensions.GetSymbolInfo(sm, invocation).Symbol is not IMethodSymbol invokedMethod) {
+        if (sm.GetOperation(invocation, cancellationToken) is not IInvocationOperation invocationOperation) {
             return null;
         }
 
-        var containingType = invokedMethod.ContainingType;
+        var containingType = invocationOperation.Instance?.Type;
+        if (containingType is null) {
+            return null;
+        }
+
         var implementsExpressionReceivable = containingType.AllInterfaces.Any(x => x.MetadataName == "IRoslynExpressionReceivable`1");
         if (!implementsExpressionReceivable) {
             return null;
@@ -113,16 +118,16 @@ file sealed class CompilationScopeTestSourceGenerator : IIncrementalGenerator {
             invocation,
             new { lambda },
             static (ctx, refs) => {
-                var px = (LambdaExpressionSyntax)SyntaxFactory.ParseExpression(refs.lambda.NormalizeWhitespace().ToFullString());
+                var px = (LambdaExpressionSyntax) SyntaxFactory.ParseExpression(refs.lambda.NormalizeWhitespace().ToFullString());
                 StatementSyntax[] statements = px.Body is BlockSyntax block
                     ? [..block.Statements]
-                    : [SyntaxFactory.ExpressionStatement((ExpressionSyntax)px.Body)];
+                    : [SyntaxFactory.ExpressionStatement((ExpressionSyntax) px.Body)];
 
                 ParameterSyntax[] parameters = px is SimpleLambdaExpressionSyntax spx ? [spx.Parameter]
                     : px is ParenthesizedLambdaExpressionSyntax pplx ? [..pplx.ParameterList.Parameters]
                     : [];
 
-                // We can replace the hardcoded Func type once we re-write this to use a method template which can be generic 
+                // We can replace the hardcoded Func type once we re-write this to use a method template which can be generic
                 var x = new RoslynExpression<Func<string, bool>> {
                     Parameters = parameters,
                     Statements = statements
@@ -132,7 +137,6 @@ file sealed class CompilationScopeTestSourceGenerator : IIncrementalGenerator {
             });
 
         var boundResult = new BoundCompilationResult();
-
         var ns = new QtNamespace($"{compilation.AssemblyName}.Generated", [cls]);
         var writer = new SyntaxWriter();
         writer.WriteLine(
@@ -164,7 +168,7 @@ file sealed class CompilationScopeTestSourceGenerator : IIncrementalGenerator {
         }
     }
 
-    private class BoundCompilationResult {
+    private sealed class BoundCompilationResult {
         private ImmutableArray<Diagnostic>.Builder? _diagnostics;
         public ImmutableArray<Diagnostic>? Diagnostics => _diagnostics?.ToImmutable();
 
