@@ -6,7 +6,7 @@ namespace Mumei.CodeGen.Qt;
 
 public readonly struct QtNamespace(
     string name,
-    ImmutableComponentCollection<IQtTemplateBindable> declarations
+    QtCollection<IQtTemplateBindable> declarations
 ) : ISyntaxRepresentable {
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         writer.WriteLine($"namespace {name} {{");
@@ -20,7 +20,7 @@ public readonly struct QtNamespace(
         writer.Write("}");
     }
 
-    public QtNamespace WithDeclarations(ImmutableComponentCollection<IQtTemplateBindable> newDeclarations) {
+    public QtNamespace WithDeclarations(QtCollection<IQtTemplateBindable> newDeclarations) {
         return new QtNamespace(name, newDeclarations);
     }
 

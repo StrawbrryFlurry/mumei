@@ -1,4 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
+using DiffPlex.DiffBuilder;
+using DiffPlex.DiffBuilder.Model;
 using Mumei.CodeGen.Qt.Output;
 using Mumei.CodeGen.Qt.Qt;
 using Xunit.Sdk;
@@ -46,8 +48,7 @@ internal sealed class SyntaxVerifier {
                 ignoreWhiteSpaceDifferences: true,
                 ignoreLineEndingDifferences: true
             );
-        }
-        catch (EqualException e) {
+        } catch (EqualException e) {
             throw new XunitException(
                 $"""
                  Syntax verification failed.
@@ -74,6 +75,24 @@ internal sealed class SyntaxVerifier {
             expectedString
         );
         if (!doesMatch) {
+            var diff = InlineDiffBuilder.Diff(actual, expectedString, true, true);
+            var result = new SyntaxWriter();
+            foreach (var line in diff.Lines) {
+                switch (line.Type) {
+                    case ChangeType.Inserted:
+                        result.Write("+ ");
+                        break;
+                    case ChangeType.Deleted:
+                        result.Write("- ");
+                        break;
+                    default:
+                        result.Write("  ");
+                        break;
+                }
+
+                result.WriteLine(line.Text);
+            }
+
             throw new XunitException(
                 $"""
                  Syntax verification failed.
@@ -82,6 +101,9 @@ internal sealed class SyntaxVerifier {
 
                  Actual:
                  {actual}
+
+                 Diff:
+                 {result}
                  """
             );
         }

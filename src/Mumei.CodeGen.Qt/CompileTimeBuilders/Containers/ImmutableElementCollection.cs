@@ -12,7 +12,7 @@ namespace Mumei.CodeGen.Qt.Containers;
 /// </summary>
 /// <typeparam name="TElement"></typeparam>
 [CollectionBuilder(typeof(λImmutableComponentCollectionFactory), nameof(λImmutableComponentCollectionFactory.Create))]
-public readonly struct ImmutableComponentCollection<TElement> : IReadOnlyCollection<TElement>, IQtMemoryAccessor<TElement>, IDisposable {
+public readonly struct QtCollection<TElement> : IReadOnlyCollection<TElement>, IQtMemoryAccessor<TElement>, IDisposable {
     internal const int InitialCapacity = 4;
 
     private readonly TElement[] _elements = [];
@@ -22,19 +22,19 @@ public readonly struct ImmutableComponentCollection<TElement> : IReadOnlyCollect
 
     public Memory<TElement> Memory {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => _elements.AsMemory();
+        get => _elements.AsMemory(0, Count);
     }
 
     public Span<TElement> Span {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => _elements.AsSpan();
+        get => _elements.AsSpan(0, Count);
     }
 
-    public static ImmutableComponentCollection<TElement> Empty => default;
+    public static QtCollection<TElement> Empty => default;
 
-    public ImmutableComponentCollection() { }
+    public QtCollection() { }
 
-    private ImmutableComponentCollection(TElement[] elements, int count, bool borrowed = false) {
+    private QtCollection(TElement[] elements, int count, bool borrowed = false) {
         Count = count;
         _elements = elements;
         _borrowed = borrowed;
@@ -47,12 +47,12 @@ public readonly struct ImmutableComponentCollection<TElement> : IReadOnlyCollect
     /// <param name="length">The length of the actual elements to take from <paramref name="elements"/> or null if all elements should be used</param>
     /// <param name="borrowed">Whether the provided array was borrowed from the shared array pool</param>
     /// <returns></returns>
-    public static ImmutableComponentCollection<TElement> UnsafeCreateFrom(TElement[] elements, int? length = null, bool borrowed = false) {
+    public static QtCollection<TElement> UnsafeCreateFrom(TElement[] elements, int? length = null, bool borrowed = false) {
         var len = length ?? elements.Length;
-        return new ImmutableComponentCollection<TElement>(elements, len, borrowed);
+        return new QtCollection<TElement>(elements, len, borrowed);
     }
 
-    public static ImmutableComponentCollection<TElement> CreateFrom(ReadOnlySpan<TElement> elements) {
+    public static QtCollection<TElement> CreateFrom(ReadOnlySpan<TElement> elements) {
         if (elements.IsEmpty) {
             return Empty;
         }
@@ -63,20 +63,26 @@ public readonly struct ImmutableComponentCollection<TElement> : IReadOnlyCollect
         return UnsafeCreateFrom(buffer, elements.Length);
     }
 
+    public static QtCollection<TElement> Create(int length) {
+        return UnsafeCreateFrom(new TElement[length]);
+    }
+
     public TElement this[int index] {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => _elements[index];
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        set => _elements[index] = value;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ImmutableComponentCollection<TElement> Add(in TElement element) {
+    public QtCollection<TElement> Add(in TElement element) {
         var coll = EnsureCapacity(1);
         coll._elements[coll.Count] = element;
         return coll;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ImmutableComponentCollection<TElement> AddRange(in ReadOnlySpan<TElement> elements) {
+    public QtCollection<TElement> AddRange(in ReadOnlySpan<TElement> elements) {
         if (elements.IsEmpty) {
             return this;
         }
@@ -87,7 +93,7 @@ public readonly struct ImmutableComponentCollection<TElement> : IReadOnlyCollect
     }
 
     [SkipLocalsInit]
-    public ImmutableComponentCollection<TElement> EnsureCapacity(int newElementCount) {
+    public QtCollection<TElement> EnsureCapacity(int newElementCount) {
         var elements = _elements;
         var currentCount = Count;
         var requiredCapacity = currentCount + newElementCount;
@@ -98,7 +104,7 @@ public readonly struct ImmutableComponentCollection<TElement> : IReadOnlyCollect
         if (elements.Length == 0) {
             var initialSize = Math.Max(InitialCapacity, newElementCount);
             var initialElements = new TElement[initialSize];
-            return new ImmutableComponentCollection<TElement>(initialElements, newElementCount);
+            return new QtCollection<TElement>(initialElements, newElementCount);
         }
 
         var newSize = Math.Max(elements.Length * 2, requiredCapacity);
@@ -108,7 +114,7 @@ public readonly struct ImmutableComponentCollection<TElement> : IReadOnlyCollect
             ArrayPool<TElement>.Shared.Return(elements);
         }
 
-        return new ImmutableComponentCollection<TElement>(newElements, requiredCapacity);
+        return new QtCollection<TElement>(newElements, requiredCapacity);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -135,15 +141,15 @@ public readonly struct ImmutableComponentCollection<TElement> : IReadOnlyCollect
 // Cannot be file scoped.
 // ReSharper disable once InconsistentNaming
 public static class λImmutableComponentCollectionFactory {
-    public static ImmutableComponentCollection<TElement> Create<TElement>(ReadOnlySpan<TElement> elements) {
+    public static QtCollection<TElement> Create<TElement>(ReadOnlySpan<TElement> elements) {
         var elementLength = elements.Length;
         if (elementLength == 0) {
-            return ImmutableComponentCollection<TElement>.Empty;
+            return QtCollection<TElement>.Empty;
         }
 
-        var bufferSize = Math.Max(ImmutableComponentCollection<TElement>.InitialCapacity, elementLength);
+        var bufferSize = Math.Max(QtCollection<TElement>.InitialCapacity, elementLength);
         var buffer = new TElement[bufferSize];
         elements.CopyTo(buffer);
-        return ImmutableComponentCollection<TElement>.UnsafeCreateFrom(buffer, elementLength);
+        return QtCollection<TElement>.UnsafeCreateFrom(buffer, elementLength);
     }
 }

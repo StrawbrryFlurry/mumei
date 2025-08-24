@@ -22,6 +22,7 @@ public sealed class CompilationScopeTests {
             b.AddReference(SourceCode.Of<CompilationTestSource>())
                 .AddTypeReference<CSharpCompilation>()
         ).Run();
+
         result.PassesAssemblyAction(x => {
             var t = x.GetTypes().First(x => x.Name == nameof(CompilationTestSource));
             var ts = Activator.CreateInstance(t)!;

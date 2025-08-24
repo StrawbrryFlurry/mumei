@@ -1,4 +1,5 @@
-﻿using Mumei.CodeGen.Qt.Output;
+﻿using Mumei.CodeGen.Qt.Containers;
+using Mumei.CodeGen.Qt.Output;
 
 namespace Mumei.CodeGen.Qt.Qt;
 
@@ -72,18 +73,20 @@ public readonly struct QtAttribute(
 }
 
 public readonly struct QtAttributeList(
-    QtAttribute[]? attributes
+    QtCollection<QtAttribute> attributes
 ) : IQtTemplateBindable, IQtMemoryAccessor<QtAttribute> {
-    public static QtAttributeList Empty { get; } = new(Array.Empty<QtAttribute>());
+    public int Length => attributes.Count;
+    public bool IsEmpty => attributes.Count == 0;
+    public static QtAttributeList Empty { get; } = new([]);
 
-    public Memory<QtAttribute> Memory => attributes?.AsMemory() ?? Memory<QtAttribute>.Empty;
+    public Memory<QtAttribute> Memory => attributes.Memory;
 
-    public static QtAttributeList With(params QtAttribute[] attributes) {
+    public static QtAttributeList With(params QtCollection<QtAttribute> attributes) {
         return new QtAttributeList(attributes);
     }
 
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
-        if (attributes?.Length == 0) {
+        if (attributes.Count == 0) {
             return;
         }
 

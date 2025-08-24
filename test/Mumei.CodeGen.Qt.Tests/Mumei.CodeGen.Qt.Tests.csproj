@@ -15,4 +15,8 @@
     <ProjectReference Include="..\..\src\Mumei.Roslyn.SourceCodeReferenceGenerator\Mumei.Roslyn.SourceCodeReferenceGenerator.csproj" OutputItemType="Analyzer"/>
     <ProjectReference Include="..\Mumei.Roslyn.Testing\Mumei.Roslyn.Testing.csproj"/>
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DiffPlex"/>
+  </ItemGroup>
 </Project>

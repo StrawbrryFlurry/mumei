@@ -4,10 +4,8 @@ using System.Runtime.InteropServices.ComTypes;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Mumei.CodeGen.Playground;
+using Mumei.CodeGen.Qt;
 using Mumei.CodeGen.Qt.Qt;
-using static Global;
-using static Mumei.CodeGen.Playground.AccessModifier;
 
 _ = 1;
 
@@ -30,7 +28,7 @@ internal sealed class Generator {
         // that declare actual use cases for the syntax builders
         // E.g. Create a type for proxy invocations that know how to write a proxy method
         // for the given invocation and exposes APIs that can be used by the builder implementation
-        // to reflect those use cases e.g. 
+        // to reflect those use cases e.g.
         // (ProxyInvocationTarget t) => {
         //     try {
         //         var result = t.InvokeProxyMethod();

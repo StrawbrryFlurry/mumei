@@ -32,9 +32,8 @@ public sealed class QtClassTestsDynamicInterceptorMethod {
             static ctx => {
                 bool result;
                 try {
-                    result = (bool)ctx.Invoke<BooleanLike>();
-                }
-                catch (Exception e) {
+                    result = (bool) ctx.Invoke<BooleanLike>();
+                } catch (Exception e) {
                     Console.WriteLine(e);
                     Console.WriteLine(new {
                         Arguments = ctx.InvocationArguments,
@@ -52,12 +51,12 @@ public sealed class QtClassTestsDynamicInterceptorMethod {
             cls,
             $$"""
               file static class TestClass {
+                  [System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "*")]
                   public static bool QtProxy__SequenceEqual(this {{typeof(IEnumerable<int>):g}} λthis, {{typeof(IEnumerable<int>):g}} λsecond) {
                       bool result;
                       try {
-                          result = (bool){{typeof(Enumerable):g}}.SequenceEqual<int>(λthis, λsecond);
-                      }
-                      catch ({{typeof(Exception):g}} e) {
+                          result = (bool) {{typeof(Enumerable):g}}.SequenceEqual<int>(λthis, λsecond);
+                      } catch ({{typeof(Exception):g}} e) {
                           {{typeof(Console):g}}.WriteLine(e);
                           {{typeof(Console):g}}.WriteLine(new {
                               Arguments = [ λthis, λsecond ],

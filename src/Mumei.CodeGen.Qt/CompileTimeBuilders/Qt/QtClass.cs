@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Playground;
+using Mumei.CodeGen.Qt.Containers;
 using Mumei.CodeGen.Qt.Output;
 using Mumei.CodeGen.Qt.Roslyn;
 
@@ -10,7 +11,6 @@ public interface IQtParameter : IQtType {
 }
 
 public interface IQtInvokable<TReturn> : IQtTemplateBindable;
-
 public interface IQtTemplateBindable : ISyntaxRepresentable;
 
 public interface IQtThis {
@@ -28,26 +28,17 @@ internal readonly struct QtDeclarationPtr<T>(
     }
 }
 
-[Flags]
-public enum QtClassGenerationRequirements {
-    None = 0,
-    InterceptMethods = 1 << 0
-}
-
-public sealed record QtClassInfo {
-    public QtClassGenerationRequirements GenerationRequirements { get; set; } = QtClassGenerationRequirements.None;
-}
-
 public readonly struct QtClass(
     AccessModifier modifiers,
     string name,
-    QtTypeParameter[]? typeParameters = null!
+    QtCollection<QtTypeParameter> typeParameters = default
 ) : IQtType, IQtTypeDeclaration {
-    public QtTypeParameterList TypeParameters { get; } = new(typeParameters ?? []);
+    public QtTypeParameterList TypeParameters { get; } = new(typeParameters);
 
     private readonly List<QtFieldCore> _fields = new();
     private readonly List<QtMethodCore> _methods = new();
-    internal readonly QtClassInfo ClassInfo = new();
+
+    internal readonly CodeGenFeatureCollection Features = new();
 
     public QtField<CompileTimeUnknown> AddField(
         AccessModifier modifiers,
@@ -231,7 +222,7 @@ public readonly struct QtClass(
     }
 
     private void TrackInterceptorMethod() {
-        ClassInfo.GenerationRequirements |= QtClassGenerationRequirements.InterceptMethods;
+        Features.RequiresFeature(CodeGenFeature.Interceptors);
     }
 
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {

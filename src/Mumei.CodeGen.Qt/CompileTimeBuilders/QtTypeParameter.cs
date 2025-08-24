@@ -1,8 +1,8 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using Mumei.CodeGen.Qt.Containers;
 using Mumei.CodeGen.Qt.Output;
 using Mumei.CodeGen.Qt.Qt;
 
-namespace Mumei.CodeGen.Playground;
+namespace Mumei.CodeGen.Qt;
 
 public readonly struct QtTypeParameter {
     public Type TypeOf { get; }
@@ -11,21 +11,18 @@ public readonly struct QtTypeParameter {
 }
 
 public readonly struct QtTypeParameterList(
-    QtTypeParameter[] typeParameters
+    QtCollection<QtTypeParameter> typeParameters
 ) : IQtTemplateBindable {
     public ConstraintImpl Constraints { get; } = new();
 
-    private readonly QtTypeParameter[]? _typeParameters = typeParameters;
-
-    [MemberNotNullWhen(false, nameof(_typeParameters))]
-    public bool IsEmpty => _typeParameters is null || _typeParameters.Length == 0;
+    public bool IsEmpty => typeParameters.Count == 0;
 
     public static QtTypeParameterList Builder(int capacity) {
-        return new QtTypeParameterList(new QtTypeParameter[capacity]);
+        return new QtTypeParameterList(QtCollection<QtTypeParameter>.Create(capacity));
     }
 
     internal QtTypeParameter this[int idx] {
-        set => _typeParameters?[idx] = value;
+        set => typeParameters[idx] = value;
     }
 
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
@@ -34,12 +31,12 @@ public readonly struct QtTypeParameterList(
         }
 
         writer.Write("<");
-        for (var i = 0; i < _typeParameters.Length; i++) {
+        for (var i = 0; i < typeParameters.Count; i++) {
             if (i > 0) {
                 writer.Write(", ");
             }
 
-            writer.Write(_typeParameters[i].Name);
+            writer.Write(typeParameters[i].Name);
         }
 
         writer.Write(">");

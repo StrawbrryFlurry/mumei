@@ -10,7 +10,7 @@ internal static class RuntimeTypeSerializer {
             writer.WriteFormatted($"typeof(");
         }
 
-        if (TryWriteShortForm(type, writer)) {
+        if (TryWriteShortForm(type, ref writer)) {
             goto WriteEndOfType;
         }
 
@@ -52,7 +52,7 @@ internal static class RuntimeTypeSerializer {
         }
     }
 
-    private static bool TryWriteShortForm<TSyntaxWriter>(Type type, in TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
+    private static bool TryWriteShortForm<TSyntaxWriter>(Type type, ref TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
         if (type.IsPrimitive) {
             writer.Write(type switch {
                 not null when type == typeof(int) => "int",

@@ -56,7 +56,11 @@ internal readonly struct QtMethodCore(
     public string Name => name;
 
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
-        writer.Write(attributes);
+        if (!attributes.IsEmpty) {
+            writer.Write(attributes);
+            writer.WriteLine();
+        }
+
         writer.WriteFormatted($"{modifiers} {returnType:g} {name}{typeParameters}({parameters})");
 
         if (!typeParameters.Constraints.IsEmpty) {
