@@ -11,13 +11,12 @@ public interface IQtParameter : IQtType {
 }
 
 public interface IQtInvokable<TReturn> : IQtTemplateBindable;
-public interface IQtTemplateBindable : ISyntaxRepresentable;
 
 public interface IQtThis {
     public T Is<T>();
 }
 
-public interface IQtTypeDeclaration;
+public interface IQtTypeDeclaration : IQtTemplateBindable;
 
 internal readonly struct QtDeclarationPtr<T>(
     List<T> declarationRef,
@@ -38,7 +37,21 @@ public readonly struct QtClass(
     private readonly List<QtFieldCore> _fields = new();
     private readonly List<QtMethodCore> _methods = new();
 
-    internal readonly CodeGenFeatureCollection Features = new();
+    public static QtClass CreateObfuscated(
+        AccessModifier modifiers,
+        string nameHint,
+        QtCollection<QtTypeParameter> typeParameters = default
+    ) {
+        var name = RandomNameGenerator.GenerateName(nameHint);
+        return new QtClass(modifiers, name, typeParameters);
+    }
+
+    // All other implementations should be extension methods
+    public void AddField<T>(
+        ref QtField<T> field
+    ) {
+        _fields.Add(field.Field);
+    }
 
     public QtField<CompileTimeUnknown> AddField(
         AccessModifier modifiers,
@@ -182,7 +195,6 @@ public readonly struct QtClass(
         );
 
         _methods.Add(method.Method);
-        TrackInterceptorMethod();
         return method;
     }
 
@@ -217,12 +229,7 @@ public readonly struct QtClass(
         );
 
         _methods.Add(method.Method);
-        TrackInterceptorMethod();
         return method;
-    }
-
-    private void TrackInterceptorMethod() {
-        Features.RequiresFeature(CodeGenFeature.Interceptors);
     }
 
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {

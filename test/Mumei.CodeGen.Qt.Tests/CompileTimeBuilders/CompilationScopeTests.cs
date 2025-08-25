@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -59,67 +60,54 @@ file sealed class CompilationTestSource {
 
 file sealed class CompilationScopeTestSourceGenerator : IIncrementalGenerator {
     public void Initialize(IncrementalGeneratorInitializationContext context) {
-        var results = context.SyntaxProvider.CreateSyntaxProvider(
+        context.RegisterQtSourceOutput(
             Filter,
-            static (ctx, cancellationToken) => Bind(ctx.Node, ctx.SemanticModel, cancellationToken)
-        ).Where(static x => x is not null);
-
-        context.RegisterSourceOutput(results, static (context, result) => Execute(context, result!));
+            GenerateOutput
+        );
     }
 
-    private static bool Filter(SyntaxNode node, CancellationToken cancellationToken) {
-        if (node is not InvocationExpressionSyntax invocation) {
-            return false;
+    private static NodeMatchResult<(InvocationExpressionSyntax Invocation, LambdaExpressionSyntax Lambda)> Filter(NodeMatchingContext ctx) {
+        if (ctx.Node is not InvocationExpressionSyntax invocation) {
+            return default;
         }
 
         if (invocation.Expression is not MemberAccessExpressionSyntax) {
-            return false;
+            return default;
         }
 
         if (invocation.ArgumentList.Arguments.Count != 1) {
-            return false;
-        }
-
-        if (invocation.ArgumentList.Arguments[0].Expression is not LambdaExpressionSyntax) {
-            return false;
-        }
-
-        return true;
-    }
-
-    private static BoundCompilationResult? Bind(SyntaxNode node, SemanticModel sm, CancellationToken cancellationToken) {
-        if (node is not InvocationExpressionSyntax invocation) {
-            return null;
+            return default;
         }
 
         if (invocation.ArgumentList.Arguments[0].Expression is not LambdaExpressionSyntax lambda) {
-            return null;
+            return default;
         }
 
-        if (sm.GetOperation(invocation, cancellationToken) is not IInvocationOperation invocationOperation) {
-            return null;
+        return (invocation, lambda);
+    }
+
+    private static void GenerateOutput(OutputGenerationContext<(InvocationExpressionSyntax Invocation, LambdaExpressionSyntax Lambda)> ctx) {
+        var invocation = ctx.State.Invocation;
+        if (ctx.SemanticModel.GetOperation(invocation, ctx) is not IInvocationOperation invocationOperation) {
+            return;
         }
 
         var containingType = invocationOperation.Instance?.Type;
         if (containingType is null) {
-            return null;
+            return;
         }
 
         var implementsExpressionReceivable = containingType.AllInterfaces.Any(x => x.MetadataName == "IRoslynExpressionReceivable`1");
         if (!implementsExpressionReceivable) {
-            return null;
+            return;
         }
 
         var cls = new QtClass(AccessModifier.FileStatic, "cls");
-
-        var compilation = sm.Compilation;
-        QtCompilationScope.SetActiveScope(compilation);
-
         cls.BindDynamicTemplateInterceptMethod(
             invocation,
-            new { lambda },
+            new { ctx.State.Lambda },
             static (ctx, refs) => {
-                var px = (LambdaExpressionSyntax) SyntaxFactory.ParseExpression(refs.lambda.NormalizeWhitespace().ToFullString());
+                var px = (LambdaExpressionSyntax) SyntaxFactory.ParseExpression(refs.Lambda.NormalizeWhitespace().ToFullString());
                 StatementSyntax[] statements = px.Body is BlockSyntax block
                     ? [..block.Statements]
                     : [SyntaxFactory.ExpressionStatement((ExpressionSyntax) px.Body)];
@@ -137,48 +125,9 @@ file sealed class CompilationScopeTestSourceGenerator : IIncrementalGenerator {
                 ctx.This.Is<IRoslynExpressionReceivable<Func<string, bool>>>().ReceiveExpression(x);
             });
 
-        var boundResult = new BoundCompilationResult();
-        var ns = new QtNamespace($"{compilation.AssemblyName}.Generated", [cls]);
-        var writer = new SyntaxWriter();
-        writer.WriteLine(
-            """
-            #pragma warning disable
-            namespace System.Runtime.CompilerServices {
-                [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-                file sealed class InterceptsLocationAttribute(int version, string data) : Attribute;
-            }
-            #pragma warning enable
-            """
-        );
-        ns.WriteSyntax(ref writer);
-        boundResult.AddResult("out.g.cs", SourceText.From(writer.ToString(), Encoding.UTF8));
-        return boundResult;
-    }
+        var ns = QtNamespace.FromGeneratorAssemblyName("Generated", [cls]);
+        var file = QtSourceFile.CreateObfuscated("Coolio").WithNamespace(ns);
 
-    private static void Execute(SourceProductionContext context, BoundCompilationResult result) {
-        if (result.Diagnostics is { Length: > 0 } diagnostics) {
-            foreach (var diagnostic in diagnostics) {
-                context.ReportDiagnostic(diagnostic);
-            }
-        }
-
-        if (result.GeneratedFiles is { Length: > 0 } generatedFiles) {
-            foreach (var (filePath, text) in generatedFiles) {
-                context.AddSource(filePath, text);
-            }
-        }
-    }
-
-    private sealed class BoundCompilationResult {
-        private ImmutableArray<Diagnostic>.Builder? _diagnostics;
-        public ImmutableArray<Diagnostic>? Diagnostics => _diagnostics?.ToImmutable();
-
-        private ImmutableArray<(string FilePath, SourceText text)>.Builder? _generatedFiles;
-        public ImmutableArray<(string FilePath, SourceText text)>? GeneratedFiles => _generatedFiles?.ToImmutable();
-
-        public void AddResult(string filePath, SourceText text) {
-            _generatedFiles ??= ImmutableArray.CreateBuilder<(string FilePath, SourceText text)>();
-            _generatedFiles.Add((filePath, text));
-        }
+        ctx.AddFile(file);
     }
 }

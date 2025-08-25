@@ -17,7 +17,8 @@ public readonly struct QtMethod<TReturnType> : IQtInvokable<TReturnType> {
         in QtParameterList parameters,
         in QtCodeBlock codeBlock,
         in QtAttributeList attributes,
-        in QtDeclarationPtr<QtMethodCore> declarationPtr
+        in QtDeclarationPtr<QtMethodCore> declarationPtr,
+        bool isInterceptorMethod = false
     ) {
         _declarationPtr = declarationPtr;
         Method = new QtMethodCore(
@@ -27,7 +28,8 @@ public readonly struct QtMethod<TReturnType> : IQtInvokable<TReturnType> {
             typeParameters,
             parameters,
             codeBlock,
-            attributes
+            attributes,
+            isInterceptorMethod
         );
     }
 
@@ -51,11 +53,17 @@ internal readonly struct QtMethodCore(
     QtTypeParameterList typeParameters,
     QtParameterList parameters,
     QtCodeBlock codeBlock,
-    QtAttributeList attributes
+    QtAttributeList attributes,
+    bool isInterceptorMethod = false
 ) : IQtTemplateBindable {
     public string Name => name;
 
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+        if (isInterceptorMethod) {
+            // TODO: Yikes
+            TemplateBindingContext.Current.CodeGenFeatures.Require(CodeGenFeature.Interceptors);
+        }
+
         if (!attributes.IsEmpty) {
             writer.Write(attributes);
             writer.WriteLine();

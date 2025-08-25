@@ -34,10 +34,9 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ValueSyntaxWriter(in Span<char> initialBuffer) {
-        _buffer = (char*)Unsafe.AsPointer(ref initialBuffer.GetPinnableReference());
+        _buffer = (char*) Unsafe.AsPointer(ref initialBuffer.GetPinnableReference());
         _bufferLength = initialBuffer.Length;
     }
-
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Indent() {
@@ -139,8 +138,7 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
         if (TryWriteIndent(line.Length + NewLine.Length)) {
             WriteCoreUnsafe(line);
             WriteCoreUnsafe(NewLine);
-        }
-        else {
+        } else {
             WriteCore(line, NewLine.Length);
             WriteCoreUnsafe(NewLine);
         }
@@ -154,6 +152,7 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
         _requiresIndent = true;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void WriteBlock(in ReadOnlySpan<char> block) {
         SyntaxWriter.WriteBlock(ref this, block);
     }
@@ -175,7 +174,11 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
     }
 
     public void WriteFormattedBlock(in FormattableSyntaxWritable writable) {
-        throw new NotImplementedException();
+        var temporaryBlockBuffer = new ValueSyntaxWriter(stackalloc char[StackBufferSize]);
+        writable.CopyToAndDispose(ref temporaryBlockBuffer);
+        var span = new ReadOnlySpan<char>(temporaryBlockBuffer._buffer, temporaryBlockBuffer._bufferPosition);
+        WriteBlock(span);
+        temporaryBlockBuffer.Dispose();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -199,7 +202,7 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
         requiredLength = _requiresIndent ? _indentString.Length + requiredLength : requiredLength;
         var currentLength = _bufferLength;
         requiredLength = _bufferPosition + requiredLength;
-        if ((uint)requiredLength < (uint)currentLength) {
+        if ((uint) requiredLength < (uint) currentLength) {
             return;
         }
 
@@ -213,7 +216,7 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
 
         _rentedBuffer = newBuffer;
         var newBufferSpan = new Span<char>(newBuffer);
-        _buffer = (char*)Unsafe.AsPointer(ref newBufferSpan.GetPinnableReference());
+        _buffer = (char*) Unsafe.AsPointer(ref newBufferSpan.GetPinnableReference());
         _bufferLength = newLength;
     }
 

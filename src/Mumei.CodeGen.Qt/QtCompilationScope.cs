@@ -4,18 +4,20 @@ using Microsoft.CodeAnalysis.Text;
 namespace Mumei.CodeGen.Qt;
 
 public sealed class QtCompilationScope {
-    public static QtCompilationScope Active => ActiveScope.Value ?? throw new InvalidOperationException();
+    public static QtCompilationScope Active => ActiveScope.Value ?? throw new InvalidOperationException("No active compilation scope. Ensure that you are inside a source generator context.");
     private static AsyncLocal<QtCompilationScope> ActiveScope { get; } = new();
+    private readonly HashSet<ICompilationUnitFeature> _compilationUnitFeatures = [];
 
     public required Compilation Compilation { get; init; }
-
-    /// Tracks things like the reflection extensions 
-    private Dictionary<string, string> _globallyWrittenFiles = new();
 
     internal readonly Dictionary<string, SourceText> GeneratedFiles = new();
 
     public static void SetActiveScope(Compilation scope) {
         ActiveScope.Value = new QtCompilationScope { Compilation = scope };
+    }
+
+    internal static void RequiresFeature(ICompilationUnitFeature feature) {
+        Active._compilationUnitFeatures.Add(feature);
     }
 }
 

@@ -74,8 +74,7 @@ internal readonly struct ProxyInvocationCallSiteInvokeBinder(
         if (method.IsStatic || method.IsExtensionMethod) {
             var declaringType = QtType.ForRoslynType(method.ContainingType);
             writer.Write(declaringType, "g");
-        }
-        else {
+        } else {
             Debug.Assert(callIsOnThisObj);
             var thisIdentifier = parameters[0].Name;
             writer.Write(thisIdentifier);
@@ -107,6 +106,8 @@ internal readonly struct InvocationCallSiteMethodInfoBinder(
         var typeParameters = method.TypeParameters.AsMemory().RepresentAsQtArray(QtType.ForRoslynType);
         var parameterTypes = method.Parameters.AsMemory().RepresentAsQtArray(p => QtType.ForRoslynType(p.Type));
         writer.WriteFormatted($"{declaringType:t}, {method.Name:q}, {typeParameters:t}, {parameterTypes:t}");
+
+        TemplateBindingContext.Current.CodeGenFeatures.Require(CodeGenFeature.MethodReflection);
 
         return Unit.Value;
     }
@@ -237,7 +238,8 @@ internal readonly ref struct RoslynQtMethodFactory(
             parameters,
             methodBody,
             QtAttributeList.With(interceptLocationAttribute),
-            declPtr
+            declPtr,
+            true
         );
 
         return method;

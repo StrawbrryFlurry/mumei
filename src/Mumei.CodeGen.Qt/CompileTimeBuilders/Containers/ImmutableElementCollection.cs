@@ -15,10 +15,12 @@ namespace Mumei.CodeGen.Qt.Containers;
 public readonly struct QtCollection<TElement> : IReadOnlyCollection<TElement>, IQtMemoryAccessor<TElement>, IDisposable {
     internal const int InitialCapacity = 4;
 
-    private readonly TElement[] _elements = [];
+    // Null for "default" instances
+    private readonly TElement[]? _elements = [];
     private readonly bool _borrowed = false;
 
     public int Count { get; } = 0;
+    public bool IsEmpty => Count == 0;
 
     public Memory<TElement> Memory {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -64,20 +66,23 @@ public readonly struct QtCollection<TElement> : IReadOnlyCollection<TElement>, I
     }
 
     public static QtCollection<TElement> Create(int length) {
-        return UnsafeCreateFrom(new TElement[length]);
+        return UnsafeCreateFrom(new TElement[length], 0);
     }
 
     public TElement this[int index] {
+        // Use span to throw on out-of-bounds exceptions on default instances
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => _elements[index];
+        get => Span[index];
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => _elements[index] = value;
+        internal set => Span[index] = value;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public QtCollection<TElement> Add(in TElement element) {
+        var idx = Count;
         var coll = EnsureCapacity(1);
-        coll._elements[coll.Count] = element;
+        // We know this is never null after EnsureCapacity - MemberNotNull won't work here because coll may not be "this"
+        coll._elements![idx] = element;
         return coll;
     }
 
@@ -87,8 +92,9 @@ public readonly struct QtCollection<TElement> : IReadOnlyCollection<TElement>, I
             return this;
         }
 
+        var idx = Count;
         var coll = EnsureCapacity(elements.Length);
-        elements.CopyTo(coll._elements.AsSpan(coll.Count));
+        elements.CopyTo(coll._elements.AsSpan(idx));
         return coll;
     }
 
@@ -97,14 +103,15 @@ public readonly struct QtCollection<TElement> : IReadOnlyCollection<TElement>, I
         var elements = _elements;
         var currentCount = Count;
         var requiredCapacity = currentCount + newElementCount;
-        if (requiredCapacity <= elements.Length) {
-            return this;
-        }
 
-        if (elements.Length == 0) {
+        if (elements is null || elements.Length == 0) {
             var initialSize = Math.Max(InitialCapacity, newElementCount);
             var initialElements = new TElement[initialSize];
             return new QtCollection<TElement>(initialElements, newElementCount);
+        }
+
+        if (requiredCapacity <= elements.Length) {
+            return new QtCollection<TElement>(elements, requiredCapacity, _borrowed);
         }
 
         var newSize = Math.Max(elements.Length * 2, requiredCapacity);
@@ -124,7 +131,7 @@ public readonly struct QtCollection<TElement> : IReadOnlyCollection<TElement>, I
 
     IEnumerator<TElement> IEnumerable<TElement>.GetEnumerator() {
         Debug.Assert(false, "We never want to use this overload");
-        return _elements.AsEnumerable().GetEnumerator();
+        return (_elements ?? []).AsEnumerable().GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator() {
@@ -135,6 +142,17 @@ public readonly struct QtCollection<TElement> : IReadOnlyCollection<TElement>, I
         if (_borrowed) {
             ArrayPool<TElement>.Shared.Return(_elements);
         }
+    }
+}
+
+public static class QtCollectionExtensions {
+    public static QtCollection<TTo> Select<T, TTo>(this in QtCollection<T> collection, Func<T, TTo> mapper) {
+        var destination = QtCollection<TTo>.Create(collection.Count);
+        foreach (var item in collection) {
+            destination = destination.Add(mapper(item));
+        }
+
+        return destination;
     }
 }
 

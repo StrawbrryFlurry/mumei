@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Mumei.CodeGen.Qt.Containers;
 using Mumei.CodeGen.Qt.Output;
@@ -6,7 +7,38 @@ using Mumei.CodeGen.Qt.Qt;
 
 namespace Mumei.CodeGen.Qt;
 
-public readonly struct QtSourceFile { }
+public readonly struct QtSourceFile {
+    public required string Name { get; init; }
+    private readonly QtCollection<QtNamespace> _namespaceDeclarations = QtCollection<QtNamespace>.Empty;
+
+    public QtSourceFile() { }
+
+    [SetsRequiredMembers]
+    public QtSourceFile(string name) {
+        Name = name;
+    }
+
+    [SetsRequiredMembers]
+    public QtSourceFile(string name, QtCollection<QtNamespace> namespaceDeclarations) {
+        Name = name;
+        _namespaceDeclarations = namespaceDeclarations;
+    }
+
+    public static QtSourceFile CreateObfuscated(string nameHint) {
+        return new QtSourceFile(RandomNameGenerator.GenerateName(nameHint));
+    }
+
+    public QtSourceFile WithNamespace(QtNamespace ns) {
+        return new QtSourceFile(Name, _namespaceDeclarations.Add(ns));
+    }
+
+    public void WriteTo<TSyntaxWriter>(ref TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
+        foreach (var namespaceDeclaration in _namespaceDeclarations) {
+            writer.Write(namespaceDeclaration);
+            writer.WriteLine();
+        }
+    }
+}
 
 /// <summary>
 /// Describes a feature that needs to be available in the generated
@@ -29,12 +61,23 @@ internal sealed class CodeGenFeatureCollection {
     private HashSet<ISourceFileFeature>? _sourceFileFeatures;
     private HashSet<ICompilationUnitFeature>? _compilationUnitFeatures;
 
-    public void RequiresFeature(ISourceFileFeature feature) {
+    public void Require(ISourceFileFeature feature) {
         (_sourceFileFeatures ??= []).Add(feature);
     }
 
-    public void RequiresFeature(ICompilationUnitFeature feature) {
+    public void Require(ICompilationUnitFeature feature) {
         (_compilationUnitFeatures ??= []).Add(feature);
+    }
+
+    public void WriteSourceFileFeatures<TSyntaxWriter>(ref TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
+        if (_sourceFileFeatures is null) {
+            return;
+        }
+
+        foreach (var feature in _sourceFileFeatures) {
+            writer.Write(feature);
+            writer.WriteLine();
+        }
     }
 }
 
