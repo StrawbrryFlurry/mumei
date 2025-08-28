@@ -1,22 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>latest</LangVersion>
+    <IsPackable>false</IsPackable>
+
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
     <PackageReference Include="PolySharp">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    
+    <PackageReference Include="Microsoft.CodeAnalysis.Common"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Mumei.Reflection\Mumei.Reflection.csproj"/>
-  </ItemGroup>
-
-  <Import Project="../Mumei.Roslyn.Common/Mumei.Roslyn.Common.props"/>
 </Project>

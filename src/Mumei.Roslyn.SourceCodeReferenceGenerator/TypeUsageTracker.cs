@@ -28,11 +28,7 @@ internal sealed class TypeUsageTracker : CSharpSyntaxWalker {
     }
 
     public override void VisitIdentifierName(IdentifierNameSyntax node) {
-        if (node.Identifier.Text == "CustomAwaitable") {
-            Debug.Indent();
-        }
-
-        TryTrackIdentifierType(_sm, node);
+        TryTrackIdentifierType(node);
         base.VisitIdentifierName(node);
     }
 
@@ -102,7 +98,6 @@ internal sealed class TypeUsageTracker : CSharpSyntaxWalker {
     }
 
     private void TryTrackIdentifierType(
-        SemanticModel sm,
         IdentifierNameSyntax node
     ) {
         if (node.Parent is QualifiedNameSyntax qualifiedNameSyntax) {
@@ -119,7 +114,7 @@ internal sealed class TypeUsageTracker : CSharpSyntaxWalker {
             }
         }
 
-        if (!TryGetIdentifierType(sm, node, out var identifierType)) {
+        if (!TryGetIdentifierType(node, out var identifierType)) {
             return;
         }
 
@@ -131,10 +126,10 @@ internal sealed class TypeUsageTracker : CSharpSyntaxWalker {
     }
 
 
-    private bool TryGetIdentifierType(SemanticModel sm, IdentifierNameSyntax identifierNode, out ITypeSymbol identifierType) {
-        var identifier = sm.GetSymbolInfo(identifierNode).Symbol;
+    private bool TryGetIdentifierType(IdentifierNameSyntax identifierNode, out ITypeSymbol identifierType) {
+        var identifier = _sm.GetSymbolInfo(identifierNode).Symbol;
         if (identifier is ITypeSymbol typeIdentifier) {
-            if (sm.GetAliasInfo(identifierNode) is { } alias) {
+            if (_sm.GetAliasInfo(identifierNode) is { } alias) {
                 _aliases.Add(alias);
             }
 
@@ -146,8 +141,8 @@ internal sealed class TypeUsageTracker : CSharpSyntaxWalker {
         // e.g. `[Attribute]` or `[Attribute()]` where the
         // MethodSymbol is the Attribute's constructor
         if (identifier is IMethodSymbol possibleAttributeCtor) {
-            var attributeType = sm.Compilation.GetTypeByMetadataName("System.Attribute");
-            var isAttribute = sm.Compilation.HasImplicitConversion(possibleAttributeCtor.ContainingType, attributeType);
+            var attributeType = _sm.Compilation.GetTypeByMetadataName("System.Attribute");
+            var isAttribute = _sm.Compilation.HasImplicitConversion(possibleAttributeCtor.ContainingType, attributeType);
             if (isAttribute) {
                 identifierType = possibleAttributeCtor.ContainingType;
                 return true;

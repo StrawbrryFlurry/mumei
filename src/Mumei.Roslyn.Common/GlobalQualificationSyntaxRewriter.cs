@@ -1,22 +1,14 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Operations;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Mumei.CodeGen.Qt;
+namespace Mumei.Roslyn.Common;
 
-public class TypeToGloballyQualifiedIdentifierRewriter(
+public class GloballyQualifyingSyntaxRewriter(
     SemanticModel sm
 ) : CSharpSyntaxRewriter {
-    public static T GlobalizeIdentifiers<T>(
-        SemanticModel sm,
-        T syntaxNode
-    ) where T : SyntaxNode {
-        var rewriter = new TypeToGloballyQualifiedIdentifierRewriter(sm);
-        var resultNode = (T)rewriter.Visit(syntaxNode);
-        return resultNode;
-    }
-
     public override SyntaxNode? VisitGenericName(GenericNameSyntax node) {
         if (!TryGlobalizeIdentifier(sm, node, out var globalizedIdentifier)) {
             return base.VisitGenericName(node);
@@ -34,12 +26,12 @@ public class TypeToGloballyQualifiedIdentifierRewriter(
     }
 
     public override SyntaxNode? VisitInvocationExpression(InvocationExpressionSyntax node) {
-        if (node.Expression is not MemberAccessExpressionSyntax memberAccess) {
-            return base.VisitInvocationExpression(node);
+        if (node.Expression is not MemberAccessExpressionSyntax) {
+            return TryQualifyImplicitTargetMethodCall(node);
         }
 
-        var targetMethod = ModelExtensions.GetSymbolInfo(sm, memberAccess.Name).Symbol as IMethodSymbol;
-        if (!targetMethod?.IsExtensionMethod ?? false) {
+        var invocationOperation = sm.GetOperation(node);
+        if (invocationOperation is not IInvocationOperation { TargetMethod: { IsExtensionMethod: true } targetMethod }) {
             return base.VisitInvocationExpression(node);
         }
 
@@ -48,16 +40,38 @@ public class TypeToGloballyQualifiedIdentifierRewriter(
             return visited;
         }
 
+        var methodName = targetMemberAccess.Name; // Take the existing member name to preserve type arguments
         return InvocationExpression(
             MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
-                IdentifierName(targetMethod.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)),
-                IdentifierName(targetMethod.Name)
+                IdentifierName(targetMethod!.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)),
+                methodName
             ),
             ArgumentList(SeparatedList([
                 Argument(targetMemberAccess.Expression),
                 ..invocation.ArgumentList.Arguments
             ]))
+        ).WithLeadingTrivia(node.GetLeadingTrivia()).WithTrailingTrivia(node.GetTrailingTrivia());
+    }
+
+    private SyntaxNode? TryQualifyImplicitTargetMethodCall(InvocationExpressionSyntax node) {
+        // If the invocation is a static method imported via `using static ...` we need to qualify it
+        var invocationOperation = sm.GetOperation(node);
+        if (invocationOperation is not IInvocationOperation { TargetMethod: { IsStatic: true } targetMethod }) {
+            return base.VisitInvocationExpression(node);
+        }
+
+        // Ideally we would only qualify the member if it's imported via `using static ...`
+        // but determining that is non-trivial so for now we always qualify static method calls
+        // with their containing type
+        var methodName = node.Expression as SimpleNameSyntax ?? throw new NotSupportedException(); // Preserve type arguments
+        return InvocationExpression(
+            MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                IdentifierName(targetMethod!.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)),
+                methodName
+            ),
+            node.ArgumentList
         ).WithLeadingTrivia(node.GetLeadingTrivia()).WithTrailingTrivia(node.GetTrailingTrivia());
     }
 
@@ -98,7 +112,7 @@ public class TypeToGloballyQualifiedIdentifierRewriter(
 
 
     private static bool TryGetIdentifierType(SemanticModel sm, SimpleNameSyntax identifierNode, out ITypeSymbol identifierType) {
-        var identifier = ModelExtensions.GetSymbolInfo(sm, identifierNode).Symbol;
+        var identifier = sm.GetSymbolInfo(identifierNode).Symbol;
         if (identifier is ITypeSymbol typeIdentifier) {
             identifierType = typeIdentifier;
             return true;

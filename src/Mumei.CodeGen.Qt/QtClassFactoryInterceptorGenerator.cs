@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Qt.Output;
 using Mumei.CodeGen.Qt.Qt;
 using Mumei.CodeGen.Qt.Roslyn;
+using Mumei.Roslyn.Common;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Mumei.CodeGen.Qt;
@@ -416,7 +417,7 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
 
     private sealed class QtInterceptorMethodDeclarationVisitor(
         SemanticModel sm
-    ) : TypeToGloballyQualifiedIdentifierRewriter(sm) {
+    ) : GloballyQualifyingSyntaxRewriter(sm) {
         private string? _ctxIdentifier;
         private string? _stateIdentifier;
 
