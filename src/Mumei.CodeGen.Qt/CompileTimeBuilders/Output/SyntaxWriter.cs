@@ -96,10 +96,10 @@ public class SyntaxWriter : ISyntaxWriter {
     }
 
     public void WriteFormattedBlock(in FormattableSyntaxWritable writable) {
-        TryWriteIndent();
+        var tempBuffer = new ValueSyntaxWriter(stackalloc char[ValueSyntaxWriter.StackBufferSize]);
+        writable.CopyToAndDispose(ref tempBuffer);
         var @this = this;
-        writable.CopyToAndDispose(ref @this);
-        WriteLine();
+        WriteBlock(ref @this, tempBuffer.Buffer);
     }
 
     public string GetIndent() {

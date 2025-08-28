@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Qt.Output;
 using Mumei.CodeGen.Qt.Qt;
 using Mumei.CodeGen.Qt.Roslyn;
+using Mumei.Roslyn;
 using Mumei.Roslyn.Common;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -105,10 +106,10 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
                 writer.WriteLine(",");
             }
 
-            writer.WriteLine("\"\"\"\"\"\"\"\"\"\"\"\"");
+            writer.WriteLine(Strings.RawStringLiteral12);
             var sourceCodeSection = sourceCodeSections[i];
             writer.WriteLine(sourceCodeSection);
-            writer.Write("\"\"\"\"\"\"\"\"\"\"\"\"");
+            writer.Write(Strings.RawStringLiteral12);
         }
 
         writer.SetIndentLevel(ind);
@@ -203,10 +204,10 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
                 writer.WriteLine(",");
             }
 
-            writer.WriteLine("\"\"\"\"\"\"\"\"\"\"\"\"");
+            writer.WriteLine(Strings.RawStringLiteral12);
             var sourceCodeSection = sourceCodeSections[i];
             writer.WriteLine(sourceCodeSection);
-            writer.Write("\"\"\"\"\"\"\"\"\"\"\"\"");
+            writer.Write(Strings.RawStringLiteral12);
         }
 
         writer.SetIndentLevel(ind);
@@ -352,8 +353,8 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
         var source = CleanUpCapturedSourceCode(code).AsSpan();
         // We could prolly make the binding of syntax nodes / context objs to the source code fully compile-time as well
         // Since we know all arguments and references of "external" code at this point.
-        var result = ImmutableArray.CreateBuilder<string>();
-        var boundKeysBuilder = ImmutableArray.CreateBuilder<string>();
+        var result = new ArrayBuilder<string>();
+        var boundKeysBuilder = new ArrayBuilder<string>();
         while (true) {
             var markerIdx = source.IndexOf(__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeStart);
             if (markerIdx == -1) {
@@ -371,8 +372,8 @@ public sealed class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
             source = source[(endIdx + 1)..];
         }
 
-        boundKeys = boundKeysBuilder.ToArray();
-        return result.ToArray();
+        boundKeys = boundKeysBuilder.ToArrayAndFree();
+        return result.ToArrayAndFree();
     }
 
     private static string CleanUpCapturedSourceCode(

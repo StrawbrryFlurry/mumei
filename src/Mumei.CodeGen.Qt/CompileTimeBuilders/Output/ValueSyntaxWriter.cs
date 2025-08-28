@@ -26,6 +26,8 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
 
     private bool _requiresIndent = true;
 
+    internal ReadOnlySpan<char> Buffer => new(_buffer, _bufferPosition);
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ValueSyntaxWriter(char* initialBuffer, int initialBufferLength) {
         _buffer = initialBuffer;
