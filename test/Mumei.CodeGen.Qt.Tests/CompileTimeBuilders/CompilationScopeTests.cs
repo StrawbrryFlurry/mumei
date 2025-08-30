@@ -20,10 +20,8 @@ public sealed class CompilationScopeTests {
         ).Run();
 
         result.PassesAssemblyAction(x => {
-            var t = x.GetTypes().First(x => x.Name == nameof(CompilationTestSource));
-            var ts = Activator.CreateInstance(t)!;
-            var result = ts.GetType().GetMethod(nameof(CompilationTestSource.TestInvocation)).Invoke(ts, []);
-            var r = Unsafe.As<CompilationTestSource.TestReceivable>(result);
+            var t = x.CreateInstance<CompilationTestSource>();
+            var r = x.Invoke(t, ts => ts.TestInvocation());
 
             Assert.Equal("s", r.ParameterName);
             Assert.Equal("s.Length > 0;", r.Body);
