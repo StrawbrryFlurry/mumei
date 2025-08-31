@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
@@ -11,9 +10,9 @@ using SourceCodeFactory;
 
 namespace Mumei.CodeGen.Qt.Tests.CompileTimeBuilders;
 
-public sealed class CompilationScopeTests {
+public sealed class InterceptorMethodTemplateTests {
     [Fact]
-    public void CompilationScope() {
+    public void TemplateMethod() {
         var result = new SourceGeneratorTest<CompilationScopeTestSourceGenerator>(b =>
             b.AddReference(SourceCode.Of<CompilationTestSource>())
                 .AddTypeReference<CSharpCompilation>()
@@ -48,6 +47,31 @@ file sealed class CompilationTestSource {
             ParameterName = expression.Parameters[0].Identifier.Text;
             Body = expression.Statements[0].NormalizeWhitespace().ToFullString();
         }
+    }
+}
+
+file sealed class RoslynExpressionReceivableTemplate<TExpression>(LambdaExpressionSyntax lambda) : QtInterceptorMethodTemplate, IRoslynExpressionReceivable<TExpression>
+    where TExpression : Delegate {
+    public void Invoke(TExpression expression) {
+        var px = (LambdaExpressionSyntax) SyntaxFactory.ParseExpression(lambda.NormalizeWhitespace().ToFullString());
+        StatementSyntax[] statements = px.Body is BlockSyntax block
+            ? [..block.Statements]
+            : [SyntaxFactory.ExpressionStatement((ExpressionSyntax) px.Body)];
+
+        ParameterSyntax[] parameters = px is SimpleLambdaExpressionSyntax spx ? [spx.Parameter]
+            : px is ParenthesizedLambdaExpressionSyntax pplx ? [..pplx.ParameterList.Parameters]
+            : [];
+
+        var x = new RoslynExpression<TExpression> {
+            Parameters = parameters,
+            Statements = statements
+        };
+
+        ReceiveExpression(x);
+    }
+
+    public void ReceiveExpression(RoslynExpression<TExpression> expression) {
+        throw new NotSupportedException();
     }
 }
 
@@ -96,27 +120,11 @@ file sealed class CompilationScopeTestSourceGenerator : IIncrementalGenerator {
         }
 
         var cls = new QtClass(AccessModifier.FileStatic, "cls");
-        cls.AddDynamicTemplateInterceptMethod(
+        cls.AddTemplateInterceptMethod(
             invocation,
-            new { ctx.State.Lambda },
-            static (ctx, refs) => {
-                var px = (LambdaExpressionSyntax) SyntaxFactory.ParseExpression(refs.Lambda.NormalizeWhitespace().ToFullString());
-                StatementSyntax[] statements = px.Body is BlockSyntax block
-                    ? [..block.Statements]
-                    : [SyntaxFactory.ExpressionStatement((ExpressionSyntax) px.Body)];
-
-                ParameterSyntax[] parameters = px is SimpleLambdaExpressionSyntax spx ? [spx.Parameter]
-                    : px is ParenthesizedLambdaExpressionSyntax pplx ? [..pplx.ParameterList.Parameters]
-                    : [];
-
-                // We can replace the hardcoded Func type once we re-write this to use a method template which can be generic
-                var x = new RoslynExpression<Func<string, bool>> {
-                    Parameters = parameters,
-                    Statements = statements
-                };
-
-                ctx.This.Is<IRoslynExpressionReceivable<Func<string, bool>>>().ReceiveExpression(x);
-            });
+            new RoslynExpressionReceivableTemplate<Delegate>(ctx.State.Lambda),
+            t => t.Invoke
+        );
 
         var ns = QtNamespace.FromGeneratorAssemblyName("Generated", [cls]);
         var file = QtSourceFile.CreateObfuscated("Coolio").WithNamespace(ns);

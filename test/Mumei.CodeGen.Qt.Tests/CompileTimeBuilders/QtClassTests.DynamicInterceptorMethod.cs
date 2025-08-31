@@ -28,7 +28,7 @@ public sealed class QtClassTestsDynamicInterceptorMethod {
         // < >SM:Invoke
         // => Enumerable.SequenceEqual(__first, __second)
         // state.field.Get(ctx.This);
-        cls.BindDynamicTemplateInterceptMethod(
+        cls.AddDynamicTemplateInterceptMethod(
             invocation!,
             static ctx => {
                 bool result;

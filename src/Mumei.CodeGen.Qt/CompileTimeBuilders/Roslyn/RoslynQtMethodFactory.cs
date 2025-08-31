@@ -182,7 +182,6 @@ internal sealed class ProxyInvocationExpressionBindingContext(
     public const string BindMethodInfo = "PxMethod";
     public const string BindArguments = "PxArguments";
     public const string BindThis = "PxThis";
-    public const string BindConstructInitializer = "PxConstructorInitializer";
 
     private readonly ProxyInvocationCallSiteInvokeBinder _invocationBinder = invocationBinder;
     private readonly InvocationCallSiteArgumentBinder _argumentBinder = argumentBinder;

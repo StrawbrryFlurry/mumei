@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Operations;
 using Mumei.CodeGen.Playground;
 using Mumei.CodeGen.Qt.Containers;
 using Mumei.CodeGen.Qt.Output;
@@ -90,6 +91,11 @@ public readonly struct QtClass(
         return default!;
     }
 
+    public QtMethod<T> AddMethod<T>(ref QtMethod<T> method) {
+        _methods.Add(method.Method);
+        return method;
+    }
+
     public QtMethod<Unit> AddMethod<TBindingCtx>(
         AccessModifier modifiers,
         string name,
@@ -155,27 +161,21 @@ public readonly struct QtClass(
         return default!;
     }
 
-    public QtMethod<CompileTimeUnknown> BindTemplateMethod<TTemplate>(
+    public QtMethod<CompileTimeUnknown> AddTemplateMethod<TTemplate>(
         TTemplate template,
         Func<TTemplate, Delegate> methodSelector
     ) where TTemplate : QtClassTemplate<TTemplate> {
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
-    public QtMethod<CompileTimeUnknown> BindTemplateProxyMethod<TTemplate>(
-        TTemplate template
-    ) where TTemplate : IQtInterceptorMethodTemplate {
-        throw new CompileTimeComponentUsedAtRuntimeException();
-    }
-
-    public QtMethod<CompileTimeUnknown> BindDynamicTemplateInterceptMethod<TReturn>(
+    public QtMethod<CompileTimeUnknown> AddDynamicTemplateInterceptMethod<TReturn>(
         InvocationExpressionSyntax invocationToProxy,
         DeclareQtInterceptorMethod<TReturn> declaration
     ) {
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
-    public QtMethod<CompileTimeUnknown> BindDynamicTemplateInterceptMethod(
+    public QtMethod<CompileTimeUnknown> AddDynamicTemplateInterceptMethod(
         InvocationExpressionSyntax invocationToProxy,
         DeclareQtInterceptorVoidMethod declaration
     ) {
@@ -198,7 +198,7 @@ public readonly struct QtClass(
         return method;
     }
 
-    public QtMethod<TReturn> BindDynamicTemplateInterceptMethod<TTemplateReferences, TReturn>(
+    public QtMethod<TReturn> AddDynamicTemplateInterceptMethod<TTemplateReferences, TReturn>(
         InvocationExpressionSyntax invocationToProxy,
         TTemplateReferences refs,
         DeclareQtInterceptorMethodWithRefs<TTemplateReferences, TReturn> declaration
@@ -206,7 +206,7 @@ public readonly struct QtClass(
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
-    public QtMethod<CompileTimeUnknown> BindDynamicTemplateInterceptMethod<TTemplateReferences>(
+    public QtMethod<CompileTimeUnknown> AddDynamicTemplateInterceptMethod<TTemplateReferences>(
         InvocationExpressionSyntax invocationToProxy,
         TTemplateReferences refs,
         DeclareQtInterceptorVoidMethodWithRefs<TTemplateReferences> declaration
@@ -255,4 +255,34 @@ public readonly struct QtClass(
         writer.Dedent();
         writer.WriteLine("}");
     }
+}
+
+public static class QtClassDynamicDeclarationExtensions {
+    public static QtMethod<CompileTimeUnknown> AddTemplateInterceptMethod<TTemplate>(
+        ref this QtClass cls,
+        InvocationExpressionSyntax invocationExpression,
+        TTemplate template,
+        Func<TTemplate, Delegate> methodSelector
+    ) where TTemplate : IQtInterceptorMethodTemplate {
+        throw new CompileTimeComponentUsedAtRuntimeException();
+    }
+
+    internal static AddTemplateInterceptMethodArguments ParseAddTemplateInterceptMethodArguments(
+        IInvocationOperation invocation
+    ) {
+        var arguments = invocation.Arguments;
+        return new AddTemplateInterceptMethodArguments(
+            arguments[0],
+            arguments[1],
+            arguments[2],
+            arguments[3]
+        );
+    }
+
+    internal readonly record struct AddTemplateInterceptMethodArguments(
+        IArgumentOperation ClassRef,
+        IArgumentOperation InvocationToProxy,
+        IArgumentOperation Template,
+        IArgumentOperation MethodSelector
+    );
 }

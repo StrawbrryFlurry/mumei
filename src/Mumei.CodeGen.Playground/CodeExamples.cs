@@ -15,7 +15,7 @@ file sealed class Example {
         var parentField = cls.AddField<IInjector>(Private | Readonly, "_parent");
 
         var ijt = new InjectorTemplate(modules);
-        cls.BindTemplateMethod(ijt, t => t.Get);
+        cls.AddTemplateMethod(ijt, t => t.Get);
 
         var tProvider = TypeParam("TProvider");
     }
