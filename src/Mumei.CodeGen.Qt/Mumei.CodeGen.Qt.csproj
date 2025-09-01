@@ -8,8 +8,25 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
-    <PackageReference Include="Polysharp"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PolySharpCommon\PolySharpCommon.csproj"/>
   </ItemGroup>
 
   <Import Project="../Mumei.Roslyn.Common/Mumei.Roslyn.Common.props"/>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Mumei.CodeGen.Qt.Tests"/>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <GetTargetPathDependsOn>$(GetTargetPathDependsOn);GetDependencyTargetPaths</GetTargetPathDependsOn>
+  </PropertyGroup>
+
+  <Target Name="GetDependencyTargetPaths" AfterTargets="ResolvePackageDependenciesForBuild">
+    <ItemGroup>
+      <TargetPathWithTargetPlatformMoniker Include="..\..\PolySharpCommon\bin\$(Configuration)\netstandard2.0\*.dll" IncludeRuntimeDependency="false"/>
+    </ItemGroup>
+  </Target>
 </Project>

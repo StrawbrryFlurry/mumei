@@ -80,11 +80,11 @@ internal readonly ref struct RoslynQtComponentFactory(
         var sm = SemanticModel(invocation);
         var location = sm.GetInterceptableLocation(invocation) ??
                        throw new InvalidOperationException($"Unable to determine intercept location for invocation: {invocation}");
-        var interceptLocationAttributeType = QtType.ForExpression(QtExpression.ForExpression("System.Runtime.CompilerServices.InterceptsLocationAttribute"));
+        var interceptLocationAttributeType = QtType.ForExpression(QtExpression.For("System.Runtime.CompilerServices.InterceptsLocationAttribute"));
         return QtAttribute.FromType(
             interceptLocationAttributeType,
             [
-                QtExpression.ForExpression(location.Version.ToString()),
+                QtExpression.For(location.Version.ToString()),
                 QtExpression.ForExpression($"{location.Data:q}")
             ]
         );
@@ -182,14 +182,14 @@ internal readonly ref struct RoslynQtComponentFactory(
 
         // Missing an invocation target, has to be an implicit call to a non-static instance method.
         if (invocation.Expression is IdentifierNameSyntax or GenericNameSyntax) {
-            return QtExpression.ForExpression("this");
+            return QtExpression.For("this");
         }
 
         if (invocation.Expression is not MemberAccessExpressionSyntax memberAccess) {
             throw new NotSupportedException("Found a non-static, non-instance method invocation without a valid target expression.");
         }
 
-        return QtExpression.ForExpression(memberAccess.ToString());
+        return QtExpression.For(memberAccess.ToString());
     }
 
     private QtArgumentList ReplayArguments(

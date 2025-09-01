@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Security;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,10 +11,32 @@ namespace Mumei.CodeGen.Qt.Roslyn;
 
 // ReSharper disable once InconsistentNaming
 public readonly ref struct __DynamicallyBoundSourceCode {
-    internal const string DynamicallyBoundSourceCodeStart = "<>SM:";
-    internal const string DynamicallyBoundSourceCodeEnd = "ɵ";
+    private const string DynamicallyBoundSourceCodeStart = "<>SM:";
+    private const string DynamicallyBoundSourceCodeEnd = "ɵ";
 
     public required string[] CodeTemplate { get; init; }
+
+    public static bool IsDynamicSection(ReadOnlySpan<char> section) {
+        return section.StartsWith(DynamicallyBoundSourceCodeStart);
+    }
+
+    public static ReadOnlySpan<char> GetDynamicSectionKey(ReadOnlySpan<char> section) {
+        var start = DynamicallyBoundSourceCodeStart.Length;
+        var key = section[start..];
+        return key;
+    }
+
+    public static string MakeDynamicSection(string key) {
+        return $"{DynamicallyBoundSourceCodeStart}{key}{DynamicallyBoundSourceCodeEnd}";
+    }
+
+    public static int FindDynamicSectionEnd(ReadOnlySpan<char> span) {
+        return span.IndexOf(DynamicallyBoundSourceCodeEnd);
+    }
+
+    public static int FindDynamicSectionStart(ReadOnlySpan<char> span) {
+        return span.IndexOf(DynamicallyBoundSourceCodeStart);
+    }
 }
 
 public sealed class QtDynamicComponentBinderCollection : Dictionary<string, IQtTemplateBindable> { }
@@ -41,15 +64,15 @@ file readonly ref struct DynamicSourceCodeBinder(
         var writer = new ValueSyntaxWriter(stackalloc char[ValueSyntaxWriter.StackBufferSize]);
         var t = _template;
         foreach (var section in t) {
-            if (section.StartsWith(__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeStart)) {
-                ctx.WriteBindableSyntax(ref writer, section[__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeStart.Length..]);
+            if (__DynamicallyBoundSourceCode.IsDynamicSection(section)) {
+                ctx.WriteBindableSyntax(ref writer, __DynamicallyBoundSourceCode.GetDynamicSectionKey(section));
                 continue;
             }
 
             writer.Write(section);
         }
 
-        var codeBlock = new QtCodeBlock(writer.ToString());
+        var codeBlock = QtCodeBlock.ForCode(writer.ToString());
         return codeBlock;
     }
 }
@@ -140,6 +163,50 @@ internal readonly struct ProxyInvocationThisBinder(
         writer.Write(thisParameter.Name);
         return Unit.Value;
     }
+}
+
+internal readonly record struct TemplateBindingKey {
+    public string Kind { get; }
+    public string? Value { get; }
+
+    private TemplateBindingKey(string kind, string? value) {
+        Kind = kind;
+        Value = value;
+    }
+
+    public static TemplateBindingKey Parse(string value) {
+        return Parse(value.AsSpan());
+    }
+
+    public static TemplateBindingKey Parse(ReadOnlySpan<char> value) {
+        var colonIndex = value.IndexOf(':');
+        if (colonIndex == -1) {
+            return new TemplateBindingKey(value.ToString(), null);
+        }
+
+        var kind = value[..colonIndex].ToString();
+        var val = value[(colonIndex + 1)..].ToString();
+        return new TemplateBindingKey(kind, val);
+    }
+
+    public static TemplateBindingKey For(string kind, string? value = null) {
+        return new TemplateBindingKey(kind, value);
+    }
+
+    public static implicit operator string(TemplateBindingKey key) {
+        return $"{key.Kind}:{key.Value}";
+    }
+}
+
+internal static class ProxyMethodBindingKeys {
+    public const string Invoke = "PxInvoke";
+    public const string MethodInfo = "PxMethodInfo";
+    public const string ArgumentList = "PxArguments";
+
+    public const string This = "PxThis";
+    public const string Member = "PxMemberAccess";
+    public const string State = "PxStateAccess";
+    public const string Parameter = "PxParameter";
 }
 
 // We could prolly code-gen a struct binding context struct for each bindable location

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Dynamic;
 using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -9,6 +10,7 @@ using Mumei.CodeGen.Qt.Qt;
 using Mumei.CodeGen.Qt.Roslyn;
 using Mumei.Roslyn.Common;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using CSharpExtensions = Microsoft.CodeAnalysis.CSharp.CSharpExtensions;
 
 namespace Mumei.CodeGen.Qt;
 
@@ -55,10 +57,54 @@ public sealed partial class QtClassFactoryInterceptorGenerator {
 
 
         var stateIdentifiers = primaryConstructor.Parameters.Select(x => x.Identifier.Text).ToImmutableHashSet();
-        var visitor = new QtMethodTemplateDeclarationVisitor(semanticModel, stateIdentifiers);
+        var methodParameters = selectedMethod.Parameters.Select(x => x.Name).ToImmutableHashSet();
+        var visitor = new QtMethodTemplateDeclarationVisitor(semanticModel, templateType, stateIdentifiers, methodParameters);
 
         var updatedMethodDeclaration = visitor.Visit(methodTemplateDeclaration) as MethodDeclarationSyntax;
-        var body = updatedMethodDeclaration.Body;
+        var body = updatedMethodDeclaration!.Body;
+
+        var sourceCodeSections = MakeDynamicallyBoundSourceCodeSections(body!.Statements, out var boundKeys);
+        var proxyId = NextId;
+        WriteCachedSourceCodeDeclaration(result, proxyId, sourceCodeSections);
+
+
+        // The template type might be private or file scoped, so we can't use it directly
+        var methodTemplateTypeArg = QtType.ForExpression(QtExpression.For("TMethodTemplate"));
+        var methodSelectorType = QtType.ConstructRuntimeGenericType(typeof(Func<>), methodTemplateTypeArg, QtType.ForRuntimeType<Delegate>());
+
+        var instantiateTemplateReferenceBindersExpr = CreateTemplateBindersExpressionForMethodTemplate(boundKeys);
+
+        var location = CSharpExtensions.GetInterceptableLocation(semanticModel, invocation);
+        // result.WriteLine(CSharpExtensions.GetInterceptsLocationAttributeSyntax(location!));
+        // result.WriteFormattedBlock(
+        //     $$"""
+        //       public static {{typeof(QtMethod<CompileTimeUnknown>)}} Intercept_{{nameof(QtClassDynamicDeclarationExtensions.AddTemplateInterceptMethod)}}_{{proxyId}}<TMethodTemplate>(
+        //           ref this {{typeof(QtClass)}} self,
+        //           {{typeof(InvocationExpressionSyntax)}} invocationToProxy,
+        //           TMethodTemplate methodTemplateInstance,
+        //           {{methodSelectorType}} templateMethodSelector
+        //       ) {
+        //           var sourceCode = new {{typeof(__DynamicallyBoundSourceCode)}}() {
+        //               {{nameof(__DynamicallyBoundSourceCode.CodeTemplate)}} = CachedSourceCodeTemplate_Intercept_{{proxyId}},
+        //           };
+        //
+        //           var dynamicComponentBinders = {{instantiateTemplateReferenceBindersExpr}};
+        //           return self.{{nameof(QtClass.__BindDynamicTemplateInterceptMethod)}}(
+        //             invocationToProxy,
+        //             sourceCode,
+        //             dynamicComponentBinders
+        //           );
+        //       }
+        //       """
+        // );
+    }
+
+    private QtExpression CreateTemplateBindersExpressionForMethodTemplate(string[] boundKeys) {
+        if (boundKeys.Length == 0) {
+            return QtExpression.Null;
+        }
+
+        return QtExpression.ForExpression($"new {typeof(QtDynamicComponentBinderCollection)}()");
     }
 
     private IMethodSymbol? GetMethodTemplateMethodFromSelection(
@@ -91,116 +137,206 @@ public sealed partial class QtClassFactoryInterceptorGenerator {
         return methodSymbol;
     }
 
-    private sealed class QtMethodTemplateDeclarationVisitor(
-        SemanticModel sm,
-        ImmutableHashSet<string> stateIdentifiers
-    ) : GloballyQualifyingSyntaxRewriter(sm) {
-        private const string _replaceStateExpressionWithAnnotationKind = "ReplaceStateExpressionWith";
-        private const string _replaceContextExpressionWithAnnotationKind = "ReplaceContextExpressionWith";
+}
 
-        public override SyntaxNode? VisitInvocationExpression(InvocationExpressionSyntax node) {
-            if (node.Expression is not MemberAccessExpressionSyntax memberAccess) {
+/// <summary>
+/// Responsible for ensuring that we can bind all "dynamic" components of the method body.
+/// Operations:
+/// - Member access to state (provided via the ctor) => Mark For State Binding
+///     (this.stateMember, stateMember)
+/// - Local access to method parameters => Mark For Parameter Binding
+///     (localParam)
+/// - Member access to inherited template members => Mark For Proxy Binding
+///     (this.Invoke(), Method (implicit), this.Arguments)
+/// - Member access to instance members => Mark For Member Binding
+///     (this.instanceMember, instanceMember)
+/// - Simple instance access => Mark For Member Binding
+///     (this)
+/// </summary>
+/// <param name="sm"></param>
+/// <param name="stateIdentifiers"></param>
+/// <param name="parameterIdentifiers"></param>
+internal sealed class QtMethodTemplateDeclarationVisitor(
+    SemanticModel sm,
+    ITypeSymbol templateType,
+    ImmutableHashSet<string> stateIdentifiers,
+    ImmutableHashSet<string> parameterIdentifiers
+) : GloballyQualifyingSyntaxRewriter(sm) {
+    public override SyntaxNode? VisitInvocationExpression(InvocationExpressionSyntax node) {
+        // Since we need to replace the entire invocation we can't rely on the identifier visitor
+        if (TryReplaceCompileTimeCastWithThis(node, out var castedThisExpr)) {
+            return castedThisExpr;
+        }
+
+        // Unless the invocation needs to be bound to Invoke, we can simply delegate
+        // replacing identifiers to the identifier visitor. Invoke needs to replace
+        // the entire invocation, since we just need the identifier at this position
+        SimpleNameSyntax methodName;
+        if (node.Expression is SimpleNameSyntax identifier) {
+            methodName = identifier;
+            goto TryBindInvokeMethod;
+        }
+
+        if (node.Expression is MemberAccessExpressionSyntax memberAccess) {
+            if (memberAccess.Expression is not ThisExpressionSyntax) {
                 return base.VisitInvocationExpression(node);
             }
 
-            if (
-                memberAccess.Name is GenericNameSyntax {
-                    TypeArgumentList.Arguments.Count: 1,
-                    Identifier.Text: nameof(IQtThis.Is)
-                }
-            ) {
-                // Ignore all Is<> calls
-                // If we called Is<> on <This> we still want to visit the <This>
-                // expression to write the this binding into this place.
-                // TODO: Should we track what casts are performed here and validate
-                // that the the target type is a valid conversion for <this> when
-                // the resulting template is bound?
-                return Visit(memberAccess.Expression);
-            }
+            methodName = memberAccess.Name;
+            goto TryBindInvokeMethod;
+        }
 
-            // This would be a call on the ctx object e.g. ctx.Invoke(...)
-            if (memberAccess.Expression is SimpleNameSyntax invokee) {
-                if (invokee.Identifier.Text != "this") {
-                    return base.VisitInvocationExpression(node);
-                }
+        return base.VisitInvocationExpression(node);
 
-                if (TryMakeMakerLiteralFor(memberAccess.Name.Identifier, node, out var result)) {
-                    return result;
-                }
-
-                return base.VisitInvocationExpression(node);
-            }
-
-            // Since all state expressions are on the state object, invocations on the state object
-            // will (almost) always be a nested member access e.g. state.someRef.Invoke();
-            if (memberAccess.Expression is MemberAccessExpressionSyntax possibleStateAccess) {
-                if (possibleStateAccess.Expression is not SimpleNameSyntax stateIdentifier) {
-                    return base.VisitInvocationExpression(node);
-                }
-
-                if (stateIdentifier.Identifier.Text != "this") {
-                    return base.VisitInvocationExpression(node);
-                }
-
-                // Not suuper sure if we can even do something here, since most state binding
-                // is already handled by replacing the dynamic component binding - we'll see.
-            }
-
+        TryBindInvokeMethod:
+        var couldBindInvokeMethod = TryGetMethodTemplateBindingKey(methodName.Identifier.Text, out var invokeBindingKey) && invokeBindingKey.Kind == ProxyMethodBindingKeys.Invoke;
+        if (!couldBindInvokeMethod) {
             return base.VisitInvocationExpression(node);
-
         }
 
-        public override SyntaxNode VisitIdentifierName(IdentifierNameSyntax node) {
-            if (stateIdentifiers.Contains(node.Identifier.Text)) {
-                return MakeMakerLiteralCore(DynamicQtComponentBinder.CreateDynamicComponentBinderKey($"QtArgCtx:{node.Identifier.Text}"), node);
-            }
-            return base.VisitIdentifierName(node);
+        if (sm.GetSymbolInfo(node).Symbol is not IMethodSymbol { IsStatic: false } methodSymbol) {
+            return base.VisitInvocationExpression(node);
         }
 
-        public override SyntaxNode? VisitMemberAccessExpression(MemberAccessExpressionSyntax node) {
-            if (node.Expression is not SimpleNameSyntax identifier) {
-                return base.VisitMemberAccessExpression(node);
-            }
+        // TODO: Add cache for types and do comparisons with the actual symbol
+        if (methodSymbol.ContainingType.Name != nameof(QtInterceptorMethodTemplate)) {
+            return base.VisitInvocationExpression(node);
+        }
 
-            var identifierName = identifier.Identifier.Text;
-            if (identifierName != "this") {
-                return base.VisitMemberAccessExpression(node);
-            }
+        return Bind(invokeBindingKey, node);
+    }
 
-            if (TryMakeMakerLiteralFor(node.Name.Identifier, node, out var result)) {
-                return result;
-            }
+    private bool TryReplaceCompileTimeCastWithThis(InvocationExpressionSyntax invocation, out SyntaxNode? castedThisExpr) {
+        // TODO: Should we track what casts are performed here and validate
+        SimpleNameSyntax methodName;
 
-            if (stateIdentifiers.Contains(identifierName)) {
-                return MakeMakerLiteralCore(DynamicQtComponentBinder.CreateDynamicComponentBinderKey($"QtArgState:{node.Name.Identifier.Text}"), node);
-            }
+        // Implicit Is<T>() call
+        if (invocation.Expression is SimpleNameSyntax methodNameSyntax) {
+            methodName = methodNameSyntax;
+            goto CheckName;
+        }
 
+        // Explicit this.Is<T>() call
+        if (invocation.Expression is not MemberAccessExpressionSyntax { Expression: ThisExpressionSyntax } memberAccess) {
+            castedThisExpr = null;
+            return false;
+        }
+
+        castedThisExpr = memberAccess.Expression;
+        methodName = memberAccess.Name;
+
+        CheckName:
+        if (methodName is not GenericNameSyntax { TypeArgumentList.Arguments.Count: 1, Identifier.Text: nameof(IQtThis.Is) }) {
+            castedThisExpr = null;
+            return false;
+        }
+
+        castedThisExpr = Bind(TemplateBindingKey.For(ProxyMethodBindingKeys.This), invocation);
+        return true;
+    }
+
+    public override SyntaxNode? VisitMemberAccessExpression(MemberAccessExpressionSyntax node) {
+        if (node.Expression is not ThisExpressionSyntax) {
             return base.VisitMemberAccessExpression(node);
         }
 
-        private bool TryMakeMakerLiteralFor(SyntaxToken identifier, SyntaxNode sourceNode, [NotNullWhen(true)] out IdentifierNameSyntax? result) {
-            var binderKey = identifier.Text switch {
-                nameof(QtDynamicInterceptorMethodCtx.This) => ProxyInvocationExpressionBindingContext.BindThis,
-                nameof(QtDynamicInterceptorMethodCtx.Invoke) => ProxyInvocationExpressionBindingContext.BindInvocation,
-                nameof(QtDynamicInterceptorMethodCtx.Method) => ProxyInvocationExpressionBindingContext.BindMethodInfo,
-                nameof(QtDynamicInterceptorMethodCtx.InvocationArguments) => ProxyInvocationExpressionBindingContext.BindArguments,
-                _ => null
-            };
+        // Simply strip away the "this"
+        if (TryCreateBindingForName(node.Name, node, out var binding)) {
+            return binding;
+        }
 
-            if (binderKey is null) {
-                result = null;
-                return false;
-            }
+        return base.VisitMemberAccessExpression(node);
+    }
 
-            result = MakeMakerLiteralCore(binderKey, sourceNode);
+    public override SyntaxNode VisitIdentifierName(IdentifierNameSyntax node) {
+        if (TryCreateBindingForName(node, node, out var binding)) {
+            return binding;
+        }
+
+        return base.VisitIdentifierName(node);
+    }
+
+    public override SyntaxNode? VisitGenericName(GenericNameSyntax node) {
+        if (TryCreateBindingForName(node, node, out var binding)) {
+            return binding;
+        }
+
+        return base.VisitGenericName(node);
+    }
+
+    public override SyntaxNode? VisitThisExpression(ThisExpressionSyntax node) {
+        var binding = Bind(TemplateBindingKey.For(ProxyMethodBindingKeys.This), node);
+        return binding;
+    }
+
+    private bool TryCreateBindingForName(SimpleNameSyntax node, SyntaxNode containingNode, [NotNullWhen(true)] out IdentifierNameSyntax? binding) {
+        var identifier = node.Identifier.Text;
+        var isVariableIdentifier = node.Parent is VariableDeclaratorSyntax declarator && declarator.Identifier.Text == identifier;
+        if (isVariableIdentifier) {
+            binding = null;
+            return false;
+        }
+
+        if (stateIdentifiers.Contains(identifier)) {
+            binding = Bind(TemplateBindingKey.For(ProxyMethodBindingKeys.State, identifier), containingNode);
             return true;
         }
 
-        private IdentifierNameSyntax MakeMakerLiteralCore(string markerExpr, SyntaxNode sourceNode) {
-            return IdentifierName(
-                    $"{__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeStart}{markerExpr}{__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeEnd}"
-                ).WithLeadingTrivia(sourceNode.GetLeadingTrivia())
-                .WithTrailingTrivia(sourceNode.GetTrailingTrivia());
+        if (parameterIdentifiers.Contains(identifier)) {
+            binding = Bind(TemplateBindingKey.For(ProxyMethodBindingKeys.Parameter, identifier), containingNode);
+            return true;
         }
+
+        if (TryGetMethodTemplateBindingKey(identifier, out var templateBindingKey)) {
+            binding = Bind(templateBindingKey, containingNode);
+            return true;
+        }
+
+        // At this point the only "bindable" things left are instance members
+        // Try to resolve what instance member we are dealing with, if any
+        if (sm.GetSymbolInfo(node) is not { Symbol: { } symbol }) {
+            binding = null;
+            return false;
+        }
+
+        // TODO: Support generating static methods into the template class
+        if (symbol is not IPropertySymbol { IsStatic: false } and not IFieldSymbol { IsStatic: false } and not IMethodSymbol { IsStatic: false }) {
+            binding = null;
+            return false;
+        }
+
+        // TODO: We should prolly differentiate between instance members of the template vs the instance members of the proxy class
+        // Maybe declare them as part of the QtMethodTemplate base class?
+        var isMemberAccessOfTemplate = SymbolEqualityComparer.Default.Equals(symbol.ContainingType, templateType);
+        if (isMemberAccessOfTemplate) {
+            binding = Bind(TemplateBindingKey.For(ProxyMethodBindingKeys.Member, symbol.Name), containingNode);
+            return true;
+        }
+
+        binding = null;
+        return false;
+    }
+
+    private bool TryGetMethodTemplateBindingKey(string identifier, out TemplateBindingKey bindingKey) {
+        var x = identifier switch {
+            nameof(QtInterceptorMethodTemplate.Invoke) => ProxyMethodBindingKeys.Invoke,
+            nameof(QtInterceptorMethodTemplate.Method) => ProxyMethodBindingKeys.MethodInfo,
+            nameof(QtInterceptorMethodTemplate.InvocationArguments) => ProxyMethodBindingKeys.ArgumentList,
+            _ => null
+        };
+
+        if (x is null) {
+            bindingKey = default;
+            return false;
+        }
+
+        bindingKey = TemplateBindingKey.For(x);
+        return true;
+    }
+
+    private IdentifierNameSyntax Bind(TemplateBindingKey bindingKey, SyntaxNode sourceNode) {
+        return IdentifierName(__DynamicallyBoundSourceCode.MakeDynamicSection(bindingKey))
+            .WithLeadingTrivia(sourceNode.GetLeadingTrivia())
+            .WithTrailingTrivia(sourceNode.GetTrailingTrivia());
     }
 }

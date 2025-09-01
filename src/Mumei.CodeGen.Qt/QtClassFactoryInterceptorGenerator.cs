@@ -116,33 +116,14 @@ public sealed partial class QtClassFactoryInterceptorGenerator : IIncrementalGen
             body = (BlockSyntax) ((SimpleLambdaExpressionSyntax) v).Body;
         }
 
-        var bodyStatements = body.Statements.ToFullString();
-        var sourceCodeSections = MakeDynamicallyBoundSourceCodeSections(bodyStatements, out _);
-
-        writer.WriteFormattedLine($"private static readonly string[] CachedSourceCodeTemplate_Intercept_{proxyId} = [");
-        var ind = writer.IndentLevel;
-        writer.SetIndentLevel(0);
-        for (var i = 0; i < sourceCodeSections.Length; i++) {
-            if (i > 0) {
-                writer.WriteLine(",");
-            }
-
-            writer.WriteLine(Strings.RawStringLiteral12);
-            var sourceCodeSection = sourceCodeSections[i];
-            writer.WriteLine(sourceCodeSection);
-            writer.Write(Strings.RawStringLiteral12);
-        }
-
-        writer.SetIndentLevel(ind);
-        writer.WriteLine();
-        writer.WriteLine("];");
-        writer.WriteLine();
+        var sourceCodeSections = MakeDynamicallyBoundSourceCodeSections(body.Statements, out _);
+        WriteCachedSourceCodeDeclaration(writer, proxyId, sourceCodeSections);
 
         var location = semanticModel.GetInterceptableLocation(invocation);
         writer.WriteLine(location!.GetInterceptsLocationAttributeSyntax());
         writer.WriteFormattedLine($"public static {typeof(QtMethod<CompileTimeUnknown>):g} Intercept__{proxyId}(");
         writer.Indent();
-        writer.WriteFormattedLine($"in this {typeof(QtClass):g} self,");
+        writer.WriteFormattedLine($"in this {typeof(QtClass):g} @this,");
         writer.WriteFormattedLine($"{typeof(InvocationExpressionSyntax):g} invocationToProxy,");
 
         var templateMethodType = method.TypeParameters.IsEmpty
@@ -163,7 +144,7 @@ public sealed partial class QtClassFactoryInterceptorGenerator : IIncrementalGen
                   {{nameof(__DynamicallyBoundSourceCode.CodeTemplate)}} = CachedSourceCodeTemplate_Intercept_{{proxyId}},
               };
 
-              return self.{{nameof(QtClass.__BindDynamicTemplateInterceptMethod)}}(
+              return @this.{{nameof(QtClass.__BindDynamicTemplateInterceptMethod)}}(
                 invocationToProxy,
                 sourceCode
               );
@@ -194,8 +175,7 @@ public sealed partial class QtClassFactoryInterceptorGenerator : IIncrementalGen
             body = (BlockSyntax) ((SimpleLambdaExpressionSyntax) v).Body;
         }
 
-        var bodyStatements = body.Statements.ToFullString();
-        var sourceCodeSections = MakeDynamicallyBoundSourceCodeSections(bodyStatements, out var boundKeys);
+        var sourceCodeSections = MakeDynamicallyBoundSourceCodeSections(body.Statements, out var boundKeys);
 
         var stateArg = invocation.ArgumentList.Arguments[1].Expression;
         var stateType = semanticModel.GetTypeInfo(stateArg);
@@ -217,30 +197,13 @@ public sealed partial class QtClassFactoryInterceptorGenerator : IIncrementalGen
 
         var instantiateTemplateReferenceBindersExpr = WriteAdditionalReferenceStateBinders(writer, stateArg, semanticModel, boundKeys, proxyId);
 
-        writer.WriteFormattedLine($"private static readonly string[] CachedSourceCodeTemplate_Intercept_{proxyId} = [");
-        var ind = writer.IndentLevel;
-        writer.SetIndentLevel(0);
-        for (var i = 0; i < sourceCodeSections.Length; i++) {
-            if (i > 0) {
-                writer.WriteLine(",");
-            }
-
-            writer.WriteLine(Strings.RawStringLiteral12);
-            var sourceCodeSection = sourceCodeSections[i];
-            writer.WriteLine(sourceCodeSection);
-            writer.Write(Strings.RawStringLiteral12);
-        }
-
-        writer.SetIndentLevel(ind);
-        writer.WriteLine();
-        writer.WriteLine("];");
-        writer.WriteLine();
+        WriteCachedSourceCodeDeclaration(writer, proxyId, sourceCodeSections);
 
         var location = semanticModel.GetInterceptableLocation(invocation);
         writer.WriteLine(location!.GetInterceptsLocationAttributeSyntax());
         writer.WriteFormattedLine($"public static {typeof(QtMethod<CompileTimeUnknown>):g} Intercept__{proxyId}<TTemplateReferences>(");
         writer.Indent();
-        writer.WriteFormattedLine($"in this {typeof(QtClass):g} self,");
+        writer.WriteFormattedLine($"in this {typeof(QtClass):g} @this,");
         writer.WriteFormattedLine($"{typeof(InvocationExpressionSyntax):g} invocationToProxy,");
 
         var refsArgType = QtType.ForRoslynType(method.TypeArguments[0]);
@@ -249,7 +212,7 @@ public sealed partial class QtClassFactoryInterceptorGenerator : IIncrementalGen
         var templateMethodType = method.TypeParameters.Length == 1
             ? QtType.ConstructRuntimeGenericType(
                 typeof(DeclareQtInterceptorVoidMethodWithRefs<>),
-                QtType.ForExpression(QtExpression.ForExpression("TTemplateReferences"))
+                QtType.ForExpression(QtExpression.For("TTemplateReferences"))
             )
             : QtType.ConstructRuntimeGenericType(
                 typeof(DeclareQtInterceptorMethodWithRefs<,>),
@@ -272,7 +235,7 @@ public sealed partial class QtClassFactoryInterceptorGenerator : IIncrementalGen
               };
 
               var dynamicComponentBinders = {{instantiateTemplateReferenceBindersExpr}};
-              return self.{{nameof(QtClass.__BindDynamicTemplateInterceptMethod)}}(
+              return @this.{{nameof(QtClass.__BindDynamicTemplateInterceptMethod)}}(
                 invocationToProxy,
                 sourceCode,
                 dynamicComponentBinders
@@ -282,6 +245,26 @@ public sealed partial class QtClassFactoryInterceptorGenerator : IIncrementalGen
 
         writer.Dedent();
         writer.WriteLine("}");
+        writer.WriteLine();
+    }
+    private static void WriteCachedSourceCodeDeclaration(SyntaxWriter writer, string proxyId, string[] sourceCodeSections) {
+        writer.WriteFormattedLine($"private static readonly string[] CachedSourceCodeTemplate_Intercept_{proxyId} = [");
+        var ind = writer.IndentLevel;
+        writer.SetIndentLevel(0);
+        for (var i = 0; i < sourceCodeSections.Length; i++) {
+            if (i > 0) {
+                writer.WriteLine(",");
+            }
+
+            writer.WriteLine(Strings.RawStringLiteral12);
+            var sourceCodeSection = sourceCodeSections[i];
+            writer.WriteLine(sourceCodeSection);
+            writer.Write(Strings.RawStringLiteral12);
+        }
+
+        writer.SetIndentLevel(ind);
+        writer.WriteLine();
+        writer.WriteLine("];");
         writer.WriteLine();
     }
 
@@ -300,11 +283,11 @@ public sealed partial class QtClassFactoryInterceptorGenerator : IIncrementalGen
         var stateBindings = new HashSet<string>();
         foreach (var key in bindingKeys) {
             var keySpan = key.AsSpan();
-            if (!keySpan.StartsWith(__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeStart)) {
+            if (!__DynamicallyBoundSourceCode.IsDynamicSection(keySpan)) {
                 continue;
             }
 
-            keySpan = keySpan[__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeStart.Length..];
+            keySpan = __DynamicallyBoundSourceCode.GetDynamicSectionKey(keySpan);
             if (!keySpan.StartsWith(DynamicQtComponentBinder.BindDynamicComponent)) {
                 continue;
             }
@@ -368,16 +351,17 @@ public sealed partial class QtClassFactoryInterceptorGenerator : IIncrementalGen
     }
 
     private static string[] MakeDynamicallyBoundSourceCodeSections(
-        ReadOnlySpan<char> code,
+        SyntaxList<StatementSyntax> statements,
         out string[] boundKeys
     ) {
+        ReadOnlySpan<char> code = statements.ToFullString();
         var source = CleanUpCapturedSourceCode(code).AsSpan();
         // We could prolly make the binding of syntax nodes / context objs to the source code fully compile-time as well
         // Since we know all arguments and references of "external" code at this point.
         var result = new ArrayBuilder<string>();
         var boundKeysBuilder = new ArrayBuilder<string>();
         while (true) {
-            var markerIdx = source.IndexOf(__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeStart);
+            var markerIdx = __DynamicallyBoundSourceCode.FindDynamicSectionStart(source);
             if (markerIdx == -1) {
                 result.Add(source.ToString());
                 break;
@@ -385,7 +369,7 @@ public sealed partial class QtClassFactoryInterceptorGenerator : IIncrementalGen
 
             result.Add(source[..markerIdx].ToString());
             source = source[markerIdx..];
-            var endIdx = source.IndexOf(__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeEnd);
+            var endIdx = __DynamicallyBoundSourceCode.FindDynamicSectionEnd(source);
             Debug.Assert(endIdx != -1);
             var identifier = source[..endIdx].ToString();
             result.Add(identifier);
@@ -558,9 +542,8 @@ public sealed partial class QtClassFactoryInterceptorGenerator : IIncrementalGen
         }
 
         private IdentifierNameSyntax MakeMakerLiteralCore(string markerExpr, SyntaxNode sourceNode) {
-            return IdentifierName(
-                    $"{__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeStart}{markerExpr}{__DynamicallyBoundSourceCode.DynamicallyBoundSourceCodeEnd}"
-                ).WithLeadingTrivia(sourceNode.GetLeadingTrivia())
+            return IdentifierName(__DynamicallyBoundSourceCode.MakeDynamicSection(markerExpr))
+                .WithLeadingTrivia(sourceNode.GetLeadingTrivia())
                 .WithTrailingTrivia(sourceNode.GetTrailingTrivia());
         }
     }

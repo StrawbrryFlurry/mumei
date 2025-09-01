@@ -2,10 +2,28 @@
 
 namespace Mumei.CodeGen.Qt.Qt;
 
-public readonly struct QtCodeBlock(
-    string code
-) : IQtTemplateBindable {
-    private readonly string _code = code;
+public readonly struct QtCodeBlock : IQtTemplateBindable {
+    private readonly string? _code;
+    private readonly IQtTemplateBindable? _dynamicBlock;
+
+    private QtCodeBlock(string? code, IQtTemplateBindable? dynamicBlock) {
+        _code = code;
+        _dynamicBlock = dynamicBlock;
+    }
+
+    public static QtCodeBlock ForCode(string code) {
+        return new QtCodeBlock(code, null);
+    }
+
+    public static QtCodeBlock ForCode(IQtTemplateBindable dynamicBlock) {
+        return new QtCodeBlock(null, dynamicBlock);
+    }
+
+    public static QtCodeBlock ForCode(FormattableSyntaxWritable code) {
+        var outputWriter = new ValueSyntaxWriter(stackalloc char[ValueSyntaxWriter.StackBufferSize]);
+        code.CopyToAndDispose(ref outputWriter);
+        return new QtCodeBlock(outputWriter.ToString(), null);
+    }
 
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         writer.Write(_code);

@@ -14,9 +14,7 @@ internal static class RuntimeTypeSerializer {
             goto WriteEndOfType;
         }
 
-        if (format is "g" or "global") {
-            writer.Write("global::");
-        }
+        writer.Write("global::");
 
         if (type.Namespace is not null) {
             writer.Write(type.Namespace);

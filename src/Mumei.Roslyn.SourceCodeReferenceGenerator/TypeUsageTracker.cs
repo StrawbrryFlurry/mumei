@@ -120,7 +120,7 @@ internal sealed class TypeUsageTracker : CSharpSyntaxWalker {
 
         TryTrackType(identifierType);
 
-        if (identifierType.ContainingNamespace.IsGlobalNamespace) {
+        if (identifierType.ContainingNamespace?.IsGlobalNamespace ?? false) {
             return;
         }
     }

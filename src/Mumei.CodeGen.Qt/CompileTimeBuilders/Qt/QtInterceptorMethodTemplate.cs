@@ -3,6 +3,8 @@ using System.Reflection;
 namespace Mumei.CodeGen.Qt.Qt;
 
 public abstract class QtInterceptorMethodTemplate : IQtInterceptorMethodTemplate {
+    public const string MetadataName = "Mumei.CodeGen.Qt.Qt.QtInterceptorMethodTemplate";
+
     public T Invoke<T>() {
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
@@ -31,13 +33,9 @@ public abstract class QtAsyncInterceptorMethodTemplate : IQtInterceptorMethodTem
 }
 
 public interface IQtInterceptorMethodTemplate : IQtThis;
-
 public delegate TReturn DeclareQtInterceptorMethod<TReturn>(QtDynamicInterceptorMethodCtx ctx);
-
 public delegate void DeclareQtInterceptorVoidMethod(QtDynamicInterceptorMethodCtx ctx);
-
 public delegate TReturn DeclareQtInterceptorMethodWithRefs<TTemplateReferences, TReturn>(QtDynamicInterceptorMethodCtx ctx, TTemplateReferences refs);
-
 public delegate void DeclareQtInterceptorVoidMethodWithRefs<TTemplateReferences>(QtDynamicInterceptorMethodCtx ctx, TTemplateReferences refs);
 
 public readonly ref struct QtDynamicInterceptorMethodCtx {

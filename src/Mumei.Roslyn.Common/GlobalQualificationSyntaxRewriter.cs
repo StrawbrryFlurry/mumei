@@ -61,10 +61,14 @@ public class GloballyQualifyingSyntaxRewriter(
             return base.VisitInvocationExpression(node);
         }
 
+        if (base.VisitInvocationExpression(node) is not InvocationExpressionSyntax visited) {
+            return node;
+        }
+
         // Ideally we would only qualify the member if it's imported via `using static ...`
         // but determining that is non-trivial so for now we always qualify static method calls
         // with their containing type
-        var methodName = node.Expression as SimpleNameSyntax ?? throw new NotSupportedException(); // Preserve type arguments
+        var methodName = visited.Expression as SimpleNameSyntax ?? throw new NotSupportedException(); // Preserve type arguments
         return InvocationExpression(
             MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
@@ -99,7 +103,7 @@ public class GloballyQualifyingSyntaxRewriter(
             return false;
         }
 
-        if (identifierType.ContainingNamespace.IsGlobalNamespace) {
+        if (identifierType.ContainingNamespace?.IsGlobalNamespace ?? true) {
             // We don't need to fully qualify types in the global namespace
             return false;
         }

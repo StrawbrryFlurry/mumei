@@ -70,7 +70,7 @@ public class SourceCodeReferenceGenerator : IIncrementalGenerator {
                     }
 
                     var typeArgument = calledMethod.TypeArguments[0];
-                    return ((bool IsMatch, InvocationExpressionSyntax Invocation, INamedTypeSymbol SourceType))(true, invocation, typeArgument);
+                    return ((bool IsMatch, InvocationExpressionSyntax Invocation, INamedTypeSymbol SourceType)) (true, invocation, typeArgument);
                 })
             .Where(t => t.IsMatch)
             .Select((t, _) => (t.Invocation, t.SourceType));
@@ -172,7 +172,7 @@ public class SourceCodeReferenceGenerator : IIncrementalGenerator {
 
         var usingDirectives = typeReferences
             .Distinct(SymbolEqualityComparer.Default)
-            .Where(x => !SymbolEqualityComparer.Default.Equals(x.ContainingNamespace, targetType.ContainingNamespace)) // Skip our own namespace
+            .Where(x => x.ContainingNamespace is not null && !SymbolEqualityComparer.Default.Equals(x.ContainingNamespace, targetType.ContainingNamespace)) // Skip our own namespace
             .Select(t => t!.ContainingNamespace.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat))
             .Where(x => !targetType.ContainingNamespace.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
                 .StartsWith(x)) // Skip namespaces we're implicitly part of
@@ -205,7 +205,7 @@ public class SourceCodeReferenceGenerator : IIncrementalGenerator {
 
             var strippedDuplicateMembersAlreadyCoveredByImportedTypes =
                 classDecl.Members.Where(x => x is not ClassDeclarationSyntax cls || typeReferences.Any(t => t.Name == cls.Identifier.Text));
-            sourceCodeNode = ((ClassDeclarationSyntax)sourceCodeNode).WithMembers(List(strippedDuplicateMembersAlreadyCoveredByImportedTypes));
+            sourceCodeNode = ((ClassDeclarationSyntax) sourceCodeNode).WithMembers(List(strippedDuplicateMembersAlreadyCoveredByImportedTypes));
         }
 
         var compilationUnitWithUsings = CompilationUnit()
@@ -267,6 +267,10 @@ public class SourceCodeReferenceGenerator : IIncrementalGenerator {
             }
 
             if (type.DeclaringSyntaxReferences.IsEmpty) {
+                if (type.ContainingAssembly is null) {
+                    continue;
+                }
+
                 elements.Add(
                     ObjectCreationExpression(ParseTypeName("global::SourceCodeFactory.AssemblyTypeRef"))
                         .WithInitializer(InitializerExpression(SyntaxKind.ObjectInitializerExpression,
@@ -295,11 +299,11 @@ public class SourceCodeReferenceGenerator : IIncrementalGenerator {
     }
 
     public static LiteralExpressionSyntax RawStringLiteral(string value) {
-        return (LiteralExpressionSyntax)ParseExpression($""""""""""""""""
-                                                         """"""""""""
-                                                         {value}
-                                                         """"""""""""
-                                                         """""""""""""""");
+        return (LiteralExpressionSyntax) ParseExpression($""""""""""""""""
+                                                          """"""""""""
+                                                          {value}
+                                                          """"""""""""
+                                                          """""""""""""""");
     }
 
 }

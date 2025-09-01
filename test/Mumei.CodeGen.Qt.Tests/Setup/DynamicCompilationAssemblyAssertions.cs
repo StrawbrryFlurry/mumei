@@ -20,26 +20,26 @@ internal static class DynamicCompilationAssemblyAssertions {
 
     public sealed class GeneratedAssembly(Assembly assembly) {
         public Assembly Assembly { get; } = assembly;
-        public T CreateInstance<T>(params object[] args) {
+        public GeneratedAssemblyInstance<T> CreateInstance<T>(params object[] args) {
             var name = GetTypeNameWithoutFileScope(typeof(T));
             var instance = Activator.CreateInstance(Assembly.GetTypes().First(x => x.FullName == name), args)
                            ?? throw new InvalidOperationException("Could not create instance of type " + name);
             // We can't cast here since the type is from a different assembly load context.
-            return Unsafe.As<object, T>(ref instance);
+            return new GeneratedAssemblyInstance<T>(Unsafe.As<object, T>(ref instance), this);
         }
 
-        public TResult Invoke<T, TResult>(T instance, Expression<Func<T, TResult>> expression) {
+        public TResult Invoke<T, TResult>(GeneratedAssemblyInstance<T> instance, Expression<Func<T, TResult>> expression) {
             var (methodInfo, args) = InvocationExpressionVisitor.FindInvocation(expression.Body)
                                      ?? throw new InvalidOperationException("The provided expression does not contain an invocation.");
 
-            return InvokeCore<T, TResult>(instance, methodInfo, args);
+            return InvokeCore<T, TResult>(instance.UnsafeValue, methodInfo, args);
         }
 
-        public void Invoke<T>(T instance, Expression<Action<T>> expression) {
+        public void Invoke<T>(GeneratedAssemblyInstance<T> instance, Expression<Action<T>> expression) {
             var (methodInfo, args) = InvocationExpressionVisitor.FindInvocation(expression.Body)
                                      ?? throw new InvalidOperationException("The provided expression does not contain an invocation.");
 
-            InvokeCore<T, Unit>(instance, methodInfo, args);
+            InvokeCore<T, Unit>(instance.UnsafeValue, methodInfo, args);
         }
 
         private TResult InvokeCore<T, TResult>(T instance, MethodInfo method, object?[] args) {
@@ -104,5 +104,24 @@ internal static class DynamicCompilationAssemblyAssertions {
         ).Compile();
 
         return valueExtractor();
+    }
+
+    public sealed class GeneratedAssemblyInstance<T>(T value, GeneratedAssembly assembly) {
+        /// <summary>
+        /// This is not actually an instance of <typeparamref name="T"/>, but instead an
+        /// instance of <typeparamref name="T"/>, which was compiled from the same source code
+        /// into the generator assembly. Calling methods on this instance directly will call the
+        /// implementation in the calling assembly, not the generated one. Use <see cref="GeneratedAssembly.Invoke{T, TResult}"/> or
+        /// <see cref="GeneratedAssembly.Invoke{T}"/> to invoke methods on this instance.
+        /// </summary>
+        public T UnsafeValue { get; } = value;
+
+        public TResult Invoke<TResult>(Expression<Func<T, TResult>> expression) {
+            return assembly.Invoke(this, expression);
+        }
+
+        public void Invoke(Expression<Action<T>> expression) {
+            assembly.Invoke(this, expression);
+        }
     }
 }

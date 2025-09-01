@@ -41,28 +41,41 @@ internal readonly struct SyntaxVerificationExpectation {
 internal sealed class SyntaxVerifier {
     public static void Verify<TRepresentable>(TRepresentable representable, SyntaxVerificationExpectation expected)
         where TRepresentable : ISyntaxRepresentable {
+        var actual = representable.ToSyntaxInternal().TrimEnd();
+        Verify(actual, expected);
+    }
+
+    public static void Verify(string actual, SyntaxVerificationExpectation expected) {
+        var expectedStr = expected.ToString();
+
         try {
             Assert.Equal(
-                representable.ToSyntaxInternal().TrimEnd(),
-                expected.ToString(),
+                actual,
+                expectedStr,
                 ignoreWhiteSpaceDifferences: true,
                 ignoreLineEndingDifferences: true
             );
         } catch (EqualException e) {
+            var diff = Diff(actual, expectedStr);
             throw new XunitException(
                 $"""
                  Syntax verification failed.
+                 Actual:
+                 {actual}
+
                  Expected:
                  {expected}
 
-                 Actual:
-                 {representable.ToSyntaxInternal()}
+                 Diff:
+                 {diff}
 
+                 Inner Exception:
                  {e}
                  """
             );
         }
     }
+
 
     public static void VerifyRegex<TRepresentable>(TRepresentable representable, SyntaxVerificationExpectation expected)
         where TRepresentable : ISyntaxRepresentable {
@@ -75,23 +88,7 @@ internal sealed class SyntaxVerifier {
             expectedString
         );
         if (!doesMatch) {
-            var diff = InlineDiffBuilder.Diff(actual, expectedString, true, true);
-            var result = new SyntaxWriter();
-            foreach (var line in diff.Lines) {
-                switch (line.Type) {
-                    case ChangeType.Inserted:
-                        result.Write("+ ");
-                        break;
-                    case ChangeType.Deleted:
-                        result.Write("- ");
-                        break;
-                    default:
-                        result.Write("  ");
-                        break;
-                }
-
-                result.WriteLine(line.Text);
-            }
+            var result = Diff(actual, expectedString);
 
             throw new XunitException(
                 $"""
@@ -107,5 +104,27 @@ internal sealed class SyntaxVerifier {
                  """
             );
         }
+    }
+
+    private static string Diff(string actual, string expected) {
+        var diff = InlineDiffBuilder.Diff(actual, expected, true, true);
+        var result = new SyntaxWriter();
+        foreach (var line in diff.Lines) {
+            switch (line.Type) {
+                case ChangeType.Inserted:
+                    result.Write("+ ");
+                    break;
+                case ChangeType.Deleted:
+                    result.Write("- ");
+                    break;
+                default:
+                    result.Write("  ");
+                    break;
+            }
+
+            result.WriteLine(line.Text);
+        }
+
+        return result.ToSyntax();
     }
 }

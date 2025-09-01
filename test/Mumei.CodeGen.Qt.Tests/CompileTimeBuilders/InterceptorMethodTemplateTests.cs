@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Runtime.CompilerServices;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
@@ -20,7 +21,7 @@ public sealed class InterceptorMethodTemplateTests {
 
         result.PassesAssemblyAction(x => {
             var t = x.CreateInstance<CompilationTestSource>();
-            var r = x.Invoke(t, ts => ts.TestInvocation());
+            var r = t.Invoke(ts => ts.TestInvocation());
 
             Assert.Equal("s", r.ParameterName);
             Assert.Equal("s.Length > 0;", r.Body);
@@ -50,7 +51,7 @@ file sealed class CompilationTestSource {
     }
 }
 
-file sealed class RoslynExpressionReceivableTemplate<TExpression>(LambdaExpressionSyntax lambda) : QtInterceptorMethodTemplate, IRoslynExpressionReceivable<TExpression>
+public sealed class RoslynExpressionReceivableTemplate<TExpression>(LambdaExpressionSyntax lambda) : QtInterceptorMethodTemplate, IRoslynExpressionReceivable<TExpression>
     where TExpression : Delegate {
     public void Invoke(TExpression expression) {
         var px = (LambdaExpressionSyntax) SyntaxFactory.ParseExpression(lambda.NormalizeWhitespace().ToFullString());
@@ -131,4 +132,16 @@ file sealed class CompilationScopeTestSourceGenerator : IIncrementalGenerator {
 
         ctx.AddFile(file);
     }
+}
+
+file static class FiledReflection {
+#if NET7_0_OR_GREATER
+    [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "<lambda>P")]
+    public static extern LambdaExpressionSyntax RoslynExpressionReceivableTemplate_StateArg_1(RoslynExpressionReceivableTemplate<Delegate> instance);
+#else
+    public static LambdaExpressionSyntax RoslynExpressionReceivableTemplate_StateArg_1(RoslynExpressionReceivableTemplate<Delegate> instance) {
+        var f = typeof(RoslynExpressionReceivableTemplate<Delegate>).GetField("<lambda>P", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        return (LambdaExpressionSyntax) f!.GetValue(instance)!;
+    }
+#endif
 }

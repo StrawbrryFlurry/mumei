@@ -13,7 +13,7 @@ public readonly struct QtExpression : IQtTemplateBindable {
 
     public static QtExpression Null => new("null", null);
 
-    public static QtExpression ForExpression(string expression) {
+    public static QtExpression For(string expression) {
         return new QtExpression(expression, null);
     }
 
