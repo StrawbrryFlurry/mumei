@@ -332,7 +332,7 @@ public sealed partial class QtClassFactoryInterceptorGenerator : IIncrementalGen
                 throw new InvalidOperationException("Could not find state property for key: " + stateBinding);
             }
 
-            var syntaxNodeConversion = semanticModel.Compilation.ClassifyConversion(stateProperty.Type, syntaxNodeType);
+            var syntaxNodeConversion = semanticModel.Compilation.ClassifyConversion(stateProperty.Type, syntaxNodeType!);
             var isSyntaxNode = syntaxNodeConversion.IsImplicit;
             if (isSyntaxNode) {
                 var qtStateType = QtType.ForRoslynType(stateProperty.Type);

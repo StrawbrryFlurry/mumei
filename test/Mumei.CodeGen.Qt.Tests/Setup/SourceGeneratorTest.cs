@@ -58,7 +58,7 @@ public sealed class SourceGeneratorTest<TSourceGenerator> where TSourceGenerator
             Assert.Multiple(compilationDiagnostics.Select<Diagnostic, Action>(diagnostic => {
                     var source = diagnostic.Location.SourceTree;
                     return () => Assert.Fail(
-                        $"Diagnostic: {diagnostic.Id}:\n{diagnostic.GetMessage()}\nat: {source.GetText().GetSubText(diagnostic.Location.SourceSpan)}\nof: {source.GetText()}"
+                        $"Diagnostic: {diagnostic.Id}:\n{diagnostic.GetMessage()}\nat: {source!.GetText().GetSubText(diagnostic.Location.SourceSpan)}\nof: {source.GetText()}"
                     );
                 }
             ).ToArray());

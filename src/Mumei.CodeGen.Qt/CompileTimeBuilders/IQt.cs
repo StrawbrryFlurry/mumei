@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace Mumei.CodeGen.Playground;
+namespace Mumei.CodeGen.Qt;
 
 internal interface IQt {
     public void InjectSyntax();
@@ -16,8 +16,8 @@ public interface IQtSyntaxFunctor<TSyntax, TResult> where TSyntax : SyntaxNode {
 }
 
 public interface IQtSyntaxTemplateInterpolator { }
-
-public class QtSyntaxTemplateItem<TActual>(
+#pragma warning disable
+public sealed class QtSyntaxTemplateItem<TActual>(
     SyntaxNode node
 ) {
     public static implicit operator TActual(QtSyntaxTemplateItem<TActual> item) {

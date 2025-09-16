@@ -13,7 +13,7 @@ public sealed class QtProperty<T> : IQtCompileTimeValue, IQtTemplateBindable {
 
 public static class QtProperty {
     public sealed class QtPropertyBuilderCtx<T> {
-        public IQtThis This { get; set; }
-        public T Value { get; set; }
+        public required IQtThis This { get; set; }
+        public required T Value { get; set; }
     }
 }

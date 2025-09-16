@@ -9,8 +9,8 @@ public abstract class QtInterceptorMethodTemplate : IQtInterceptorMethodTemplate
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
-    public object[] InvocationArguments { get; set; }
-    public MethodInfo Method { get; set; }
+    public object[] InvocationArguments { get; } = null!;
+    public MethodInfo Method { get; } = null!;
 
     public T Is<T>() {
         throw new CompileTimeComponentUsedAtRuntimeException();
@@ -22,8 +22,8 @@ public abstract class QtAsyncInterceptorMethodTemplate : IQtInterceptorMethodTem
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
-    public object[] InvocationArguments { get; set; }
-    public MethodInfo Method { get; set; }
+    public object[] InvocationArguments { get; } = null!;
+    public MethodInfo Method { get; } = null!;
 
     public CancellationToken CancellationToken { get; set; }
 

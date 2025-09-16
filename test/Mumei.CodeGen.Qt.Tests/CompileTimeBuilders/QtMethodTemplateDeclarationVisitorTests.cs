@@ -88,6 +88,7 @@ public sealed class QtMethodTemplateDeclarationVisitorTests {
 }
 
 // ReSharper disable ArrangeThisQualifier
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 file sealed class Templates {
     public sealed class MethodTemplate(string explicitState, object implicitState) : QtInterceptorMethodTemplate {
         public required string ExplicitProperty { get; set; }

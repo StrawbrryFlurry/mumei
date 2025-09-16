@@ -8,8 +8,8 @@ public static class QtMethodLegacy {
     public sealed class QtProxyMethodBuilderCtx { }
 
     public sealed class QtMethodBuilderCtx {
-        public MethodBuilderArgumentsProvider Arguments { get; }
-        public MethodBuilderTypeArgumentsProvider TypeArguments { get; set; }
+        public required MethodBuilderArgumentsProvider Arguments { get; init; }
+        public required MethodBuilderTypeArgumentsProvider TypeArguments { get; init; }
 
         public T Interpolate<T>(IQtSyntaxTemplateInterpolator interpolator) {
             throw new CompileTimeComponentUsedAtRuntimeException();

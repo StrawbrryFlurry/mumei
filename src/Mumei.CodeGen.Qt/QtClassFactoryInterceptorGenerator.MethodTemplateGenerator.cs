@@ -75,28 +75,28 @@ public sealed partial class QtClassFactoryInterceptorGenerator {
         var instantiateTemplateReferenceBindersExpr = CreateTemplateBindersExpressionForMethodTemplate(boundKeys);
 
         var location = CSharpExtensions.GetInterceptableLocation(semanticModel, invocation);
-        // result.WriteLine(CSharpExtensions.GetInterceptsLocationAttributeSyntax(location!));
-        // result.WriteFormattedBlock(
-        //     $$"""
-        //       public static {{typeof(QtMethod<CompileTimeUnknown>)}} Intercept_{{nameof(QtClassDynamicDeclarationExtensions.AddTemplateInterceptMethod)}}_{{proxyId}}<TMethodTemplate>(
-        //           ref this {{typeof(QtClass)}} self,
-        //           {{typeof(InvocationExpressionSyntax)}} invocationToProxy,
-        //           TMethodTemplate methodTemplateInstance,
-        //           {{methodSelectorType}} templateMethodSelector
-        //       ) {
-        //           var sourceCode = new {{typeof(__DynamicallyBoundSourceCode)}}() {
-        //               {{nameof(__DynamicallyBoundSourceCode.CodeTemplate)}} = CachedSourceCodeTemplate_Intercept_{{proxyId}},
-        //           };
-        //
-        //           var dynamicComponentBinders = {{instantiateTemplateReferenceBindersExpr}};
-        //           return self.{{nameof(QtClass.__BindDynamicTemplateInterceptMethod)}}(
-        //             invocationToProxy,
-        //             sourceCode,
-        //             dynamicComponentBinders
-        //           );
-        //       }
-        //       """
-        // );
+        result.WriteLine(CSharpExtensions.GetInterceptsLocationAttributeSyntax(location!));
+        result.WriteFormattedBlock(
+            $$"""
+              public static {{typeof(QtMethod<CompileTimeUnknown>)}} Intercept_{{nameof(QtClassDynamicDeclarationExtensions.AddTemplateInterceptMethod)}}_{{proxyId}}<TMethodTemplate>(
+                  ref this {{typeof(QtClass)}} self,
+                  {{typeof(InvocationExpressionSyntax)}} invocationToProxy,
+                  TMethodTemplate methodTemplateInstance,
+                  {{methodSelectorType}} templateMethodSelector
+              ) {
+                  var sourceCode = new {{typeof(__DynamicallyBoundSourceCode)}}() {
+                      {{nameof(__DynamicallyBoundSourceCode.CodeTemplate)}} = CachedSourceCodeTemplate_Intercept_{{proxyId}},
+                  };
+
+                  var dynamicComponentBinders = {{instantiateTemplateReferenceBindersExpr}};
+                  return self.{{nameof(QtClass.__BindDynamicTemplateInterceptMethod)}}(
+                    invocationToProxy,
+                    sourceCode,
+                    dynamicComponentBinders
+                  );
+              }
+              """
+        );
     }
 
     private QtExpression CreateTemplateBindersExpressionForMethodTemplate(string[] boundKeys) {
@@ -194,7 +194,7 @@ internal sealed class QtMethodTemplateDeclarationVisitor(
             return base.VisitInvocationExpression(node);
         }
 
-        if (sm.GetSymbolInfo(node).Symbol is not IMethodSymbol { IsStatic: false } methodSymbol) {
+        if (SemanticModel.GetSymbolInfo(node).Symbol is not IMethodSymbol { IsStatic: false } methodSymbol) {
             return base.VisitInvocationExpression(node);
         }
 
@@ -294,7 +294,7 @@ internal sealed class QtMethodTemplateDeclarationVisitor(
 
         // At this point the only "bindable" things left are instance members
         // Try to resolve what instance member we are dealing with, if any
-        if (sm.GetSymbolInfo(node) is not { Symbol: { } symbol }) {
+        if (SemanticModel.GetSymbolInfo(node) is not { Symbol: { } symbol }) {
             binding = null;
             return false;
         }

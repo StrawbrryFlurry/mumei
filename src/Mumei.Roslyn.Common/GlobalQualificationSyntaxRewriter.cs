@@ -9,8 +9,10 @@ namespace Mumei.Roslyn.Common;
 public class GloballyQualifyingSyntaxRewriter(
     SemanticModel sm
 ) : CSharpSyntaxRewriter {
+    protected SemanticModel SemanticModel = sm;
+
     public override SyntaxNode? VisitGenericName(GenericNameSyntax node) {
-        if (!TryGlobalizeIdentifier(sm, node, out var globalizedIdentifier)) {
+        if (!TryGlobalizeIdentifier(SemanticModel, node, out var globalizedIdentifier)) {
             return base.VisitGenericName(node);
         }
 
@@ -18,7 +20,7 @@ public class GloballyQualifyingSyntaxRewriter(
     }
 
     public override SyntaxNode VisitIdentifierName(IdentifierNameSyntax node) {
-        if (!TryGlobalizeIdentifier(sm, node, out var globalizedIdentifier)) {
+        if (!TryGlobalizeIdentifier(SemanticModel, node, out var globalizedIdentifier)) {
             return base.VisitIdentifierName(node)!;
         }
 
@@ -30,7 +32,7 @@ public class GloballyQualifyingSyntaxRewriter(
             return TryQualifyImplicitTargetMethodCall(node);
         }
 
-        var invocationOperation = sm.GetOperation(node);
+        var invocationOperation = SemanticModel.GetOperation(node);
         if (invocationOperation is not IInvocationOperation { TargetMethod: { IsExtensionMethod: true } targetMethod }) {
             return base.VisitInvocationExpression(node);
         }
@@ -56,7 +58,7 @@ public class GloballyQualifyingSyntaxRewriter(
 
     private SyntaxNode? TryQualifyImplicitTargetMethodCall(InvocationExpressionSyntax node) {
         // If the invocation is a static method imported via `using static ...` we need to qualify it
-        var invocationOperation = sm.GetOperation(node);
+        var invocationOperation = SemanticModel.GetOperation(node);
         if (invocationOperation is not IInvocationOperation { TargetMethod: { IsStatic: true } targetMethod }) {
             return base.VisitInvocationExpression(node);
         }
