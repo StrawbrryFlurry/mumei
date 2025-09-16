@@ -28,15 +28,38 @@ internal readonly struct QtDeclarationPtr<T>(
     }
 }
 
+public readonly struct ConstructedGenericQtClass(
+    QtClass classRef,
+    QtCollection<IQtType> typeArguments
+) : IQtType, IQtTypeDeclaration {
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+        throw new NotSupportedException();
+    }
+
+    public void RenderFullName(IRenderer renderer) {
+        renderer.Text(classRef.Name);
+        renderer.Text("<");
+        renderer.SeparatedList(typeArguments.Span, static x => x.FullName());
+        renderer.Text(">");
+    }
+
+    public void RenderExpression(IRenderer renderer) {
+        renderer.Text(classRef.Name);
+    }
+}
+
 public readonly struct QtClass(
     AccessModifier modifiers,
     string name,
-    QtCollection<QtTypeParameter> typeParameters = default
+    QtCollection<QtTypeParameter> typeParameters = default,
+    IQtTypeDeclaration? parentClassOrNamespace = null
 ) : IQtType, IQtTypeDeclaration {
     public QtTypeParameterList TypeParameters { get; } = new(typeParameters);
 
     private readonly List<QtFieldCore> _fields = new();
-    private readonly List<QtMethodCore> _methods = new();
+    private readonly List<QtMethodRenderNode> _methods = new();
+
+    public string Name => name;
 
     public static QtClass CreateObfuscated(
         AccessModifier modifiers,
@@ -186,7 +209,7 @@ public readonly struct QtClass(
         InvocationExpressionSyntax invocationToProxy,
         __DynamicallyBoundSourceCode code
     ) {
-        var decl = new QtDeclarationPtr<QtMethodCore>(_methods, _methods.Count + 1); // This isn't thread-safe, prolly doesn't matter though
+        var decl = new QtDeclarationPtr<QtMethodRenderNode>(_methods, _methods.Count + 1); // This isn't thread-safe, prolly doesn't matter though
         var factory = new RoslynQtMethodFactory(QtCompilationScope.Active);
         var method = factory.CreateProxyMethodForInvocation(
             invocationToProxy,
@@ -219,7 +242,7 @@ public readonly struct QtClass(
         __DynamicallyBoundSourceCode code,
         QtDynamicComponentBinderCollection? dynamicComponentBinders
     ) {
-        var decl = new QtDeclarationPtr<QtMethodCore>(_methods, _methods.Count + 1); // This isn't thread-safe, prolly doesn't matter though
+        var decl = new QtDeclarationPtr<QtMethodRenderNode>(_methods, _methods.Count + 1); // This isn't thread-safe, prolly doesn't matter though
         var factory = new RoslynQtMethodFactory(QtCompilationScope.Active);
         var method = factory.CreateProxyMethodForInvocation(
             invocationToProxy,
@@ -254,6 +277,23 @@ public readonly struct QtClass(
 
         writer.Dedent();
         writer.WriteLine("}");
+    }
+
+    public void RenderFullName(IRenderer renderer) {
+        // Render parent node
+        renderer.Text(name);
+    }
+
+    public void RenderExpression(IRenderer renderer) {
+        renderer.Text(name);
+    }
+
+    public ConstructedGenericQtClass Construct(QtCollection<IQtType> typeArguments) {
+        if (typeArguments.Count != TypeParameters.Count) {
+            throw new ArgumentException($"Type argument count ({typeArguments.Count}) does not match type parameter count ({TypeParameters.Count})");
+        }
+
+        return new ConstructedGenericQtClass(this, typeArguments);
     }
 }
 

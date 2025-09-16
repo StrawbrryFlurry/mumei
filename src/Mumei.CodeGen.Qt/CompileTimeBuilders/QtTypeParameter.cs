@@ -12,10 +12,11 @@ public readonly struct QtTypeParameter {
 
 public readonly struct QtTypeParameterList(
     QtCollection<QtTypeParameter> typeParameters
-) : IQtTemplateBindable {
+) : IQtTemplateBindable, IRenderNode {
     public ConstraintImpl Constraints { get; } = new();
 
     public bool IsEmpty => typeParameters.Count == 0;
+    public int Count => typeParameters.Count;
 
     public static QtTypeParameterList Builder(int capacity) {
         return new QtTypeParameterList(QtCollection<QtTypeParameter>.Create(capacity));
@@ -42,11 +43,19 @@ public readonly struct QtTypeParameterList(
         writer.Write(">");
     }
 
-    public readonly struct ConstraintImpl : IQtTemplateBindable {
+    public readonly struct ConstraintImpl : IQtTemplateBindable, IRenderNode {
         public bool IsEmpty => true;
 
         public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
             throw new NotImplementedException();
         }
+
+        public void Render(IRenderer renderer) {
+            throw new NotImplementedException();
+        }
+    }
+
+    public void Render(IRenderer renderer) {
+        throw new NotImplementedException();
     }
 }

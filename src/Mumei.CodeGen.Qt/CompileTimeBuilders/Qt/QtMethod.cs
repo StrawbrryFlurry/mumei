@@ -5,9 +5,9 @@ using Mumei.CodeGen.Qt.Output;
 namespace Mumei.CodeGen.Qt.Qt;
 
 public readonly struct QtMethod<TReturnType> : IQtInvokable<TReturnType> {
-    private readonly QtDeclarationPtr<QtMethodCore> _declarationPtr;
+    private readonly QtDeclarationPtr<QtMethodRenderNode> _declarationPtr;
 
-    internal QtMethodCore Method { get; }
+    internal QtMethodRenderNode Method { get; }
 
     internal QtMethod(
         string name,
@@ -17,11 +17,11 @@ public readonly struct QtMethod<TReturnType> : IQtInvokable<TReturnType> {
         in QtParameterList parameters,
         in QtCodeBlock codeBlock,
         in QtAttributeList attributes,
-        in QtDeclarationPtr<QtMethodCore> declarationPtr,
+        in QtDeclarationPtr<QtMethodRenderNode> declarationPtr,
         bool isInterceptorMethod = false
     ) {
         _declarationPtr = declarationPtr;
-        Method = new QtMethodCore(
+        Method = new QtMethodRenderNode(
             modifiers,
             name,
             returnType,
@@ -46,7 +46,7 @@ public readonly struct QtMethod<TReturnType> : IQtInvokable<TReturnType> {
     }
 }
 
-internal readonly struct QtMethodCore(
+internal readonly struct QtMethodRenderNode(
     AccessModifier modifiers,
     string name,
     IQtType returnType,
@@ -55,7 +55,7 @@ internal readonly struct QtMethodCore(
     QtCodeBlock codeBlock,
     QtAttributeList attributes,
     bool isInterceptorMethod = false
-) : IQtTemplateBindable {
+) : IQtTemplateBindable, IRenderNode {
     public string Name => name;
 
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
@@ -86,6 +86,29 @@ internal readonly struct QtMethodCore(
         writer.WriteBlock(codeBlock);
         writer.Dedent();
         writer.Write("}");
+    }
+
+    public void Render(IRenderer renderer) {
+        if (!attributes.IsEmpty) {
+            renderer.Bind(attributes);
+            renderer.NewLine();
+        }
+
+        renderer.Interpolate($"{modifiers.AsCSharpString()} {returnType.Expression()} {name}{typeParameters}({parameters})");
+
+        if (!typeParameters.Constraints.IsEmpty) {
+            renderer.Interpolate($" {typeParameters.Constraints}");
+        }
+
+        if (modifiers.IsAbstract()) {
+            renderer.Text(";");
+            return;
+        }
+
+        renderer.Text(" ");
+        renderer.StartCodeBlock();
+        renderer.Node(codeBlock);
+        renderer.EndCodeBlock();
     }
 }
 

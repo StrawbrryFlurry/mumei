@@ -276,7 +276,7 @@ internal readonly ref struct RoslynQtMethodFactory(
     public QtMethod<CompileTimeUnknown> CreateProxyMethodForInvocation(
         InvocationExpressionSyntax invocationToProxy,
         in __DynamicallyBoundSourceCode sourceCode,
-        in QtDeclarationPtr<QtMethodCore> declPtr,
+        in QtDeclarationPtr<QtMethodRenderNode> declPtr,
         QtDynamicComponentBinderCollection? dynamicQtComponentBinder = null
     ) {
         var methodSymbol = scope.GetMethodSymbol(invocationToProxy);

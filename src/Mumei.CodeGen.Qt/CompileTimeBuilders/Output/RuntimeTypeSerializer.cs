@@ -50,6 +50,70 @@ internal static class RuntimeTypeSerializer {
         }
     }
 
+    public static void RenderInto<TRenderer>(TRenderer renderer, Type type) where TRenderer : IRenderer {
+        if (TryWriteShortForm(type, renderer)) {
+            return;
+        }
+
+        renderer.Text("global::");
+
+        if (type.Namespace is not null) {
+            renderer.Text(type.Namespace);
+            renderer.Text(".");
+        }
+
+        ReadOnlySpan<char> name = type.Name;
+        if (type.IsGenericType) {
+            name = name[..name.LastIndexOf('`')];
+        }
+
+        renderer.Text(name);
+
+        if (!type.IsConstructedGenericType) {
+            return;
+        }
+
+        renderer.Text("<");
+        var genericArguments = type.GetGenericArguments();
+        for (var i = 0; i < genericArguments.Length; i++) {
+            if (i > 0) {
+                renderer.Text(", ");
+            }
+
+            RenderInto(renderer, genericArguments[i]);
+        }
+
+        renderer.Text(">");
+    }
+
+    private static bool TryWriteShortForm<TRenderer>(Type type, TRenderer writer) where TRenderer : IRenderer {
+        if (type.IsPrimitive) {
+            writer.Text(type switch {
+                not null when type == typeof(int) => "int",
+                not null when type == typeof(uint) => "uint",
+                not null when type == typeof(long) => "long",
+                not null when type == typeof(ulong) => "ulong",
+                not null when type == typeof(short) => "short",
+                not null when type == typeof(ushort) => "ushort",
+                not null when type == typeof(byte) => "byte",
+                not null when type == typeof(sbyte) => "sbyte",
+                not null when type == typeof(float) => "float",
+                not null when type == typeof(double) => "double",
+                not null when type == typeof(bool) => "bool",
+                not null when type == typeof(char) => "char",
+                _ => throw new NotSupportedException($"Unsupported primitive type: {type}")
+            });
+            return true;
+        }
+
+        if (type == typeof(string)) {
+            writer.Text("string");
+            return true;
+        }
+
+        return false;
+    }
+
     private static bool TryWriteShortForm<TSyntaxWriter>(Type type, ref TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
         if (type.IsPrimitive) {
             writer.Write(type switch {

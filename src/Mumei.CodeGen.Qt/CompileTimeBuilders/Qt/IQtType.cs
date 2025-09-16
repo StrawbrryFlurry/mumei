@@ -1,9 +1,14 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Runtime.CompilerServices;
+using Microsoft.CodeAnalysis;
 using Mumei.CodeGen.Qt.Output;
+using Mumei.CodeGen.Qt.Qt;
 
-namespace Mumei.CodeGen.Qt.Qt;
+namespace Mumei.CodeGen.Qt;
 
-public interface IQtType : IQtTemplateBindable;
+public interface IQtType : IQtTemplateBindable {
+    public void RenderFullName(IRenderer renderer);
+    public void RenderExpression(IRenderer renderer);
+}
 
 public sealed class QtType {
     public static IQtType ForRuntimeType<T>() {
@@ -66,6 +71,26 @@ file sealed class QtRuntimeType(
     public override string ToString() {
         return t.ToString();
     }
+
+    public void RenderFullName(IRenderer renderer) {
+        renderer.QualifiedTypeName(t);
+    }
+
+    public void RenderExpression(IRenderer renderer) {
+        if (attributes.HasFlag(QtTypeAttribute.ByRef)) {
+            renderer.Text("ref ");
+        }
+
+        if (attributes.HasFlag(QtTypeAttribute.Readonly)) {
+            renderer.Text("readonly ");
+        }
+
+        if (attributes.HasFlag(QtTypeAttribute.Pointer)) {
+            renderer.Text("*");
+        }
+
+        renderer.QualifiedTypeName(t);
+    }
 }
 
 file sealed class CompositeQtType(
@@ -93,6 +118,33 @@ file sealed class CompositeQtType(
         }
     }
 
+    public void RenderFullName(IRenderer renderer) {
+        renderer.Node(type.FullName());
+        RenderTypeArguments(renderer);
+    }
+
+    public void RenderExpression(IRenderer renderer) {
+        renderer.Node(type.Expression());
+        RenderTypeArguments(renderer);
+    }
+
+    private void RenderTypeArguments(IRenderer renderer) {
+        if (typeArguments.Length == 0) {
+            return;
+        }
+
+        renderer.Text("<");
+        for (var i = 0; i < typeArguments.Length; i++) {
+            if (i > 0) {
+                renderer.Text(", ");
+            }
+            var arg = typeArguments[i];
+            renderer.Node(arg.FullName());
+        }
+
+        renderer.Text(">");
+    }
+
     public override string ToString() {
         var sw = new ValueSyntaxWriter(stackalloc char[ValueSyntaxWriter.StackBufferSize]);
         WriteSyntax(ref sw);
@@ -115,6 +167,15 @@ file sealed class QtRoslynType(
         }
     }
 
+    public void RenderFullName(IRenderer renderer) {
+        renderer.Text(typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+    }
+
+    public void RenderExpression(IRenderer renderer) {
+        // TODO: Handle ref, readonly, pointer, etc.
+        renderer.Text(typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+    }
+
     public override string ToString() {
         return typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
     }
@@ -125,5 +186,13 @@ file sealed class QtExpressionType(
 ) : IQtType {
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
         writer.Write(expression);
+    }
+
+    public void RenderFullName(IRenderer renderer) {
+        renderer.Node(expression);
+    }
+
+    public void RenderExpression(IRenderer renderer) {
+        renderer.Node(expression);
     }
 }

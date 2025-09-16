@@ -143,6 +143,18 @@ public readonly struct QtCollection<TElement> : IReadOnlyCollection<TElement>, I
             ArrayPool<TElement>.Shared.Return(_elements);
         }
     }
+
+    public static implicit operator Span<TElement>(QtCollection<TElement> collection) {
+        return collection.Span;
+    }
+
+    public static implicit operator ReadOnlySpan<TElement>(QtCollection<TElement> collection) {
+        return collection.Span;
+    }
+
+    public static implicit operator Memory<TElement>(QtCollection<TElement> collection) {
+        return collection.Memory;
+    }
 }
 
 public static class QtCollectionExtensions {

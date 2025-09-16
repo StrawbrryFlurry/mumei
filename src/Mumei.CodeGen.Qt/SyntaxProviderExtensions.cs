@@ -91,6 +91,15 @@ public static class SyntaxProviderExtensions {
     }
 }
 
+public readonly struct NodeMatchResult {
+    public static readonly NoneResult None = new();
+    public readonly struct NoneResult { }
+
+    public static NodeMatchResult<T> Of<T>(T match) {
+        return new NodeMatchResult<T> { Match = match };
+    }
+}
+
 public readonly struct NodeMatchResult<T> {
     public required T? Match { get; init; }
 
@@ -98,6 +107,10 @@ public readonly struct NodeMatchResult<T> {
 
     public static implicit operator NodeMatchResult<T>(T? match) {
         return new NodeMatchResult<T> { Match = match };
+    }
+
+    public static implicit operator NodeMatchResult<T>(NodeMatchResult.NoneResult noneResult) {
+        return new NodeMatchResult<T> { Match = default };
     }
 }
 

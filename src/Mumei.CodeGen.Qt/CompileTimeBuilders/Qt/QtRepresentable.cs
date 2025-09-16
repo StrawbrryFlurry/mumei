@@ -99,6 +99,50 @@ internal readonly struct SeparatedListRepresentable<TState, TElement, TRepresent
     }
 }
 
+internal static class QtRepresentableRendererExtensions {
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static SeparatedListRenderNode<DefaultMemoryAccessor<TElement>, TElement, TRenderNode> RenderAsSeparatedList<TElement, TRenderNode>(
+        this Memory<TElement> memory,
+        Func<TElement, TRenderNode> representationSelector
+    ) where TRenderNode : IRenderNode {
+        return RenderAsSeparatedList(memory.AsMemoryAccessor(), representationSelector);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static SeparatedListRenderNode<DefaultMemoryAccessor<TElement>, TElement, TRenderNode> RenderAsSeparatedList<TElement, TRenderNode>(
+        this ReadOnlyMemory<TElement> memory,
+        Func<TElement, TRenderNode> representationSelector
+    ) where TRenderNode : IRenderNode {
+        return RenderAsSeparatedList(memory.AsMemoryAccessor(), representationSelector);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static SeparatedListRenderNode<TMemoryAccessor, TElement, TRenderNode> RenderAsSeparatedList<TMemoryAccessor, TElement, TRenderNode>(
+        this TMemoryAccessor state,
+        Func<TElement, TRenderNode> representationSelector
+    ) where TMemoryAccessor : IQtMemoryAccessor<TElement> where TRenderNode : IRenderNode {
+        return new SeparatedListRenderNode<TMemoryAccessor, TElement, TRenderNode>(state, representationSelector);
+    }
+}
+
+internal readonly struct SeparatedListRenderNode<TState, TElement, TRenderNode>(
+    TState state,
+    Func<TElement, TRenderNode> nodeSelector
+) : IRenderNode where TState : IQtMemoryAccessor<TElement> where TRenderNode : IRenderNode {
+    public void Render(IRenderer renderer) {
+        var span = state.Memory.Span;
+        for (var i = 0; i < span.Length; i++) {
+            if (i > 0) {
+                renderer.Text(", ");
+            }
+
+            var item = span[i];
+            var representable = nodeSelector(item);
+            renderer.Node(representable);
+        }
+    }
+}
+
 internal readonly struct DefaultMemoryAccessor<T>(
     Memory<T> memory
 ) : IQtMemoryAccessor<T> {

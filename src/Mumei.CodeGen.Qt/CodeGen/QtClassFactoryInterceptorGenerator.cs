@@ -76,7 +76,6 @@ public sealed partial class QtClassFactoryInterceptorGenerator : IIncrementalGen
         context.AddSource("QtClassFactoryInterceptor.g.cs", result.ToSyntax());
     }
 
-
     private void BindDynamicTemplateInterceptMethod(
         SyntaxWriter result,
         InvocationExpressionSyntax invocation,

@@ -21,7 +21,7 @@ public readonly struct QtParameter : IQtTemplateBindable {
 
 public readonly struct QtParameterList(
     QtParameter[] parameters
-) : IQtTemplateBindable, IQtMemoryAccessor<QtParameter> {
+) : IQtTemplateBindable, IRenderNode, IQtMemoryAccessor<QtParameter> {
     public int Count => parameters.Length;
 
     internal QtParameter[] Parameters => parameters;
@@ -56,5 +56,9 @@ public readonly struct QtParameterList(
 
         parameter = default;
         return false;
+    }
+
+    public void Render(IRenderer renderer) {
+        throw new NotImplementedException();
     }
 }

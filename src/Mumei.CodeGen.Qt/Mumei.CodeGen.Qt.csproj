@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Mumei.CodeGen.Qt.Tests"/>
+    <InternalsVisibleTo Include="Mumei.CodeGen.Playground"/>
   </ItemGroup>
 
   <PropertyGroup>

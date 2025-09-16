@@ -9,58 +9,54 @@ using Mumei.CodeGen.Qt.Roslyn;
 namespace Mumei.CodeGen.Playground;
 
 file static class __QtInterceptorImpl_Renderer {
-    private sealed class ContextBindablesAccessor_Example {
+    private sealed class ContextStateAccessor_Example {
         public LambdaExpressionSyntax Lambda { get; }
     }
 
-    internal interface IRenderer {
-        public void Text(string s);
+    // internal static class Renderer {
+    //     public delegate void Render(IRenderer renderer, object ctx);
+    // }
 
-        public void Interpolate();
-
-        [Obsolete("Replace with the renderer API")]
-        public void Bind<TBindable>(TBindable bindable) where TBindable : IQtTemplateBindable;
-
-        public void Node<TNode>(TNode node) where TNode : SyntaxNode;
-
-        public void Child<TRenderable>(TRenderable renderable) where TRenderable : IRenderable;
-
-        public void RequireFeature(IFeature feature);
-
-        internal interface IFeature { }
-
-        delegate void Render(IRenderer renderer);
-    }
-
-    internal sealed class ProxyMethodRenderContext<TState>(InvocationExpressionSyntax proxyInvocation, TState state) {
+    internal sealed class ProxyMethodRenderContextWithState<TState>(InvocationExpressionSyntax proxyInvocation, TState state) {
         public TState State { get; } = state;
 
-        public MethodInfoRenderable MethodInfo() {
+        public MethodInfoRenderNode MethodInfo() {
             return default;
         }
 
-        public ThisRenderable This() {
+        public ThisRenderNode This() {
             return default;
         }
 
-        public readonly record struct MethodInfoRenderable : IRenderable {
+        public readonly record struct MethodInfoRenderNode : IRenderNode {
             public void Render(IRenderer renderer) { }
         }
 
-        public readonly record struct ThisRenderable : IRenderable {
+        public readonly record struct ThisRenderNode : IRenderNode {
             public void Render(IRenderer renderer) { }
         }
     }
 
-    private readonly struct Intercept__MethodBodyTemplate_Example(ProxyMethodRenderContext<ContextBindablesAccessor_Example> ctx) : IRenderable {
-        public void Render(IRenderer renderer) {
-            renderer.Text(
+    private readonly struct Intercept__MethodBodyTemplate_Example(ProxyMethodRenderContextWithState<ContextStateAccessor_Example> ctx) : ICodeBlock {
+        // Possibly explore something like this so we could treat the
+        // class as a singleton / pass an Action<IRenderer, object>
+        // to consumers
+        public void Render(IRenderer r, object ctxArg) {
+            if (ctxArg is not ProxyMethodRenderContextWithState<ContextStateAccessor_Example> ctx_) {
+                throw new InvalidOperationException("Invalid context type passed to renderer");
+            }
+
+            _ = ctx_;
+        }
+
+        public void Render(IRenderer r) {
+            r.Text(
                 """"""""""""
                 global::Microsoft.CodeAnalysis.CSharp.Syntax.LambdaExpressionSyntax px = (global::Microsoft.CodeAnalysis.CSharp.Syntax.LambdaExpressionSyntax) global::Microsoft.CodeAnalysis.CSharp.SyntaxFactory.ParseExpression(global::Microsoft.CodeAnalysis.SyntaxNodeExtensions.NormalizeWhitespace(
                 """"""""""""
             );
-            renderer.Node(ctx.State.Lambda);
-            renderer.Text(
+            r.SyntaxNode(ctx.State.Lambda);
+            r.Text(
                 """"""""""""
                 ).ToFullString());
                 global::Microsoft.CodeAnalysis.CSharp.Syntax.StatementSyntax[] statements = px.Body is global::Microsoft.CodeAnalysis.CSharp.Syntax.BlockSyntax block
@@ -80,8 +76,8 @@ file static class __QtInterceptorImpl_Renderer {
 
                 """"""""""""
             );
-            renderer.Child(ctx.This());
-            renderer.Text(
+            r.Node(ctx.This());
+            r.Text(
                 """"""""""""
                 .ReceiveExpression(x);
 
@@ -90,8 +86,12 @@ file static class __QtInterceptorImpl_Renderer {
         }
     };
 
-    internal interface IRenderable {
-        public void Render(IRenderer renderer);
+    internal interface ICodeBlock : IRenderNode;
+
+    internal readonly record struct RenderNode<T>(Action<IRenderer, T> RenderFn, T RenderState) : IRenderNode {
+        public void Render(IRenderer renderer) {
+            RenderFn(renderer, RenderState);
+        }
     }
 
     public static QtMethod<CompileTimeUnknown> Intercept<TTemplateReferences>(
@@ -100,13 +100,14 @@ file static class __QtInterceptorImpl_Renderer {
         TTemplateReferences references,
         DeclareQtInterceptorVoidMethodWithRefs<TTemplateReferences> declaration
     ) {
-        var state = Unsafe.As<TTemplateReferences, ContextBindablesAccessor_Example>(ref references);
-        var bindingContext = new ProxyMethodRenderContext<ContextBindablesAccessor_Example>(invocationToProxy, state);
+        var state = Unsafe.As<TTemplateReferences, ContextStateAccessor_Example>(ref references);
+        var bindingContext = new ProxyMethodRenderContextWithState<ContextStateAccessor_Example>(invocationToProxy, state);
         var template = new Intercept__MethodBodyTemplate_Example(bindingContext);
 
         return @this.__BindDynamicTemplateInterceptMethod(
             invocationToProxy,
-            (__DynamicallyBoundSourceCode) (dynamic) (IRenderer.Render) (dynamic) template
+            default
+            // (__DynamicallyBoundSourceCode) (dynamic) new Renderer.Render(template.Render)
         );
     }
 }

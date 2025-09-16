@@ -86,22 +86,22 @@ file sealed class CompilationScopeTestSourceGenerator : IIncrementalGenerator {
 
     private static NodeMatchResult<(InvocationExpressionSyntax Invocation, LambdaExpressionSyntax Lambda)> Filter(NodeMatchingContext ctx) {
         if (ctx.Node is not InvocationExpressionSyntax invocation) {
-            return default;
+            return NodeMatchResult.None;
         }
 
         if (invocation.Expression is not MemberAccessExpressionSyntax) {
-            return default;
+            return NodeMatchResult.None;
         }
 
         if (invocation.ArgumentList.Arguments.Count != 1) {
-            return default;
+            return NodeMatchResult.None;
         }
 
         if (invocation.ArgumentList.Arguments[0].Expression is not LambdaExpressionSyntax lambda) {
-            return default;
+            return NodeMatchResult.None;
         }
 
-        return (invocation, lambda);
+        return NodeMatchResult.Of((invocation, lambda));
     }
 
     private static void GenerateOutput(OutputGenerationContext<(InvocationExpressionSyntax Invocation, LambdaExpressionSyntax Lambda)> ctx) {
@@ -134,7 +134,7 @@ file sealed class CompilationScopeTestSourceGenerator : IIncrementalGenerator {
     }
 }
 
-file static class FiledReflection {
+file static class FieldReflection {
 #if NET7_0_OR_GREATER
     [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "<lambda>P")]
     public static extern LambdaExpressionSyntax RoslynExpressionReceivableTemplate_StateArg_1(RoslynExpressionReceivableTemplate<Delegate> instance);
