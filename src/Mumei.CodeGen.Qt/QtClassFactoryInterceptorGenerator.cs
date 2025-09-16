@@ -305,7 +305,14 @@ public sealed partial class QtClassFactoryInterceptorGenerator : IIncrementalGen
             return QtExpression.Null;
         }
 
-        // Generate accessor for the state object
+        // Since the state provided to the interceptor should always be an anonymous type
+        // we need to mimic that type here. By default, the runtime will layout the class
+        // members in memory automatically, and since the same rules should also apply to us,
+        // we should not have to order the members the same way as the compiler would. Generating
+        // a property for each member will automatically generate a backing field for it, leaving us
+        // with the same members as the anonymous type would have.
+        // -- TODO: We don't really need to generate an implementation for each state, we could simply re-use
+        // a generic implementation and type that accordingly.
         var stateAccessorClassName = $"QtArgStateAccessor__{proxyId}";
         writer.WriteFormattedLine($"private sealed class {stateAccessorClassName} {{");
         writer.Indent();
