@@ -20,20 +20,13 @@ file static class __QtInterceptorImpl_Renderer {
     internal sealed class ProxyMethodRenderContextWithState<TState>(InvocationExpressionSyntax proxyInvocation, TState state) {
         public TState State { get; } = state;
 
-        public MethodInfoRenderNode MethodInfo() {
-            return default;
-        }
+        public MethodInfoRenderNode MethodInfo => new();
 
-        public ThisRenderNode This() {
-            return default;
-        }
+        public RenderFragment<ProxyMethodRenderContextWithState<TState>> This =>
+            static (tree, @this) => { };
 
         public readonly record struct MethodInfoRenderNode : IRenderNode {
-            public void Render(IRenderer renderer) { }
-        }
-
-        public readonly record struct ThisRenderNode : IRenderNode {
-            public void Render(IRenderer renderer) { }
+            public void Render(IRenderTreeBuilder renderer) { }
         }
     }
 
@@ -49,7 +42,7 @@ file static class __QtInterceptorImpl_Renderer {
             _ = ctx_;
         }
 
-        public void Render(IRenderer r) {
+        public void Render(IRenderTreeBuilder r) {
             r.Text(
                 """"""""""""
                 global::Microsoft.CodeAnalysis.CSharp.Syntax.LambdaExpressionSyntax px = (global::Microsoft.CodeAnalysis.CSharp.Syntax.LambdaExpressionSyntax) global::Microsoft.CodeAnalysis.CSharp.SyntaxFactory.ParseExpression(global::Microsoft.CodeAnalysis.SyntaxNodeExtensions.NormalizeWhitespace(
@@ -76,7 +69,7 @@ file static class __QtInterceptorImpl_Renderer {
 
                 """"""""""""
             );
-            r.Node(ctx.This());
+            r.Node(ctx.This, ctx);
             r.Text(
                 """"""""""""
                 .ReceiveExpression(x);
@@ -88,14 +81,8 @@ file static class __QtInterceptorImpl_Renderer {
 
     internal interface ICodeBlock : IRenderNode;
 
-    internal readonly record struct RenderNode<T>(Action<IRenderer, T> RenderFn, T RenderState) : IRenderNode {
-        public void Render(IRenderer renderer) {
-            RenderFn(renderer, RenderState);
-        }
-    }
-
     public static QtMethod<CompileTimeUnknown> Intercept<TTemplateReferences>(
-        in this QtClass @this,
+        this QtClass @this,
         InvocationExpressionSyntax invocationToProxy,
         TTemplateReferences references,
         DeclareQtInterceptorVoidMethodWithRefs<TTemplateReferences> declaration
@@ -154,7 +141,7 @@ file static class __QtInterceptorImpl {
     ];
 
     public static QtMethod<CompileTimeUnknown> Intercept<TTemplateReferences>(
-        in this QtClass @this,
+        this QtClass @this,
         InvocationExpressionSyntax invocationToProxy,
         TTemplateReferences references,
         DeclareQtInterceptorVoidMethodWithRefs<TTemplateReferences> declaration

@@ -5,11 +5,22 @@ using Mumei.CodeGen.Qt.Qt;
 
 namespace Mumei.CodeGen.Qt;
 
-internal sealed class SyntaxRenderer : GenericRenderer {
+internal sealed class SyntaxRenderTreeBuilder : GenericRenderTreeBuilder {
     private SyntaxWriter _sourceFile = new();
 
     protected override void TextCore(ReadOnlySpan<char> s) {
         _sourceFile.Write(s);
+    }
+
+    protected override void ValueCore<T>(in T value) {
+        if (value is null) {
+            _sourceFile.WriteLiteral("null");
+            return;
+        }
+
+ #pragma warning disable CS8714 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'notnull' constraint.
+        _sourceFile.WriteLiteral(value);
+ #pragma warning restore CS8714 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'notnull' constraint.
     }
 
     protected override void BlockCore() { }

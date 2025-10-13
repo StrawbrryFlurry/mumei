@@ -6,8 +6,8 @@ using Mumei.CodeGen.Qt.Qt;
 namespace Mumei.CodeGen.Qt;
 
 public interface IQtType : IQtTemplateBindable {
-    public void RenderFullName(IRenderer renderer);
-    public void RenderExpression(IRenderer renderer);
+    public void RenderFullName(IRenderTreeBuilder renderer);
+    public void RenderExpression(IRenderTreeBuilder renderer);
 }
 
 public sealed class QtType {
@@ -72,11 +72,11 @@ file sealed class QtRuntimeType(
         return t.ToString();
     }
 
-    public void RenderFullName(IRenderer renderer) {
+    public void RenderFullName(IRenderTreeBuilder renderer) {
         renderer.QualifiedTypeName(t);
     }
 
-    public void RenderExpression(IRenderer renderer) {
+    public void RenderExpression(IRenderTreeBuilder renderer) {
         if (attributes.HasFlag(QtTypeAttribute.ByRef)) {
             renderer.Text("ref ");
         }
@@ -118,17 +118,17 @@ file sealed class CompositeQtType(
         }
     }
 
-    public void RenderFullName(IRenderer renderer) {
-        renderer.Node(type.FullName());
+    public void RenderFullName(IRenderTreeBuilder renderer) {
+        renderer.Node(type.FullName);
         RenderTypeArguments(renderer);
     }
 
-    public void RenderExpression(IRenderer renderer) {
-        renderer.Node(type.Expression());
+    public void RenderExpression(IRenderTreeBuilder renderer) {
+        renderer.Node(type.Expression);
         RenderTypeArguments(renderer);
     }
 
-    private void RenderTypeArguments(IRenderer renderer) {
+    private void RenderTypeArguments(IRenderTreeBuilder renderer) {
         if (typeArguments.Length == 0) {
             return;
         }
@@ -139,7 +139,7 @@ file sealed class CompositeQtType(
                 renderer.Text(", ");
             }
             var arg = typeArguments[i];
-            renderer.Node(arg.FullName());
+            renderer.Node(arg.FullName);
         }
 
         renderer.Text(">");
@@ -167,11 +167,11 @@ file sealed class QtRoslynType(
         }
     }
 
-    public void RenderFullName(IRenderer renderer) {
+    public void RenderFullName(IRenderTreeBuilder renderer) {
         renderer.Text(typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
     }
 
-    public void RenderExpression(IRenderer renderer) {
+    public void RenderExpression(IRenderTreeBuilder renderer) {
         // TODO: Handle ref, readonly, pointer, etc.
         renderer.Text(typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
     }
@@ -188,11 +188,11 @@ file sealed class QtExpressionType(
         writer.Write(expression);
     }
 
-    public void RenderFullName(IRenderer renderer) {
+    public void RenderFullName(IRenderTreeBuilder renderer) {
         renderer.Node(expression);
     }
 
-    public void RenderExpression(IRenderer renderer) {
+    public void RenderExpression(IRenderTreeBuilder renderer) {
         renderer.Node(expression);
     }
 }

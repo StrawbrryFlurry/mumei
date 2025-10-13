@@ -4,10 +4,13 @@ using Mumei.CodeGen.Qt.Qt;
 
 namespace Mumei.CodeGen.Qt;
 
-public readonly struct QtTypeParameter {
+public readonly struct QtTypeParameter : IRenderNode {
     public Type TypeOf { get; }
     public required string Name { get; init; }
-    public required string? Constraint { get; init; }
+
+    public void Render(IRenderTreeBuilder renderTree) {
+        renderTree.Text(Name);
+    }
 }
 
 public readonly struct QtTypeParameterList(
@@ -43,19 +46,25 @@ public readonly struct QtTypeParameterList(
         writer.Write(">");
     }
 
-    public readonly struct ConstraintImpl : IQtTemplateBindable, IRenderNode {
+    public void Render(IRenderTreeBuilder renderTree) {
+        if (IsEmpty) {
+            return;
+        }
+
+        renderTree.Text("<");
+        renderTree.SeparatedList(typeParameters.Span);
+        renderTree.Text(">");
+    }
+
+    public readonly struct ConstraintImpl : IRenderNode {
         public bool IsEmpty => true;
 
         public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
             throw new NotImplementedException();
         }
 
-        public void Render(IRenderer renderer) {
+        public void Render(IRenderTreeBuilder renderTree) {
             throw new NotImplementedException();
         }
-    }
-
-    public void Render(IRenderer renderer) {
-        throw new NotImplementedException();
     }
 }

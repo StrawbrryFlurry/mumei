@@ -46,7 +46,6 @@ internal readonly ref struct RoslynQtComponentFactory(
 
         return new QtTypeParameter {
             Name = name,
-            Constraint = null
         };
     }
 

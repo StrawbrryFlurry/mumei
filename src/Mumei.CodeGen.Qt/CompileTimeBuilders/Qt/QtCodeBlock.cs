@@ -2,7 +2,7 @@
 
 namespace Mumei.CodeGen.Qt.Qt;
 
-public readonly struct QtCodeBlock : IQtTemplateBindable {
+public readonly struct QtCodeBlock : IQtTemplateBindable, IRenderNode {
     private readonly string? _code;
     private readonly IQtTemplateBindable? _dynamicBlock;
 
@@ -31,5 +31,13 @@ public readonly struct QtCodeBlock : IQtTemplateBindable {
 
     public static implicit operator ReadOnlySpan<char>(QtCodeBlock block) {
         return block._code;
+    }
+
+    public void Render(IRenderTreeBuilder renderTree) {
+        if (_code is not null) {
+            renderTree.Text(_code);
+        } else if (_dynamicBlock is not null) {
+            renderTree.Bind(_dynamicBlock);
+        }
     }
 }

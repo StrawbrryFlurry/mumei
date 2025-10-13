@@ -50,16 +50,16 @@ internal static class RuntimeTypeSerializer {
         }
     }
 
-    public static void RenderInto<TRenderer>(TRenderer renderer, Type type) where TRenderer : IRenderer {
-        if (TryWriteShortForm(type, renderer)) {
+    public static void RenderInto(IRenderTreeBuilder tree, Type type) {
+        if (TryWriteShortForm(type, tree)) {
             return;
         }
 
-        renderer.Text("global::");
+        tree.Text("global::");
 
         if (type.Namespace is not null) {
-            renderer.Text(type.Namespace);
-            renderer.Text(".");
+            tree.Text(type.Namespace);
+            tree.Text(".");
         }
 
         ReadOnlySpan<char> name = type.Name;
@@ -67,28 +67,28 @@ internal static class RuntimeTypeSerializer {
             name = name[..name.LastIndexOf('`')];
         }
 
-        renderer.Text(name);
+        tree.Text(name);
 
         if (!type.IsConstructedGenericType) {
             return;
         }
 
-        renderer.Text("<");
+        tree.Text("<");
         var genericArguments = type.GetGenericArguments();
         for (var i = 0; i < genericArguments.Length; i++) {
             if (i > 0) {
-                renderer.Text(", ");
+                tree.Text(", ");
             }
 
-            RenderInto(renderer, genericArguments[i]);
+            RenderInto(tree, genericArguments[i]);
         }
 
-        renderer.Text(">");
+        tree.Text(">");
     }
 
-    private static bool TryWriteShortForm<TRenderer>(Type type, TRenderer writer) where TRenderer : IRenderer {
+    private static bool TryWriteShortForm(Type type, IRenderTreeBuilder tree) {
         if (type.IsPrimitive) {
-            writer.Text(type switch {
+            tree.Text(type switch {
                 not null when type == typeof(int) => "int",
                 not null when type == typeof(uint) => "uint",
                 not null when type == typeof(long) => "long",
@@ -107,7 +107,7 @@ internal static class RuntimeTypeSerializer {
         }
 
         if (type == typeof(string)) {
-            writer.Text("string");
+            tree.Text("string");
             return true;
         }
 

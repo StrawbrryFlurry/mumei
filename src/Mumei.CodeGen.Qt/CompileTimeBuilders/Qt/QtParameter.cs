@@ -58,7 +58,7 @@ public readonly struct QtParameterList(
         return false;
     }
 
-    public void Render(IRenderer renderer) {
+    public void Render(IRenderTreeBuilder renderer) {
         throw new NotImplementedException();
     }
 }

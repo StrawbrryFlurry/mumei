@@ -36,19 +36,23 @@ public readonly struct ConstructedGenericQtClass(
         throw new NotSupportedException();
     }
 
-    public void RenderFullName(IRenderer renderer) {
+    public void RenderFullName(IRenderer renderer) { }
+
+    public void RenderExpression(IRenderer renderer) { }
+
+    public void RenderFullName(IRenderTreeBuilder renderer) {
         renderer.Text(classRef.Name);
         renderer.Text("<");
-        renderer.SeparatedList(typeArguments.Span, static x => x.FullName());
+        renderer.SeparatedList(typeArguments.Span, static x => x.FullName);
         renderer.Text(">");
     }
 
-    public void RenderExpression(IRenderer renderer) {
+    public void RenderExpression(IRenderTreeBuilder renderer) {
         renderer.Text(classRef.Name);
     }
 }
 
-public readonly struct QtClass(
+public class QtClass(
     AccessModifier modifiers,
     string name,
     QtCollection<QtTypeParameter> typeParameters = default,
@@ -279,12 +283,12 @@ public readonly struct QtClass(
         writer.WriteLine("}");
     }
 
-    public void RenderFullName(IRenderer renderer) {
+    public void RenderFullName(IRenderTreeBuilder renderer) {
         // Render parent node
         renderer.Text(name);
     }
 
-    public void RenderExpression(IRenderer renderer) {
+    public void RenderExpression(IRenderTreeBuilder renderer) {
         renderer.Text(name);
     }
 
@@ -299,7 +303,7 @@ public readonly struct QtClass(
 
 public static class QtClassDynamicDeclarationExtensions {
     public static QtMethod<CompileTimeUnknown> AddTemplateInterceptMethod<TTemplate>(
-        ref this QtClass cls,
+        this QtClass cls,
         InvocationExpressionSyntax invocationExpression,
         TTemplate template,
         Func<TTemplate, Delegate> methodSelector

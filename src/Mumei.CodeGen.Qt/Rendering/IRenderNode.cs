@@ -1,5 +1,5 @@
 ﻿namespace Mumei.CodeGen.Qt;
 
 public interface IRenderNode {
-    public void Render(IRenderer renderer);
+    public void Render(IRenderTreeBuilder context);
 }

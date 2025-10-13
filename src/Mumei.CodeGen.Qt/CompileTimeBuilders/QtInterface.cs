@@ -16,4 +16,10 @@ public sealed class QtInterface : IQtType {
     public void RenderExpression(IRenderer renderer) {
         throw new NotImplementedException();
     }
+    public void RenderFullName(IRenderTreeBuilder renderer) {
+        throw new NotImplementedException();
+    }
+    public void RenderExpression(IRenderTreeBuilder renderer) {
+        throw new NotImplementedException();
+    }
 }

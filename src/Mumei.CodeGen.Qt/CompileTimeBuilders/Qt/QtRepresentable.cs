@@ -129,7 +129,7 @@ internal readonly struct SeparatedListRenderNode<TState, TElement, TRenderNode>(
     TState state,
     Func<TElement, TRenderNode> nodeSelector
 ) : IRenderNode where TState : IQtMemoryAccessor<TElement> where TRenderNode : IRenderNode {
-    public void Render(IRenderer renderer) {
+    public void Render(IRenderTreeBuilder renderer) {
         var span = state.Memory.Span;
         for (var i = 0; i < span.Length; i++) {
             if (i > 0) {

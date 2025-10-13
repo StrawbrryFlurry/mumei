@@ -53,9 +53,9 @@ public readonly struct QtExpression : IQtTemplateBindable, IRenderNode {
         writer.Write(_dynamicExpression);
     }
 
-    public void Render(IRenderer renderer) {
+    public void Render(IRenderTreeBuilder renderTree) {
         if (_expression is not null) {
-            renderer.Text(_expression);
+            renderTree.Text(_expression);
             return;
         }
 
@@ -63,6 +63,6 @@ public readonly struct QtExpression : IQtTemplateBindable, IRenderNode {
             throw new ArgumentNullException(nameof(_node));
         }
 
-        renderer.Node(_node);
+        renderTree.Node(_node);
     }
 }

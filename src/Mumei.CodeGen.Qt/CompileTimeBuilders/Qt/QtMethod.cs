@@ -71,9 +71,9 @@ internal readonly struct QtMethodRenderNode(
 
         writer.WriteFormatted($"{modifiers} {returnType:g} {name}{typeParameters}({parameters})");
 
-        if (!typeParameters.Constraints.IsEmpty) {
-            writer.WriteFormatted($" {typeParameters.Constraints}");
-        }
+        // if (!typeParameters.Constraints.IsEmpty) {
+        //     writer.WriteFormatted($" {typeParameters.Constraints}");
+        // }
 
         if (modifiers.IsAbstract()) {
             writer.Write(";");
@@ -88,27 +88,26 @@ internal readonly struct QtMethodRenderNode(
         writer.Write("}");
     }
 
-    public void Render(IRenderer renderer) {
+    public void Render(IRenderTreeBuilder tree) {
         if (!attributes.IsEmpty) {
-            renderer.Bind(attributes);
-            renderer.NewLine();
+            tree.Bind(attributes);
+            tree.NewLine();
         }
 
-        renderer.Interpolate($"{modifiers.AsCSharpString()} {returnType.Expression()} {name}{typeParameters}({parameters})");
+        tree.Interpolate($"{modifiers.List} {returnType.Expression} {name}{typeParameters}({parameters})");
 
         if (!typeParameters.Constraints.IsEmpty) {
-            renderer.Interpolate($" {typeParameters.Constraints}");
+            tree.Interpolate($" {typeParameters.Constraints}");
         }
 
         if (modifiers.IsAbstract()) {
-            renderer.Text(";");
-            return;
+            tree.Text(";");
         }
 
-        renderer.Text(" ");
-        renderer.StartCodeBlock();
-        renderer.Node(codeBlock);
-        renderer.EndCodeBlock();
+        tree.Text(" ");
+        tree.StartCodeBlock();
+        tree.Node(codeBlock);
+        tree.EndCodeBlock();
     }
 }
 
