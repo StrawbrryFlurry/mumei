@@ -1,8 +1,45 @@
-﻿using Mumei.CodeGen.Qt.Output;
+﻿using System.Diagnostics;
+using Mumei.CodeGen.Qt.Output;
 
 namespace Mumei.CodeGen.Qt.Qt;
 
-public readonly struct QtCodeBlock : IQtTemplateBindable, IRenderNode {
+public readonly struct CodeBlockNode : IRenderNode {
+    private readonly string? _code;
+    private readonly IRenderNode? _dynamicBlock;
+
+    private CodeBlockNode(string? code, IRenderNode? dynamicBlock, bool allowEmpty = false) {
+        _code = code;
+        _dynamicBlock = dynamicBlock;
+
+        Debug.Assert(_code is not null || _dynamicBlock is not null || allowEmpty);
+    }
+
+    public static CodeBlockNode ForCode(string code) {
+        return new CodeBlockNode(code, null);
+    }
+
+    public static CodeBlockNode ForNode(IRenderNode dynamicBlock) {
+        return new CodeBlockNode(null, dynamicBlock);
+    }
+
+    public static CodeBlockNode Empty() {
+        return new CodeBlockNode(null, null, true);
+    }
+
+    public void Render(IRenderTreeBuilder context) {
+        if (_code is not null) {
+            context.Text(_code);
+            return;
+        }
+
+        if (_dynamicBlock is not null) {
+            context.Node(_dynamicBlock);
+            return;
+        }
+    }
+}
+
+public readonly struct QtCodeBlock : IQtTemplateBindable {
     private readonly string? _code;
     private readonly IQtTemplateBindable? _dynamicBlock;
 

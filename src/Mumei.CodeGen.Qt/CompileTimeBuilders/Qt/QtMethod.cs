@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Mumei.CodeGen.Playground;
+﻿using Mumei.CodeGen.Playground;
 using Mumei.CodeGen.Qt.Output;
 
 namespace Mumei.CodeGen.Qt.Qt;
@@ -15,10 +14,9 @@ public readonly struct QtMethod<TReturnType> : IQtInvokable<TReturnType> {
         IQtType returnType,
         in QtTypeParameterList typeParameters,
         in QtParameterList parameters,
-        in QtCodeBlock codeBlock,
+        in CodeBlockNode codeBlock,
         in QtAttributeList attributes,
-        in QtDeclarationPtr<QtMethodRenderNode> declarationPtr,
-        bool isInterceptorMethod = false
+        in QtDeclarationPtr<QtMethodRenderNode> declarationPtr
     ) {
         _declarationPtr = declarationPtr;
         Method = new QtMethodRenderNode(
@@ -28,8 +26,7 @@ public readonly struct QtMethod<TReturnType> : IQtInvokable<TReturnType> {
             typeParameters,
             parameters,
             codeBlock,
-            attributes,
-            isInterceptorMethod
+            attributes
         );
     }
 
@@ -52,18 +49,12 @@ internal readonly struct QtMethodRenderNode(
     IQtType returnType,
     QtTypeParameterList typeParameters,
     QtParameterList parameters,
-    QtCodeBlock codeBlock,
-    QtAttributeList attributes,
-    bool isInterceptorMethod = false
+    CodeBlockNode codeBlock,
+    QtAttributeList attributes
 ) : IQtTemplateBindable, IRenderNode {
     public string Name => name;
 
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
-        if (isInterceptorMethod) {
-            // TODO: Yikes
-            TemplateBindingContext.Current.CodeGenFeatures.Require(CodeGenFeature.Interceptors);
-        }
-
         if (!attributes.IsEmpty) {
             writer.Write(attributes);
             writer.WriteLine();
@@ -83,7 +74,7 @@ internal readonly struct QtMethodRenderNode(
         writer.Write(" ");
         writer.WriteLine("{");
         writer.Indent();
-        writer.WriteBlock(codeBlock);
+        // writer.WriteBlock(codeBlock);
         writer.Dedent();
         writer.Write("}");
     }
@@ -102,6 +93,7 @@ internal readonly struct QtMethodRenderNode(
 
         if (modifiers.IsAbstract()) {
             tree.Text(";");
+            return;
         }
 
         tree.Text(" ");

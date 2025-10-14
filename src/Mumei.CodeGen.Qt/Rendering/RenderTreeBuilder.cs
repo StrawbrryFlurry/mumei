@@ -94,12 +94,12 @@ internal abstract class GenericRenderTreeBuilder : IRenderTreeBuilder {
         EndNode();
     }
 
-    public void Node(RenderFragment node) {
+    public void Node(RenderNode node) {
         node(this);
     }
 
-    public void Node<TState>(RenderFragment<TState> node, TState state) {
-        node(this, state);
+    public void Node<TState>(in RenderNode<TState> node) {
+        node.Render(this);
     }
 
     protected abstract void NodeCore<TRenderNode>(TRenderNode renderable) where TRenderNode : IRenderNode;
@@ -136,8 +136,8 @@ public interface IRenderTreeBuilder {
     public void SyntaxNode<TNode>(TNode node) where TNode : SyntaxNode;
 
     public void Node<TRenderNode>(TRenderNode node) where TRenderNode : IRenderNode;
-    public void Node(RenderFragment node);
-    public void Node<TState>(RenderFragment<TState> node, TState state);
+    public void Node(RenderNode render);
+    public void Node<TState>(in RenderNode<TState> render);
 
     public void RequireFeature(IRenderer.IFeature feature);
 

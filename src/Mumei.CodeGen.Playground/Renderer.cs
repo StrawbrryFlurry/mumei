@@ -22,7 +22,7 @@ file static class __QtInterceptorImpl_Renderer {
 
         public MethodInfoRenderNode MethodInfo => new();
 
-        public RenderFragment<ProxyMethodRenderContextWithState<TState>> This =>
+        public RenderNode<ProxyMethodRenderContextWithState<TState>> This =>
             static (tree, @this) => { };
 
         public readonly record struct MethodInfoRenderNode : IRenderNode {
