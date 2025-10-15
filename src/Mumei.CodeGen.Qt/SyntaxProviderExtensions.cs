@@ -154,11 +154,11 @@ public readonly struct OutputGenerationContext<TNodeMatch>() {
         }
 
         var files = _state.GeneratedFiles.Select(file => {
-            var writer = new ValueSyntaxWriter(stackalloc char[ValueSyntaxWriter.StackBufferSize]);
+            var renderTree = new SyntaxRenderTreeBuilder();
             using var ctx = TemplateBindingContext.StartBinding();
-            file.WriteTo(ref writer);
-            ctx.CodeGenFeatures.WriteSourceFileFeatures(ref writer);
-            var text = writer.ToString();
+            file.Render(renderTree);
+            // ctx.CodeGenFeatures.WriteSourceFileFeatures(ref renderTree);
+            var text = renderTree.GetSourceText();
             return (file.Name, SourceText.From(text, Encoding.UTF8));
         });
 

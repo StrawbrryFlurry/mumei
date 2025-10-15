@@ -80,7 +80,12 @@ internal sealed class SyntaxVerifier {
     public static void VerifyRegex<TRepresentable>(TRepresentable representable, SyntaxVerificationExpectation expected)
         where TRepresentable : ISyntaxRepresentable {
 
-        var actual = representable.ToSyntaxInternal().TrimEnd();
+        var actual = representable.ToSyntaxInternal();
+        VerifyRegex(actual, expected);
+    }
+
+    public static void VerifyRegex(string actual, SyntaxVerificationExpectation expected) {
+        actual = actual.TrimEnd();
         var expectedString = expected.ToString();
 
         var doesMatch = WildcardMatcher.Matches(

@@ -17,13 +17,15 @@ public interface IQtThis {
     public T Is<T>();
 }
 
-public interface IQtTypeDeclaration : IQtTemplateBindable;
+public interface IQtTypeDeclaration : IQtTemplateBindable, IRenderNode;
 
 internal readonly struct QtDeclarationPtr<T>(
     List<T> declarationRef,
     int declarationIdx
 ) {
     public void Update(T newDeclaration) {
+        if (declarationRef is null) { throw new InvalidOperationException("The declaration is not referenced by any container that can be updated"); }
+
         declarationRef[declarationIdx] = newDeclaration;
     }
 }
@@ -32,10 +34,6 @@ public readonly struct ConstructedGenericQtClass(
     QtClass classRef,
     QtCollection<IQtType> typeArguments
 ) : IQtType, IQtTypeDeclaration {
-    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
-        throw new NotSupportedException();
-    }
-
     public void RenderFullName(IRenderer renderer) { }
 
     public void RenderExpression(IRenderer renderer) { }
@@ -50,6 +48,14 @@ public readonly struct ConstructedGenericQtClass(
     public void RenderExpression(IRenderTreeBuilder renderer) {
         renderer.Text(classRef.Name);
     }
+
+    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
+        throw new NotImplementedException();
+    }
+
+    public void Render(IRenderTreeBuilder renderTree) {
+        throw new NotImplementedException();
+    }
 }
 
 public class QtClass(
@@ -57,7 +63,7 @@ public class QtClass(
     string name,
     QtCollection<QtTypeParameter> typeParameters = default,
     IQtTypeDeclaration? parentClassOrNamespace = null
-) : IQtType, IQtTypeDeclaration {
+) : IQtType, IQtTypeDeclaration, IDebugRenderNodeFormattable {
     public QtTypeParameterList TypeParameters { get; } = new(typeParameters);
 
     private readonly List<QtFieldCore> _fields = new();
@@ -298,6 +304,35 @@ public class QtClass(
         }
 
         return new ConstructedGenericQtClass(this, typeArguments);
+    }
+
+    public void Render(IRenderTreeBuilder renderTree) {
+        renderTree.Interpolate(
+            $$"""
+              {{modifiers.List}} class{{TypeParameters}} {{name}}
+              """
+        );
+        renderTree.Text(" ");
+        renderTree.StartCodeBlock();
+
+        foreach (var field in _fields) {
+            // field.WriteSyntax(ref writer);
+            // writer.WriteLine();
+        }
+
+        for (var i = 0; i < _methods.Count; i++) {
+            var method = _methods[i];
+            renderTree.Node(method);
+            if (i < _methods.Count - 1) {
+                renderTree.NewLine();
+            }
+        }
+
+        renderTree.EndCodeBlock();
+    }
+
+    public string DescribeDebugNode() {
+        return $"QtClass {{ Name = {name} }}";
     }
 }
 

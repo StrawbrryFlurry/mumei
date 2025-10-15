@@ -22,8 +22,7 @@ file static class __QtInterceptorImpl_Renderer {
 
         public MethodInfoRenderNode MethodInfo => new();
 
-        public RenderNode<ProxyMethodRenderContextWithState<TState>> This =>
-            static (tree, @this) => { };
+        public RenderNode<ProxyMethodRenderContextWithState<TState>> This => new(this, (renderTree, @this) => { });
 
         public readonly record struct MethodInfoRenderNode : IRenderNode {
             public void Render(IRenderTreeBuilder renderer) { }
@@ -69,7 +68,7 @@ file static class __QtInterceptorImpl_Renderer {
 
                 """"""""""""
             );
-            r.Node(ctx.This, ctx);
+            r.Node(ctx.This);
             r.Text(
                 """"""""""""
                 .ReceiveExpression(x);

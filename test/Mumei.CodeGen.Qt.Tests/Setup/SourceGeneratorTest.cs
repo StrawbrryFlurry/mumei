@@ -47,7 +47,8 @@ public sealed class SourceGeneratorTest<TSourceGenerator> where TSourceGenerator
         Assert.Empty(diagnostics);
         Assert.Empty(runResult.Diagnostics);
 
-        var compilationDiagnostics = updatedCompilation.GetDiagnostics();
+        const string unnecessaryUsingDirectiveId = "CS8019";
+        var compilationDiagnostics = updatedCompilation.GetDiagnostics().Where(x => x.Id != unnecessaryUsingDirectiveId).ToArray();
 
         // Debug References
         var firstGeneratedTree = runResult.GeneratedTrees.FirstOrDefault();

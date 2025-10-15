@@ -16,13 +16,16 @@ internal static partial class SourceCodeAssertions {
 
     public static SyntaxTree WithPartialContent(
         this SyntaxTree syntaxTree,
-        string partialContent
+        SyntaxVerificationExpectation expectation
     ) {
         var content = syntaxTree.GetText().ToString();
-        if (!WildcardMatcher.Matches(content, partialContent)) {
-            throw new Xunit.Sdk.XunitException($"Did not find partial content:\n{partialContent}\n\nIn:\n{content}");
-        }
+        SyntaxVerifier.VerifyRegex(content, expectation);
+        return syntaxTree;
+    }
 
+    public static SyntaxTree WithContent(this SyntaxTree syntaxTree, SyntaxVerificationExpectation expectation) {
+        var content = syntaxTree.GetText().ToString();
+        SyntaxVerifier.Verify(content, expectation);
         return syntaxTree;
     }
 }

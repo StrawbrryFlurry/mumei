@@ -12,6 +12,6 @@ internal sealed class DebugRenderGraph {
     }
 
     public string DebugView() {
-        return string.Join(" -> ", _nodeStack.Select(n => n.ToString()));
+        return string.Join(" -> ", _nodeStack.Select(n => n is IDebugRenderNodeFormattable debugNode ? debugNode.DescribeDebugNode() : n.ToString()));
     }
 }

@@ -1,10 +1,11 @@
 ﻿using System.Collections.Immutable;
 using Mumei.CodeGen.Playground;
+using Mumei.CodeGen.Qt.Containers;
 using Mumei.CodeGen.Qt.Output;
 
 namespace Mumei.CodeGen.Qt.Qt;
 
-public readonly struct QtParameter : IQtTemplateBindable {
+public readonly struct QtParameter : IQtTemplateBindable, IRenderNode {
     public required string Name { get; init; }
     public required IQtType Type { get; init; }
     public required IQtCompileTimeValue? DefaultValue { get; init; }
@@ -17,18 +18,26 @@ public readonly struct QtParameter : IQtTemplateBindable {
             writer.Write(DefaultValue);
         }
     }
+
+    public void Render(IRenderTreeBuilder renderTree) {
+        renderTree.Interpolate($"{Attributes.List}{Type.FullName} {Name}");
+        if (DefaultValue is not null) {
+            renderTree.Text(" = ");
+            // renderTree.Node(DefaultValue);
+        }
+    }
 }
 
 public readonly struct QtParameterList(
-    QtParameter[] parameters
+    QtCollection<QtParameter> parameters
 ) : IQtTemplateBindable, IRenderNode, IQtMemoryAccessor<QtParameter> {
-    public int Count => parameters.Length;
+    public int Count => parameters.Count;
 
-    internal QtParameter[] Parameters => parameters;
-    public Memory<QtParameter> Memory => Parameters.AsMemory();
+    internal QtCollection<QtParameter> Parameters => parameters;
+    public Memory<QtParameter> Memory => Parameters.Memory;
 
     internal static QtParameterList Builder(int capacity) {
-        return new QtParameterList(new QtParameter[capacity]);
+        return new QtParameterList(QtCollection<QtParameter>.Create(capacity));
     }
 
     internal QtParameter this[int index] {
@@ -37,7 +46,7 @@ public readonly struct QtParameterList(
     }
 
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
-        for (var i = 0; i < parameters.Length; i++) {
+        for (var i = 0; i < parameters.Count; i++) {
             var parameter = parameters[i];
             if (i > 0) {
                 writer.Write(", ");
@@ -48,7 +57,7 @@ public readonly struct QtParameterList(
     }
 
     public bool TryGetThisParameter(out QtParameter parameter) {
-        var first = parameters.Length > 0 ? parameters[0] : default;
+        var first = parameters.Count > 0 ? parameters[0] : default;
         if (first.Attributes.HasFlag(ParameterAttributes.This)) {
             parameter = first;
             return true;
@@ -59,6 +68,6 @@ public readonly struct QtParameterList(
     }
 
     public void Render(IRenderTreeBuilder renderer) {
-        throw new NotImplementedException();
+        renderer.SeparatedList(parameters.Span);
     }
 }

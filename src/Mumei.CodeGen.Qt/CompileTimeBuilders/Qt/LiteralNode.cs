@@ -29,7 +29,7 @@ public readonly struct StringLiteralNode(string value) : IRenderNode {
 
 public readonly struct RawStringLiteralNode(string value, string quotes) : IRenderNode {
     public void Render(IRenderTreeBuilder renderTree) {
-        renderTree.Interpolate(
+        renderTree.Block(
             $"""
              {quotes}
              {value}

@@ -72,9 +72,9 @@ public readonly struct QtCollection<TElement> : IReadOnlyCollection<TElement>, I
     public TElement this[int index] {
         // Use span to throw on out-of-bounds exceptions on default instances
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Span[index];
+        get => (_elements ?? [])[index];
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal set => Span[index] = value;
+        internal set => (_elements ?? [])[index] = value;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -7,22 +7,26 @@ namespace Mumei.CodeGen.Qt;
 public readonly struct QtNamespace(
     string name,
     QtCollection<IQtTypeDeclaration> declarations
-) : ISyntaxRepresentable {
+) : IRenderNode {
     private readonly List<ISourceFileFeature> _features = [];
 
-    public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
-        writer.WriteLine($"namespace {name} {{");
-        writer.Indent();
-        foreach (var declaration in declarations) {
-            writer.Write(declaration);
-            writer.WriteLine();
+    public void Render(IRenderTreeBuilder renderTree) {
+        renderTree.Text($"namespace {name}");
+        renderTree.Text(" ");
+        renderTree.StartCodeBlock();
+
+        for (var i = 0; i < declarations.Count; i++) {
+            var declaration = declarations[i];
+            renderTree.Node(declaration);
+            if (i < declarations.Count - 1) {
+                renderTree.NewLine();
+            }
         }
 
-        writer.Dedent();
-        writer.Write("}");
+        renderTree.EndCodeBlock();
     }
 
-    public static QtNamespace FromGeneratorAssemblyName(string assemblyScopedName, QtCollection<IQtTypeDeclaration> declarations = default) {
+    public static QtNamespace FromGeneratorAssemblyName(string assemblyScopedName, params QtCollection<IQtTypeDeclaration> declarations) {
         string fullName;
         var assemblyName = QtCompilationScope.Active.Compilation.AssemblyName;
         if (assemblyName is null) {

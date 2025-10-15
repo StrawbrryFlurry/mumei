@@ -32,17 +32,28 @@ internal abstract class GenericRenderTreeBuilder : IRenderTreeBuilder {
     }
     protected abstract void TextCore(ReadOnlySpan<char> s);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void NewLine() {
+        NewLineCore();
+    }
+    protected abstract void NewLineCore();
+
     public void Value<T>(in T value) { }
     protected abstract void ValueCore<T>(in T value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Interpolate(IRenderTreeBuilder.InterpolatedStringHandler s) { }
+    public void Interpolate([InterpolatedStringHandlerArgument("")] IRenderTreeBuilder.InterpolatedStringHandler s) { }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Block() {
-        BlockCore();
+    public void Block(string s) {
+        BlockCore(s);
     }
-    protected abstract void BlockCore();
+    protected abstract void BlockCore(string s);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void InterpolateBlock(IRenderTreeBuilder.BlockInterpolatedStringHandler s) {
+        BlockCore(s.GetSourceText());
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void StartBlock() {
@@ -86,8 +97,9 @@ internal abstract class GenericRenderTreeBuilder : IRenderTreeBuilder {
 #else
         try {
             NodeCore(node);
-        } catch (Exception e) {
-            throw new InvalidOperationException($"Error while rendering node of type {node.GetType().FullName} at:\n{DebugView()}", e);
+        } catch (Exception e) when (e is not RendererException) {
+            var nodeId = node is IDebugRenderNodeFormattable debugNode ? debugNode.DescribeDebugNode() : $"of type {node.GetType().FullName}";
+            throw new RendererException($"Error while rendering node {nodeId} at:\n{DebugView()}", e);
         }
 #endif
 
@@ -116,6 +128,8 @@ internal abstract class GenericRenderTreeBuilder : IRenderTreeBuilder {
         return ToString();
 #endif
     }
+
+    public sealed class RendererException(string msg, Exception inner) : Exception(msg, inner);
 }
 
 public interface IRenderTreeBuilder {
@@ -123,11 +137,13 @@ public interface IRenderTreeBuilder {
     public void EndNode();
 
     public void Text(ReadOnlySpan<char> s);
+    public void NewLine();
     public void Value<T>(in T value);
 
     public void Interpolate([InterpolatedStringHandlerArgument("")] InterpolatedStringHandler s);
 
-    public void Block();
+    public void Block(string s);
+    public void InterpolateBlock(BlockInterpolatedStringHandler s);
     public void StartBlock();
     public void EndBlock();
 
@@ -153,6 +169,28 @@ public interface IRenderTreeBuilder {
 
         public void AppendFormatted(ReadOnlySpan<char> s) {
             tree.Text(s);
+        }
+    }
+
+    [InterpolatedStringHandler]
+    public readonly ref struct BlockInterpolatedStringHandler(int literalLength, int formattedCount) {
+        // ToDo: Implement block handling via the source render tree.
+        private readonly SyntaxRenderTreeBuilder _tree = new();
+
+        public void AppendLiteral(string s) {
+            _tree.Text(s);
+        }
+
+        public void AppendFormatted<TRenderNode>(in TRenderNode node) where TRenderNode : IRenderNode {
+            _tree.Node(node);
+        }
+
+        public void AppendFormatted(ReadOnlySpan<char> s) {
+            _tree.Text(s);
+        }
+
+        public string GetSourceText() {
+            return _tree.GetSourceText();
         }
     }
 }

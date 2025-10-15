@@ -14,7 +14,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Mumei.CodeGen.Qt;
 
-[Generator]
+// [Generator]
 public sealed partial class QtClassFactoryInterceptorGenerator : IIncrementalGenerator {
     public void Initialize(IncrementalGeneratorInitializationContext context) {
         var dynamicSourceCodeProvider = context.SyntaxProvider.CreateSyntaxProvider(

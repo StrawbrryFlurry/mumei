@@ -51,7 +51,7 @@ internal readonly struct QtMethodRenderNode(
     QtParameterList parameters,
     CodeBlockNode codeBlock,
     QtAttributeList attributes
-) : IQtTemplateBindable, IRenderNode {
+) : IQtTemplateBindable, IRenderNode, IDebugRenderNodeFormattable {
     public string Name => name;
 
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
@@ -99,7 +99,12 @@ internal readonly struct QtMethodRenderNode(
         tree.Text(" ");
         tree.StartCodeBlock();
         tree.Node(codeBlock);
+        tree.NewLine();
         tree.EndCodeBlock();
+    }
+
+    public string DescribeDebugNode() {
+        return $"QtMethod {{ Name = {name} }}";
     }
 }
 

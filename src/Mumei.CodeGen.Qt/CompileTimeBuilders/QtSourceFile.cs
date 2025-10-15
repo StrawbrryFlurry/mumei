@@ -32,10 +32,10 @@ public readonly struct QtSourceFile {
         return new QtSourceFile(Name, _namespaceDeclarations.Add(ns));
     }
 
-    public void WriteTo<TSyntaxWriter>(ref TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
+    public void Render(IRenderTreeBuilder renderTreeBuilder) {
         foreach (var namespaceDeclaration in _namespaceDeclarations) {
-            writer.Write(namespaceDeclaration);
-            writer.WriteLine();
+            renderTreeBuilder.Node(namespaceDeclaration);
+            renderTreeBuilder.NewLine();
         }
     }
 }

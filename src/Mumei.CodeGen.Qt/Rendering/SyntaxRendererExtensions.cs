@@ -10,6 +10,38 @@ internal static class SyntaxRendererExtensions {
         public string List => modifier.AsCSharpString();
     }
 
+    extension(ParameterAttributes attributes) {
+        public RenderNode<ParameterAttributes> List => new(attributes, (tree, parameterAttributes) => {
+            if (parameterAttributes == ParameterAttributes.None) {
+                return;
+            }
+
+            if (parameterAttributes.HasFlag(ParameterAttributes.This)) {
+                tree.Text("this ");
+            }
+
+            if (parameterAttributes.HasFlag(ParameterAttributes.Ref)) {
+                tree.Text("ref ");
+            }
+
+            if (parameterAttributes.HasFlag(ParameterAttributes.Out)) {
+                tree.Text("out ");
+            }
+
+            if (parameterAttributes.HasFlag(ParameterAttributes.In)) {
+                tree.Text("in ");
+            }
+
+            if (parameterAttributes.HasFlag(ParameterAttributes.Params)) {
+                tree.Text("params ");
+            }
+
+            if (parameterAttributes.HasFlag(ParameterAttributes.Readonly)) {
+                tree.Text("readonly ");
+            }
+        });
+    }
+
     extension(IQtType type) {
         public RenderNode<IQtType> Expression => new(type, static (renderTree, type) => type.RenderExpression(renderTree));
 
@@ -25,11 +57,6 @@ internal static class SyntaxRendererExtensions {
     }
 
     extension(IRenderTreeBuilder renderTree) {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void NewLine() {
-            renderTree.Text("\n");
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Line(string line) {
             renderTree.Text(line);

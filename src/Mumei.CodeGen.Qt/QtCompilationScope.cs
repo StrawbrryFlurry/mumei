@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Mumei.CodeGen.Qt;
 
-public sealed class QtCompilationScope {
+public sealed class QtCompilationScope : IEquatable<QtCompilationScope> {
     public static QtCompilationScope Active => ActiveScope.Value ?? throw new InvalidOperationException("No active compilation scope. Ensure that you are inside a source generator context.");
     private static AsyncLocal<QtCompilationScope> ActiveScope { get; } = new();
     private readonly HashSet<ICompilationUnitFeature> _compilationUnitFeatures = [];
@@ -18,6 +18,18 @@ public sealed class QtCompilationScope {
 
     internal static void RequiresFeature(ICompilationUnitFeature feature) {
         Active._compilationUnitFeatures.Add(feature);
+    }
+
+    public override int GetHashCode() {
+        return 0;
+    }
+
+    public override bool Equals(object? obj) {
+        return obj is QtCompilationScope other && Equals(other);
+    }
+
+    public bool Equals(QtCompilationScope other) {
+        return true; // Source generator caching
     }
 }
 

@@ -12,6 +12,10 @@ internal sealed class SyntaxRenderTreeBuilder : GenericRenderTreeBuilder {
         _sourceFile.Write(s);
     }
 
+    protected override void NewLineCore() {
+        _sourceFile.WriteLine();
+    }
+
     protected override void ValueCore<T>(in T value) {
         if (value is null) {
             _sourceFile.WriteLiteral("null");
@@ -23,7 +27,9 @@ internal sealed class SyntaxRenderTreeBuilder : GenericRenderTreeBuilder {
  #pragma warning restore CS8714 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'notnull' constraint.
     }
 
-    protected override void BlockCore() { }
+    protected override void BlockCore(string s) {
+        _sourceFile.WriteBlock(s);
+    }
 
     protected override void StartBlockCore() {
         _sourceFile.Indent();
