@@ -1,12 +1,12 @@
-﻿using System.Runtime.CompilerServices;
-using Microsoft.CodeAnalysis;
-using Mumei.CodeGen.Qt.Output;
-using Mumei.CodeGen.Qt.Qt;
+﻿using Mumei.CodeGen.Qt.Output;
 
 namespace Mumei.CodeGen.Qt;
 
-internal sealed class SyntaxRenderTreeBuilder : GenericRenderTreeBuilder {
+internal sealed class SourceFileRenderTreeBuilder : GenericRenderTreeBuilder<string>, IDisposable {
     private SyntaxWriter _sourceFile = new();
+
+    public SourceFileRenderTreeBuilder() : this(null) { }
+    public SourceFileRenderTreeBuilder(FeatureCollection? parentFeatureCollection) : base(parentFeatureCollection) { }
 
     protected override void TextCore(ReadOnlySpan<char> s) {
         _sourceFile.Write(s);
@@ -49,7 +49,19 @@ internal sealed class SyntaxRenderTreeBuilder : GenericRenderTreeBuilder {
         renderable.Render(this);
     }
 
-    public string GetSourceText() {
+    public override string RenderRootNode<TRootNode>(TRootNode node) {
+        Node(node);
+
+        Features?.RenderSourceFileFeatures(this);
+
+        return GetSourceText();
+    }
+
+    internal string GetSourceText() {
         return _sourceFile.ToString();
+    }
+
+    public void Dispose() {
+        _sourceFile.Clear();
     }
 }

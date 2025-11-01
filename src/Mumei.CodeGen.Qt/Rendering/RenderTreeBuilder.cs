@@ -1,12 +1,15 @@
 ﻿using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
-using Mumei.CodeGen.Qt.Containers;
 using Mumei.CodeGen.Qt.Qt;
 
 namespace Mumei.CodeGen.Qt;
 
-internal abstract class GenericRenderTreeBuilder : IRenderTreeBuilder {
-    private FeatureCollection? _features;
+internal abstract class GenericRenderTreeBuilder<TResult>(FeatureCollection? parentFeatureCollection) : IRenderTreeBuilder {
+    private FeatureCollection? _features = parentFeatureCollection;
+    protected FeatureCollection? Features => _features;
+
+    private int _nextMajorId = 0;
+    private int _nextMinorId = 0;
 
 #if DEBUG
     private readonly DebugRenderGraph _debugRenderGraph = new();
@@ -116,9 +119,21 @@ internal abstract class GenericRenderTreeBuilder : IRenderTreeBuilder {
 
     protected abstract void NodeCore<TRenderNode>(TRenderNode renderable) where TRenderNode : IRenderNode;
 
+    public abstract TResult RenderRootNode<TRootNode>(TRootNode node) where TRootNode : IRenderNode;
+
     public void RequireFeature(IRenderer.IFeature feature) {
         _features ??= new FeatureCollection();
         _features.Require(feature);
+    }
+
+    public string NextId() {
+        var id = $"{_nextMajorId}__{_nextMinorId}";
+        if (++_nextMinorId >= 10) {
+            _nextMinorId = 0;
+            _nextMajorId++;
+        }
+
+        return id;
     }
 
     public string DebugView() {
@@ -157,6 +172,8 @@ public interface IRenderTreeBuilder {
 
     public void RequireFeature(IRenderer.IFeature feature);
 
+    public string NextId();
+
     [InterpolatedStringHandler]
     public readonly ref struct InterpolatedStringHandler(int literalLength, int formattedCount, IRenderTreeBuilder tree) {
         public void AppendLiteral(string s) {
@@ -175,7 +192,7 @@ public interface IRenderTreeBuilder {
     [InterpolatedStringHandler]
     public readonly ref struct BlockInterpolatedStringHandler(int literalLength, int formattedCount) {
         // ToDo: Implement block handling via the source render tree.
-        private readonly SyntaxRenderTreeBuilder _tree = new();
+        private readonly SourceFileRenderTreeBuilder _tree = new();
 
         public void AppendLiteral(string s) {
             _tree.Text(s);
@@ -184,6 +201,16 @@ public interface IRenderTreeBuilder {
         public void AppendFormatted<TRenderNode>(in TRenderNode node) where TRenderNode : IRenderNode {
             _tree.Node(node);
         }
+
+        public void AppendFormatted(Type type, string format = "") {
+            if (format == "typeof") {
+                _tree.TypeOf(type);
+                return;
+            }
+
+            _tree.QualifiedTypeName(type);
+        }
+
 
         public void AppendFormatted(ReadOnlySpan<char> s) {
             _tree.Text(s);

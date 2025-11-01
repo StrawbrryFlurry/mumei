@@ -154,7 +154,7 @@ public readonly struct OutputGenerationContext<TNodeMatch>() {
         }
 
         var files = _state.GeneratedFiles.Select(file => {
-            var renderTree = new SyntaxRenderTreeBuilder();
+            var renderTree = new SourceFileRenderTreeBuilder();
             using var ctx = TemplateBindingContext.StartBinding();
             file.Render(renderTree);
             // ctx.CodeGenFeatures.WriteSourceFileFeatures(ref renderTree);

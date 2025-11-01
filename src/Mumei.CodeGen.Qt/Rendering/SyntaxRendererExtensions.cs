@@ -85,6 +85,17 @@ internal static class SyntaxRendererExtensions {
             }
         }
 
+        public void List<TItem>(ReadOnlySpan<TItem> items) where TItem : IRenderNode {
+            for (var i = 0; i < items.Length; i++) {
+                var t = items[i];
+                renderTree.Node(t);
+                var isLast = i == items.Length - 1;
+                if (!isLast) {
+                    renderTree.NewLine();
+                }
+            }
+        }
+
         public void SeparatedList<TItem, TRenderItem>(ReadOnlySpan<TItem> items, Func<TItem, TRenderItem> renderItemSelector) where TRenderItem : IRenderNode {
             for (var i = 0; i < items.Length; i++) {
                 if (i > 0) {
@@ -99,6 +110,10 @@ internal static class SyntaxRendererExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void QualifiedTypeName(Type type) {
             RuntimeTypeSerializer.RenderInto(renderTree, type);
+        }
+
+        public void QualifiedTypeName<T>() {
+            RuntimeTypeSerializer.RenderInto(renderTree, typeof(T));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

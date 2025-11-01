@@ -53,16 +53,14 @@ public interface ISyntaxWriter {
 }
 
 public class SyntaxWriter : ISyntaxWriter {
-    public int Length => _code.Length;
-
     internal const char IndentChar = ' ';
     internal const int IndentSpacing = 4;
-
-    private readonly StringBuilder _code = new();
-
-    private string _indentString = "";
     internal const string NewLine = "\n";
 
+    private readonly StringBuilder _code = new();
+    public int Length => _code.Length;
+
+    private string _indentString = "";
     private bool _requiresIndent = true;
 
     public int IndentLevel {
@@ -245,5 +243,11 @@ public class SyntaxWriter : ISyntaxWriter {
 
     public override string ToString() {
         return ToSyntax();
+    }
+
+    public void Clear() {
+        IndentLevel = 0;
+        _requiresIndent = true;
+        _code.Clear();
     }
 }

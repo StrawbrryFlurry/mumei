@@ -47,7 +47,7 @@ public readonly struct QtSourceFile {
 /// E.g. The InterceptsLocationAttribute must be defined in order
 /// for interception to work.
 /// </summary>
-internal interface ISourceFileFeature : ISyntaxRepresentable;
+internal interface ISourceFileFeature : IRenderNode;
 
 /// <summary>
 /// Describes a feature that needs to be available in the generated
@@ -55,28 +55,31 @@ internal interface ISourceFileFeature : ISyntaxRepresentable;
 /// are accessible by all other source code and should only be generated
 /// once per compilation unit.
 /// </summary>
-internal interface ICompilationUnitFeature : ISyntaxRepresentable;
+internal interface ICompilationFeature : IRenderNode;
 
 internal sealed class CodeGenFeatureCollection {
     private HashSet<ISourceFileFeature>? _sourceFileFeatures;
-    private HashSet<ICompilationUnitFeature>? _compilationUnitFeatures;
+    private HashSet<ICompilationFeature>? _compilationUnitFeatures;
 
     public void Require(ISourceFileFeature feature) {
         (_sourceFileFeatures ??= []).Add(feature);
     }
 
-    public void Require(ICompilationUnitFeature feature) {
+    public void Require(ICompilationFeature feature) {
         (_compilationUnitFeatures ??= []).Add(feature);
     }
 
-    public void WriteSourceFileFeatures<TSyntaxWriter>(ref TSyntaxWriter writer) where TSyntaxWriter : ISyntaxWriter {
+    public void RenderSourceFileFeatures(IRenderTreeBuilder renderTree) {
         if (_sourceFileFeatures is null) {
             return;
         }
 
+        var i = _sourceFileFeatures.Count;
         foreach (var feature in _sourceFileFeatures) {
-            writer.Write(feature);
-            writer.WriteLine();
+            renderTree.Node(feature);
+            if (--i != 0) {
+                renderTree.NewLine();
+            }
         }
     }
 }
@@ -85,14 +88,27 @@ internal static class CodeGenFeature {
     public static readonly MethodReflectionImpl MethodReflection = new();
     public static readonly InterceptorsImpl Interceptors = new();
 
-    public sealed class InterceptorsImpl : ISourceFileFeature {
+    public sealed class InterceptorsImpl : ISourceFileFeature, IRenderer.IFeature {
         public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
             writer.WriteFormattedBlock(
                 $$"""
                   #pragma warning disable
                   namespace System.Runtime.CompilerServices {
-                      [{{typeof(AttributeUsageAttribute):g}}({{typeof(AttributeTargets):g}}.Method, AllowMultiple = true)]
-                      file sealed class InterceptsLocationAttribute(int version, string data) : {{typeof(Attribute):g}};
+                      [{{typeof(AttributeUsageAttribute)}}({{typeof(AttributeTargets)}}.Method, AllowMultiple = true)]
+                      file sealed class InterceptsLocationAttribute(int version, string data) : {{typeof(Attribute)}};
+                  }
+                  #pragma warning enable
+                  """
+            );
+        }
+
+        public void Render(IRenderTreeBuilder renderTree) {
+            renderTree.InterpolateBlock(
+                $$"""
+                  #pragma warning disable
+                  namespace System.Runtime.CompilerServices {
+                      [{{typeof(AttributeUsageAttribute)}}({{typeof(AttributeTargets)}}.Method, AllowMultiple = true)]
+                      file sealed class InterceptsLocationAttribute(int version, string data) : {{typeof(Attribute)}};
                   }
                   #pragma warning enable
                   """
@@ -100,7 +116,7 @@ internal static class CodeGenFeature {
         }
     }
 
-    public sealed class MethodReflectionImpl : ICompilationUnitFeature {
+    public sealed class MethodReflectionImpl : ICompilationFeature {
         private const string ClassIdentifier = "λMumeiMethodReflector";
 
         public void ReflectMethodInfo<TSyntaxWriter>(
@@ -219,6 +235,10 @@ internal static class CodeGenFeature {
                   }
                   """
             );
+        }
+
+        public void Render(IRenderTreeBuilder renderTree) {
+            throw new NotImplementedException();
         }
     }
 }

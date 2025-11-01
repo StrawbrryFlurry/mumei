@@ -19,4 +19,10 @@
   <ItemGroup>
     <PackageReference Include="DiffPlex"/>
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="TwoStageBuilders\Components\"/>
+    <Folder Include="TwoStageBuilders\RoslynCodeProviders\"/>
+    <Folder Include="TwoStageBuilders\SythesizedComponents\"/>
+  </ItemGroup>
 </Project>

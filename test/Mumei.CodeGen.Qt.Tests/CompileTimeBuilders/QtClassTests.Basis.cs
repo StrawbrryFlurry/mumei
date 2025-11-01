@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Mumei.CodeGen.Playground;
+﻿using Mumei.CodeGen.Playground;
 using Mumei.CodeGen.Qt.Qt;
 using Mumei.CodeGen.Qt.Tests.Setup;
 

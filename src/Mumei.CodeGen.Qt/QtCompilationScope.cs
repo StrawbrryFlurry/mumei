@@ -6,7 +6,7 @@ namespace Mumei.CodeGen.Qt;
 public sealed class QtCompilationScope : IEquatable<QtCompilationScope> {
     public static QtCompilationScope Active => ActiveScope.Value ?? throw new InvalidOperationException("No active compilation scope. Ensure that you are inside a source generator context.");
     private static AsyncLocal<QtCompilationScope> ActiveScope { get; } = new();
-    private readonly HashSet<ICompilationUnitFeature> _compilationUnitFeatures = [];
+    private readonly HashSet<ICompilationFeature> _compilationUnitFeatures = [];
 
     public required Compilation Compilation { get; init; }
 
@@ -16,7 +16,7 @@ public sealed class QtCompilationScope : IEquatable<QtCompilationScope> {
         ActiveScope.Value = new QtCompilationScope { Compilation = scope };
     }
 
-    internal static void RequiresFeature(ICompilationUnitFeature feature) {
+    internal static void RequiresFeature(ICompilationFeature feature) {
         Active._compilationUnitFeatures.Add(feature);
     }
 

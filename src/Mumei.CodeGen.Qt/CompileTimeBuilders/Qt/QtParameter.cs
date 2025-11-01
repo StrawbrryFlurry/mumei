@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections;
+using System.Runtime.CompilerServices;
 using Mumei.CodeGen.Playground;
 using Mumei.CodeGen.Qt.Containers;
 using Mumei.CodeGen.Qt.Output;
@@ -28,9 +29,10 @@ public readonly struct QtParameter : IQtTemplateBindable, IRenderNode {
     }
 }
 
+[CollectionBuilder(typeof(QtParameterList), nameof(Initialize))]
 public readonly struct QtParameterList(
     QtCollection<QtParameter> parameters
-) : IQtTemplateBindable, IRenderNode, IQtMemoryAccessor<QtParameter> {
+) : IQtTemplateBindable, IRenderNode, IQtMemoryAccessor<QtParameter>, IEnumerable<QtParameter> {
     public int Count => parameters.Count;
 
     internal QtCollection<QtParameter> Parameters => parameters;
@@ -38,6 +40,10 @@ public readonly struct QtParameterList(
 
     internal static QtParameterList Builder(int capacity) {
         return new QtParameterList(QtCollection<QtParameter>.Create(capacity));
+    }
+
+    public static QtParameterList Initialize(ReadOnlySpan<QtParameter> items) {
+        return new QtParameterList([..items]);
     }
 
     internal QtParameter this[int index] {
@@ -69,5 +75,17 @@ public readonly struct QtParameterList(
 
     public void Render(IRenderTreeBuilder renderer) {
         renderer.SeparatedList(parameters.Span);
+    }
+
+    public Span<QtParameter>.Enumerator GetEnumerator() {
+        return Parameters.GetEnumerator();
+    }
+
+    IEnumerator<QtParameter> IEnumerable<QtParameter>.GetEnumerator() {
+        return ((IEnumerable<QtParameter>) Parameters).GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() {
+        return ((IEnumerable<QtParameter>) this).GetEnumerator();
     }
 }
