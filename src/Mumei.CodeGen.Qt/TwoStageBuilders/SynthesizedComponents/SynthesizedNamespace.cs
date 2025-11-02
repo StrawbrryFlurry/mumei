@@ -5,13 +5,13 @@ namespace Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 public readonly struct SynthesizedNamespace(
     string? parentNamespace,
     string name,
-    ImmutableArray<SynthesizedClass> classDeclarations
+    ImmutableArray<SynthesizedClassDeclaration> classDeclarations
 ) : IRenderNode {
-    public ImmutableArray<SynthesizedClass> ClassDeclarations { get; } = classDeclarations;
+    public ImmutableArray<SynthesizedClassDeclaration> ClassDeclarations { get; } = classDeclarations;
     public string Name { get; } = name;
     public string? ParentNamespace { get; } = parentNamespace;
 
-    public static SynthesizedNamespace Create(string name, ImmutableArray<SynthesizedClass> classDeclarations) {
+    public static SynthesizedNamespace Create(string name, ImmutableArray<SynthesizedClassDeclaration> classDeclarations) {
         return new SynthesizedNamespace(null, name, classDeclarations);
     }
 

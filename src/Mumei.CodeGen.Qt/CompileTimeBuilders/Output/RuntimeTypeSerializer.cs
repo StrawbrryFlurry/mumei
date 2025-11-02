@@ -1,4 +1,6 @@
-﻿namespace Mumei.CodeGen.Qt.Output;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Mumei.CodeGen.Qt.Output;
 
 internal static class RuntimeTypeSerializer {
     public static void SerializeInto<TSyntaxWriter>(
@@ -87,8 +89,16 @@ internal static class RuntimeTypeSerializer {
     }
 
     private static bool TryWriteShortForm(Type type, IRenderTreeBuilder tree) {
+        if (TryGetKeywordType(type, out var keywordType)) {
+            tree.Text(keywordType);
+            return true;
+        }
+
+        return false;
+    }
+    private static bool TryGetKeywordType(Type type, [NotNullWhen(true)] out string? keyword) {
         if (type.IsPrimitive) {
-            tree.Text(type switch {
+            keyword = type switch {
                 not null when type == typeof(int) => "int",
                 not null when type == typeof(uint) => "uint",
                 not null when type == typeof(long) => "long",
@@ -102,15 +112,16 @@ internal static class RuntimeTypeSerializer {
                 not null when type == typeof(bool) => "bool",
                 not null when type == typeof(char) => "char",
                 _ => throw new NotSupportedException($"Unsupported primitive type: {type}")
-            });
+            };
             return true;
         }
 
         if (type == typeof(string)) {
-            tree.Text("string");
+            keyword = "string";
             return true;
         }
 
+        keyword = null!;
         return false;
     }
 
@@ -140,5 +151,15 @@ internal static class RuntimeTypeSerializer {
         }
 
         return false;
+    }
+
+    internal static string GetTypeFullName(Type type) {
+        if (TryGetKeywordType(type, out var keywordType)) {
+            return keywordType;
+        }
+
+        var writer = new ValueSyntaxWriter(stackalloc char[ValueSyntaxWriter.StackBufferSize]);
+        SerializeInto(ref writer, type);
+        return writer.ToString();
     }
 }

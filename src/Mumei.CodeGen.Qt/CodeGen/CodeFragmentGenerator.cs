@@ -22,7 +22,7 @@ internal sealed class CodeFragmentGenerator : IIncrementalGenerator {
         context.RegisterSourceOutput(interceptorMethods, (ctx, state) => {
             var method = state;
 
-            var cls = SynthesizedClass.Create(AccessModifier.FileSealed, $"CodeFragments_{method.Name}", [], [], [], [method], [CodeGenFeature.Interceptors]);
+            var cls = SynthesizedClassDeclaration.Create($"CodeFragments_{method.Name}", accessModifier: AccessModifier.FileSealed, methods: [method], renderFeatures: [CodeGenFeature.Interceptors]);
             var ns = SynthesizedNamespace.Create("Generated", [cls]);
             var fileTree = new SourceFileRenderTreeBuilder();
 
@@ -52,7 +52,7 @@ internal sealed class CodeFragmentGenerator : IIncrementalGenerator {
         return invocation.AsIntercept().WithState(fragmentDeclaration);
     }
 
-    private static SynthesizedMethod CreateCodeFragmentInterceptorMethod(InterceptInvocationIntermediateNode<LambdaExpressionSyntax> codeFragment, CancellationToken _) {
+    private static SynthesizedMethodDeclaration CreateCodeFragmentInterceptorMethod(InterceptInvocationIntermediateNode<LambdaExpressionSyntax> codeFragment, CancellationToken _) {
         var name = $"Intercept_CodeFragment_{Math.Abs(codeFragment.Location.GetHashCode())}";
         ImmutableArray<SynthesizedParameter> parameters = [
             new() {
@@ -68,7 +68,7 @@ internal sealed class CodeFragmentGenerator : IIncrementalGenerator {
             : declaredBody.ToFullString();
 
         var fragment = LiteralNode.ForRawString(bodyContent.TrimEnd('\r', '\n'));
-        return SynthesizedMethod.Create(
+        return SynthesizedMethodDeclaration.Create(
             [],
             AccessModifier.InternalStatic,
             typeof(CodeFragment),

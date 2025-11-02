@@ -12,20 +12,20 @@ internal abstract class GenericRenderTreeBuilder<TResult>(FeatureCollection? par
     private int _nextMinorId = 0;
 
 #if DEBUG
-    private readonly DebugRenderGraph _debugRenderGraph = new();
+    protected readonly DebugRenderGraph DebugRenderGraph = new();
 #endif
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void StartNode<TRenderNode>(TRenderNode node) where TRenderNode : IRenderNode {
 #if DEBUG
-        _debugRenderGraph.StartNode(node);
+        DebugRenderGraph.StartNode(node);
 #endif
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void EndNode() {
 #if DEBUG
-        _debugRenderGraph.EndNode();
+        DebugRenderGraph.EndNode();
 #endif
     }
 
@@ -138,7 +138,7 @@ internal abstract class GenericRenderTreeBuilder<TResult>(FeatureCollection? par
 
     public string DebugView() {
 #if DEBUG
-        return _debugRenderGraph.DebugView();
+        return DebugRenderGraph.DebugView();
 #else
         return ToString();
 #endif

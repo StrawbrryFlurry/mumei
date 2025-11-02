@@ -6,7 +6,7 @@ namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 internal sealed class ComponentSynthesizer {
     public ComponentSynthesizer(Compilation compilation) { }
 
-    public SynthesizedClass Synthesize(IClassComponent classComponent) {
+    public SynthesizedClassDeclaration Synthesize(IClassComponent classComponent) {
         return default;
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
+using Mumei.Roslyn;
 
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 
@@ -8,7 +9,9 @@ namespace Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 public readonly struct SynthesizedTypeParameterList(
     ImmutableArray<SynthesizedTypeParameter> typeParameters
 ) : IEnumerable<SynthesizedTypeParameter> {
-    public RenderNode<ImmutableArray<SynthesizedTypeParameter>> List => new(typeParameters, static (renderTree, typeParameters) => {
+    public ImmutableArray<SynthesizedTypeParameter> TypeParameters => typeParameters.EnsureInitialized();
+
+    public RenderNode<ImmutableArray<SynthesizedTypeParameter>> List => new(TypeParameters, static (renderTree, typeParameters) => {
         if (typeParameters.IsEmpty) {
             return;
         }
@@ -18,7 +21,7 @@ public readonly struct SynthesizedTypeParameterList(
         renderTree.Text(">");
     });
 
-    public RenderNode<ImmutableArray<SynthesizedTypeParameter>> Constraints => new(typeParameters, static (renderTree, typeParameters) => {
+    public RenderNode<ImmutableArray<SynthesizedTypeParameter>> Constraints => new(TypeParameters, static (renderTree, typeParameters) => {
         if (typeParameters.Length == 0) {
             return;
         }
@@ -39,11 +42,11 @@ public readonly struct SynthesizedTypeParameterList(
     }
 
     IEnumerator<SynthesizedTypeParameter> IEnumerable<SynthesizedTypeParameter>.GetEnumerator() {
-        return ((IEnumerable<SynthesizedTypeParameter>) typeParameters).GetEnumerator();
+        return ((IEnumerable<SynthesizedTypeParameter>) TypeParameters).GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator() {
-        return ((IEnumerable<SynthesizedTypeParameter>) typeParameters).GetEnumerator();
+        return ((IEnumerable<SynthesizedTypeParameter>) TypeParameters).GetEnumerator();
     }
 }
 

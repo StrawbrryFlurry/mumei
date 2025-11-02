@@ -19,6 +19,8 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
     private string _indentString = "";
     private int _indentLevel;
 
+    // TODO: for large buffers using the array pool, we can't use this unfixed pointer.
+    // Go with two fields instead, one is the pointer to the known stack buffer (that can't move), the other is the backing array (_rentedBuffer)
     private char* _buffer;
     private int _bufferLength;
     private int _bufferPosition;

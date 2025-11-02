@@ -1,9 +1,11 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Mumei.CodeGen.Playground;
 using Mumei.CodeGen.Qt.Containers;
 using Mumei.CodeGen.Qt.Output;
 using Mumei.CodeGen.Qt.Qt;
+using Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 
 namespace Mumei.CodeGen.Qt;
 
@@ -89,30 +91,29 @@ internal static class CodeGenFeature {
     public static readonly InterceptorsImpl Interceptors = new();
 
     public sealed class InterceptorsImpl : ISourceFileFeature, IRenderer.IFeature {
-        public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {
-            writer.WriteFormattedBlock(
-                $$"""
-                  #pragma warning disable
-                  namespace System.Runtime.CompilerServices {
-                      [{{typeof(AttributeUsageAttribute)}}({{typeof(AttributeTargets)}}.Method, AllowMultiple = true)]
-                      file sealed class InterceptsLocationAttribute(int version, string data) : {{typeof(Attribute)}};
-                  }
-                  #pragma warning enable
-                  """
-            );
-        }
-
         public void Render(IRenderTreeBuilder renderTree) {
-            renderTree.InterpolateBlock(
-                $$"""
-                  #pragma warning disable
-                  namespace System.Runtime.CompilerServices {
-                      [{{typeof(AttributeUsageAttribute)}}({{typeof(AttributeTargets)}}.Method, AllowMultiple = true)]
-                      file sealed class InterceptsLocationAttribute(int version, string data) : {{typeof(Attribute)}};
-                  }
-                  #pragma warning enable
-                  """
-            );
+            renderTree.Line("#pragma warning disable");
+            renderTree.Node(SynthesizedNamespace.Create("System.Runtime.CompilerServices", [
+                SynthesizedClassDeclaration.Create(
+                    "InterceptsLocationAttribute",
+                    accessModifier: AccessModifier.FileSealed,
+                    attributes: [
+                        SynthesizedAttribute.Create(
+                            typeof(AttributeUsageAttribute),
+                            [
+                                $"{typeof(AttributeTargets)}.Method",
+                                SynthesizedAttributePropertyArgument.Create("AllowMultiple", "true")
+                            ]
+                        )
+                    ],
+                    primaryConstructorParameters: [
+                        (typeof(int), "version"),
+                        (typeof(string), "data")
+                    ],
+                    baseTypes: [typeof(Attribute)]
+                )
+            ]));
+            renderTree.Line("#pragma warning enable");
         }
     }
 

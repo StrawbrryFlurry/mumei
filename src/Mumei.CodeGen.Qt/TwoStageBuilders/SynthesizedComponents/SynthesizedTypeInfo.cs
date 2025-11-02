@@ -1,4 +1,7 @@
-﻿namespace Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
+﻿using Microsoft.CodeAnalysis;
+using Mumei.CodeGen.Qt.Output;
+
+namespace Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 
 public readonly struct SynthesizedTypeInfo : IEquatable<SynthesizedTypeInfo> {
     public string QualifiedTypeName { get; }
@@ -17,17 +20,11 @@ public readonly struct SynthesizedTypeInfo : IEquatable<SynthesizedTypeInfo> {
         renderTree.Interpolate($"typeof({node.QualifiedTypeName})");
     });
 
+    public SynthesizedTypeInfo(Type type) : this(RuntimeTypeSerializer.GetTypeFullName(type), false) { }
     public SynthesizedTypeInfo(string qualifiedTypeName) : this(qualifiedTypeName, false) { }
 
     internal SynthesizedTypeInfo(string qualifiedTypeName, bool isNonRuntimeKeyword) {
-        if (isNonRuntimeKeyword) {
-            QualifiedTypeName = qualifiedTypeName;
-        } else {
-            QualifiedTypeName = qualifiedTypeName.StartsWith("global::")
-                ? qualifiedTypeName
-                : $"global::{qualifiedTypeName}";
-        }
-
+        QualifiedTypeName = qualifiedTypeName;
         IsNonRuntimeKeyword = isNonRuntimeKeyword;
 
         Name = qualifiedTypeName.Contains('.')
@@ -36,7 +33,7 @@ public readonly struct SynthesizedTypeInfo : IEquatable<SynthesizedTypeInfo> {
     }
 
     public static implicit operator SynthesizedTypeInfo(Type type) {
-        return new SynthesizedTypeInfo(type.FullName ?? type.Name);
+        return new SynthesizedTypeInfo(type);
     }
 
     public static bool operator ==(SynthesizedTypeInfo left, SynthesizedTypeInfo right) {

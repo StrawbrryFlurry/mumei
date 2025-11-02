@@ -1,34 +1,44 @@
 ﻿using System.Collections.Immutable;
 using Mumei.CodeGen.Playground;
+using Mumei.Roslyn;
 
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 
-public readonly struct SynthesizedClass(
+public readonly struct SynthesizedClassDeclaration(
+    ImmutableArray<SynthesizedAttribute> attributes,
     AccessModifier accessModifier,
     string name,
     SynthesizedTypeParameterList typeParameters,
-    ImmutableArray<SynthesizedField> fields,
-    ImmutableArray<SynthesizedProperty> properties,
-    ImmutableArray<SynthesizedMethod> methods,
+    ImmutableArray<SynthesizedParameter> primaryConstructorParameters,
+    ImmutableArray<SynthesizedTypeInfo> baseTypes,
+    ImmutableArray<SynthesizedFieldDeclaration> fields,
+    ImmutableArray<SynthesizedPropertyDeclaration> properties,
+    ImmutableArray<SynthesizedMethodDeclaration> methods,
     ImmutableArray<IRenderer.IFeature> renderFeatures
 ) : IRenderNode {
-    public static SynthesizedClass Create(
-        AccessModifier accessModifier,
+    public static SynthesizedClassDeclaration Create(
         string name,
-        SynthesizedTypeParameterList typeParameters,
-        ImmutableArray<SynthesizedField> fields,
-        ImmutableArray<SynthesizedProperty> properties,
-        ImmutableArray<SynthesizedMethod> methods,
-        ImmutableArray<IRenderer.IFeature> renderFeatures
+        ImmutableArray<SynthesizedAttribute> attributes = default,
+        AccessModifier accessModifier = AccessModifier.Internal,
+        SynthesizedTypeParameterList typeParameters = default,
+        ImmutableArray<SynthesizedParameter> primaryConstructorParameters = default,
+        ImmutableArray<SynthesizedTypeInfo> baseTypes = default,
+        ImmutableArray<SynthesizedFieldDeclaration> fields = default,
+        ImmutableArray<SynthesizedPropertyDeclaration> properties = default,
+        ImmutableArray<SynthesizedMethodDeclaration> methods = default,
+        ImmutableArray<IRenderer.IFeature> renderFeatures = default
     ) {
-        return new SynthesizedClass(
+        return new SynthesizedClassDeclaration(
+            attributes.EnsureInitialized(),
             accessModifier,
             name,
             typeParameters,
-            fields,
-            properties,
-            methods,
-            renderFeatures
+            primaryConstructorParameters.EnsureInitialized(),
+            baseTypes.EnsureInitialized(),
+            fields.EnsureInitialized(),
+            properties.EnsureInitialized(),
+            methods.EnsureInitialized(),
+            renderFeatures.EnsureInitialized()
         );
     }
 
@@ -37,10 +47,27 @@ public readonly struct SynthesizedClass(
             renderTree.RequireFeature(feature);
         }
 
+        if (!attributes.IsEmpty) {
+            renderTree.List(attributes.AsSpan());
+            renderTree.NewLine();
+        }
+
         renderTree.Interpolate(
-            $"{accessModifier.List} class {name}"
+            $"{accessModifier.List} class {name}{typeParameters.List}"
         );
 
+        if (!primaryConstructorParameters.IsEmpty) {
+            renderTree.Text("(");
+            renderTree.SeparatedList(primaryConstructorParameters.AsSpan());
+            renderTree.Text(")");
+        }
+
+        if (!baseTypes.IsEmpty) {
+            renderTree.Text(" : ");
+            renderTree.SeparatedList(baseTypes.AsSpan(), static x => x.FullName);
+        }
+
+        renderTree.Node(typeParameters.Constraints);
 
         renderTree.Text(" ");
         renderTree.StartCodeBlock();
@@ -62,7 +89,7 @@ public readonly struct SynthesizedClass(
     }
 }
 
-public readonly struct SynthesizedMethod(
+public readonly struct SynthesizedMethodDeclaration(
     ImmutableArray<SynthesizedAttribute> attributes,
     AccessModifier accessModifier,
     SynthesizedTypeInfo returnType,
@@ -73,7 +100,7 @@ public readonly struct SynthesizedMethod(
 ) : IRenderNode {
     public string Name => name;
 
-    public static SynthesizedMethod Create<TBodyState>(
+    public static SynthesizedMethodDeclaration Create<TBodyState>(
         ImmutableArray<SynthesizedAttribute> attributes,
         AccessModifier accessModifier,
         SynthesizedTypeInfo returnType,
@@ -85,7 +112,7 @@ public readonly struct SynthesizedMethod(
     ) {
         var body = SynthesizedCodeBlock.Create(bodyState, declareBody);
 
-        return new SynthesizedMethod(
+        return new SynthesizedMethodDeclaration(
             attributes,
             accessModifier,
             returnType,
@@ -123,10 +150,10 @@ public readonly struct SynthesizedMethod(
     }
 }
 
-public readonly struct SynthesizedField : IRenderNode {
+public readonly struct SynthesizedFieldDeclaration : IRenderNode {
     public void Render(IRenderTreeBuilder renderTree) { }
 }
 
-public readonly struct SynthesizedProperty : IRenderNode {
+public readonly struct SynthesizedPropertyDeclaration : IRenderNode {
     public void Render(IRenderTreeBuilder renderTree) { }
 }

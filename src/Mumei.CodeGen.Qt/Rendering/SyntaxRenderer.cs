@@ -1,7 +1,9 @@
-﻿using Mumei.CodeGen.Qt.Output;
+﻿using System.Diagnostics;
+using Mumei.CodeGen.Qt.Output;
 
 namespace Mumei.CodeGen.Qt;
 
+[DebuggerTypeProxy(typeof(RenderTreeBuilderDebugView))]
 internal sealed class SourceFileRenderTreeBuilder : GenericRenderTreeBuilder<string>, IDisposable {
     private SyntaxWriter _sourceFile = new();
 
@@ -63,5 +65,13 @@ internal sealed class SourceFileRenderTreeBuilder : GenericRenderTreeBuilder<str
 
     public void Dispose() {
         _sourceFile.Clear();
+    }
+
+    private sealed class RenderTreeBuilderDebugView(SourceFileRenderTreeBuilder builder) {
+        [DebuggerBrowsable(DebuggerBrowsableState.Collapsed)]
+        public string CurrentTree => builder.GetSourceText();
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Collapsed)]
+        public IEnumerable<IRenderNode> Graph => builder.DebugRenderGraph.Stack;
     }
 }

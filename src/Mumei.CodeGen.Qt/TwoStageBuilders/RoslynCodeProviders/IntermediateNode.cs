@@ -63,7 +63,9 @@ internal readonly struct InterceptInvocationIntermediateNode<TState>(
     }
 
     public static implicit operator bool(InterceptInvocationIntermediateNode<TState> node) {
-        return node.Location is not null;
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        var isDefaultInstance = node.Location is null;
+        return !isDefaultInstance;
     }
 
     public static implicit operator InterceptInvocationIntermediateNode<TState>(IntermediateNode.NoneNode _) {
@@ -95,4 +97,9 @@ public readonly struct IntermediateNode {
     public static NoneNode None => new();
 
     public readonly struct NoneNode { }
+}
+
+public interface IIntermediateNode<TSelf> where TSelf : struct, IIntermediateNode<TSelf> {
+    public bool HasValue { get; }
+    public IEqualityComparer<TSelf> EqualityComparer { get; }
 }
