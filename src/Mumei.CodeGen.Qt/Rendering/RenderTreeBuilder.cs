@@ -184,6 +184,15 @@ public interface IRenderTreeBuilder {
             tree.Node(node);
         }
 
+        public void AppendFormatted(Type type, string format = "") {
+            if (format == "typeof") {
+                tree.TypeOf(type);
+                return;
+            }
+
+            tree.QualifiedTypeName(type);
+        }
+
         public void AppendFormatted(ReadOnlySpan<char> s) {
             tree.Text(s);
         }
@@ -210,7 +219,6 @@ public interface IRenderTreeBuilder {
 
             _tree.QualifiedTypeName(type);
         }
-
 
         public void AppendFormatted(ReadOnlySpan<char> s) {
             _tree.Text(s);

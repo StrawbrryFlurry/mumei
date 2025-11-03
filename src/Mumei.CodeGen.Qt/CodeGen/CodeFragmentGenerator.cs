@@ -77,9 +77,7 @@ internal sealed class CodeFragmentGenerator : IIncrementalGenerator {
             parameters,
             fragment,
             static (f, tree) => {
-                tree.Text("return ");
-                tree.QualifiedTypeName<CodeFragment>();
-                tree.Interpolate($".{nameof(CodeFragment.λCreate)}({f});");
+                tree.Interpolate($"return {typeof(CodeFragment)}.{nameof(CodeFragment.λCreate)}({f});");
             }
         );
     }
