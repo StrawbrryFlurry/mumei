@@ -4,28 +4,34 @@ using Microsoft.CodeAnalysis;
 
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 
-internal sealed class ClassComponentBuilder : IClassComponentBuilder {
-    public ImmutableArray<IMethodComponent> Methods { get; }
+internal sealed class SyntheticClassBuilder : ISyntheticClassBuilder {
+    public ImmutableArray<ISyntheticMethod> Methods { get; }
 }
 
-public interface IClassComponentBuilder : IClassComponent { }
+public interface ISyntheticClassBuilder { }
 
-public interface IClassComponent {
-    public ImmutableArray<IMethodComponent> Methods { get; }
+public interface ISyntheticClassBuilder<T> {
+    public T New(object[] args);
 }
 
-public interface IMethodComponent {
+public interface ISyntheticClass : ISyntheticType {
+    public ImmutableArray<ISyntheticMethod> Methods { get; }
+}
+
+public interface ISyntheticMethodBuilder { }
+
+public interface ISyntheticMethod {
     public string Name { get; }
 }
 
-internal sealed class RuntimeMethodComponent(MethodInfo method) : IMethodComponent {
+internal sealed class RuntimeSyntheticMethod(MethodInfo method) : ISyntheticMethod {
     public string Name => method.Name;
 }
 
-internal sealed class RoslynMethodComponent(IMethodSymbol method) : IMethodComponent {
+internal sealed class RoslynSyntheticMethod(IMethodSymbol method) : ISyntheticMethod {
     public string Name => method.Name;
 }
 
-internal sealed class QtMethodComponent(string name) : IMethodComponent {
+internal sealed class QtSyntheticMethod(string name) : ISyntheticMethod {
     public string Name { get; } = name;
 }
