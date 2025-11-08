@@ -4,12 +4,16 @@ namespace Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 
 public readonly struct SynthesizedNamespace(
     string? parentNamespace,
-    string name,
+    string? name,
     ImmutableArray<SynthesizedClassDeclaration> classDeclarations
 ) : IRenderNode {
+    public static SynthesizedNamespace Empty => new(null, null, ImmutableArray<SynthesizedClassDeclaration>.Empty);
+
     public ImmutableArray<SynthesizedClassDeclaration> ClassDeclarations { get; } = classDeclarations;
     public string Name { get; } = name;
     public string? ParentNamespace { get; } = parentNamespace;
+
+    public bool IsEmpty => name == null && ClassDeclarations.IsEmpty;
 
     public static SynthesizedNamespace Create(string name, ImmutableArray<SynthesizedClassDeclaration> classDeclarations) {
         return new SynthesizedNamespace(null, name, classDeclarations);

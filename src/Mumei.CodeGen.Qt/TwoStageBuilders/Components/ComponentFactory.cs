@@ -3,7 +3,7 @@
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 
 public sealed class ComponentFactory {
-    public static ISyntheticClassBuilder<CompileTimeUnknown> Class() {
+    public static ISyntheticClassBuilder<CompileTimeUnknown> Class(string name) {
         return new SyntheticClassBuilder<CompileTimeUnknown>();
     }
 

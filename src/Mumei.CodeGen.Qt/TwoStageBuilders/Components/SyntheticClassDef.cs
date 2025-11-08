@@ -1,15 +1,15 @@
-﻿using System.Collections.Immutable;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Qt.Qt;
 
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 
-public abstract class SyntheticClassDefinition<TSelf> : ISyntheticClass where TSelf : new() {
+public abstract class SyntheticClassDefinition<TSelf> where TSelf : new() {
     // Add an analyzer that ensures Synthetic Classes are never instantiated by user code!
     protected SyntheticClassDefinition() {
-        throw new CompileTimeComponentUsedAtRuntimeException();
+        // throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
     public virtual void DefineDynamicMembers() { }
@@ -22,7 +22,7 @@ public abstract class SyntheticClassDefinition<TSelf> : ISyntheticClass where TS
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
-    public TSelf New() {
+    public TSelf DynamicNew(object[] args) {
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
@@ -33,16 +33,18 @@ public abstract class SyntheticClassDefinition<TSelf> : ISyntheticClass where TS
         throw new NotSupportedException();
     }
 
-    #region ISyntheticClass
-
-    public ImmutableArray<ISyntheticMethod> Methods { get; }
-    public ImmutableArray<ISyntheticField> Fields { get; }
-
     internal void AddField(ISyntheticField field) { }
-    internal void AddMethod(ISyntheticMethod field) { }
-    internal void AddProperty(ISyntheticField field) { }
+    internal void AddMethod(ISyntheticMethod method) { }
+    internal void AddProperty(ISyntheticField property) { }
+}
 
-    #endregion
+public abstract class SyntheticMethodDefinition {
+    public T Invoke<T>() {
+        throw new CompileTimeComponentUsedAtRuntimeException();
+    }
+
+    public object[] InvocationArguments { get; } = null!;
+    public MethodInfo Method { get; } = null!;
 }
 
 public interface IMethodBuilder {
@@ -73,6 +75,12 @@ public abstract class SyntheticInput<T> {
 }
 
 public abstract class SyntheticMethod<TSignature> { }
+
+public abstract class SyntheticProperty : ISyntheticField {
+    public SyntheticProperty(string parent, Type type) {
+        throw new NotImplementedException();
+    }
+}
 
 // Do AsyncLocal / ThreadLocal magic to check which class / type definition these members should be added
 // Require that these methods are only called at valid callsites e.g. DefineDynamicMembers or inside other member definitions
@@ -108,6 +116,8 @@ public static class SyntheticMemberDeclarationFactory {
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
+    public static void BindSyntheticImplementation(ISyntheticType member, ISyntheticType actualType) { }
+
     public static void Implement(Type baseType) { }
     public static void Implement(ISyntheticType baseType) { }
     public static void Implement(ITypeSymbol baseType) { }
@@ -122,7 +132,7 @@ public static class SyntheticMemberDeclarationFactory {
 
 public static class SyntheticMemberAccessor { }
 
-public sealed class SyntheticInjector : SyntheticClassDefinition<SyntheticInjector> {
+public sealed class SyntheticInjector : SyntheticClassDefinition<SyntheticInjector>, ISyntheticType {
     [Input]
     public ClassDeclarationSyntax InjectorClass { get; set; }
 
@@ -131,6 +141,9 @@ public sealed class SyntheticInjector : SyntheticClassDefinition<SyntheticInject
 
     [Input]
     public ITypeSymbol SomeType { get; set; }
+
+    [Input]
+    public SyntheticInjector ParentInjectorType { get; set; }
 
     [Output]
     public SyntheticInjector Parent { get; set; }
@@ -148,10 +161,12 @@ public sealed class SyntheticInjector : SyntheticClassDefinition<SyntheticInject
 
         SyntheticMemberDeclarationFactory.Implement(SomeType);
 
-        SyntheticMemberDeclarationFactory.DefineConstructor((mb) => {
+        SyntheticMemberDeclarationFactory.DefineConstructor(mb => {
             Field<string>("_name") = mb.Arg<string>("name");
             Field("_foo") = mb.Arg("foo", SomeType);
         });
+
+        SyntheticMemberDeclarationFactory.BindSyntheticImplementation(Parent, ParentInjectorType);
     }
 
     public void InterceptWhatever() {
@@ -172,14 +187,15 @@ public sealed class SyntheticInjector : SyntheticClassDefinition<SyntheticInject
 
     internal static class ComponentFactory__Impl {
         public static SyntheticClassBuilder<SyntheticInjector> Class<TDef>(Action<TDef> setup) where TDef : SyntheticClassDefinition<SyntheticInjector>, new() {
+            var compilation = default(SyntheticCompilation);
             var definition = new TDef();
             setup(definition);
-            var binder = new SyntheticInjector__SyntheticClass_DefinitionBinder(definition);
+            var binder = new SyntheticInjector__SyntheticClass_DefinitionBinder(definition as SyntheticInjector);
             SyntheticMemberDeclarationFactory.SetActiveBinder(binder);
             definition.DefineDynamicMembers();
             binder.BindOutputMembers();
             SyntheticMemberDeclarationFactory.SetActiveBinder(null);
-            return new SyntheticClassBuilder<SyntheticInjector>(definition);
+            return new SyntheticClassBuilder<SyntheticInjector>(compilation);
         }
     }
 
@@ -202,40 +218,47 @@ public sealed class SyntheticInjector : SyntheticClassDefinition<SyntheticInject
         }
 
         public void BindOutputMembers() {
-            syntheticDecl.AddProperty(new SyntheticProperty("Parent", typeof(SyntheticInjector)));
-            syntheticDecl.AddMethod(new SyntheticMethod("Public",  < T >, "Get", renderBody: (instance, tree) => {
-                tree.Line("if (typeof(T) == typeof(Func<string>)) {");
-                tree.Text("return ");
-                tree.DynamicField(instance.InjectorClass.Identifier.Text);
-                tree.Text(";");
-                tree.Line("}");
-                tree.Line("throw new NotSupportedException();");
-            }));
+            // syntheticDecl.AddProperty(new SyntheticProperty("Parent", typeof(SyntheticInjector)));
+            // syntheticDecl.AddMethod(new SyntheticMethod("Public",  < T >, "Get", renderBody: (instance, tree) => {
+            //     tree.Line("if (typeof(T) == typeof(Func<string>)) {");
+            //     tree.Text("return ");
+            //     tree.DynamicField(instance.InjectorClass.Identifier.Text);
+            //     tree.Text(";");
+            //     tree.Line("}");
+            //     tree.Line("throw new NotSupportedException();");
+            // }));
         }
 
         public SyntheticMethod<TSignature> DefineMethod<TSignature>(string name) {
-            if (__method_State == 0) {
-                // Lets assume the interceptor method is just a method for now.
-                var methodSignature = BindInterceptorMethodFromInvocation();
-                var method = syntheticDecl.AddMethod(new SyntheticMethod(methodSignature, renderBody: (instance, tree) => {
-                    tree.Text("Debug.Write(\"A\");");
-                }));
-
-                return method;
-            }
-
-            if (__method_State == 1) {
-                // SomethingDynamic method
-                var method = syntheticDecl.AddMethod(new SyntheticMethod("Public",  <void>, "SomethingDynamic", renderBody: (instance, tree) => {
-                    tree.Text("Debug.Write(\"SomethingDynamic\" + ");
-                    tree.Dynamic__Input(instance.InjectorClass.Identifier.Text);
-                    tree.Text(");");
-                }));
-
-                return;
-            }
+            // if (__method_State == 0) {
+            //     // Lets assume the interceptor method is just a method for now.
+            //     var methodSignature = BindInterceptorMethodFromInvocation();
+            //     var method = syntheticDecl.AddMethod(new SyntheticMethod(methodSignature, renderBody: (instance, tree) => {
+            //         tree.Text("Debug.Write(\"A\");");
+            //     }));
+            //
+            //     return method;
+            // }
+            //
+            // if (__method_State == 1) {
+            //     // SomethingDynamic method
+            //     var method = syntheticDecl.AddMethod(new SyntheticMethod("Public",  <void >,
+            //
+            //     "SomethingDynamic", renderBody:
+            //     (instance, tree) => {
+            //         tree.Text("Debug.Write(\"SomethingDynamic\" + ");
+            //         tree.Dynamic__Input(instance.InjectorClass.Identifier.Text);
+            //         tree.Text(");");
+            //     }));
+            //
+            //     return;
+            // }
 
             throw new InvalidOperationException();
+        }
+
+        private object BindInterceptorMethodFromInvocation() {
+            throw new NotImplementedException();
         }
     }
 
@@ -253,18 +276,18 @@ public sealed class OutputAttribute : Attribute { }
 public sealed class InputAttribute : Attribute { }
 
 public static class Usage {
-    public void Do() {
-        var def = ComponentFactory.Class<SyntheticInjector>(x => {
-            x.InjectInvocation = null!;
-            x.InjectorClass = null!;
-            x.SomeType = null!;
-        });
-
-        var i = def.New(Array.Empty<object>());
-        i.Method("SomethingDynamic").DynamicInvoke(); // Emit invoke for that mehtod
-        i.Field<string>("_factory");
-
-        def.WithAccessModifier(AccessModifier.Public);
-        def.WithMethod( /* Method Builder here*/);
+    public static void Do() {
+        // var def = ComponentFactory.Class<SyntheticInjector>(x => {
+        //     x.InjectInvocation = null!;
+        //     x.InjectorClass = null!;
+        //     x.SomeType = null!;
+        // });
+//
+        // var i = def.New(Array.Empty<object>());
+        // i.Method("SomethingDynamic").DynamicInvoke(); // Emit invoke for that mehtod
+        // i.Field<string>("_factory");
+//
+        // def.WithAccessModifier(AccessModifier.Public);
+        // def.WithMethod( /* Method Builder here*/);
     }
 }
