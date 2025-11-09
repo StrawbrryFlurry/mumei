@@ -40,7 +40,7 @@ public abstract class SyntheticClassDefinition<TSelf> : ISyntheticClass where TS
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
-    public virtual void BindCompilerOutputMembers(ISyntheticClassBuilder<TSelf> classBuilder) { }
+    public virtual void BindCompilerOutputMembers(ISyntheticClassBuilder<TSelf> classBuilder, TSelf target) { }
 
     [DoesNotReturn]
     protected void ThrowDynamicallyImplemented() {

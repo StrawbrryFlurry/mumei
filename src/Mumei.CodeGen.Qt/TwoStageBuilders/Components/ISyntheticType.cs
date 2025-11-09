@@ -13,6 +13,8 @@ public interface ISyntheticTypeInfo<T> {
     public T New(Func<T> constructorExpression);
 }
 
+internal sealed class RuntimeSyntheticType(Type t) : ISyntheticType { }
+
 internal sealed class QtSyntheticTypeInfo<T> : ISyntheticTypeInfo<T> {
     public T New(params object[] args) {
         throw new CompileTimeComponentUsedAtRuntimeException();

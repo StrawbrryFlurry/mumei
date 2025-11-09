@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -8,6 +7,8 @@ using Mumei.CodeGen.Qt.Qt;
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 
 internal sealed class SyntheticClassBuilder<TClassDef>(SyntheticCompilation compilation) : ISyntheticClassBuilder<TClassDef> {
+    public ISyntheticClassBuilder<TClassDef>.IλInternalCompilerApi λCompilerApi { get; }
+
     public ImmutableArray<ISyntheticMethod> Methods { get; }
 
     public TClassDef New(object[] args) {
@@ -129,7 +130,21 @@ public interface ISyntheticClassBuilder<T> : ISyntheticMember, ISyntheticTypeInf
     public ISyntheticClassBuilder<TNested> DeclareNestedClass<TNested>(string name, Action<TNested> bindInputs) where TNested : ISyntheticClass;
 
     public interface IλInternalCompilerApi {
-        public void BindMethodSlot(int methodSlot);
+        // public void BindMethodSlot(Delegate methodSlot, ISyntheticCodeBlock body);
+        // public void BindMethodSlot(Delegate methodSlot, ISyntheticMethod methodImpl);
+
+        public SyntheticCompilation Compilation { get; }
+
+        public void DeclareMethod(ISyntheticMethod method);
+        public void DeclareMethod(
+            ISyntheticAttribute[] attributes,
+            SyntheticAccessModifier[] modifiers,
+            ISyntheticType returnType,
+            string name,
+            ISyntheticTypeParameter[] typeParameters,
+            ISyntheticParameter[] parameters,
+            ISyntheticCodeBlock body
+        );
     }
 }
 
