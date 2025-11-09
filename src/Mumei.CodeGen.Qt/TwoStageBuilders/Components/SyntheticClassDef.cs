@@ -14,7 +14,7 @@ public abstract class SyntheticClassDefinition<TSelf> : ISyntheticClass where TS
         // throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
-    public virtual void SetupDynamic(ISyntheticClassBuilder<TSelf> builder) { }
+    public virtual void SetupDynamic(ISyntheticClassBuilder<TSelf> classBuilder) { }
 
     public ref SyntheticField<T> Field<T>(string name) {
         throw new CompileTimeComponentUsedAtRuntimeException();
@@ -39,6 +39,8 @@ public abstract class SyntheticClassDefinition<TSelf> : ISyntheticClass where TS
     public IEnumerable<T> CompileTimeForEach<T>(IEnumerable<T> items) {
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
+
+    public virtual void BindCompilerOutputMembers(ISyntheticClassBuilder<TSelf> classBuilder) { }
 
     [DoesNotReturn]
     protected void ThrowDynamicallyImplemented() {
@@ -124,7 +126,7 @@ public static class SyntheticMemberDeclarationFactory {
 
 public static class SyntheticMemberAccessor { }
 
-public sealed class SyntheticInjector : SyntheticClassDefinition<SyntheticInjector>, ISyntheticType {
+public sealed class SyntheticInjector : SyntheticClassDefinition<SyntheticInjector> {
     [Input]
     public ClassDeclarationSyntax InjectorClass { get; set; }
 
@@ -264,7 +266,9 @@ public sealed class SyntheticInjector : SyntheticClassDefinition<SyntheticInject
 }
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.GenericParameter | AttributeTargets.Constructor)]
-public sealed class OutputAttribute : Attribute;
+public sealed class OutputAttribute : Attribute {
+    public string? Name { get; set; }
+}
 
 [AttributeUsage(AttributeTargets.Property)]
 public sealed class InputAttribute : Attribute;

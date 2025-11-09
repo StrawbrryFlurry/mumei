@@ -13,8 +13,7 @@ internal sealed class SyntheticClassBuilder<TClassDef>(SyntheticCompilation comp
     public TClassDef New(object[] args) {
         throw new NotImplementedException();
     }
-
-    public TClassDef New(Expression<Func<TClassDef>> constructorExpression) {
+    public TClassDef New(Func<TClassDef> constructorExpression) {
         throw new NotImplementedException();
     }
 
@@ -82,12 +81,9 @@ internal sealed class SyntheticClassBuilder<TClassDef>(SyntheticCompilation comp
     }
 }
 
-public interface ISyntheticTypeInfo<T> {
-    public T New(params object[] args);
-    public T New(Expression<Func<T>> constructorExpression);
-}
-
 public interface ISyntheticClassBuilder<T> : ISyntheticMember, ISyntheticTypeInfo<T> {
+    public IλInternalCompilerApi λCompilerApi { get; }
+
     public ISyntheticClassBuilder<T> WithName(string name);
 
     public ISyntheticClassBuilder<T> WithModifiers(params ReadOnlySpan<SyntheticAccessModifier> modifiers);
@@ -131,6 +127,10 @@ public interface ISyntheticClassBuilder<T> : ISyntheticMember, ISyntheticTypeInf
     public ISyntheticClassBuilder<T> Bind<TTarget>(ITypeSymbol type);
 
     public ISyntheticClassBuilder<TNested> DeclareNestedClass<TNested>(string name, Action<TNested> bindInputs) where TNested : ISyntheticClass;
+
+    public interface IλInternalCompilerApi {
+        public void BindMethodSlot(int methodSlot);
+    }
 }
 
 public interface ISyntheticClass : ISyntheticType, ISyntheticMember {

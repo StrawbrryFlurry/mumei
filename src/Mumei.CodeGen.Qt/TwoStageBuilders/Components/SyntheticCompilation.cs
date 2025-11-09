@@ -11,7 +11,7 @@ namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 /// </summary>
 public sealed class SyntheticCompilation(Compilation compilation) {
     // ReSharper disable once InconsistentNaming
-    public IλInternalSyntheticCompilationCompilerApi λCompilerApi => field ??= new QtSyntheticCompilationCompilerApi(this);
+    public IλInternalCompilerApi λCompilerApi => field ??= new QtSyntheticCompilationCompilerApi(this);
 
     public ISyntheticNamespace NamespaceFromCompilation(string name) {
         return new QtSyntheticNamespace(name);
@@ -59,25 +59,25 @@ public sealed class SyntheticCompilation(Compilation compilation) {
         var type = compilation.GetTypeByMetadataName(typeof(T).FullName!);
         return type ?? throw new InvalidOperationException("Type not found in compilation: " + typeof(T).FullName);
     }
-}
 
-internal sealed class QtSyntheticCompilationCompilerApi(SyntheticCompilation compilation) : IλInternalSyntheticCompilationCompilerApi {
-    public ISyntheticClassBuilder<TClassDefinition> DeclareClassBuilder<TClassDefinition>(string name) {
-        return new SyntheticClassBuilder<TClassDefinition>(compilation).WithName(name);
+    /// <summary>
+    /// API Surface required by the compiler implementation to declare synthetic components.
+    /// </summary>
+    // ReSharper disable once InconsistentNaming
+    public interface IλInternalCompilerApi {
+        public ISyntheticClassBuilder<TClassDefinition> DeclareClassBuilder<TClassDefinition>(string name);
+
+        public ISyntheticClassBuilder<TClassDefinition> TrackClass<TClassDefinition>(ISyntheticClassBuilder<TClassDefinition> classBuilder)
+            where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new();
     }
 
-    public ISyntheticClassBuilder<TClassDefinition> TrackClass<TClassDefinition>(ISyntheticClassBuilder<TClassDefinition> classBuilder) where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new() {
-        throw new NotImplementedException();
+    private sealed class QtSyntheticCompilationCompilerApi(SyntheticCompilation compilation) : IλInternalCompilerApi {
+        public ISyntheticClassBuilder<TClassDefinition> DeclareClassBuilder<TClassDefinition>(string name) {
+            return new SyntheticClassBuilder<TClassDefinition>(compilation).WithName(name);
+        }
+
+        public ISyntheticClassBuilder<TClassDefinition> TrackClass<TClassDefinition>(ISyntheticClassBuilder<TClassDefinition> classBuilder) where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new() {
+            throw new NotImplementedException();
+        }
     }
-}
-
-/// <summary>
-/// API Surface required by the compiler implementation to declare synthetic components.
-/// </summary>
-// ReSharper disable once InconsistentNaming
-public interface IλInternalSyntheticCompilationCompilerApi {
-    public ISyntheticClassBuilder<TClassDefinition> DeclareClassBuilder<TClassDefinition>(string name);
-
-    public ISyntheticClassBuilder<TClassDefinition> TrackClass<TClassDefinition>(ISyntheticClassBuilder<TClassDefinition> classBuilder)
-        where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new();
 }
