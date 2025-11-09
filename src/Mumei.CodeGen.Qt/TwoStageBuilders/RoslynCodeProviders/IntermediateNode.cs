@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
@@ -89,6 +90,10 @@ public readonly struct IntermediateMethodInfo(SemanticModel semanticModel, IMeth
         var targetType = semanticModel.Compilation.GetTypeByMetadataName(typeof(T).FullName!);
         return SymbolEqualityComparer.Default.Equals(declaredIn, targetType);
     }
+
+    public IntermediateTypeInfo ReturnTypeInfo => new(semanticModel, methodSymbol.ReturnType);
+
+    public ImmutableArray<ITypeSymbol> TypeArguments => methodSymbol.TypeArguments;
 }
 
 public readonly struct IntermediateTypeInfo(SemanticModel semanticModel, ITypeSymbol typeSymbol) { }

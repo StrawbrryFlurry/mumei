@@ -11,7 +11,7 @@ public readonly struct SynthesizedCodeBlock(string content) : IRenderNode {
         return new SynthesizedCodeBlock(builder.GetSourceText());
     }
 
-    public static SynthesizedCodeBlock Create(Action<IRenderTreeBuilder> dynamicContent) {
+    public static SynthesizedCodeBlock Create(RenderNode dynamicContent) {
         return Create(dynamicContent, static (action, builder) => action(builder));
     }
 

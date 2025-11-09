@@ -10,15 +10,29 @@ namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 /// Components that reference other components use this to resolve those dependencies.
 /// </summary>
 public sealed class SyntheticCompilation(Compilation compilation) {
+    // ReSharper disable once InconsistentNaming
+    public IλInternalSyntheticCompilationCompilerApi λCompilerApi => field ??= new QtSyntheticCompilationCompilerApi(this);
+
+    public ISyntheticNamespace NamespaceFromCompilation(string name) {
+        return new QtSyntheticNamespace(name);
+    }
+
     public ISyntheticClassBuilder<CompileTimeUnknown> DeclareClass(string name) {
         return new SyntheticClassBuilder<CompileTimeUnknown>(this);
+    }
+
+    public ISyntheticClassBuilder<TClassDefinition> DeclareClass<TClassDefinition>(
+        string name,
+        Action<TClassDefinition> inputBinder
+    ) where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new() {
+        throw new NotSupportedException();
     }
 
     public ISyntheticMethod Method<TMethodDefinition>(
         Action<TMethodDefinition> inputBinder,
         Func<TMethodDefinition, Delegate> methodSelector
     ) where TMethodDefinition : SyntheticMethodDefinition, new() {
-        return null!;
+        throw new NotSupportedException();
     }
 
     public ISyntheticMethod InterceptorMethod<TMethodDefinition>(
@@ -26,7 +40,7 @@ public sealed class SyntheticCompilation(Compilation compilation) {
         Action<TMethodDefinition> inputBinder,
         Func<TMethodDefinition, Delegate> methodSelector
     ) where TMethodDefinition : SyntheticMethodDefinition, new() {
-        return null!;
+        throw new NotSupportedException();
     }
 
     public string MakeUniqueName(string name) {
@@ -36,4 +50,34 @@ public sealed class SyntheticCompilation(Compilation compilation) {
     public SynthesizedClassDeclaration Synthesize<TClass>(ISyntheticClassBuilder<TClass> builder) {
         return new SynthesizedClassDeclaration();
     }
+
+    public SynthesizedNamespace Synthesize(ISyntheticNamespace ns) {
+        return new SynthesizedNamespace();
+    }
+
+    public ITypeSymbol TypeFromCompilation<T>() {
+        var type = compilation.GetTypeByMetadataName(typeof(T).FullName!);
+        return type ?? throw new InvalidOperationException("Type not found in compilation: " + typeof(T).FullName);
+    }
+}
+
+internal sealed class QtSyntheticCompilationCompilerApi(SyntheticCompilation compilation) : IλInternalSyntheticCompilationCompilerApi {
+    public ISyntheticClassBuilder<TClassDefinition> DeclareClassBuilder<TClassDefinition>(string name) {
+        return new SyntheticClassBuilder<TClassDefinition>(compilation).WithName(name);
+    }
+
+    public ISyntheticClassBuilder<TClassDefinition> TrackClass<TClassDefinition>(ISyntheticClassBuilder<TClassDefinition> classBuilder) where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new() {
+        throw new NotImplementedException();
+    }
+}
+
+/// <summary>
+/// API Surface required by the compiler implementation to declare synthetic components.
+/// </summary>
+// ReSharper disable once InconsistentNaming
+public interface IλInternalSyntheticCompilationCompilerApi {
+    public ISyntheticClassBuilder<TClassDefinition> DeclareClassBuilder<TClassDefinition>(string name);
+
+    public ISyntheticClassBuilder<TClassDefinition> TrackClass<TClassDefinition>(ISyntheticClassBuilder<TClassDefinition> classBuilder)
+        where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new();
 }

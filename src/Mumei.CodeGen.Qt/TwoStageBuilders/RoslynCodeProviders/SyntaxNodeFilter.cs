@@ -11,24 +11,27 @@ internal sealed class SyntaxNodeFilter {
         string methodName,
         string immediateTargetName
     ) {
-        return IsInvocationOf(node, methodName, immediateTargetName, out _);
+        return IsInvocationOf(node, methodName, immediateTargetName, out _, out _);
     }
 
     public static bool IsInvocationOf(
         SyntaxNode node,
         string methodName,
         string immediateTargetName,
-        [NotNullWhen(true)] out InvocationExpressionSyntax? invocationExpression
+        [NotNullWhen(true)] out InvocationExpressionSyntax? invocationExpression,
+        [NotNullWhen(true)] out MemberAccessExpressionSyntax? memberAccessExpression
     ) {
         invocationExpression = null;
+        memberAccessExpression = null;
         if (node is not InvocationExpressionSyntax invocation) {
             return false;
         }
 
-        if (invocation.Expression is not MemberAccessExpressionSyntax { Name.Identifier.Text: var actualMethodName, Expression: IdentifierNameSyntax { Identifier.Text: var actualTargetName } }) {
+        if (invocation.Expression is not MemberAccessExpressionSyntax { Name.Identifier.Text: var actualMethodName, Expression: SimpleNameSyntax { Identifier.Text: var actualTargetName } } memberAccessExpressionSyntax) {
             return false;
         }
 
+        memberAccessExpression = memberAccessExpressionSyntax;
         if (actualMethodName != methodName) {
             return false;
         }

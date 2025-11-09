@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -6,13 +8,13 @@ using Mumei.CodeGen.Qt.Qt;
 
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 
-public abstract class SyntheticClassDefinition<TSelf> where TSelf : new() {
+public abstract class SyntheticClassDefinition<TSelf> : ISyntheticClass where TSelf : new() {
     // Add an analyzer that ensures Synthetic Classes are never instantiated by user code!
     protected SyntheticClassDefinition() {
         // throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
-    public virtual void DefineDynamicMembers() { }
+    public virtual void SetupDynamic(ISyntheticClassBuilder<TSelf> builder) { }
 
     public ref SyntheticField<T> Field<T>(string name) {
         throw new CompileTimeComponentUsedAtRuntimeException();
@@ -29,16 +31,28 @@ public abstract class SyntheticClassDefinition<TSelf> where TSelf : new() {
     public Delegate Method(string name) {
         throw new NotSupportedException();
     }
-    public TDef Method<TDef>(string name) where TDef : Delegate {
+
+    public TSignature Method<TSignature>(string name) where TSignature : Delegate {
         throw new NotSupportedException();
     }
 
-    internal void AddField(ISyntheticField field) { }
-    internal void AddMethod(ISyntheticMethod method) { }
-    internal void AddProperty(ISyntheticField property) { }
+    public IEnumerable<T> CompileTimeForEach<T>(IEnumerable<T> items) {
+        throw new CompileTimeComponentUsedAtRuntimeException();
+    }
+
+    [DoesNotReturn]
+    protected void ThrowDynamicallyImplemented() {
+        throw new CompileTimeComponentUsedAtRuntimeException();
+    }
+
+    public ImmutableArray<ISyntheticMethod> Methods { get; }
 }
 
-public abstract class SyntheticMethodDefinition {
+public abstract class SyntheticMethodDefinition { }
+
+public abstract class SyntheticInterceptorMethodDefinition {
+    public virtual void BindDynamicComponents(IMethodBuilder methodBuilder) { }
+
     public T Invoke<T>() {
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
@@ -50,9 +64,11 @@ public abstract class SyntheticMethodDefinition {
 public interface IMethodBuilder {
     public T Arg<T>(string name);
     public CompileTimeUnknown Arg(string name, ITypeSymbol type);
+    public IMethodBuilder BindSyntheticType<TTarget>(ITypeSymbol type);
 }
 
 public interface ISyntheticField { }
+public interface ISyntheticField<T> { }
 
 public abstract class SyntheticField<T> {
     public static implicit operator SyntheticField<T>(T value) {
@@ -64,59 +80,27 @@ public abstract class SyntheticField<T> {
     }
 }
 
-public abstract class SyntheticInput<T> {
-    public static implicit operator SyntheticInput<T>(T value) {
-        throw new NotSupportedException();
-    }
-
-    public static implicit operator T(SyntheticInput<T> value) {
-        throw new NotSupportedException();
-    }
-}
-
-public abstract class SyntheticMethod<TSignature> { }
-
-public abstract class SyntheticProperty : ISyntheticField {
-    public SyntheticProperty(string parent, Type type) {
-        throw new NotImplementedException();
-    }
-}
-
 // Do AsyncLocal / ThreadLocal magic to check which class / type definition these members should be added
 // Require that these methods are only called at valid callsites e.g. DefineDynamicMembers or inside other member definitions
 public static class SyntheticMemberDeclarationFactory {
-    private static AsyncLocal<SyntheticInjector.ISyntheticClassDefinition_MemberDeclarationBinder?> _activeBinder = new();
+    [ThreadStatic]
+    private static SyntheticInjector.ISyntheticClassDefinition_MemberDeclarationBinder? _activeBinder;
 
     internal static void SetActiveBinder(SyntheticInjector.ISyntheticClassDefinition_MemberDeclarationBinder? binder) {
-        _activeBinder.Value = binder;
+        _activeBinder = binder;
     }
 
-    public static SyntheticField<T> DefineField<T>(string name) {
-        if (_activeBinder.Value is not { } binder) {
-            throw new InvalidOperationException();
-        }
-
-        return binder.DefineField<T>(name);
-    }
-    public static SyntheticField<CompileTimeUnknown> DefineField(Type type, string name) {
-        throw new CompileTimeComponentUsedAtRuntimeException();
-    }
-    public static SyntheticField<CompileTimeUnknown> DefineField(string name, ITypeSymbol type) {
-        throw new CompileTimeComponentUsedAtRuntimeException();
-    }
-    public static SyntheticField<CompileTimeUnknown> DefineField(string name, ISyntheticType type) {
+    public static ISyntheticMethod<TSignature> DefineInterceptorMethod<TSignature>(InvocationExpressionSyntax invocationToProxy, TSignature impl) where TSignature : Delegate {
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
-    public static SyntheticMethod<TSignature> DefineInterceptorMethod<TSignature>(InvocationExpressionSyntax invocationToProxy, TSignature impl) where TSignature : Delegate {
-        throw new CompileTimeComponentUsedAtRuntimeException();
-    }
-
-    public static SyntheticMethod<TSignature> DefineMethod<TSignature>(string name, TSignature signature) where TSignature : Delegate {
+    public static ISyntheticMethod<TSignature> DefineMethod<TSignature>(string name, TSignature signature) where TSignature : Delegate {
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
     public static void BindSyntheticImplementation(ISyntheticType member, ISyntheticType actualType) { }
+    public static void BindSyntheticImplementation(Type member, ISyntheticType actualType) { }
+    public static void BindSyntheticImplementation(Type member, ITypeSymbol actualType) { }
 
     public static void Implement(Type baseType) { }
     public static void Implement(ISyntheticType baseType) { }
@@ -128,6 +112,14 @@ public static class SyntheticMemberDeclarationFactory {
 
     public static void DefineConstructor<TImplementaiton>(Delegate impl) { }
     public static void DefineConstructor(Action<IMethodBuilder> impl) { }
+
+    private static SyntheticInjector.ISyntheticClassDefinition_MemberDeclarationBinder EnsureBinder() {
+        if (_activeBinder is not { } binder) {
+            throw new InvalidOperationException();
+        }
+
+        return binder;
+    }
 }
 
 public static class SyntheticMemberAccessor { }
@@ -149,24 +141,24 @@ public sealed class SyntheticInjector : SyntheticClassDefinition<SyntheticInject
     public SyntheticInjector Parent { get; set; }
 
     public SyntheticField<Func<string>> FactoryField { get; set; }
-    public SyntheticMethod<Action> InterceptInjectWhatever { get; set; }
-    public SyntheticMethod<Action> SomethingDynamic { get; set; }
+    public ISyntheticMethod<Action> InterceptInjectWhatever { get; set; }
+    public ISyntheticMethod<Action> SomethingDynamic { get; set; }
 
-    public override void DefineDynamicMembers() {
-        FactoryField = SyntheticMemberDeclarationFactory.DefineField<Func<string>>($"_factory_{InjectorClass.Identifier}}}");
-        InterceptInjectWhatever = SyntheticMemberDeclarationFactory.DefineInterceptorMethod(InjectInvocation, InterceptWhatever);
-        SomethingDynamic = SyntheticMemberDeclarationFactory.DefineMethod("SomethingDynamic", () => {
-            Debug.WriteLine("SomethingDynamic" + InjectorClass.Identifier.Text);
-        });
-
-        SyntheticMemberDeclarationFactory.Implement(SomeType);
-
-        SyntheticMemberDeclarationFactory.DefineConstructor(mb => {
-            Field<string>("_name") = mb.Arg<string>("name");
-            Field("_foo") = mb.Arg("foo", SomeType);
-        });
-
-        SyntheticMemberDeclarationFactory.BindSyntheticImplementation(Parent, ParentInjectorType);
+    public override void SetupDynamic(ISyntheticClassBuilder<SyntheticInjector> builder) {
+        // FactoryField = SyntheticMemberDeclarationFactory.DefineField<Func<string>>($"_factory_{InjectorClass.Identifier}}}");
+        // InterceptInjectWhatever = SyntheticMemberDeclarationFactory.DefineInterceptorMethod(InjectInvocation, InterceptWhatever);
+        // SomethingDynamic = SyntheticMemberDeclarationFactory.DefineMethod("SomethingDynamic", () => {
+        //     Debug.WriteLine("SomethingDynamic" + InjectorClass.Identifier.Text);
+        // });
+        //
+        // SyntheticMemberDeclarationFactory.Implement(SomeType);
+        //
+        // SyntheticMemberDeclarationFactory.DefineConstructor(mb => {
+        //     Field<string>("_name") = mb.Arg<string>("name");
+        //     Field("_foo") = mb.Arg("foo", SomeType);
+        // });
+        //
+        // SyntheticMemberDeclarationFactory.BindSyntheticImplementation(Parent, ParentInjectorType);
     }
 
     public void InterceptWhatever() {
@@ -192,7 +184,7 @@ public sealed class SyntheticInjector : SyntheticClassDefinition<SyntheticInject
             setup(definition);
             var binder = new SyntheticInjector__SyntheticClass_DefinitionBinder(definition as SyntheticInjector);
             SyntheticMemberDeclarationFactory.SetActiveBinder(binder);
-            definition.DefineDynamicMembers();
+            // definition.DefineDynamicMembers(binder.ClassBuilder);
             binder.BindOutputMembers();
             SyntheticMemberDeclarationFactory.SetActiveBinder(null);
             return new SyntheticClassBuilder<SyntheticInjector>(compilation);
@@ -201,6 +193,8 @@ public sealed class SyntheticInjector : SyntheticClassDefinition<SyntheticInject
 
     // For each synthetic class declaration, generate a setup class that can map all the dynamic values
     internal sealed class SyntheticInjector__SyntheticClass_DefinitionBinder(SyntheticInjector syntheticDecl) : ISyntheticClassDefinition_MemberDeclarationBinder {
+        public ISyntheticClassBuilder<CompileTimeUnknown> ClassBuilder { get; set; }
+
         private int __field_State = 0;
         private int __method_State = 0;
 
@@ -229,7 +223,7 @@ public sealed class SyntheticInjector : SyntheticClassDefinition<SyntheticInject
             // }));
         }
 
-        public SyntheticMethod<TSignature> DefineMethod<TSignature>(string name) {
+        public ISyntheticMethod<TSignature> DefineMethod<TSignature>(string name) where TSignature : Delegate {
             // if (__method_State == 0) {
             //     // Lets assume the interceptor method is just a method for now.
             //     var methodSignature = BindInterceptorMethodFromInvocation();
@@ -263,17 +257,25 @@ public sealed class SyntheticInjector : SyntheticClassDefinition<SyntheticInject
     }
 
     internal interface ISyntheticClassDefinition_MemberDeclarationBinder {
-        public SyntheticField<T> DefineField<T>(string name);
+        public ISyntheticClassBuilder<CompileTimeUnknown> ClassBuilder { get; }
 
         public void BindOutputMembers();
     }
 }
 
-[AttributeUsage(AttributeTargets.Method | AttributeTargets.Field | AttributeTargets.Property)]
-public sealed class OutputAttribute : Attribute { }
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.GenericParameter | AttributeTargets.Constructor)]
+public sealed class OutputAttribute : Attribute;
 
 [AttributeUsage(AttributeTargets.Property)]
-public sealed class InputAttribute : Attribute { }
+public sealed class InputAttribute : Attribute;
+
+/// <summary>
+/// Declares a type parameter as bindable in a synthetic type definition
+/// meaning it is not part of the actual type declaration but instead
+/// will resolve to a concrete type when the type is constructed.
+/// </summary>
+[AttributeUsage(AttributeTargets.GenericParameter)]
+public sealed class BindableAttribute : Attribute;
 
 public static class Usage {
     public static void Do() {

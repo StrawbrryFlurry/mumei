@@ -59,7 +59,7 @@ internal sealed class CodeFragmentGenerator_SyntheticClass : IIncrementalGenerat
 
         var compilation = new SyntheticCompilation(codeFragments[0].SemanticModel.Compilation);
         var interceptorClass = compilation.DeclareClass(compilation.MakeUniqueName("CodeFragmentInterceptor"))
-            .WithAccessibility(SyntheticAccessModifier.File, SyntheticAccessModifier.Sealed);
+            .WithModifiers(SyntheticAccessModifier.File, SyntheticAccessModifier.Sealed);
 
         foreach (var codeFragment in codeFragments) {
             var declaredBody = new GloballyQualifyingSyntaxRewriter(codeFragment.SemanticModel).Visit(codeFragment.State.Body);
@@ -70,14 +70,14 @@ internal sealed class CodeFragmentGenerator_SyntheticClass : IIncrementalGenerat
             var fragment = LiteralNode.ForRawString(bodyContent.TrimEnd('\r', '\n'));
 
             interceptorClass.DeclareInterceptorMethod<SimpleCodeFragmentCreateMethod>(
+                    interceptorClass.MakeUniqueName("Intercept_Create"),
                     codeFragment.Invocation,
                     m => {
                         m.Body = new SyntheticRawStringLiteralExpression(bodyContent.TrimEnd('\r', '\n'), Strings.RawStringLiteral12);
                     },
                     m => m.InterceptCreate
                 )
-                .WithAccessibility(SyntheticAccessModifier.Internal, SyntheticAccessModifier.Static)
-                .WithName(cls => cls.MakeUniqueName("Intercept_Create"));
+                .WithAccessibility(SyntheticAccessModifier.Internal, SyntheticAccessModifier.Static);
         }
 
 
@@ -90,8 +90,8 @@ internal sealed class CodeFragmentInterceptor : SyntheticClassDefinition<CodeFra
     [Input]
     public ISyntheticMethod InterceptCreate { get; set; } = null!;
 
-    public override void DefineDynamicMembers() {
-        AddMethod(InterceptCreate);
+    public override void SetupDynamic(ISyntheticClassBuilder<CodeFragmentInterceptor> builder) {
+        // builder.DeclareMethod()
     }
 }
 
