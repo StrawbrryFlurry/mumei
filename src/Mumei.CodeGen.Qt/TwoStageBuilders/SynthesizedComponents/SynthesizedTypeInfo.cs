@@ -20,6 +20,7 @@ public readonly struct SynthesizedTypeInfo : IEquatable<SynthesizedTypeInfo> {
         renderTree.Interpolate($"typeof({node.QualifiedTypeName})");
     });
 
+    public SynthesizedTypeInfo(ITypeSymbol type) : this(type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), false) { }
     public SynthesizedTypeInfo(Type type) : this(RuntimeTypeSerializer.GetTypeFullName(type), false) { }
     public SynthesizedTypeInfo(string qualifiedTypeName) : this(qualifiedTypeName, false) { }
 

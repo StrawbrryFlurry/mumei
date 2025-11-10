@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Immutable;
+using Microsoft.CodeAnalysis.CSharp;
 using Mumei.Roslyn;
 
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
@@ -12,6 +13,17 @@ public readonly struct SynthesizedAttribute(SynthesizedTypeInfo type, Synthesize
         SynthesizedAttributeArgumentList argumentList = default
     ) {
         return new SynthesizedAttribute(type, argumentList);
+    }
+
+    public static SynthesizedAttribute Intercept(
+        InterceptableLocation location
+    ) {
+        var interceptableLocationType = new SynthesizedTypeInfo("global::System.Runtime.CompilerServices.InterceptsLocationAttribute");
+        SynthesizedAttributeArgumentList.Builder builder = [
+            new SynthesizedPositionalArgument(location.Version.ToString()),
+            new SynthesizedPositionalArgument("\"" + location.Data + "\"")
+        ];
+        return new SynthesizedAttribute(interceptableLocationType, builder);
     }
 
     public static SynthesizedAttribute Create(

@@ -100,6 +100,27 @@ public readonly struct SynthesizedMethodDeclaration(
 ) : IRenderNode {
     public string Name => name;
 
+    public static SynthesizedMethodDeclaration Create(
+        ImmutableArray<SynthesizedAttribute> attributes,
+        AccessModifier accessModifier,
+        SynthesizedTypeInfo returnType,
+        string name,
+        SynthesizedTypeParameterList typeParameters,
+        ImmutableArray<SynthesizedParameter> parameters,
+        SynthesizedCodeBlock body
+    ) {
+        return new SynthesizedMethodDeclaration(
+            attributes.EnsureInitialized(),
+            accessModifier,
+            returnType,
+            name,
+            typeParameters,
+            parameters.EnsureInitialized(),
+            body
+        );
+    }
+
+
     public static SynthesizedMethodDeclaration Create<TBodyState>(
         ImmutableArray<SynthesizedAttribute> attributes,
         AccessModifier accessModifier,
@@ -113,12 +134,12 @@ public readonly struct SynthesizedMethodDeclaration(
         var body = SynthesizedCodeBlock.Create(bodyState, declareBody);
 
         return new SynthesizedMethodDeclaration(
-            attributes,
+            attributes.EnsureInitialized(),
             accessModifier,
             returnType,
             name,
             typeParameters,
-            parameters,
+            parameters.EnsureInitialized(),
             body
         );
     }
@@ -147,6 +168,18 @@ public readonly struct SynthesizedMethodDeclaration(
         renderTree.Node(body);
         renderTree.NewLine();
         renderTree.EndCodeBlock();
+    }
+
+    public SynthesizedMethodDeclaration WithName(string newName) {
+        return new SynthesizedMethodDeclaration(
+            attributes,
+            accessModifier,
+            returnType,
+            newName,
+            typeParameters,
+            parameters,
+            body
+        );
     }
 }
 

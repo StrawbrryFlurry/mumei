@@ -15,9 +15,9 @@ public sealed class TestCompilationBuilder {
 
     public Compilation Compilation => _compilation ??= CreateCompilation();
 
-    public CSharpParseOptions ParseOptions => new CSharpParseOptions(LanguageVersion.CSharp13)
+    public CSharpParseOptions ParseOptions => new CSharpParseOptions(LanguageVersion.Preview)
         .WithFeatures([
-            new KeyValuePair<string, string>("InterceptorsNamespaces", $"{_assemblyName}.Generated")
+            new KeyValuePair<string, string>("InterceptorsNamespaces", $"{_assemblyName}.Generated;Generated")
         ]);
 
     public TestCompilationBuilder WithAssemblyName(string assemblyName) {
@@ -77,7 +77,7 @@ public sealed class TestCompilationBuilder {
     private void UpdateSyntaxTreesWithParseOptions() {
         for (var i = 0; i < _sources.Count; i++) {
             var syntaxTree = _sources[i];
-            var syntaxRootNode = (CSharpSyntaxNode)syntaxTree.GetRoot();
+            var syntaxRootNode = (CSharpSyntaxNode) syntaxTree.GetRoot();
             var updatedTree = CSharpSyntaxTree.Create(syntaxRootNode, ParseOptions, syntaxTree.FilePath);
             _sources[i] = updatedTree;
         }

@@ -28,21 +28,6 @@ public sealed class SyntheticCompilation(Compilation compilation) {
         throw new NotSupportedException();
     }
 
-    public ISyntheticMethod Method<TMethodDefinition>(
-        Action<TMethodDefinition> inputBinder,
-        Func<TMethodDefinition, Delegate> methodSelector
-    ) where TMethodDefinition : SyntheticMethodDefinition, new() {
-        throw new NotSupportedException();
-    }
-
-    public ISyntheticMethod InterceptorMethod<TMethodDefinition>(
-        InvocationExpressionSyntax invocationToIntercept,
-        Action<TMethodDefinition> inputBinder,
-        Func<TMethodDefinition, Delegate> methodSelector
-    ) where TMethodDefinition : SyntheticMethodDefinition, new() {
-        throw new NotSupportedException();
-    }
-
     public string MakeUniqueName(string name) {
         return null!;
     }

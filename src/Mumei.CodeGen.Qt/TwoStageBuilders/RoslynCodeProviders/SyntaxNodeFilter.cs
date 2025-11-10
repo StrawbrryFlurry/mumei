@@ -48,7 +48,19 @@ internal sealed class SyntaxNodeFilter {
         SyntaxNode node,
         string methodName
     ) {
-        return node is InvocationExpressionSyntax invocation && invocation.Expression is IdentifierNameSyntax { Identifier.Text: var actualMethodName } && actualMethodName == methodName;
+        if (node is not InvocationExpressionSyntax invocation) {
+            return false;
+        }
+
+        if (invocation.Expression is IdentifierNameSyntax { Identifier.Text: var immediateMethodInvocationName }) {
+            return immediateMethodInvocationName == methodName;
+        }
+
+        if (invocation.Expression is MemberAccessExpressionSyntax { Name.Identifier.Text: var memberMethodInvocationName }) {
+            return memberMethodInvocationName == methodName;
+        }
+
+        return false;
     }
 }
 

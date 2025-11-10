@@ -87,8 +87,31 @@ internal readonly struct InterceptInvocationIntermediateNode<TState>(
 public readonly struct IntermediateMethodInfo(SemanticModel semanticModel, IMethodSymbol methodSymbol) {
     public bool IsDeclaredIn<T>() {
         var declaredIn = methodSymbol.ContainingType;
-        var targetType = semanticModel.Compilation.GetTypeByMetadataName(typeof(T).FullName!);
+        var targetTypeName = typeof(T).FullName!;
+        if (typeof(T).IsGenericType) {
+            targetTypeName = targetTypeName[..(targetTypeName.IndexOf('`') + 2)];
+        }
+
+        var targetType = semanticModel.Compilation.GetTypeByMetadataName(targetTypeName);
         return SymbolEqualityComparer.Default.Equals(declaredIn, targetType);
+    }
+
+    public bool IsDeclaredInAnyConstructedFormOf<T>() {
+        var declaredIn = methodSymbol.ContainingType;
+
+        var targetTypeName = typeof(T).FullName!;
+        if (typeof(T).IsGenericType) {
+            targetTypeName = targetTypeName[..(targetTypeName.IndexOf('`') + 2)];
+        }
+
+        var targetType = semanticModel.Compilation.GetTypeByMetadataName(targetTypeName);
+
+        if (targetType is null || !targetType.IsGenericType || declaredIn.TypeArguments.Length != targetType.TypeArguments.Length) {
+            return false;
+        }
+
+        var constructedTargetType = targetType.Construct(declaredIn.TypeArguments, declaredIn.TypeArgumentNullableAnnotations);
+        return SymbolEqualityComparer.Default.Equals(declaredIn, constructedTargetType);
     }
 
     public IntermediateTypeInfo ReturnTypeInfo => new(semanticModel, methodSymbol.ReturnType);
