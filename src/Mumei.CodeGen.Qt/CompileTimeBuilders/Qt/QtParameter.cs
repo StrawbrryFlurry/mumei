@@ -6,7 +6,7 @@ using Mumei.CodeGen.Qt.Output;
 
 namespace Mumei.CodeGen.Qt.Qt;
 
-public readonly struct QtParameter : IQtTemplateBindable, IRenderNode {
+public readonly struct QtParameter : IQtTemplateBindable, IRenderFragment {
     public required string Name { get; init; }
     public required IQtType Type { get; init; }
     public required IQtCompileTimeValue? DefaultValue { get; init; }
@@ -32,7 +32,7 @@ public readonly struct QtParameter : IQtTemplateBindable, IRenderNode {
 [CollectionBuilder(typeof(QtParameterList), nameof(Initialize))]
 public readonly struct QtParameterList(
     QtCollection<QtParameter> parameters
-) : IQtTemplateBindable, IRenderNode, IQtMemoryAccessor<QtParameter>, IEnumerable<QtParameter> {
+) : IQtTemplateBindable, IRenderFragment, IQtMemoryAccessor<QtParameter>, IEnumerable<QtParameter> {
     public int Count => parameters.Count;
 
     internal QtCollection<QtParameter> Parameters => parameters;

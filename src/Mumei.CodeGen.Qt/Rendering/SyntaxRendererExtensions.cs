@@ -11,7 +11,7 @@ internal static class SyntaxRendererExtensions {
     }
 
     extension(ParameterAttributes attributes) {
-        public RenderNode<ParameterAttributes> List => new(attributes, (tree, parameterAttributes) => {
+        public RenderFragment<ParameterAttributes> List => new(attributes, (tree, parameterAttributes) => {
             if (parameterAttributes == ParameterAttributes.None) {
                 return;
             }
@@ -43,15 +43,15 @@ internal static class SyntaxRendererExtensions {
     }
 
     extension(IQtType type) {
-        public RenderNode<IQtType> Expression => new(type, static (renderTree, type) => type.RenderExpression(renderTree));
+        public RenderFragment<IQtType> Expression => new(type, static (renderTree, type) => type.RenderExpression(renderTree));
 
-        public RenderNode<IQtType> TypeOf => new(type, static (renderTree, type) => {
+        public RenderFragment<IQtType> TypeOf => new(type, static (renderTree, type) => {
             renderTree.Text("typeof(");
             type.RenderFullName(renderTree);
             renderTree.Text(")");
         });
 
-        public RenderNode<IQtType> FullName => new(type, static (renderTree, type) => {
+        public RenderFragment<IQtType> FullName => new(type, static (renderTree, type) => {
             type.RenderFullName(renderTree);
         });
     }
@@ -75,7 +75,7 @@ internal static class SyntaxRendererExtensions {
             renderTree.Line("}");
         }
 
-        public void SeparatedList<TItem>(ReadOnlySpan<TItem> items) where TItem : IRenderNode {
+        public void SeparatedList<TItem>(ReadOnlySpan<TItem> items) where TItem : IRenderFragment {
             for (var i = 0; i < items.Length; i++) {
                 if (i > 0) {
                     renderTree.Text(", ");
@@ -85,7 +85,7 @@ internal static class SyntaxRendererExtensions {
             }
         }
 
-        public void List<TItem>(ReadOnlySpan<TItem> items) where TItem : IRenderNode {
+        public void List<TItem>(ReadOnlySpan<TItem> items) where TItem : IRenderFragment {
             for (var i = 0; i < items.Length; i++) {
                 var t = items[i];
                 renderTree.Node(t);
@@ -96,7 +96,7 @@ internal static class SyntaxRendererExtensions {
             }
         }
 
-        public void SeparatedList<TItem, TRenderItem>(ReadOnlySpan<TItem> items, Func<TItem, TRenderItem> renderItemSelector) where TRenderItem : IRenderNode {
+        public void SeparatedList<TItem, TRenderItem>(ReadOnlySpan<TItem> items, Func<TItem, TRenderItem> renderItemSelector) where TRenderItem : IRenderFragment {
             for (var i = 0; i < items.Length; i++) {
                 if (i > 0) {
                     renderTree.Text(", ");

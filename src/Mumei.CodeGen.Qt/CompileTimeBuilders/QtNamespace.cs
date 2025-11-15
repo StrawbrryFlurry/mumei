@@ -7,7 +7,7 @@ namespace Mumei.CodeGen.Qt;
 public readonly struct QtNamespace(
     string name,
     QtCollection<IQtTypeDeclaration> declarations
-) : IRenderNode {
+) : IRenderFragment {
     private readonly List<ISourceFileFeature> _features = [];
 
     public void Render(IRenderTreeBuilder renderTree) {

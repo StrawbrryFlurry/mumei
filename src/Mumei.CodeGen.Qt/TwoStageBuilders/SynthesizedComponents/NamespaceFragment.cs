@@ -2,21 +2,21 @@
 
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 
-public readonly struct SynthesizedNamespace(
+public readonly struct NamespaceFragment(
     string? parentNamespace,
     string? name,
-    ImmutableArray<SynthesizedClassDeclaration> classDeclarations
-) : IRenderNode {
-    public static SynthesizedNamespace Empty => new(null, null, ImmutableArray<SynthesizedClassDeclaration>.Empty);
+    ImmutableArray<ClassDeclarationFragment> classDeclarations
+) : IRenderFragment {
+    public static NamespaceFragment Empty => new(null, null, ImmutableArray<ClassDeclarationFragment>.Empty);
 
-    public ImmutableArray<SynthesizedClassDeclaration> ClassDeclarations { get; } = classDeclarations;
+    public ImmutableArray<ClassDeclarationFragment> ClassDeclarations { get; } = classDeclarations;
     public string Name { get; } = name;
     public string? ParentNamespace { get; } = parentNamespace;
 
     public bool IsEmpty => name == null && ClassDeclarations.IsEmpty;
 
-    public static SynthesizedNamespace Create(string name, ImmutableArray<SynthesizedClassDeclaration> classDeclarations) {
-        return new SynthesizedNamespace(null, name, classDeclarations);
+    public static NamespaceFragment Create(string name, ImmutableArray<ClassDeclarationFragment> classDeclarations) {
+        return new NamespaceFragment(null, name, classDeclarations);
     }
 
     public void Render(IRenderTreeBuilder renderTree) {

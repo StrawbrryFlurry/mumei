@@ -1,10 +1,10 @@
 ﻿namespace Mumei.CodeGen.Qt;
 
 internal sealed class DebugRenderGraph {
-    private List<IRenderNode> _nodeStack = new();
+    private List<IRenderFragment> _nodeStack = new();
 
-    public void StartNode(IRenderNode node) {
-        _nodeStack.Add(node);
+    public void StartNode(IRenderFragment fragment) {
+        _nodeStack.Add(fragment);
     }
 
     public void EndNode() {
@@ -15,5 +15,5 @@ internal sealed class DebugRenderGraph {
         return string.Join(" -> ", _nodeStack.Select(n => n is IDebugRenderNodeFormattable debugNode ? debugNode.DescribeDebugNode() : n.ToString()));
     }
 
-    public IEnumerable<IRenderNode> Stack => _nodeStack;
+    public IEnumerable<IRenderFragment> Stack => _nodeStack;
 }

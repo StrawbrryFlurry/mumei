@@ -49,7 +49,7 @@ public readonly struct QtSourceFile {
 /// E.g. The InterceptsLocationAttribute must be defined in order
 /// for interception to work.
 /// </summary>
-internal interface ISourceFileFeature : IRenderNode;
+internal interface ISourceFileFeature : IRenderFragment;
 
 /// <summary>
 /// Describes a feature that needs to be available in the generated
@@ -57,7 +57,7 @@ internal interface ISourceFileFeature : IRenderNode;
 /// are accessible by all other source code and should only be generated
 /// once per compilation unit.
 /// </summary>
-internal interface ICompilationFeature : IRenderNode;
+internal interface ICompilationFeature : IRenderFragment;
 
 internal sealed class CodeGenFeatureCollection {
     private HashSet<ISourceFileFeature>? _sourceFileFeatures;
@@ -93,16 +93,16 @@ internal static class CodeGenFeature {
     public sealed class InterceptorsImpl : ISourceFileFeature, IRenderer.IFeature {
         public void Render(IRenderTreeBuilder renderTree) {
             renderTree.Line("#pragma warning disable");
-            renderTree.Node(SynthesizedNamespace.Create("System.Runtime.CompilerServices", [
-                SynthesizedClassDeclaration.Create(
+            renderTree.Node(NamespaceFragment.Create("System.Runtime.CompilerServices", [
+                ClassDeclarationFragment.Create(
                     "InterceptsLocationAttribute",
                     accessModifier: AccessModifier.FileSealed,
                     attributes: [
-                        SynthesizedAttribute.Create(
+                        AttributeFragment.Create(
                             typeof(AttributeUsageAttribute),
                             [
                                 $"{typeof(AttributeTargets)}.Method",
-                                SynthesizedAttributePropertyArgument.Create("AllowMultiple", "true")
+                                AttributePropertyArgumentFragment.Create("AllowMultiple", "true")
                             ]
                         )
                     ],

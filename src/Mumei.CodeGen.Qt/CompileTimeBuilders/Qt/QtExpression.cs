@@ -4,10 +4,10 @@ using Mumei.CodeGen.Qt.Qt;
 
 namespace Mumei.CodeGen.Qt;
 
-public readonly struct QtExpression : IQtTemplateBindable, IRenderNode {
+public readonly struct QtExpression : IQtTemplateBindable, IRenderFragment {
     private readonly string? _expression;
     private readonly IQtTemplateBindable? _dynamicExpression;
-    private readonly IRenderNode? _node;
+    private readonly IRenderFragment? _node;
 
     private QtExpression(string? expression, IQtTemplateBindable? o) {
         _expression = expression;
@@ -15,7 +15,7 @@ public readonly struct QtExpression : IQtTemplateBindable, IRenderNode {
     }
 
     [OverloadResolutionPriority(1)]
-    private QtExpression(string? expression, IRenderNode? node) {
+    private QtExpression(string? expression, IRenderFragment? node) {
         _expression = expression;
         _node = node;
     }
@@ -36,8 +36,8 @@ public readonly struct QtExpression : IQtTemplateBindable, IRenderNode {
         return new QtExpression(null, dynamicExpression);
     }
 
-    public static QtExpression ForNode(IRenderNode node) {
-        return new QtExpression(null, node);
+    public static QtExpression ForNode(IRenderFragment fragment) {
+        return new QtExpression(null, fragment);
     }
 
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {

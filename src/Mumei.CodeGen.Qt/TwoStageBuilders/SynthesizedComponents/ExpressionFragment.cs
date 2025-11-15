@@ -3,17 +3,17 @@ using Mumei.Roslyn;
 
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 
-public readonly struct SynthesizedExpression(string value) : IRenderNode {
+public readonly struct ExpressionFragment(string value) : IRenderFragment {
     public void Render(IRenderTreeBuilder renderTree) {
         renderTree.Text(value);
     }
 
-    public static implicit operator SynthesizedExpression(string value) {
-        return new SynthesizedExpression(value);
+    public static implicit operator ExpressionFragment(string value) {
+        return new ExpressionFragment(value);
     }
 
-    public static implicit operator SynthesizedExpression(InterpolatedStringHandler value) {
-        return new SynthesizedExpression(value.GetValue());
+    public static implicit operator ExpressionFragment(InterpolatedStringHandler value) {
+        return new ExpressionFragment(value.GetValue());
     }
 
     [InterpolatedStringHandler]

@@ -32,12 +32,12 @@ public sealed class SyntheticCompilation(Compilation compilation) {
         return null!;
     }
 
-    public SynthesizedClassDeclaration Synthesize<TClass>(ISyntheticClassBuilder<TClass> builder) {
-        return new SynthesizedClassDeclaration();
+    public ClassDeclarationFragment Synthesize<TClass>(ISyntheticClassBuilder<TClass> builder) {
+        return new ClassDeclarationFragment();
     }
 
-    public SynthesizedNamespace Synthesize(ISyntheticNamespace ns) {
-        return new SynthesizedNamespace();
+    public NamespaceFragment Synthesize(ISyntheticNamespace ns) {
+        return new NamespaceFragment();
     }
 
     public ITypeSymbol TypeFromCompilation<T>() {

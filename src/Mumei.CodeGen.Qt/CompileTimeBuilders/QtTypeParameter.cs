@@ -4,7 +4,7 @@ using Mumei.CodeGen.Qt.Qt;
 
 namespace Mumei.CodeGen.Qt;
 
-public readonly struct QtTypeParameter : IRenderNode {
+public readonly struct QtTypeParameter : IRenderFragment {
     public Type TypeOf { get; }
     public required string Name { get; init; }
 
@@ -15,7 +15,7 @@ public readonly struct QtTypeParameter : IRenderNode {
 
 public readonly struct QtTypeParameterList(
     QtCollection<QtTypeParameter> typeParameters
-) : IQtTemplateBindable, IRenderNode {
+) : IQtTemplateBindable, IRenderFragment {
     public ConstraintImpl Constraints { get; } = new();
 
     public bool IsEmpty => typeParameters.Count == 0;
@@ -56,7 +56,7 @@ public readonly struct QtTypeParameterList(
         renderTree.Text(">");
     }
 
-    public readonly struct ConstraintImpl : IRenderNode {
+    public readonly struct ConstraintImpl : IRenderFragment {
         public bool IsEmpty => true;
 
         public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {

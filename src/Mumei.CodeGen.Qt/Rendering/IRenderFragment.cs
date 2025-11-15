@@ -1,6 +1,6 @@
 ﻿namespace Mumei.CodeGen.Qt;
 
-public interface IRenderNode {
+public interface IRenderFragment {
     public void Render(IRenderTreeBuilder renderTree);
 }
 

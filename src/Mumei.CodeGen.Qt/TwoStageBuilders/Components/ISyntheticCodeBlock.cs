@@ -4,8 +4,14 @@ namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 
 public interface ISyntheticCodeBlock { }
 
-internal sealed class SyntheticRenderCodeBlock(RenderNode renderNode) : ISyntheticCodeBlock, ISyntheticConstructable<SynthesizedCodeBlock> {
-    public SynthesizedCodeBlock Construct() {
-        return SynthesizedCodeBlock.Create(renderNode);
+internal sealed class SyntheticRenderCodeBlock(RenderFragment renderFragment) : ISyntheticCodeBlock, ISyntheticConstructable<CodeBlockFragment> {
+    public CodeBlockFragment Construct() {
+        return CodeBlockFragment.Create(renderFragment);
+    }
+}
+
+internal sealed class SyntheticRenderCodeBlock<TState>(RenderFragment<TState> renderFragment) : ISyntheticCodeBlock, ISyntheticConstructable<CodeBlockFragment> {
+    public CodeBlockFragment Construct() {
+        return CodeBlockFragment.Create(renderFragment, (renderTree, state) => state.Render(renderTree));
     }
 }

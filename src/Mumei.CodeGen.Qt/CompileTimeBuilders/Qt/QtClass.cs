@@ -17,7 +17,7 @@ public interface IQtThis {
     public T Is<T>();
 }
 
-public interface IQtTypeDeclaration : IQtTemplateBindable, IRenderNode;
+public interface IQtTypeDeclaration : IQtTemplateBindable, IRenderFragment;
 
 internal readonly struct QtDeclarationPtr<T>(
     List<T> declarationRef,
@@ -67,7 +67,7 @@ public class QtClass(
     public QtTypeParameterList TypeParameters { get; } = new(typeParameters);
 
     private readonly List<QtFieldCore> _fields = new();
-    private readonly List<QtMethodRenderNode> _methods = new();
+    private readonly List<QtMethodRenderFragment> _methods = new();
 
     public string Name => name;
 
@@ -219,7 +219,7 @@ public class QtClass(
         InvocationExpressionSyntax invocationToProxy,
         __DynamicallyBoundSourceCode code
     ) {
-        var decl = new QtDeclarationPtr<QtMethodRenderNode>(_methods, _methods.Count + 1); // This isn't thread-safe, prolly doesn't matter though
+        var decl = new QtDeclarationPtr<QtMethodRenderFragment>(_methods, _methods.Count + 1); // This isn't thread-safe, prolly doesn't matter though
         var factory = new RoslynQtMethodFactory(QtCompilationScope.Active);
         var method = factory.CreateProxyMethodForInvocation(
             invocationToProxy,
@@ -252,7 +252,7 @@ public class QtClass(
         __DynamicallyBoundSourceCode code,
         QtDynamicComponentBinderCollection? dynamicComponentBinders
     ) {
-        var decl = new QtDeclarationPtr<QtMethodRenderNode>(_methods, _methods.Count + 1); // This isn't thread-safe, prolly doesn't matter though
+        var decl = new QtDeclarationPtr<QtMethodRenderFragment>(_methods, _methods.Count + 1); // This isn't thread-safe, prolly doesn't matter though
         var factory = new RoslynQtMethodFactory(QtCompilationScope.Active);
         var method = factory.CreateProxyMethodForInvocation(
             invocationToProxy,

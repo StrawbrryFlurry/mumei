@@ -22,8 +22,8 @@ internal sealed class CodeFragmentGenerator : IIncrementalGenerator {
         context.RegisterSourceOutput(interceptorMethods, (ctx, state) => {
             var method = state;
 
-            var cls = SynthesizedClassDeclaration.Create($"CodeFragments_{method.Name}", accessModifier: AccessModifier.FileSealed, methods: [method], renderFeatures: [CodeGenFeature.Interceptors]);
-            var ns = SynthesizedNamespace.Create("Generated", [cls]);
+            var cls = ClassDeclarationFragment.Create($"CodeFragments_{method.Name}", accessModifier: AccessModifier.FileSealed, methods: [method], renderFeatures: [CodeGenFeature.Interceptors]);
+            var ns = NamespaceFragment.Create("Generated", [cls]);
             var fileTree = new SourceFileRenderTreeBuilder();
 
             var content = fileTree.RenderRootNode(ns);
@@ -52,9 +52,9 @@ internal sealed class CodeFragmentGenerator : IIncrementalGenerator {
         return invocation.AsIntercept().WithState(fragmentDeclaration);
     }
 
-    private static SynthesizedMethodDeclaration CreateCodeFragmentInterceptorMethod(InterceptInvocationIntermediateNode<LambdaExpressionSyntax> codeFragment, CancellationToken _) {
+    private static MethodDeclarationFragment CreateCodeFragmentInterceptorMethod(InterceptInvocationIntermediateNode<LambdaExpressionSyntax> codeFragment, CancellationToken _) {
         var name = $"Intercept_CodeFragment_{Math.Abs(codeFragment.Location.GetHashCode())}";
-        ImmutableArray<SynthesizedParameter> parameters = [
+        ImmutableArray<ParameterFragment> parameters = [
             new() {
                 Name = "declareFragment",
                 Type = typeof(Action),
@@ -68,7 +68,7 @@ internal sealed class CodeFragmentGenerator : IIncrementalGenerator {
             : declaredBody.ToFullString();
 
         var fragment = LiteralNode.ForRawString(bodyContent.TrimEnd('\r', '\n'));
-        return SynthesizedMethodDeclaration.Create(
+        return MethodDeclarationFragment.Create(
             [],
             AccessModifier.InternalStatic,
             typeof(CodeFragment),
@@ -76,7 +76,7 @@ internal sealed class CodeFragmentGenerator : IIncrementalGenerator {
             [],
             parameters,
             fragment,
-            static (f, tree) => {
+            static (tree, f) => {
                 tree.Interpolate($"return {typeof(CodeFragment)}.{nameof(CodeFragment.λCreate)}({f});");
             }
         );

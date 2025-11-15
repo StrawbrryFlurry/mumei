@@ -13,6 +13,7 @@ public interface ISyntheticTypeInfo<T> {
     public T New(Func<T> constructorExpression);
 }
 
+internal sealed class ErrorSyntheticType(string errorReason, object declarationSite) : ISyntheticType { }
 internal sealed class RuntimeSyntheticType(Type t) : ISyntheticType { }
 
 internal sealed class QtSyntheticTypeInfo<T> : ISyntheticTypeInfo<T> {

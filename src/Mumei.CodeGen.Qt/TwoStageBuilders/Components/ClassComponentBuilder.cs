@@ -153,9 +153,30 @@ public interface ISyntheticClass : ISyntheticType, ISyntheticMember {
 }
 
 public interface ISyntheticMethodBuilder<TSignature> : ISyntheticMethod<TSignature> where TSignature : Delegate {
-    public ISyntheticMethodBuilder WithBody(TSignature bodyImpl);
-    public ISyntheticMethodBuilder WithBody<TDeps>(TDeps deps, Func<TDeps, TSignature> bodyImpl);
-    public ISyntheticMethodBuilder WithBody(ISyntheticCodeBlock body);
+    public IλInternalCompilerApi λCompilerApi { get; }
+
+    public ISyntheticMethodBuilder<TSignature> WithBody(TSignature bodyImpl);
+    public ISyntheticMethodBuilder<TSignature> WithBody<TDeps>(TDeps deps, Func<TDeps, TSignature> bodyImpl);
+    public ISyntheticMethodBuilder<TSignature> WithBody(ISyntheticCodeBlock body);
+
+    /// <summary>
+    /// API Surface required by the compiler implementation to declare synthetic components.
+    /// </summary>
+    // ReSharper disable once InconsistentNaming
+    public interface IλInternalCompilerApi {
+        public ISyntheticCodeBlock CreateRendererCodeBlock(RenderFragment renderCodeBlock);
+        public ISyntheticCodeBlock CreateRendererCodeBlock<TState>(RenderFragment<TState> renderCodeBlock);
+    }
+
+    private sealed class QtSyntheticMethodBuilderCompilerApi : IλInternalCompilerApi {
+        public ISyntheticCodeBlock CreateRendererCodeBlock(RenderFragment renderCodeBlock) {
+            return new SyntheticRenderCodeBlock(renderCodeBlock);
+        }
+
+        public ISyntheticCodeBlock CreateRendererCodeBlock<TState>(RenderFragment<TState> renderCodeBlock) {
+            return new SyntheticRenderCodeBlock<TState>(renderCodeBlock);
+        }
+    }
 }
 
 public interface ISyntheticMethodBuilder : ISyntheticMethod {

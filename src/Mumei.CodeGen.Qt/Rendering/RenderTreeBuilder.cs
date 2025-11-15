@@ -16,7 +16,7 @@ internal abstract class GenericRenderTreeBuilder<TResult>(FeatureCollection? par
 #endif
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void StartNode<TRenderNode>(TRenderNode node) where TRenderNode : IRenderNode {
+    public void StartNode<TRenderNode>(TRenderNode node) where TRenderNode : IRenderFragment {
 #if DEBUG
         DebugRenderGraph.StartNode(node);
 #endif
@@ -92,7 +92,7 @@ internal abstract class GenericRenderTreeBuilder<TResult>(FeatureCollection? par
     protected abstract void SyntaxNodeCore<TNode>(TNode node) where TNode : SyntaxNode;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Node<TRenderNode>(TRenderNode node) where TRenderNode : IRenderNode {
+    public void Node<TRenderNode>(TRenderNode node) where TRenderNode : IRenderFragment {
         StartNode(node);
 
 #if !DEBUG
@@ -109,17 +109,17 @@ internal abstract class GenericRenderTreeBuilder<TResult>(FeatureCollection? par
         EndNode();
     }
 
-    public void Node(RenderNode node) {
-        node(this);
+    public void Node(RenderFragment fragment) {
+        fragment(this);
     }
 
-    public void Node<TState>(in RenderNode<TState> node) {
-        node.Render(this);
+    public void Node<TState>(in RenderFragment<TState> fragment) {
+        fragment.Render(this);
     }
 
-    protected abstract void NodeCore<TRenderNode>(TRenderNode renderable) where TRenderNode : IRenderNode;
+    protected abstract void NodeCore<TRenderNode>(TRenderNode renderable) where TRenderNode : IRenderFragment;
 
-    public abstract TResult RenderRootNode<TRootNode>(TRootNode node) where TRootNode : IRenderNode;
+    public abstract TResult RenderRootNode<TRootNode>(TRootNode node) where TRootNode : IRenderFragment;
 
     public void RequireFeature(IRenderer.IFeature feature) {
         _features ??= new FeatureCollection();
@@ -148,7 +148,7 @@ internal abstract class GenericRenderTreeBuilder<TResult>(FeatureCollection? par
 }
 
 public interface IRenderTreeBuilder {
-    public void StartNode<TRenderNode>(TRenderNode node) where TRenderNode : IRenderNode;
+    public void StartNode<TRenderNode>(TRenderNode node) where TRenderNode : IRenderFragment;
     public void EndNode();
 
     public void Text(ReadOnlySpan<char> s);
@@ -166,9 +166,9 @@ public interface IRenderTreeBuilder {
 
     public void SyntaxNode<TNode>(TNode node) where TNode : SyntaxNode;
 
-    public void Node<TRenderNode>(TRenderNode node) where TRenderNode : IRenderNode;
-    public void Node(RenderNode render);
-    public void Node<TState>(in RenderNode<TState> render);
+    public void Node<TRenderNode>(TRenderNode node) where TRenderNode : IRenderFragment;
+    public void Node(RenderFragment render);
+    public void Node<TState>(in RenderFragment<TState> render);
 
     public void RequireFeature(IRenderer.IFeature feature);
 
@@ -180,7 +180,7 @@ public interface IRenderTreeBuilder {
             tree.Text(s);
         }
 
-        public void AppendFormatted<TRenderNode>(in TRenderNode node) where TRenderNode : IRenderNode {
+        public void AppendFormatted<TRenderNode>(in TRenderNode node) where TRenderNode : IRenderFragment {
             tree.Node(node);
         }
 
@@ -207,7 +207,7 @@ public interface IRenderTreeBuilder {
             _tree.Text(s);
         }
 
-        public void AppendFormatted<TRenderNode>(in TRenderNode node) where TRenderNode : IRenderNode {
+        public void AppendFormatted<TRenderNode>(in TRenderNode node) where TRenderNode : IRenderFragment {
             _tree.Node(node);
         }
 

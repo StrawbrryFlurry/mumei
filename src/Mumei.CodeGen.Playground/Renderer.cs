@@ -20,11 +20,11 @@ file static class __QtInterceptorImpl_Renderer {
     internal sealed class ProxyMethodRenderContextWithState<TState>(InvocationExpressionSyntax proxyInvocation, TState state) {
         public TState State { get; } = state;
 
-        public MethodInfoRenderNode MethodInfo => new();
+        public MethodInfoRenderFragment MethodInfo => new();
 
-        public RenderNode<ProxyMethodRenderContextWithState<TState>> This => new(this, (renderTree, @this) => { });
+        public RenderFragment<ProxyMethodRenderContextWithState<TState>> This => new(this, (renderTree, @this) => { });
 
-        public readonly record struct MethodInfoRenderNode : IRenderNode {
+        public readonly record struct MethodInfoRenderFragment : IRenderFragment {
             public void Render(IRenderTreeBuilder renderer) { }
         }
     }
@@ -78,7 +78,7 @@ file static class __QtInterceptorImpl_Renderer {
         }
     };
 
-    internal interface ICodeBlock : IRenderNode;
+    internal interface ICodeBlock : IRenderFragment;
 
     public static QtMethod<CompileTimeUnknown> Intercept<TTemplateReferences>(
         this QtClass @this,

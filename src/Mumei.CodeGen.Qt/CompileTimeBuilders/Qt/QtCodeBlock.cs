@@ -3,27 +3,27 @@ using Mumei.CodeGen.Qt.Output;
 
 namespace Mumei.CodeGen.Qt.Qt;
 
-public readonly struct CodeBlockNode : IRenderNode {
+public readonly struct CodeBlockFragment : IRenderFragment {
     private readonly string? _code;
-    private readonly IRenderNode? _dynamicBlock;
+    private readonly IRenderFragment? _dynamicBlock;
 
-    private CodeBlockNode(string? code, IRenderNode? dynamicBlock, bool allowEmpty = false) {
+    private CodeBlockFragment(string? code, IRenderFragment? dynamicBlock, bool allowEmpty = false) {
         _code = code;
         _dynamicBlock = dynamicBlock;
 
         Debug.Assert(_code is not null || _dynamicBlock is not null || allowEmpty);
     }
 
-    public static CodeBlockNode ForCode(string code) {
-        return new CodeBlockNode(code, null);
+    public static CodeBlockFragment ForCode(string code) {
+        return new CodeBlockFragment(code, null);
     }
 
-    public static CodeBlockNode ForNode(IRenderNode dynamicBlock) {
-        return new CodeBlockNode(null, dynamicBlock);
+    public static CodeBlockFragment ForNode(IRenderFragment dynamicBlock) {
+        return new CodeBlockFragment(null, dynamicBlock);
     }
 
-    public static CodeBlockNode Empty() {
-        return new CodeBlockNode(null, null, true);
+    public static CodeBlockFragment Empty() {
+        return new CodeBlockFragment(null, null, true);
     }
 
     public void Render(IRenderTreeBuilder context) {

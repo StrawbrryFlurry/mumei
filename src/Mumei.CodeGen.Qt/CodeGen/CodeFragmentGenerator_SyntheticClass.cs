@@ -49,12 +49,12 @@ internal sealed class CodeFragmentGenerator_SyntheticClass : IIncrementalGenerat
         return invocation.AsIntercept().WithState(fragmentDeclaration);
     }
 
-    private static SynthesizedNamespace CreateCodeFragmentInterceptorMethod(
+    private static NamespaceFragment CreateCodeFragmentInterceptorMethod(
         ImmutableArray<InterceptInvocationIntermediateNode<LambdaExpressionSyntax>> codeFragments,
         CancellationToken _
     ) {
         if (codeFragments.IsDefaultOrEmpty) {
-            return SynthesizedNamespace.Empty;
+            return NamespaceFragment.Empty;
         }
 
         var compilation = new SyntheticCompilation(codeFragments[0].SemanticModel.Compilation);
@@ -82,7 +82,7 @@ internal sealed class CodeFragmentGenerator_SyntheticClass : IIncrementalGenerat
 
 
         var cls = compilation.Synthesize(interceptorClass);
-        return SynthesizedNamespace.Create("Generated", [cls]);
+        return NamespaceFragment.Create("Generated", [cls]);
     }
 }
 

@@ -101,34 +101,34 @@ internal readonly struct SeparatedListRepresentable<TState, TElement, TRepresent
 
 internal static class QtRepresentableRendererExtensions {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static SeparatedListRenderNode<DefaultMemoryAccessor<TElement>, TElement, TRenderNode> RenderAsSeparatedList<TElement, TRenderNode>(
+    public static SeparatedListRenderFragment<DefaultMemoryAccessor<TElement>, TElement, TRenderNode> RenderAsSeparatedList<TElement, TRenderNode>(
         this Memory<TElement> memory,
         Func<TElement, TRenderNode> representationSelector
-    ) where TRenderNode : IRenderNode {
+    ) where TRenderNode : IRenderFragment {
         return RenderAsSeparatedList(memory.AsMemoryAccessor(), representationSelector);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static SeparatedListRenderNode<DefaultMemoryAccessor<TElement>, TElement, TRenderNode> RenderAsSeparatedList<TElement, TRenderNode>(
+    public static SeparatedListRenderFragment<DefaultMemoryAccessor<TElement>, TElement, TRenderNode> RenderAsSeparatedList<TElement, TRenderNode>(
         this ReadOnlyMemory<TElement> memory,
         Func<TElement, TRenderNode> representationSelector
-    ) where TRenderNode : IRenderNode {
+    ) where TRenderNode : IRenderFragment {
         return RenderAsSeparatedList(memory.AsMemoryAccessor(), representationSelector);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static SeparatedListRenderNode<TMemoryAccessor, TElement, TRenderNode> RenderAsSeparatedList<TMemoryAccessor, TElement, TRenderNode>(
+    public static SeparatedListRenderFragment<TMemoryAccessor, TElement, TRenderNode> RenderAsSeparatedList<TMemoryAccessor, TElement, TRenderNode>(
         this TMemoryAccessor state,
         Func<TElement, TRenderNode> representationSelector
-    ) where TMemoryAccessor : IQtMemoryAccessor<TElement> where TRenderNode : IRenderNode {
-        return new SeparatedListRenderNode<TMemoryAccessor, TElement, TRenderNode>(state, representationSelector);
+    ) where TMemoryAccessor : IQtMemoryAccessor<TElement> where TRenderNode : IRenderFragment {
+        return new SeparatedListRenderFragment<TMemoryAccessor, TElement, TRenderNode>(state, representationSelector);
     }
 }
 
-internal readonly struct SeparatedListRenderNode<TState, TElement, TRenderNode>(
+internal readonly struct SeparatedListRenderFragment<TState, TElement, TRenderNode>(
     TState state,
     Func<TElement, TRenderNode> nodeSelector
-) : IRenderNode where TState : IQtMemoryAccessor<TElement> where TRenderNode : IRenderNode {
+) : IRenderFragment where TState : IQtMemoryAccessor<TElement> where TRenderNode : IRenderFragment {
     public void Render(IRenderTreeBuilder renderer) {
         var span = state.Memory.Span;
         for (var i = 0; i < span.Length; i++) {

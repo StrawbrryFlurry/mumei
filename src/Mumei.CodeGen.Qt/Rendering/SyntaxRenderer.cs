@@ -72,6 +72,6 @@ internal sealed class SourceFileRenderTreeBuilder : GenericRenderTreeBuilder<str
         public string CurrentTree => builder.GetSourceText();
 
         [DebuggerBrowsable(DebuggerBrowsableState.Collapsed)]
-        public IEnumerable<IRenderNode> Graph => builder.DebugRenderGraph.Stack;
+        public IEnumerable<IRenderFragment> Graph => builder.DebugRenderGraph.Stack;
     }
 }

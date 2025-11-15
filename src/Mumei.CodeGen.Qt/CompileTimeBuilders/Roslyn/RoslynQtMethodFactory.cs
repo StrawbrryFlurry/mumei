@@ -60,7 +60,7 @@ file readonly ref struct DynamicSourceCodeBinder(
 ) {
     private readonly string[] _template = code.CodeTemplate;
 
-    public CodeBlockNode Bind(ISourceCodeBindingContext ctx) {
+    public CodeBlockFragment Bind(ISourceCodeBindingContext ctx) {
         var writer = new ValueSyntaxWriter(stackalloc char[ValueSyntaxWriter.StackBufferSize]);
         var t = _template;
         foreach (var section in t) {
@@ -72,7 +72,7 @@ file readonly ref struct DynamicSourceCodeBinder(
             writer.Write(section);
         }
 
-        var codeBlock = CodeBlockNode.ForCode(writer.ToString());
+        var codeBlock = CodeBlockFragment.ForCode(writer.ToString());
         return codeBlock;
     }
 }
@@ -276,7 +276,7 @@ internal readonly ref struct RoslynQtMethodFactory(
     public QtMethod<CompileTimeUnknown> CreateProxyMethodForInvocation(
         InvocationExpressionSyntax invocationToProxy,
         in __DynamicallyBoundSourceCode sourceCode,
-        in QtDeclarationPtr<QtMethodRenderNode> declPtr,
+        in QtDeclarationPtr<QtMethodRenderFragment> declPtr,
         QtDynamicComponentBinderCollection? dynamicQtComponentBinder = null
     ) {
         var methodSymbol = scope.GetMethodSymbol(invocationToProxy);

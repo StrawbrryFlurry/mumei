@@ -4,9 +4,9 @@ using Mumei.CodeGen.Qt.Output;
 namespace Mumei.CodeGen.Qt.Qt;
 
 public readonly struct QtMethod<TReturnType> : IQtInvokable<TReturnType> {
-    private readonly QtDeclarationPtr<QtMethodRenderNode> _declarationPtr;
+    private readonly QtDeclarationPtr<QtMethodRenderFragment> _declarationPtr;
 
-    internal QtMethodRenderNode Method { get; }
+    internal QtMethodRenderFragment Method { get; }
 
     internal QtMethod(
         string name,
@@ -14,12 +14,12 @@ public readonly struct QtMethod<TReturnType> : IQtInvokable<TReturnType> {
         IQtType returnType,
         in QtTypeParameterList typeParameters,
         in QtParameterList parameters,
-        in CodeBlockNode codeBlock,
+        in CodeBlockFragment codeBlock,
         in QtAttributeList attributes,
-        in QtDeclarationPtr<QtMethodRenderNode> declarationPtr
+        in QtDeclarationPtr<QtMethodRenderFragment> declarationPtr
     ) {
         _declarationPtr = declarationPtr;
-        Method = new QtMethodRenderNode(
+        Method = new QtMethodRenderFragment(
             modifiers,
             name,
             returnType,
@@ -43,15 +43,15 @@ public readonly struct QtMethod<TReturnType> : IQtInvokable<TReturnType> {
     }
 }
 
-internal readonly struct QtMethodRenderNode(
+internal readonly struct QtMethodRenderFragment(
     AccessModifier modifiers,
     string name,
     IQtType returnType,
     QtTypeParameterList typeParameters,
     QtParameterList parameters,
-    CodeBlockNode codeBlock,
+    CodeBlockFragment codeBlock,
     QtAttributeList attributes
-) : IQtTemplateBindable, IRenderNode, IDebugRenderNodeFormattable {
+) : IQtTemplateBindable, IRenderFragment, IDebugRenderNodeFormattable {
     public string Name => name;
 
     public void WriteSyntax<TSyntaxWriter>(ref TSyntaxWriter writer, string? format = null) where TSyntaxWriter : ISyntaxWriter {

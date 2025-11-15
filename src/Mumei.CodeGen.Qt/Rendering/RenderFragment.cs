@@ -2,11 +2,11 @@
 
 namespace Mumei.CodeGen.Qt;
 
-public readonly struct RenderNode<TState>(TState state, Action<IRenderTreeBuilder, TState> renderTree) : IRenderNode {
+public readonly struct RenderFragment<TState>(TState state, Action<IRenderTreeBuilder, TState> renderTree) : IRenderFragment {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Render(IRenderTreeBuilder outerRenderTree) {
         renderTree(outerRenderTree, state);
     }
 }
 
-public delegate void RenderNode(IRenderTreeBuilder renderTree);
+public delegate void RenderFragment(IRenderTreeBuilder renderTree);
