@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Mumei.CodeGen.Qt.Qt;
 using Mumei.CodeGen.Qt.Tests.Setup;
 using Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 using SourceCodeFactory;
@@ -23,13 +24,10 @@ file sealed class CompilationTestSource {
 
     public void TestInvocation() {
         var c = default(SyntheticCompilation)!;
-        var m = c.DeclareClass("Test").DeclareMethod<Action>("A");
-        m.WithBody(() => {
-            Console.WriteLine("Hey!");
-        });
-
-        m.WithBody(new { Input = "Hello" }, static input => () => {
-            Console.WriteLine("Hey!");
+        var m = c.DeclareClass("Test").DeclareMethod<Action<ISyntheticClassBuilder<CompileTimeUnknown>>>("A");
+        var field = typeof(CompilationTestSource).GetField(nameof(_ref))!;
+        m.WithBody(new { Field = field }, static state => defBuilder => {
+            defBuilder.DeclareField(state.Field.FieldType, state.Field.Name);
         });
     }
 }

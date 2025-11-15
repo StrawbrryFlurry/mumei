@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Text;
 using SourceCodeFactory;
 
 namespace Mumei.CodeGen.Qt.Tests.Setup;
@@ -59,13 +60,24 @@ public sealed class SourceGeneratorTest<TSourceGenerator> where TSourceGenerator
             Assert.Multiple(compilationDiagnostics.Select<Diagnostic, Action>(diagnostic => {
                     var source = diagnostic.Location.SourceTree;
                     return () => Assert.Fail(
-                        $"Diagnostic: {diagnostic.Id}:\n{diagnostic.GetMessage()}\nat: {source!.GetText().GetSubText(diagnostic.Location.SourceSpan)}\nof: {source.GetText()}"
+                        $"Diagnostic: {diagnostic.Id}:\n{diagnostic.GetMessage()}\nat: {GetSourceTextLocationWithContext(source, diagnostic.Location)}\nof: {source.GetText()}"
                     );
                 }
             ).ToArray());
         }
 
         return new SourceGeneratorTestResult(runResult, updatedCompilation);
+
+        static string GetSourceTextLocationWithContext(SyntaxTree tree, Location location) {
+            var text = tree.GetText();
+            var contextStart = Math.Max(0, location.SourceSpan.Start - 20);
+            var contextLength = Math.Min(20, location.SourceSpan.Start - contextStart);
+
+            var endContextLength = Math.Min(20, text.Length - location.SourceSpan.End);
+            var totalLength = contextLength + location.SourceSpan.Length + endContextLength;
+
+            return text.GetSubText(new TextSpan(contextStart, totalLength)).ToString();
+        }
     }
 }
 
