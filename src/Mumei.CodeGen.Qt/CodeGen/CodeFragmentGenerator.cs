@@ -71,9 +71,9 @@ internal sealed class CodeFragmentGenerator : IIncrementalGenerator {
         return MethodDeclarationFragment.Create(
             [],
             AccessModifier.InternalStatic,
+            [],
             typeof(CodeFragment),
             name,
-            [],
             parameters,
             fragment,
             static (tree, f) => {

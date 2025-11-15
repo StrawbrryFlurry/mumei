@@ -1,4 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);Generated</InterceptorsNamespaces>
+  </PropertyGroup>
+
   <ItemGroup>
     <Using Include="Xunit"/>
   </ItemGroup>

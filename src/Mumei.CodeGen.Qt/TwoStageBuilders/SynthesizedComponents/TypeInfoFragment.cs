@@ -1,5 +1,7 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using Mumei.CodeGen.Qt.Output;
+using Mumei.Roslyn;
 
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 
@@ -22,6 +24,15 @@ public readonly struct TypeInfoFragment : IEquatable<TypeInfoFragment> {
 
     public static TypeInfoFragment ForKeyword(string keyword) {
         return new TypeInfoFragment(keyword, true);
+    }
+
+    public static TypeInfoFragment Var => ForKeyword("var");
+
+    public static TypeInfoFragment ConstructGenericType(
+        TypeInfoFragment unconstructedType,
+        params ReadOnlySpan<TypeInfoFragment> typeArguments
+    ) {
+        return GenericTypeInfoFragment.Construct(unconstructedType, typeArguments);
     }
 
     public TypeInfoFragment(ITypeSymbol type) : this(type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), false) { }
@@ -59,5 +70,25 @@ public readonly struct TypeInfoFragment : IEquatable<TypeInfoFragment> {
 
     public override int GetHashCode() {
         return QualifiedTypeName.GetHashCode();
+    }
+
+    private readonly struct GenericTypeInfoFragment {
+        public static TypeInfoFragment Construct(TypeInfoFragment constructableType, ReadOnlySpan<TypeInfoFragment> typeArguments) {
+            var nameBuilder = new ArrayBuilder<char>(stackalloc char[ArrayBuilder.InitSize]);
+            nameBuilder.AddRange(constructableType.QualifiedTypeName);
+            nameBuilder.Add('<');
+
+            for (var i = 0; i < typeArguments.Length; i++) {
+                if (i > 0) {
+                    nameBuilder.Add(',');
+                    nameBuilder.Add(' ');
+                }
+
+                nameBuilder.AddRange(typeArguments[i].QualifiedTypeName);
+            }
+
+            nameBuilder.Add('>');
+            return new TypeInfoFragment(nameBuilder.ToStringAndFree());
+        }
     }
 }

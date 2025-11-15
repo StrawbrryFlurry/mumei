@@ -31,7 +31,7 @@ public readonly struct TypeParameterListFragment(
                 continue;
             }
 
-            renderTree.Interpolate($"where {typeParameter.Name} : ");
+            renderTree.Interpolate($" where {typeParameter.Name} : ");
             var constraints = typeParameter.Constraints.OrderBy(x => x).ToArray();
             renderTree.SeparatedList(constraints);
         }
@@ -53,6 +53,15 @@ public readonly struct TypeParameterListFragment(
 public readonly struct TypeParameterFragment(string name, ImmutableArray<TypeParameterFragment.Constraint> constraints) : IRenderFragment {
     public string Name { get; } = name;
     public ImmutableArray<Constraint> Constraints { get; } = constraints;
+
+    public static TypeParameterFragment Create(
+        string name,
+        out TypeParameterFragment typeParameter,
+        params ImmutableArray<Constraint> constraints
+    ) {
+        typeParameter = Create(name, constraints);
+        return typeParameter;
+    }
 
     public static TypeParameterFragment Create(
         string name,
@@ -82,6 +91,14 @@ public readonly struct TypeParameterFragment(string name, ImmutableArray<TypePar
         public static Constraint NotNull => new(new TypeInfoFragment("notnull"));
         public static Constraint Unmanaged => new(new TypeInfoFragment("unmanaged"));
         public static Constraint AllowsRefStruct => new(new TypeInfoFragment("allows ref struct"));
+
+        public static implicit operator Constraint(TypeInfoFragment typeInfo) {
+            return new Constraint(typeInfo);
+        }
+
+        public static implicit operator Constraint(Type type) {
+            return new Constraint(new TypeInfoFragment(type));
+        }
 
         public bool Equals(Constraint other) {
             return other.TypeInfo == TypeInfo;

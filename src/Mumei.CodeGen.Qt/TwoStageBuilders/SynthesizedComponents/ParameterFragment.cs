@@ -4,13 +4,13 @@ using Mumei.CodeGen.Playground;
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 
 public readonly struct ParameterFragment : IRenderFragment {
-    public required string Name { get; init; }
+    public required ExpressionFragment Name { get; init; }
     public ParameterAttributes Attributes { get; init; }
     public required TypeInfoFragment Type { get; init; }
 
     public static ParameterFragment Create(
         TypeInfoFragment type,
-        string name,
+        ExpressionFragment name,
         ParameterAttributes attributes = ParameterAttributes.None
     ) {
         return new ParameterFragment {
@@ -21,8 +21,35 @@ public readonly struct ParameterFragment : IRenderFragment {
     }
 
     public static ParameterFragment Create(
+        TypeInfoFragment type,
+        ExpressionFragment name,
+        ParameterAttributes attributes,
+        out ExpressionFragment local
+    ) {
+        local = name;
+        return new ParameterFragment {
+            Name = name,
+            Type = type,
+            Attributes = attributes
+        };
+    }
+
+    public static ParameterFragment Create(
+        TypeInfoFragment type,
+        ExpressionFragment name,
+        out ExpressionFragment local
+    ) {
+        local = name;
+        return new ParameterFragment {
+            Name = name,
+            Type = type,
+            Attributes = ParameterAttributes.None
+        };
+    }
+
+    public static ParameterFragment Create(
         ITypeSymbol type,
-        string name,
+        ExpressionFragment name,
         ParameterAttributes attributes = ParameterAttributes.None
     ) {
         return new ParameterFragment {
@@ -33,7 +60,7 @@ public readonly struct ParameterFragment : IRenderFragment {
     }
 
     public static ParameterFragment Create<T>(
-        string name,
+        ExpressionFragment name,
         ParameterAttributes attributes = ParameterAttributes.None
     ) {
         return new ParameterFragment {
@@ -43,7 +70,7 @@ public readonly struct ParameterFragment : IRenderFragment {
         };
     }
 
-    public static implicit operator ParameterFragment((TypeInfoFragment Type, string Name) paramDescriptor) {
+    public static implicit operator ParameterFragment((TypeInfoFragment Type, ExpressionFragment Name) paramDescriptor) {
         return Create(paramDescriptor.Type, paramDescriptor.Name);
     }
 

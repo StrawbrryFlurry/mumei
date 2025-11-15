@@ -44,17 +44,180 @@ internal sealed class SyntheticRenderCodeBlockSyntaxRewriter(
 
     public static ISyntheticCodeBlock CreateSyntheticRenderBlock(
         SyntaxNode blockOrExpression,
+        ITypeSymbol returnType,
         SemanticModel sm,
         ISyntheticCodeBlockResolutionContext resolutionContext
     ) {
+        if (blockOrExpression is StatementSyntax blockLikeSyntax) {
+            return CreateSyntheticRenderBlockForBlock(blockLikeSyntax, sm, resolutionContext);
+        }
+
+        if (blockOrExpression is ExpressionSyntax expressionSyntax) {
+            return CreateSyntheticRenderBlockForExpressionBody(expressionSyntax, returnType, sm, resolutionContext);
+        }
+
+        throw new InvalidOperationException("Expected either a BlockSyntax or an ExpressionSyntax");
+    }
+
+    private static ISyntheticCodeBlock CreateSyntheticRenderBlockForExpressionBody(
+        ExpressionSyntax expressionBody,
+        ITypeSymbol returnType,
+        SemanticModel sm,
+        ISyntheticCodeBlockResolutionContext resolutionContext
+    ) {
+        if (sm.GetTypeInfo(expressionBody).Type is not { } expressionType) {
+            throw new InvalidOperationException($"Could not determine the type of the expression {expressionBody}.");
+        }
+
         var visitor = new SyntheticRenderCodeBlockSyntaxRewriter(sm, resolutionContext);
-        visitor.Visit(blockOrExpression);
+        var isVoidExpression = SymbolEqualityComparer.Default.Equals(sm.Compilation.GetSpecialType(SpecialType.System_Void), returnType);
+        var body = visitor.Visit(expressionBody);
+
+        visitor.EmitRenderText(isVoidExpression ? $"{body};" : $"return {body};");
+
         var syntheticCodeBlock = new SyntheticCodeBlock(visitor._renderTree.GetSourceText());
         return syntheticCodeBlock;
     }
 
+    private static ISyntheticCodeBlock CreateSyntheticRenderBlockForBlock(
+        SyntaxNode blockLikeSyntaxNode,
+        SemanticModel sm,
+        ISyntheticCodeBlockResolutionContext resolutionContext
+    ) {
+        var visitor = new SyntheticRenderCodeBlockSyntaxRewriter(sm, resolutionContext);
+        visitor.Visit(blockLikeSyntaxNode);
+        var syntheticCodeBlock = new SyntheticCodeBlock(visitor._renderTree.GetSourceText());
+        return syntheticCodeBlock;
+    }
+
+    public override SyntaxNode? VisitDoStatement(DoStatementSyntax node) {
+        var updatedStatement = base.VisitDoStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitExpressionStatement(ExpressionStatementSyntax node) {
+        var updatedStatement = base.VisitExpressionStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitLocalDeclarationStatement(LocalDeclarationStatementSyntax node) {
+        var updatedStatement = base.VisitLocalDeclarationStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitReturnStatement(ReturnStatementSyntax node) {
+        var updatedStatement = base.VisitReturnStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitIfStatement(IfStatementSyntax node) {
+        var updatedStatement = base.VisitIfStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitForStatement(ForStatementSyntax node) {
+        var updatedStatement = base.VisitForStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitGotoStatement(GotoStatementSyntax node) {
+        var updatedStatement = base.VisitGotoStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitLockStatement(LockStatementSyntax node) {
+        var updatedStatement = base.VisitLockStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitBreakStatement(BreakStatementSyntax node) {
+        var updatedStatement = base.VisitBreakStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitCheckedStatement(CheckedStatementSyntax node) {
+        var updatedStatement = base.VisitCheckedStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitContinueStatement(ContinueStatementSyntax node) {
+        var updatedStatement = base.VisitContinueStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitEmptyStatement(EmptyStatementSyntax node) {
+        var updatedStatement = base.VisitEmptyStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitFixedStatement(FixedStatementSyntax node) {
+        var updatedStatement = base.VisitFixedStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitGlobalStatement(GlobalStatementSyntax node) {
+        var updatedStatement = base.VisitGlobalStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitLabeledStatement(LabeledStatementSyntax node) {
+        var updatedStatement = base.VisitLabeledStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitSwitchStatement(SwitchStatementSyntax node) {
+        var updatedStatement = base.VisitSwitchStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitThrowStatement(ThrowStatementSyntax node) {
+        var updatedStatement = base.VisitThrowStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitTryStatement(TryStatementSyntax node) {
+        var updatedStatement = base.VisitTryStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitUnsafeStatement(UnsafeStatementSyntax node) {
+        var updatedStatement = base.VisitUnsafeStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitUsingStatement(UsingStatementSyntax node) {
+        var updatedStatement = base.VisitUsingStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitWhileStatement(WhileStatementSyntax node) {
+        var updatedStatement = base.VisitWhileStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitYieldStatement(YieldStatementSyntax node) {
+        var updatedStatement = base.VisitYieldStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitForEachStatement(ForEachStatementSyntax node) {
+        // Handle CompileTimeForEach here
+        var updatedStatement = base.VisitForEachStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitLocalFunctionStatement(LocalFunctionStatementSyntax node) {
+        var updatedStatement = base.VisitLocalFunctionStatement(node);
+        return updatedStatement;
+    }
+
+    public override SyntaxNode? VisitForEachVariableStatement(ForEachVariableStatementSyntax node) {
+        var updatedStatement = base.VisitForEachVariableStatement(node);
+        return updatedStatement;
+    }
+
     private void EmitRenderText(string text) {
-        _renderTree.Interpolate($"{_renderTreeExpression}.{nameof(IRenderTreeBuilder.Text)}({text});");
+        _renderTree.Interpolate($"{_renderTreeExpression}.{nameof(IRenderTreeBuilder.Text)}(\"{text}\");");
         _renderTree.NewLine();
     }
 }
@@ -117,7 +280,7 @@ public sealed class SyntheticCodeBlockFromLambdaResolutionContext(SemanticModel 
 
 public sealed class SyntheticCodeBlockFromLambdaWithInputsResolutionContext(
     SemanticModel sm,
-    string renderTreeArgumentName = "renderTree"
+    string renderTreeArgumentName = "λ__renderTree"
 ) : ISyntheticCodeBlockResolutionContext {
     public bool TryResolveIdentifier(SimpleNameSyntax identifier, out SyntaxNode? resolvedNode) {
         resolvedNode = null;

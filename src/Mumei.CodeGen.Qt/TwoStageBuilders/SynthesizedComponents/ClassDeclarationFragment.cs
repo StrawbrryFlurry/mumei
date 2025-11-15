@@ -103,9 +103,9 @@ public readonly struct MethodDeclarationFragment(
     public static MethodDeclarationFragment Create(
         ImmutableArray<AttributeFragment> attributes,
         AccessModifier accessModifier,
+        TypeParameterListFragment typeParameters,
         TypeInfoFragment returnType,
         string name,
-        TypeParameterListFragment typeParameters,
         ImmutableArray<ParameterFragment> parameters,
         CodeBlockFragment body
     ) {
@@ -124,9 +124,9 @@ public readonly struct MethodDeclarationFragment(
     public static MethodDeclarationFragment Create<TBodyState>(
         ImmutableArray<AttributeFragment> attributes,
         AccessModifier accessModifier,
+        TypeParameterListFragment typeParameters,
         TypeInfoFragment returnType,
         string name,
-        TypeParameterListFragment typeParameters,
         ImmutableArray<ParameterFragment> parameters,
         TBodyState bodyState,
         Action<IRenderTreeBuilder, TBodyState> declareBody

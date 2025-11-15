@@ -26,9 +26,9 @@ file sealed class CompilationTestSource {
         var c = default(SyntheticCompilation)!;
         var m = c.DeclareClass("Test").DeclareMethod<Action<ISyntheticClassBuilder<CompileTimeUnknown>>>("A");
         var field = typeof(CompilationTestSource).GetField(nameof(_ref))!;
-        m.WithBody(new { Field = field }, static state => defBuilder => {
-            defBuilder.DeclareField(state.Field.FieldType, state.Field.Name);
-        });
+        m.WithBody(new { Field = field }, static state => defBuilder =>
+            defBuilder.DeclareField(state.Field.FieldType, state.Field.Name)
+        );
     }
 }
 

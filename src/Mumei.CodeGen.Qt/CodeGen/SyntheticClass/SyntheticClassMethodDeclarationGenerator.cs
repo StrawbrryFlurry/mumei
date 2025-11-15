@@ -5,13 +5,9 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
 using Mumei.CodeGen.Playground;
-using Mumei.CodeGen.Qt.Qt;
-using Mumei.CodeGen.Qt.Roslyn;
 using Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 using Mumei.CodeGen.Qt.TwoStageBuilders.RoslynCodeProviders;
 using Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
-using Mumei.Roslyn.Common;
-using CodeBlockFragment = Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents.CodeBlockFragment;
 
 namespace Mumei.CodeGen.Qt;
 
@@ -99,12 +95,18 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
         InterceptInvocationIntermediateNode<(ExpressionSyntax? InputExpression, LambdaExpressionSyntax BodyOrBodyWithInputsDeclaration)> invocation,
         CancellationToken _
     ) {
-        var (inputExpression, bodyDeclaration) = invocation.State;
-        if (!bodyDeclaration.Modifiers.Contains(SyntaxFactory.Token(SyntaxKind.StaticKeyword))) {
+        var (inputExpression, inputBodyDeclarationExpression) = invocation.State;
+        if (!inputBodyDeclarationExpression.Modifiers.Contains(SyntaxFactory.Token(SyntaxKind.StaticKeyword))) {
             // return default!; // Diagnostic: Body lambda must be static
         }
 
-        var lambda = invocation.SemanticModel.GetOperation(bodyDeclaration) as IAnonymousFunctionOperation;
+        // We don't want outer block bodies since they could introduce additional locals that we can't resolve.
+        if (inputBodyDeclarationExpression.Body is not LambdaExpressionSyntax bodyDeclaration) {
+            throw new NotSupportedException("Only simple lambda bodies are supported in WithBody() invocations.");
+            // return;
+        }
+
+        var lambda = invocation.SemanticModel.GetOperation(inputBodyDeclarationExpression) as IAnonymousFunctionOperation;
 
         var methodName = $"Synthetic_WithBody_Interceptor_{Guid.NewGuid():N}";
 
@@ -131,32 +133,38 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
             normalizedInputExpression = $"System.Runtime.CompilerServices.{nameof(Unsafe)}.{nameof(Unsafe.As)}<Tλ__Input, {accessorClassName}>(ref λ__input)";
         }
 
+        var bodyDeclarationOperation = invocation.SemanticModel.GetOperation(bodyDeclaration) as IAnonymousFunctionOperation;
+
         var codeBlock = SyntheticRenderCodeBlockSyntaxRewriter.CreateSyntheticRenderBlock(
             bodyDeclaration.Body,
+            bodyDeclarationOperation.Symbol.ReturnType,
             invocation.SemanticModel,
             new SyntheticCodeBlockFromLambdaWithInputsResolutionContext(invocation.SemanticModel)
         );
         var methodDecl = MethodDeclarationFragment.Create(
             [AttributeFragment.Intercept(invocation.Location)],
-            AccessModifier.PrivateStatic,
-            new TypeInfoFragment(invocation.Operation.TargetMethod.ReturnType),
+            AccessModifier.InternalStatic,
+            [TypeParameterFragment.Create("Tλ__MethodSignature", out var tMethodSignature, typeof(Delegate)), TypeParameterFragment.Create("Tλ__Input", out var tInput)],
+            TypeInfoFragment.ConstructGenericType(typeof(ISyntheticMethodBuilder<>), tMethodSignature),
             methodName,
-            [TypeParameterFragment.Create("Tλ__Input")],
             [
-                ParameterFragment.Create(invocation.Operation.TargetMethod.DeclaringType(), "λ__this", ParameterAttributes.This),
-                ParameterFragment.Create(TypeInfoFragment.ForKeyword("Tλ__Input"), "λ__input")
+                ParameterFragment.Create(TypeInfoFragment.ConstructGenericType(typeof(ISyntheticMethodBuilder<>), tMethodSignature), "λ__this", ParameterAttributes.This, out var thisParm),
+                ParameterFragment.Create(tInput, "λ__input"),
+                ParameterFragment.Create(TypeInfoFragment.ConstructGenericType(typeof(Func<>), tInput, tMethodSignature), "λ__codeBlockDeclaration")
             ],
             CodeBlockFragment.Create((codeBlock as ISyntheticConstructable<CodeBlockFragment>)!.Construct(), (builder, fragment) => {
-                builder.Interpolate($"var λ__normalizedInput = {normalizedInputExpression};");
+                builder.Interpolate($"{LocalFragment.Var("λ__normalizedInput", out var normalizedInput)} = {normalizedInputExpression};");
                 builder.NewLine();
-                builder.Text("var λ__bodyDeclaration = ");
-                builder.Interpolate($"λ__this.{nameof(ISyntheticMethodBuilder<>.λCompilerApi)}.{nameof(ISyntheticMethodBuilder<>.λCompilerApi.CreateRendererCodeBlock)}<{normalizedInputType}>(new {typeof(RenderFragment<>)}<{normalizedInputType}>(λ__normalizedInput, (renderTree, λ__renderTreeInputArg) => {{");
+                builder.Interpolate($"{LocalFragment.Var("λ__bodyDeclaration", out var bodyDeclaration)} = ");
+                builder.Interpolate($"{thisParm}.{nameof(ISyntheticMethodBuilder<>.λCompilerApi)}.{nameof(ISyntheticMethodBuilder<>.λCompilerApi.CreateRendererCodeBlock)}<{normalizedInputType}>(new {typeof(RenderFragment<>)}<{normalizedInputType}>(\n{normalizedInput},\n(λ__renderTree, λ__renderTreeInputArg) => {{");
                 builder.NewLine();
+                builder.StartBlock();
                 builder.Node(fragment);
-                builder.NewLine();
+                builder.EndBlock();
                 builder.Line("}));");
-                builder.Line($"λ__this.{nameof(ISyntheticMethodBuilder.WithBody)}(λ__bodyDeclaration);");
-                builder.Text("return λ__this;");
+                builder.Interpolate($"{thisParm}.{nameof(ISyntheticMethodBuilder.WithBody)}({bodyDeclaration});");
+                builder.NewLine();
+                builder.Interpolate($"return {thisParm};");
             })
         );
 
@@ -177,15 +185,16 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
         var methodName = $"Synthetic_WithBody_Interceptor_{Guid.NewGuid():N}";
         var codeBlock = SyntheticRenderCodeBlockSyntaxRewriter.CreateSyntheticRenderBlock(
             bodyDeclaration.Body,
+            lambda.Symbol.ReturnType,
             invocation.SemanticModel,
             new SyntheticCodeBlockFromLambdaResolutionContext(invocation.SemanticModel)
         );
         var methodDecl = MethodDeclarationFragment.Create(
             [AttributeFragment.Intercept(invocation.Location)],
             AccessModifier.PrivateStatic,
+            [],
             new TypeInfoFragment(lambda.Symbol.ReturnType),
             methodName,
-            [],
             [],
             CodeBlockFragment.Create((codeBlock as ISyntheticConstructable<CodeBlockFragment>)!.Construct(), (builder, fragment) => {
                 builder.Text("var λ__bodyDeclaration = ");
