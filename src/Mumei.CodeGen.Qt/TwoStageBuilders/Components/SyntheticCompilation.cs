@@ -54,6 +54,8 @@ public sealed class SyntheticCompilation(Compilation compilation) {
 
         public ISyntheticClassBuilder<TClassDefinition> TrackClass<TClassDefinition>(ISyntheticClassBuilder<TClassDefinition> classBuilder)
             where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new();
+
+        public string NextId();
     }
 
     private sealed class QtSyntheticCompilationCompilerApi(SyntheticCompilation compilation) : IλInternalCompilerApi {
@@ -63,6 +65,19 @@ public sealed class SyntheticCompilation(Compilation compilation) {
 
         public ISyntheticClassBuilder<TClassDefinition> TrackClass<TClassDefinition>(ISyntheticClassBuilder<TClassDefinition> classBuilder) where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new() {
             throw new NotImplementedException();
+        }
+
+        private int _nextMajorId = 0;
+        private int _nextMinorId = 0;
+
+        public string NextId() {
+            var id = $"{_nextMajorId}__{_nextMinorId}";
+            if (++_nextMinorId >= 10) {
+                _nextMinorId = 0;
+                _nextMajorId++;
+            }
+
+            return id;
         }
     }
 }

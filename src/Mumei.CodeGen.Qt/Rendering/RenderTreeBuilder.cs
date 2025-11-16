@@ -8,9 +8,6 @@ internal abstract class GenericRenderTreeBuilder<TResult>(FeatureCollection? par
     private FeatureCollection? _features = parentFeatureCollection;
     protected FeatureCollection? Features => _features;
 
-    private int _nextMajorId = 0;
-    private int _nextMinorId = 0;
-
 #if DEBUG
     protected readonly DebugRenderGraph DebugRenderGraph = new();
 #endif
@@ -126,16 +123,6 @@ internal abstract class GenericRenderTreeBuilder<TResult>(FeatureCollection? par
         _features.Require(feature);
     }
 
-    public string NextId() {
-        var id = $"{_nextMajorId}__{_nextMinorId}";
-        if (++_nextMinorId >= 10) {
-            _nextMinorId = 0;
-            _nextMajorId++;
-        }
-
-        return id;
-    }
-
     public string DebugView() {
 #if DEBUG
         return DebugRenderGraph.DebugView();
@@ -171,8 +158,6 @@ public interface IRenderTreeBuilder {
     public void Node<TState>(in RenderFragment<TState> render);
 
     public void RequireFeature(IRenderer.IFeature feature);
-
-    public string NextId();
 
     [InterpolatedStringHandler]
     public readonly ref struct InterpolatedStringHandler(int literalLength, int formattedCount, IRenderTreeBuilder tree) {
