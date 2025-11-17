@@ -1,0 +1,131 @@
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Mumei.CodeGen.Qt.Qt;
+
+namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
+
+internal sealed class QtSyntheticClassBuilder<TClassDef>(SyntheticCompilation compilation) : ISyntheticClassBuilder<TClassDef> {
+    public ISyntheticClassBuilder<TClassDef>.IλInternalClassBuilderCompilerApi λCompilerApi { get; }
+
+    public TClassDef New(object[] args) {
+        throw new NotImplementedException();
+    }
+
+    public TClassDef New(Func<TClassDef> constructorExpression) {
+        throw new NotImplementedException();
+    }
+
+    public ISyntheticClassBuilder<TClassDef> WithName(string name) {
+        throw new NotImplementedException();
+    }
+
+    public ISyntheticClassBuilder<TClassDef> WithModifiers(params ReadOnlySpan<SyntheticAccessModifier> modifiers) {
+        throw new NotImplementedException();
+    }
+
+    public ISyntheticMethodBuilder<Delegate> DeclareInterceptorMethod<TMethodDefinition>(string name, InvocationExpressionSyntax invocationToIntercept, Action<TMethodDefinition> inputBinder, Func<TMethodDefinition, Delegate> methodSelector) where TMethodDefinition : SyntheticMethodDefinition, new() {
+        throw new NotImplementedException();
+    }
+
+    public ISyntheticMethodBuilder<TSignature> DeclareInterceptorMethod<TMethodDefinition, TSignature>(
+        string name,
+        InvocationExpressionSyntax invocationToIntercept,
+        Action<TMethodDefinition> inputBinder,
+        Func<TMethodDefinition, TSignature> methodSelector
+    )
+        where TMethodDefinition : SyntheticMethodDefinition, new() where TSignature : Delegate {
+        throw new NotImplementedException();
+    }
+
+    public ISyntheticMethodBuilder<Delegate> DeclareInterceptorMethod(InvocationExpressionSyntax invocationToIntercept, string name) {
+        throw new NotImplementedException();
+    }
+
+    public ISyntheticMethodBuilder<Delegate> DeclareMethod<TMethodDefinition>(string name, Action<TMethodDefinition> inputBinder, Func<TMethodDefinition, Delegate> methodSelector) where TMethodDefinition : SyntheticMethodDefinition, new() {
+        throw new NotImplementedException();
+    }
+
+    public ISyntheticMethodBuilder<TSignature> DeclareMethod<TMethodDefinition, TSignature>(string name, Action<TMethodDefinition> inputBinder, Func<TMethodDefinition, TSignature> methodSelector) where TMethodDefinition : SyntheticMethodDefinition, new() where TSignature : Delegate {
+        throw new NotImplementedException();
+    }
+
+    public ISyntheticMethodBuilder<TSignature> DeclareMethod<TSignature>(string name) where TSignature : Delegate {
+        throw new NotImplementedException();
+    }
+
+    public string MakeUniqueName(string n) {
+        throw new NotImplementedException();
+    }
+
+    public void BindSyntheticImplementation(ISyntheticType member, ISyntheticType actualType) {
+        throw new NotImplementedException();
+    }
+
+    public void BindSyntheticImplementation(Type member, ISyntheticType actualType) {
+        throw new NotImplementedException();
+    }
+
+    public void BindSyntheticImplementation(Type member, ITypeSymbol actualType) {
+        throw new NotImplementedException();
+    }
+
+    public ISyntheticClassBuilder<TNew> WithDefinition<TNew>() where TNew : ISyntheticClass {
+        throw new NotImplementedException();
+    }
+
+    public ISyntheticField<TField> DeclareField<TField>(string name) {
+        throw new NotImplementedException();
+    }
+
+    public ISyntheticField<CompileTimeUnknown> DeclareField(Type type, string name) {
+        throw new NotImplementedException();
+    }
+
+    public ISyntheticField<CompileTimeUnknown> DeclareField(ITypeSymbol type, string name) {
+        throw new NotImplementedException();
+    }
+
+    public ISyntheticField<CompileTimeUnknown> DeclareField(ISyntheticType type, string name) {
+        throw new NotImplementedException();
+    }
+
+    public void DeclareProperty(ITypeSymbol type, string name) {
+        throw new NotImplementedException();
+    }
+
+    public ISyntheticClassBuilder<TClassDef> Bind<TTarget>(ITypeSymbol type) {
+        throw new NotImplementedException();
+    }
+
+    public void DeclareConstructor<TImplementaiton>(Delegate impl) {
+        throw new NotImplementedException();
+    }
+
+    public void Implement(Type baseType) {
+        throw new NotImplementedException();
+    }
+
+    public void Implement(ISyntheticType baseType) {
+        throw new NotImplementedException();
+    }
+
+    public void Implement(ITypeSymbol baseTyp) {
+        throw new NotImplementedException();
+    }
+
+    public void Extend(Type baseType) {
+        throw new NotImplementedException();
+    }
+
+    public void Extend(ISyntheticType baseType) {
+        throw new NotImplementedException();
+    }
+
+    public void Extend(ITypeSymbol baseType) {
+        throw new NotImplementedException();
+    }
+
+    public ISyntheticClassBuilder<TNested> DeclareNestedClass<TNested>(string name, Action<TNested> bindInputs) where TNested : ISyntheticClass {
+        throw new NotImplementedException();
+    }
+}

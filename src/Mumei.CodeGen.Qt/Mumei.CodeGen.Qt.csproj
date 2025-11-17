@@ -1,11 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <MumeiInternalApiDiagnostic>MOOM9999</MumeiInternalApiDiagnostic>
+
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>Preview</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 
-    <NoWarn>RS2008</NoWarn>
+    <NoWarn>RS2008,$(MumeiInternalApiDiagnostic)</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

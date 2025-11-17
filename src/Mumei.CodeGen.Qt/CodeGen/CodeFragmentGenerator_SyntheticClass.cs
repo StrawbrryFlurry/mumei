@@ -77,7 +77,7 @@ internal sealed class CodeFragmentGenerator_SyntheticClass : IIncrementalGenerat
                     },
                     m => m.InterceptCreate
                 )
-                .WithAccessibility(SyntheticAccessModifier.Internal, SyntheticAccessModifier.Static);
+                .WithAccessibility(SyntheticAccessModifier.Internal + SyntheticAccessModifier.Static);
         }
 
 

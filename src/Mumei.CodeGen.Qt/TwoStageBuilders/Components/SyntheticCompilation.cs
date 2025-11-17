@@ -1,5 +1,4 @@
 ﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Qt.Qt;
 using Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 
@@ -18,7 +17,7 @@ public sealed class SyntheticCompilation(Compilation compilation) {
     }
 
     public ISyntheticClassBuilder<CompileTimeUnknown> DeclareClass(string name) {
-        return new SyntheticClassBuilder<CompileTimeUnknown>(this);
+        return new QtSyntheticClassBuilder<CompileTimeUnknown>(this);
     }
 
     public ISyntheticClassBuilder<TClassDefinition> DeclareClass<TClassDefinition>(
@@ -60,11 +59,11 @@ public sealed class SyntheticCompilation(Compilation compilation) {
 
     private sealed class QtSyntheticCompilationCompilerApi(SyntheticCompilation compilation) : IλInternalCompilerApi {
         public ISyntheticClassBuilder<TClassDefinition> DeclareClassBuilder<TClassDefinition>(string name) {
-            return new SyntheticClassBuilder<TClassDefinition>(compilation).WithName(name);
+            return new QtSyntheticClassBuilder<TClassDefinition>(compilation).WithName(name);
         }
 
         public ISyntheticClassBuilder<TClassDefinition> TrackClass<TClassDefinition>(ISyntheticClassBuilder<TClassDefinition> classBuilder) where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new() {
-            throw new NotImplementedException();
+            return classBuilder;
         }
 
         private int _nextMajorId = 0;

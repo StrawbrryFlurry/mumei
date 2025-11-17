@@ -91,7 +91,7 @@ public sealed class SyntheticCompilationClassFactoryGenerator : IIncrementalGene
         var interceptMethod = classBuilder.DeclareInterceptorMethod(
             declareClassInvocation.Invocation,
             classBuilder.MakeUniqueName($"Intercept_DeclareClass__{declareClassInvocation.State.Name}}}")
-        ).WithAccessibility(SyntheticAccessModifier.Private, SyntheticAccessModifier.Static);
+        ).WithAccessibility(SyntheticAccessModifier.Private + SyntheticAccessModifier.Static);
 
         interceptMethod.WithBody(new SyntheticRenderCodeBlock(renderTree => {
             renderTree.Line("");
@@ -135,14 +135,12 @@ file sealed partial class SyntheticClassDynamicMemberBinder<TClassDefinition> {
         }
 
         private sealed class SyntheticMethodInfo_MacroBinderImpl {
-            [MacroBinding]
             public string Bind__Invoke(dynamic callsite) {
                 // take arguments from callsite
                 // take method name from self
                 return "BindOutput__field__someField(classBuilder)";
             }
 
-            [MacroBinding]
             public string Bind__Bind(dynamic callsite) {
                 // if callsite is this
                 return "this.";
@@ -173,7 +171,6 @@ file sealed partial class SyntheticClassDynamicMemberBinder<TClassDefinition> {
         }
 
         public static class TypeSymbolMacroExtensions {
-            [MacroBinding]
             public static string Bind__self(ITypeSymbol typeSymbol, dynamic callsite) {
                 return typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             }

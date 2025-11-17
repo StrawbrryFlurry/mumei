@@ -164,6 +164,7 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
             CodeBlockFragment.Create((codeBlock as ISyntheticConstructable<CodeBlockFragment>)!.Construct(), (builder, fragment) => {
                 builder.Interpolate($"{LocalFragment.Var("λ__normalizedInputs", out var normalizedInput)} = {normalizedInputExpression};");
                 builder.NewLine();
+                builder.Line($"#pragma warning disable {Diagnostics.InternalFeatureId}");
                 builder.Interpolate($"{LocalFragment.Var("λ__bodyDeclaration", out var bodyDeclaration)} = ");
                 builder.Interpolate(
                     $"{thisParm}.{nameof(ISyntheticMethodBuilder<>.λCompilerApi)}.{nameof(ISyntheticMethodBuilder<>.λCompilerApi.CreateRendererCodeBlock)}<{normalizedInputType}>(new {typeof(RenderFragment<>)}<{normalizedInputType}>(\n{normalizedInput},\nstatic ({RenderTreeArg}, {RenderFragmentInputsArg}) => {{");
@@ -172,9 +173,10 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
                 builder.Node(fragment);
                 builder.EndBlock();
                 builder.Line("}));");
+                builder.Line($"#pragma warning enable {Diagnostics.InternalFeatureId}");
                 // TODO: Since we likely don't have a parameter list initialized here we should also
                 // override the methods parameter list with the correct parameter names based on the input lambda.
-                builder.Interpolate($"{thisParm}.{nameof(ISyntheticMethodBuilder.WithBody)}({bodyDeclaration});");
+                builder.Interpolate($"{thisParm}.{nameof(ISyntheticMethodBuilder<>.WithBody)}({bodyDeclaration});");
                 builder.NewLine();
                 builder.Interpolate($"return {thisParm};");
             })
@@ -213,7 +215,7 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
                 builder.Interpolate($"{nameof(ISyntheticMethodBuilder<>.λCompilerApi)}.{nameof(ISyntheticMethodBuilder<>.λCompilerApi.CreateRendererCodeBlock)}((renderTree) => {{");
                 builder.Node(fragment);
                 builder.Text("}));");
-                builder.Text($"this.{nameof(ISyntheticMethodBuilder.WithBody)}(λ__bodyDeclaration);");
+                builder.Text($"this.{nameof(ISyntheticMethodBuilder<>.WithBody)}(λ__bodyDeclaration);");
                 builder.Text("return this;");
             })
         );

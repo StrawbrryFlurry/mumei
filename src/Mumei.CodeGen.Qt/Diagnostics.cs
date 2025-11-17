@@ -4,6 +4,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace Mumei.CodeGen.Qt;
 
 internal static class Diagnostics {
+    public const string InternalFeatureId = "MOOM9999";
+
     private static readonly DiagnosticDescriptor MethodTemplateArgumentNotFromCallSite = new(
         "MOOM0001",
         "Method Templates need to be constructed at the registration site",
