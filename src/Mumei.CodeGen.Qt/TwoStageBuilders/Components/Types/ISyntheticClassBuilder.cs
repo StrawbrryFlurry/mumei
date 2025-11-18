@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Qt.Qt;
+using Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 
@@ -9,7 +10,7 @@ public interface ISyntheticClassBuilder<T> : ISyntheticMember, ISyntheticTypeInf
 
     public ISyntheticClassBuilder<T> WithName(string name);
 
-    public ISyntheticClassBuilder<T> WithModifiers(params ReadOnlySpan<SyntheticAccessModifier> modifiers);
+    public ISyntheticClassBuilder<T> WithModifiers(AccessModifierList modifiers);
 
     public ISyntheticMethodBuilder<Delegate> DeclareInterceptorMethod<TMethodDefinition>(
         string name,
@@ -72,10 +73,9 @@ public interface ISyntheticClassBuilder<T> : ISyntheticMember, ISyntheticTypeInf
     public interface IλInternalClassBuilderCompilerApi {
         public SyntheticCompilation Compilation { get; }
 
-        public void DeclareMethod(ISyntheticMethod method);
         public void DeclareMethod(
             ISyntheticAttribute[] attributes,
-            SyntheticAccessModifier[] modifiers,
+            AccessModifierList modifiers,
             ISyntheticType returnType,
             string name,
             ISyntheticTypeParameter[] typeParameters,

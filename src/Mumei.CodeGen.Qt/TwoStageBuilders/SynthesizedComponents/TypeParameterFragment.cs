@@ -9,6 +9,8 @@ namespace Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 public readonly struct TypeParameterListFragment(
     ImmutableArray<TypeParameterFragment> typeParameters
 ) : IEnumerable<TypeParameterFragment> {
+    public static TypeParameterListFragment Empty => new([]);
+
     public ImmutableArray<TypeParameterFragment> TypeParameters => typeParameters.EnsureInitialized();
 
     public RenderFragment<ImmutableArray<TypeParameterFragment>> List => new(TypeParameters, static (renderTree, typeParameters) => {

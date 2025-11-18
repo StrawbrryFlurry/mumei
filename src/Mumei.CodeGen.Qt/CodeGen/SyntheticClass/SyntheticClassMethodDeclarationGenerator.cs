@@ -125,7 +125,7 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
             var propertyMembers = ImmutableArray.CreateBuilder<PropertyDeclarationFragment>(properties.Length);
             foreach (var inputMemberProperty in properties) {
                 propertyMembers.Add(PropertyDeclarationFragment.Create(
-                    AccessModifier.Public,
+                    AccessModifierList.Public,
                     new TypeInfoFragment(inputMemberProperty.Type),
                     inputMemberProperty.Name,
                     PropertyDeclarationFragment.AccessorFragment.Get()
@@ -152,7 +152,7 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
         );
         var methodDecl = MethodDeclarationFragment.Create(
             [AttributeFragment.Intercept(invocation.Location)],
-            AccessModifier.InternalStatic,
+            AccessModifierList.Internal + AccessModifierList.Static,
             [TypeParameterFragment.Create("Tλ__MethodSignature", out var tMethodSignature, typeof(Delegate)), TypeParameterFragment.Create("Tλ__Input", out var tInput)],
             TypeInfoFragment.ConstructGenericType(typeof(ISyntheticMethodBuilder<>), tMethodSignature),
             methodName,
@@ -205,7 +205,7 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
         );
         var methodDecl = MethodDeclarationFragment.Create(
             [AttributeFragment.Intercept(invocation.Location)],
-            AccessModifier.PrivateStatic,
+            AccessModifierList.Private + AccessModifierList.Static,
             [],
             new TypeInfoFragment(lambda.Symbol.ReturnType),
             methodName,

@@ -70,7 +70,7 @@ internal sealed class CodeFragmentGenerator : IIncrementalGenerator {
         var fragment = LiteralNode.ForRawString(bodyContent.TrimEnd('\r', '\n'));
         return MethodDeclarationFragment.Create(
             [],
-            AccessModifier.InternalStatic,
+            AccessModifierList.Internal + AccessModifierList.Static,
             [],
             typeof(CodeFragment),
             name,

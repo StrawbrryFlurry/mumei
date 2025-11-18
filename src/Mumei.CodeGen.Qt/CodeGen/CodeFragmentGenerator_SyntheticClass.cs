@@ -59,7 +59,7 @@ internal sealed class CodeFragmentGenerator_SyntheticClass : IIncrementalGenerat
 
         var compilation = new SyntheticCompilation(codeFragments[0].SemanticModel.Compilation);
         var interceptorClass = compilation.DeclareClass(compilation.MakeUniqueName("CodeFragmentInterceptor"))
-            .WithModifiers(SyntheticAccessModifier.File, SyntheticAccessModifier.Sealed);
+            .WithModifiers(AccessModifierList.File + AccessModifierList.Sealed);
 
         foreach (var codeFragment in codeFragments) {
             var declaredBody = new GloballyQualifyingSyntaxRewriter(codeFragment.SemanticModel).Visit(codeFragment.State.Body);
@@ -77,7 +77,7 @@ internal sealed class CodeFragmentGenerator_SyntheticClass : IIncrementalGenerat
                     },
                     m => m.InterceptCreate
                 )
-                .WithAccessibility(SyntheticAccessModifier.Internal + SyntheticAccessModifier.Static);
+                .WithAccessibility(AccessModifierList.Internal + AccessModifierList.Static);
         }
 
 

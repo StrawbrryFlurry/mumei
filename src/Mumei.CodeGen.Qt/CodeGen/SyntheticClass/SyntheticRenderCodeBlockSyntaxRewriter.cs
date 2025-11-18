@@ -77,7 +77,7 @@ internal sealed class SyntheticRenderCodeBlockSyntaxRewriter(
 
         visitor._renderTree.EmitRenderSegment(isVoidExpression ? $"{body};" : $"return {body};");
 
-        var syntheticCodeBlock = new SyntheticCodeBlock(visitor._renderTree.GetSourceText());
+        var syntheticCodeBlock = new QtSyntheticCodeBlock(visitor._renderTree.GetSourceText());
         return syntheticCodeBlock;
     }
 
@@ -97,7 +97,7 @@ internal sealed class SyntheticRenderCodeBlockSyntaxRewriter(
         }
 
         visitor._renderTree.EmitRenderSegment(resolvedBlockLike);
-        var syntheticCodeBlock = new SyntheticCodeBlock(visitor._renderTree.GetSourceText());
+        var syntheticCodeBlock = new QtSyntheticCodeBlock(visitor._renderTree.GetSourceText());
         return syntheticCodeBlock;
     }
 
@@ -233,7 +233,7 @@ internal sealed class SyntheticRenderCodeBlockSyntaxRewriter(
 //
 // var __ = macroBindingMethod;
 
-internal sealed class SyntheticCodeBlock(string block) : ISyntheticCodeBlock, ISyntheticConstructable<CodeBlockFragment> {
+internal sealed class QtSyntheticCodeBlock(string block) : ISyntheticCodeBlock, ISyntheticConstructable<CodeBlockFragment> {
     // Since we do have access to the declaration site of the original code block
     // we could keep an actual syntax tree here and map that to the position of the
     // original code block to give the user access to speculative type information and

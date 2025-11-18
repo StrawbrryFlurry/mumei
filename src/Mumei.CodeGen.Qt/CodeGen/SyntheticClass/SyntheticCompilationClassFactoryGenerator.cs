@@ -65,7 +65,7 @@ public sealed class SyntheticCompilationClassFactoryGenerator : IIncrementalGene
     ) {
         var compilation = new SyntheticCompilation(classDeclarationCalls[0].SemanticModel.Compilation);
         var interceptorClass = compilation.DeclareClass("SyntheticCompilationClassFactory")
-            .WithModifiers(SyntheticAccessModifier.File, SyntheticAccessModifier.Static);
+            .WithModifiers(AccessModifierList.File + AccessModifierList.Static);
 
         foreach (var call in classDeclarationCalls) {
             DeclareInterceptorMethod(interceptorClass, call);
@@ -86,14 +86,14 @@ public sealed class SyntheticCompilationClassFactoryGenerator : IIncrementalGene
             binder => {
                 binder.DefinitionClass = declareClassInvocation.State;
             }
-        ).WithModifiers(SyntheticAccessModifier.Private, SyntheticAccessModifier.Sealed);
+        ).WithModifiers(AccessModifierList.Private + AccessModifierList.Sealed);
 
         var interceptMethod = classBuilder.DeclareInterceptorMethod(
             declareClassInvocation.Invocation,
             classBuilder.MakeUniqueName($"Intercept_DeclareClass__{declareClassInvocation.State.Name}}}")
-        ).WithAccessibility(SyntheticAccessModifier.Private + SyntheticAccessModifier.Static);
+        ).WithAccessibility(AccessModifierList.Private + AccessModifierList.Static);
 
-        interceptMethod.WithBody(new SyntheticRenderCodeBlock(renderTree => {
+        interceptMethod.WithBody(new QtSyntheticRenderCodeBlock(renderTree => {
             renderTree.Line("");
         }));
     }
@@ -108,7 +108,7 @@ file sealed partial class SyntheticClassDynamicMemberBinder<TClassDefinition> {
         // classBuilder.λCompilerApi.BindMethodSlot();
         classBuilder.λCompilerApi.DeclareMethod(
             [],
-            [SyntheticAccessModifier.Public],
+            AccessModifierList.Public,
             new RuntimeSyntheticType(typeof(void)),
             "BindCompilerOutputMembers",
             [],

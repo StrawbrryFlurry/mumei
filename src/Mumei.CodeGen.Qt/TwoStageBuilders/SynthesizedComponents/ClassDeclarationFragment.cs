@@ -91,7 +91,7 @@ public readonly struct ClassDeclarationFragment(
 
 public readonly struct MethodDeclarationFragment(
     ImmutableArray<AttributeFragment> attributes,
-    AccessModifier accessModifier,
+    AccessModifierList accessModifier,
     TypeInfoFragment returnType,
     string name,
     TypeParameterListFragment typeParameters,
@@ -102,7 +102,7 @@ public readonly struct MethodDeclarationFragment(
 
     public static MethodDeclarationFragment Create(
         ImmutableArray<AttributeFragment> attributes,
-        AccessModifier accessModifier,
+        AccessModifierList accessModifier,
         TypeParameterListFragment typeParameters,
         TypeInfoFragment returnType,
         string name,
@@ -123,7 +123,7 @@ public readonly struct MethodDeclarationFragment(
 
     public static MethodDeclarationFragment Create<TBodyState>(
         ImmutableArray<AttributeFragment> attributes,
-        AccessModifier accessModifier,
+        AccessModifierList accessModifier,
         TypeParameterListFragment typeParameters,
         TypeInfoFragment returnType,
         string name,
@@ -158,7 +158,7 @@ public readonly struct MethodDeclarationFragment(
 
         renderTree.Node(typeParameters.Constraints);
 
-        if (accessModifier.IsAbstract()) {
+        if (accessModifier.IsAbstract) {
             renderTree.Text(";");
             return;
         }
@@ -188,7 +188,7 @@ public readonly struct FieldDeclarationFragment : IRenderFragment {
 
 public readonly struct PropertyDeclarationFragment(
     ImmutableArray<AttributeFragment> attributes,
-    AccessModifier accessModifier,
+    AccessModifierList accessModifier,
     TypeInfoFragment type,
     string name,
     PropertyDeclarationFragment.AccessorFragment? getAccessor,
@@ -224,26 +224,26 @@ public readonly struct PropertyDeclarationFragment(
 
     public readonly struct AccessorFragment(
         ImmutableArray<AttributeFragment> attributes,
-        AccessModifier? accessModifier,
+        AccessModifierList? accessModifier,
         string keyword,
         CodeBlockFragment? block
     ) : IRenderFragment {
         public static AccessorFragment Get(
-            AccessModifier? accessModifier = null,
+            AccessModifierList? accessModifier = null,
             CodeBlockFragment? block = null
         ) {
             return new AccessorFragment([], accessModifier, "get", block);
         }
 
         public static AccessorFragment Set(
-            AccessModifier? accessModifier = null,
+            AccessModifierList? accessModifier = null,
             CodeBlockFragment? block = null
         ) {
             return new AccessorFragment([], accessModifier, "set", block);
         }
 
         public static AccessorFragment Init(
-            AccessModifier? accessModifier = null,
+            AccessModifierList? accessModifier = null,
             CodeBlockFragment? block = null
         ) {
             return new AccessorFragment([], accessModifier, "init", block);
@@ -273,7 +273,7 @@ public readonly struct PropertyDeclarationFragment(
     }
 
     public static PropertyDeclarationFragment Create(
-        AccessModifier accessModifier,
+        AccessModifierList accessModifier,
         TypeInfoFragment type,
         string name,
         AccessorFragment getAccessor
