@@ -1,4 +1,6 @@
-﻿namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
+﻿using Microsoft.CodeAnalysis;
+
+namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 
 /// <summary>
 /// Defines a type in the synthetic type system that represents any user created type
@@ -25,6 +27,10 @@ internal sealed class ErrorSyntheticType(string? typeName, string errorReason, o
 }
 
 internal sealed class RuntimeSyntheticType(Type t) : ISyntheticType {
+    public string Name => t.Name;
+}
+
+internal sealed class RoslynSyntheticType(ITypeSymbol t) : ISyntheticType {
     public string Name => t.Name;
 }
 

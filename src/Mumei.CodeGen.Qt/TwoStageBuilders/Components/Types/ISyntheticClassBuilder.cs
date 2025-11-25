@@ -12,16 +12,16 @@ public interface ISyntheticClassBuilder<T> : ISyntheticMember, ISyntheticTypeInf
 
     public ISyntheticClassBuilder<T> WithModifiers(AccessModifierList modifiers);
 
-    public ISyntheticMethodBuilder<Delegate> DeclareInterceptorMethod<TMethodDefinition>(
+    public ISyntheticInterceptorMethodBuilder<Delegate> DeclareInterceptorMethod<TMethodDefinition>(
         string name,
         InvocationExpressionSyntax invocationToIntercept,
         Action<TMethodDefinition> inputBinder,
         Func<TMethodDefinition, Delegate> methodSelector
     ) where TMethodDefinition : SyntheticMethodDefinition, new();
 
-    public ISyntheticMethodBuilder<Delegate> DeclareInterceptorMethod(
-        InvocationExpressionSyntax invocationToIntercept,
-        string name
+    public ISyntheticInterceptorMethodBuilder<Delegate> DeclareInterceptorMethod(
+        string name,
+        InvocationExpressionSyntax invocationToIntercept
     );
 
     public ISyntheticMethodBuilder<Delegate> DeclareMethod<TMethodDefinition>(
@@ -68,19 +68,19 @@ public interface ISyntheticClassBuilder<T> : ISyntheticMember, ISyntheticTypeInf
     public void Extend(ITypeSymbol baseType);
 
     public ISyntheticClassBuilder<TNested> DeclareNestedClass<TNested>(string name, Action<TNested> bindInputs) where TNested : ISyntheticClass;
+}
 
-    // ReSharper disable once InconsistentNaming
-    public interface IλInternalClassBuilderCompilerApi {
-        public SyntheticCompilation Compilation { get; }
+// ReSharper disable once InconsistentNaming
+public interface IλInternalClassBuilderCompilerApi {
+    public ISyntheticCompilation Compilation { get; }
 
-        public void DeclareMethod(
-            ISyntheticAttribute[] attributes,
-            AccessModifierList modifiers,
-            ISyntheticType returnType,
-            string name,
-            ISyntheticTypeParameter[] typeParameters,
-            ISyntheticParameter[] parameters,
-            ISyntheticCodeBlock body
-        );
-    }
+    public void DeclareMethod(
+        ISyntheticAttribute[] attributes,
+        AccessModifierList modifiers,
+        ISyntheticType returnType,
+        string name,
+        ISyntheticTypeParameter[] typeParameters,
+        ISyntheticParameter[] parameters,
+        ISyntheticCodeBlock body
+    );
 }

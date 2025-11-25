@@ -5,7 +5,7 @@ using SourceCodeFactory;
 
 namespace Mumei.CodeGen.Qt.Tests.Testing;
 
-public sealed class SyntheticClassMethodDeclarationGeneratorTests {
+public sealed class SyntheticClassMethodDeclarationGeneratorTests_Generator {
     [Fact]
     public void Test() {
         var result = new SourceGeneratorTest<SyntheticClassMethodDeclarationGenerator>(b =>

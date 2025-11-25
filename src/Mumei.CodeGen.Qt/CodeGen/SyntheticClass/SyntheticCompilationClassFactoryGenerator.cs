@@ -74,7 +74,7 @@ public sealed class SyntheticCompilationClassFactoryGenerator : IIncrementalGene
         var ns = compilation.NamespaceFromCompilation("Generated")
             .WithMember(interceptorClass);
 
-        return compilation.Synthesize(ns);
+        return compilation.Synthesize<NamespaceFragment>(ns);
     }
 
     private static void DeclareInterceptorMethod(
@@ -89,8 +89,8 @@ public sealed class SyntheticCompilationClassFactoryGenerator : IIncrementalGene
         ).WithModifiers(AccessModifierList.Private + AccessModifierList.Sealed);
 
         var interceptMethod = classBuilder.DeclareInterceptorMethod(
-            declareClassInvocation.Invocation,
-            classBuilder.MakeUniqueName($"Intercept_DeclareClass__{declareClassInvocation.State.Name}}}")
+            classBuilder.MakeUniqueName($"Intercept_DeclareClass__{declareClassInvocation.State.Name}}}"),
+            declareClassInvocation.Invocation
         ).WithAccessibility(AccessModifierList.Private + AccessModifierList.Static);
 
         interceptMethod.WithBody(new QtSyntheticRenderCodeBlock(renderTree => {
@@ -120,7 +120,7 @@ file sealed partial class SyntheticClassDynamicMemberBinder<TClassDefinition> {
     private sealed class SyntheticClassDynamicMemberBinder__MethodDeclaration_BindCompilerOutputMembers__0(
         SyntheticClassDynamicMemberBinder<TClassDefinition> input
     ) : ISyntheticCodeBlock, ISyntheticConstructable<CodeBlockFragment> {
-        public CodeBlockFragment Construct() {
+        public CodeBlockFragment Construct(ISyntheticCompilation compilation) {
             return CodeBlockFragment.Create(RenderBody);
         }
 
@@ -153,7 +153,7 @@ file sealed partial class SyntheticClassDynamicMemberBinder<TClassDefinition> {
     private sealed class SyntheticClassDynamicMemberBinder__MethodDeclaration_DeclareBindOutputField__0(
         SyntheticClassDynamicMemberBinder__MethodDeclaration_DeclareBindOutputField__0.Inputs inputs
     ) : ISyntheticCodeBlock, ISyntheticConstructable<CodeBlockFragment> {
-        public CodeBlockFragment Construct() {
+        public CodeBlockFragment Construct(ISyntheticCompilation compilation) {
             return CodeBlockFragment.Create(RenderBody);
         }
 

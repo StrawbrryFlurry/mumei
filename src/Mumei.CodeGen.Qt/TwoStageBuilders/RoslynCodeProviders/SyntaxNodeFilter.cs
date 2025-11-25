@@ -62,6 +62,28 @@ internal sealed class SyntaxNodeFilter {
 
         return false;
     }
+
+    public static bool IsInvocationOf(
+        SyntaxNode node,
+        string methodName,
+        out InvocationExpressionSyntax invocationExpression
+    ) {
+        invocationExpression = null!;
+        if (node is not InvocationExpressionSyntax invocation) {
+            return false;
+        }
+
+        invocationExpression = invocation;
+        if (invocation.Expression is IdentifierNameSyntax { Identifier.Text: var immediateMethodInvocationName }) {
+            return immediateMethodInvocationName == methodName;
+        }
+
+        if (invocation.Expression is MemberAccessExpressionSyntax { Name.Identifier.Text: var memberMethodInvocationName }) {
+            return memberMethodInvocationName == methodName;
+        }
+
+        return false;
+    }
 }
 
 internal sealed class SyntaxProviderFactory {

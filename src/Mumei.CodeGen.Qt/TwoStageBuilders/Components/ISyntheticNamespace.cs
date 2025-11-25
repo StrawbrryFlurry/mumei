@@ -18,7 +18,7 @@ internal sealed class QtSyntheticNamespace(string name) : ISyntheticNamespace, I
         return this;
     }
 
-    public NamespaceFragment Construct() {
+    public NamespaceFragment Construct(ISyntheticCompilation compilation) {
         var classDeclarations = new ArrayBuilder<ClassDeclarationFragment>();
 
         if (_members is null) {
@@ -34,7 +34,7 @@ internal sealed class QtSyntheticNamespace(string name) : ISyntheticNamespace, I
                     );
                 }
 
-                classDeclarations.Add(syntheticClass.Construct());
+                classDeclarations.Add(syntheticClass.Construct(compilation));
                 continue;
             }
         }

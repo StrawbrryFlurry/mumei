@@ -3,11 +3,15 @@
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 
 internal sealed partial class QtSyntheticClassBuilder<TClassDef>(SyntheticCompilation compilation) : ISyntheticClassBuilder<TClassDef> {
+    private string _name = compilation.λCompilerApi.MakeArbitraryUniqueName("UnnamedClass");
+
     private QtSyntheticAttributeList? _attributes;
     private List<ISyntheticMethod> _methods;
     private List<ISyntheticClass> _nestedClasses;
 
-    public ISyntheticClassBuilder<TClassDef>.IλInternalClassBuilderCompilerApi λCompilerApi { get; }
+    private AccessModifierList _modifiers = AccessModifierList.Internal;
+
+    public IλInternalClassBuilderCompilerApi λCompilerApi { get; }
 
     public TClassDef New(object[] args) {
         throw new NotImplementedException();
@@ -18,23 +22,27 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(SyntheticCompil
     }
 
     public ISyntheticClassBuilder<TClassDef> WithName(string name) {
-        throw new NotImplementedException();
+        _name = name;
+        return this;
     }
 
     public ISyntheticClassBuilder<TClassDef> WithModifiers(AccessModifierList modifiers) {
-        throw new NotImplementedException();
+        _modifiers = modifiers;
+        return this;
     }
 
+    private UniqueNameGeneratorComponent? _uniqueNameGenerator;
+
     public string MakeUniqueName(string n) {
-        throw new NotImplementedException();
+        return (_uniqueNameGenerator ??= new UniqueNameGeneratorComponent()).MakeUnique(n);
     }
 
     private void DeclareMethod(ISyntheticMethod method) {
         (_methods ??= []).Add(method);
     }
 
-    private sealed class CompilerApi(SyntheticCompilation compilation, QtSyntheticClassBuilder<TClassDef> builder) : ISyntheticClassBuilder<TClassDef>.IλInternalClassBuilderCompilerApi {
-        public SyntheticCompilation Compilation => compilation;
+    private sealed class CompilerApi(ISyntheticCompilation compilation, QtSyntheticClassBuilder<TClassDef> builder) : IλInternalClassBuilderCompilerApi {
+        public ISyntheticCompilation Compilation => compilation;
 
         public void DeclareMethod(
             ISyntheticAttribute[] attributes,

@@ -1,16 +1,19 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Qt.Qt;
-using Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 
 internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
-    public ISyntheticMethodBuilder<Delegate> DeclareInterceptorMethod<TMethodDefinition>(string name, InvocationExpressionSyntax invocationToIntercept, Action<TMethodDefinition> inputBinder, Func<TMethodDefinition, Delegate> methodSelector) where TMethodDefinition : SyntheticMethodDefinition, new() {
+    public ISyntheticInterceptorMethodBuilder<Delegate> DeclareInterceptorMethod<TMethodDefinition>(
+        string name, InvocationExpressionSyntax invocationToIntercept,
+        Action<TMethodDefinition> inputBinder,
+        Func<TMethodDefinition, Delegate> methodSelector
+    ) where TMethodDefinition : SyntheticMethodDefinition, new() {
         throw new NotImplementedException();
     }
 
-    public ISyntheticMethodBuilder<TSignature> DeclareInterceptorMethod<TMethodDefinition, TSignature>(
+    public ISyntheticInterceptorMethodBuilder<TSignature> DeclareInterceptorMethod<TMethodDefinition, TSignature>(
         string name,
         InvocationExpressionSyntax invocationToIntercept,
         Action<TMethodDefinition> inputBinder,
@@ -20,7 +23,7 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
         throw new NotImplementedException();
     }
 
-    public ISyntheticMethodBuilder<Delegate> DeclareInterceptorMethod(InvocationExpressionSyntax invocationToIntercept, string name) {
+    public ISyntheticInterceptorMethodBuilder<Delegate> DeclareInterceptorMethod(string name, InvocationExpressionSyntax invocationToIntercept) {
         throw new NotImplementedException();
     }
 

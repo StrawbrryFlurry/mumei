@@ -241,6 +241,10 @@ internal sealed class QtSyntheticCodeBlock(string block) : ISyntheticCodeBlock, 
     public CodeBlockFragment Construct() {
         return new CodeBlockFragment(block);
     }
+
+    public CodeBlockFragment Construct(ISyntheticCompilation compilation) {
+        return new CodeBlockFragment(block);
+    }
 }
 
 internal interface ISyntheticCodeBlockResolutionContext {

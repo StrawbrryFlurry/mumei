@@ -8,5 +8,5 @@
 /// </summary>
 /// <typeparam name="TTarget"></typeparam>
 internal interface ISyntheticConstructable<out TTarget> {
-    public TTarget Construct();
+    public TTarget Construct(ISyntheticCompilation compilation);
 }

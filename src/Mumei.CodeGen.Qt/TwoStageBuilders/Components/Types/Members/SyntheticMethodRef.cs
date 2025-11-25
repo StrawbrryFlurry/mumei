@@ -1,6 +1,8 @@
 ﻿namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 
 public sealed class SyntheticMethodRef<TSignature> where TSignature : Delegate {
+    public TSignature Invoke { get; }
+
     public static implicit operator SyntheticMethodRef<TSignature>(TSignature value) {
         throw new NotSupportedException();
     }

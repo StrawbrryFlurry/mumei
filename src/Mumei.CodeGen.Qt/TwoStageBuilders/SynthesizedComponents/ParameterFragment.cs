@@ -5,6 +5,7 @@ namespace Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 
 public readonly struct ParameterFragment : IRenderFragment {
     public required ExpressionFragment Name { get; init; }
+    public ExpressionFragment? DefaultValue { get; init; }
     public ParameterAttributes Attributes { get; init; }
     public required TypeInfoFragment Type { get; init; }
 
@@ -76,5 +77,8 @@ public readonly struct ParameterFragment : IRenderFragment {
 
     public void Render(IRenderTreeBuilder renderTree) {
         renderTree.Interpolate($"{Attributes.List}{Type.FullName} {Name}");
+        if (DefaultValue is { } defaultValueExpression) {
+            renderTree.Interpolate($" = {defaultValueExpression}");
+        }
     }
 }

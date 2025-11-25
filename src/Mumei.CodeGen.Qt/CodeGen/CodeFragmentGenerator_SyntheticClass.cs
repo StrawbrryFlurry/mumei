@@ -81,7 +81,7 @@ internal sealed class CodeFragmentGenerator_SyntheticClass : IIncrementalGenerat
         }
 
 
-        var cls = compilation.Synthesize(interceptorClass);
+        var cls = compilation.Synthesize<ClassDeclarationFragment>(interceptorClass);
         return NamespaceFragment.Create("Generated", [cls]);
     }
 }

@@ -161,7 +161,7 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
                 ParameterFragment.Create(tInput, "λ__input"),
                 ParameterFragment.Create(TypeInfoFragment.ConstructGenericType(typeof(Func<>), tInput, tMethodSignature), "λ__codeBlockDeclaration")
             ],
-            CodeBlockFragment.Create((codeBlock as ISyntheticConstructable<CodeBlockFragment>)!.Construct(), (builder, fragment) => {
+            CodeBlockFragment.Create((codeBlock as ISyntheticConstructable<CodeBlockFragment>)!.Construct(null!), (builder, fragment) => {
                 builder.Interpolate($"{LocalFragment.Var("λ__normalizedInputs", out var normalizedInput)} = {normalizedInputExpression};");
                 builder.NewLine();
                 builder.Line($"#pragma warning disable {Diagnostics.InternalFeatureId}");
@@ -210,7 +210,7 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
             new TypeInfoFragment(lambda.Symbol.ReturnType),
             methodName,
             [],
-            CodeBlockFragment.Create((codeBlock as ISyntheticConstructable<CodeBlockFragment>)!.Construct(), (builder, fragment) => {
+            CodeBlockFragment.Create((codeBlock as ISyntheticConstructable<CodeBlockFragment>)!.Construct(null!), (builder, fragment) => {
                 builder.Text("var λ__bodyDeclaration = ");
                 builder.Interpolate($"{nameof(ISyntheticMethodBuilder<>.λCompilerApi)}.{nameof(ISyntheticMethodBuilder<>.λCompilerApi.CreateRendererCodeBlock)}((renderTree) => {{");
                 builder.Node(fragment);

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -85,6 +86,8 @@ internal readonly struct InterceptInvocationIntermediateNode<TState>(
 }
 
 public readonly struct IntermediateMethodInfo(SemanticModel semanticModel, IMethodSymbol methodSymbol) {
+    public INamedTypeSymbol ContainingType => methodSymbol.ContainingType;
+
     public bool IsDeclaredIn<T>() {
         var declaredIn = methodSymbol.ContainingType;
         var targetTypeName = typeof(T).FullName!;
@@ -96,6 +99,53 @@ public readonly struct IntermediateMethodInfo(SemanticModel semanticModel, IMeth
         return SymbolEqualityComparer.Default.Equals(declaredIn, targetType);
     }
 
+    public bool IsImplementedFrom<T>() {
+        var declaredIn = methodSymbol.OriginalDefinition;
+        var targetTypeName = typeof(T).FullName!;
+        if (typeof(T).IsGenericType) {
+            targetTypeName = targetTypeName[..(targetTypeName.IndexOf('`') + 2)];
+        }
+
+        var targetType = semanticModel.Compilation.GetTypeByMetadataName(targetTypeName);
+        return SymbolEqualityComparer.Default.Equals(declaredIn, targetType);
+    }
+
+    public bool IsImplementedFromAnyConstructedFormOf<T>() {
+        return IsImplementedFromAnyConstructedFormOf(typeof(T));
+    }
+
+    public bool IsImplementedFromAnyConstructedFormOf(Type t) {
+        var targetTypeName = t.FullName!;
+        if (t.IsGenericType) {
+            targetTypeName = targetTypeName[..(targetTypeName.IndexOf('`') + 2)];
+        }
+
+        var unconstructedTargetType = semanticModel.Compilation.GetTypeByMetadataName(targetTypeName);
+
+        if (methodSymbol.OverriddenMethod is not null && TryConstructTypeFromDeclaration(unconstructedTargetType, methodSymbol.OverriddenMethod.ContainingType, out var constructedTypeFromOverride)) {
+            return SymbolEqualityComparer.Default.Equals(methodSymbol.OverriddenMethod.ContainingType, constructedTypeFromOverride);
+        }
+
+        var interfaces = ContainingType.AllInterfaces;
+        foreach (var ifaceImpl in interfaces) {
+            if (!TryConstructTypeFromDeclaration(unconstructedTargetType, ifaceImpl, out var constructedType)) {
+                continue;
+            }
+
+            foreach (var member in ifaceImpl.GetMembers(methodSymbol.Name)) {
+                var implementedMember = ContainingType.FindImplementationForInterfaceMember(member);
+                if (SymbolEqualityComparer.Default.Equals(implementedMember, methodSymbol)) {
+                    return true;
+                }
+            }
+        }
+
+        // TODO:
+        if (methodSymbol.ExplicitInterfaceImplementations.Any()) { }
+
+        return true;
+    }
+
     public bool IsDeclaredInAnyConstructedFormOf<T>() {
         var declaredIn = methodSymbol.ContainingType;
 
@@ -105,13 +155,21 @@ public readonly struct IntermediateMethodInfo(SemanticModel semanticModel, IMeth
         }
 
         var targetType = semanticModel.Compilation.GetTypeByMetadataName(targetTypeName);
-
-        if (targetType is null || !targetType.IsGenericType || declaredIn.TypeArguments.Length != targetType.TypeArguments.Length) {
+        if (!TryConstructTypeFromDeclaration(targetType, declaredIn, out var constructedType)) {
             return false;
         }
 
-        var constructedTargetType = targetType.Construct(declaredIn.TypeArguments, declaredIn.TypeArgumentNullableAnnotations);
-        return SymbolEqualityComparer.Default.Equals(declaredIn, constructedTargetType);
+        return SymbolEqualityComparer.Default.Equals(declaredIn, constructedType);
+    }
+
+    private bool TryConstructTypeFromDeclaration(INamedTypeSymbol? targetType, INamedTypeSymbol declarationSymbol, [NotNullWhen(true)] out INamedTypeSymbol? constructedType) {
+        if (targetType is null || !targetType.IsGenericType || declarationSymbol.TypeArguments.Length != targetType.TypeArguments.Length) {
+            constructedType = null;
+            return false;
+        }
+
+        constructedType = targetType.Construct(declarationSymbol.TypeArguments, declarationSymbol.TypeArgumentNullableAnnotations);
+        return true;
     }
 
     public IntermediateTypeInfo ReturnTypeInfo => new(semanticModel, methodSymbol.ReturnType);
