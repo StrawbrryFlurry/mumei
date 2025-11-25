@@ -22,6 +22,9 @@ public interface ISyntheticMethodBuilder<TSignature> : ISyntheticMethod<TSignatu
     public ISyntheticMethodBuilder<TSignature> WithTypeParameters(ISyntheticTypeParameterList typeParameterList);
     public ISyntheticMethodBuilder<TSignature> WithTypeParameters(params ReadOnlySpan<ISyntheticTypeParameter> typeParameterList);
 
+    public ISyntheticMethodBuilder<TSignature> WithAttributes(ISyntheticAttributeList attributes);
+    public ISyntheticMethodBuilder<TSignature> WithAttributes(params ReadOnlySpan<ISyntheticAttribute> attributes);
+
     public ISyntheticMethodBuilder<TSignature> WithReturnType(ISyntheticType returnType);
 }
 
@@ -38,6 +41,16 @@ public interface λIInternalMethodBuilderCompilerApi {
 
     public void ApplyMethodSignatureToBuilder<TSignature>(
         ISyntheticMethodBuilder<TSignature> builder,
+        IMethodSymbol method
+    ) where TSignature : Delegate;
+
+    public void ApplyMethodSignatureToBuilder<TSignature>(
+        ISyntheticInterceptorMethodBuilder<TSignature> builder,
+        MethodInfo methodInfo
+    ) where TSignature : Delegate;
+
+    public void ApplyMethodSignatureToBuilder<TSignature>(
+        ISyntheticInterceptorMethodBuilder<TSignature> builder,
         IMethodSymbol method
     ) where TSignature : Delegate;
 
@@ -62,6 +75,11 @@ public interface ISyntheticInterceptorMethodBuilder<TSignature> : ISyntheticMeth
     public ISyntheticInterceptorMethodBuilder<TSignature> WithParameters(ISyntheticParameterList parameterList);
     public ISyntheticInterceptorMethodBuilder<TSignature> WithTypeParameters(ISyntheticTypeParameterList typeParameterList);
     public ISyntheticInterceptorMethodBuilder<TSignature> WithTypeParameters(params ReadOnlySpan<ISyntheticTypeParameter> typeParameterList);
+
+    public ISyntheticInterceptorMethodBuilder<TSignature> WithAttributes(ISyntheticAttributeList attributes);
+    public ISyntheticInterceptorMethodBuilder<TSignature> WithAttributes(params ReadOnlySpan<ISyntheticAttribute> attributes);
+
+    public ISyntheticInterceptorMethodBuilder<TSignature> WithReturnType(ISyntheticType returnType);
 }
 
 public interface IInterceptedMethodContext {

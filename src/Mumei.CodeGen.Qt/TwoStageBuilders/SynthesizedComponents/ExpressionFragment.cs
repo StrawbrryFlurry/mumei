@@ -4,9 +4,8 @@ using Mumei.Roslyn;
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 
 public readonly struct ExpressionFragment(string value) : IRenderFragment {
-    public void Render(IRenderTreeBuilder renderTree) {
-        renderTree.Text(value);
-    }
+    public static ExpressionFragment Null { get; } = new("null");
+    public static ExpressionFragment Default { get; } = new("default");
 
     public static implicit operator ExpressionFragment(string value) {
         return new ExpressionFragment(value);
@@ -47,5 +46,9 @@ public readonly struct ExpressionFragment(string value) : IRenderFragment {
         public string GetValue() {
             return _builder.ToStringAndFree();
         }
+    }
+
+    public void Render(IRenderTreeBuilder renderTree) {
+        renderTree.Text(value);
     }
 }

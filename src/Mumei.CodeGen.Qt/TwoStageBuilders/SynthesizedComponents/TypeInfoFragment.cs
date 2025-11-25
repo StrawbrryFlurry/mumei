@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Mumei.CodeGen.Qt.Output;
 using Mumei.Roslyn;
 
@@ -8,6 +7,8 @@ namespace Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 public readonly struct TypeInfoFragment : IEquatable<TypeInfoFragment> {
     public string QualifiedTypeName { get; }
     public string Name { get; }
+
+    public bool HasNullableAnnotation { get; }
 
     /// <summary>
     /// Determines wether the type info represents a non-runtime keyword type e.g. var, class, unmanaged etc.
@@ -23,7 +24,7 @@ public readonly struct TypeInfoFragment : IEquatable<TypeInfoFragment> {
     });
 
     public static TypeInfoFragment ForKeyword(string keyword) {
-        return new TypeInfoFragment(keyword, true);
+        return new TypeInfoFragment(keyword, false, true);
     }
 
     public static TypeInfoFragment Var => ForKeyword("var");
@@ -35,17 +36,29 @@ public readonly struct TypeInfoFragment : IEquatable<TypeInfoFragment> {
         return GenericTypeInfoFragment.Construct(unconstructedType, typeArguments);
     }
 
-    public TypeInfoFragment(ITypeSymbol type) : this(type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), false) { }
-    public TypeInfoFragment(Type type) : this(RuntimeTypeSerializer.GetTypeFullName(type), false) { }
-    public TypeInfoFragment(string qualifiedTypeName) : this(qualifiedTypeName, false) { }
+    public TypeInfoFragment(ITypeSymbol type) : this(type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), type.NullableAnnotation == NullableAnnotation.Annotated, false) { }
+    public TypeInfoFragment(Type type) : this(RuntimeTypeSerializer.GetTypeFullName(type), IsNullableWrapper(type), false) { }
+    public TypeInfoFragment(string qualifiedTypeName) : this(qualifiedTypeName, qualifiedTypeName.EndsWith("?"), false) { }
 
-    internal TypeInfoFragment(string qualifiedTypeName, bool isNonRuntimeKeyword) {
+    internal TypeInfoFragment(string qualifiedTypeName, bool hasNullableAnnotation, bool isNonRuntimeKeyword) {
         QualifiedTypeName = qualifiedTypeName;
         IsNonRuntimeKeyword = isNonRuntimeKeyword;
 
-        Name = qualifiedTypeName.Contains('.')
-            ? qualifiedTypeName[(qualifiedTypeName.LastIndexOf('.') + 1)..]
+        HasNullableAnnotation = hasNullableAnnotation;
+
+        var name = qualifiedTypeName.Contains('.')
+            ? qualifiedTypeName.AsSpan()[(qualifiedTypeName.LastIndexOf('.') + 1)..]
             : qualifiedTypeName;
+
+        if (HasNullableAnnotation && name.EndsWith("?")) {
+            name = name[..^1];
+        }
+
+        Name = name.SequenceEqual(qualifiedTypeName) ? qualifiedTypeName : name.ToString();
+    }
+
+    public TypeInfoFragment ToNullable() {
+        return HasNullableAnnotation ? this : new TypeInfoFragment(QualifiedTypeName, true, IsNonRuntimeKeyword);
     }
 
     public static implicit operator TypeInfoFragment(Type type) {
@@ -70,6 +83,10 @@ public readonly struct TypeInfoFragment : IEquatable<TypeInfoFragment> {
 
     public override int GetHashCode() {
         return QualifiedTypeName.GetHashCode();
+    }
+
+    private static bool IsNullableWrapper(Type type) {
+        return type.IsValueType && type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
     }
 
     private readonly struct GenericTypeInfoFragment {

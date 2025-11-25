@@ -1,6 +1,6 @@
 ﻿namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 
-internal sealed class QtSyntheticMethodBuilder<TSignature>(IλInternalClassBuilderCompilerApi classApi) : QtSyntheticMethodBase<ISyntheticMethodBuilder<TSignature>>(classApi), ISyntheticMethodBuilder<TSignature> where TSignature : Delegate {
+internal sealed class QtSyntheticMethodBuilder<TSignature>(string name, IλInternalClassBuilderCompilerApi classApi) : QtSyntheticMethodBase<ISyntheticMethodBuilder<TSignature>>(name, classApi), ISyntheticMethodBuilder<TSignature> where TSignature : Delegate {
     // TODO: Use MethodRef here?
     public TSignature Bind(object target) {
         throw new CompileTimeComponentUsedAtRuntimeException();

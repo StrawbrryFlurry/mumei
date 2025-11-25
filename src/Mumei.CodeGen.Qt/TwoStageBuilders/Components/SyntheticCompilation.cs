@@ -8,6 +8,7 @@ namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 public interface ISyntheticCompilation {
     // ReSharper disable once InconsistentNaming
     public IλInternalCompilerApi λCompilerApi { get; }
+    public Compilation UnderlyingCompilation { get; }
 
     public ISyntheticNamespace NamespaceFromCompilation(string name);
 
@@ -60,6 +61,7 @@ public interface IλInternalCompilerApi {
 internal sealed class SyntheticCompilation(Compilation compilation) : ISyntheticCompilation {
     // ReSharper disable once InconsistentNaming
     public IλInternalCompilerApi λCompilerApi => field ??= new QtSyntheticCompilationCompilerApi(this);
+    public Compilation UnderlyingCompilation => compilation;
 
     public ISyntheticNamespace NamespaceFromCompilation(string name) {
         return new QtSyntheticNamespace(name);

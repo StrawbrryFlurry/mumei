@@ -35,7 +35,7 @@ file sealed class CompilationTestSource {
             throw new CompileTimeComponentUsedAtRuntimeException();
         }
 
-        public T Get<T>(T param) where T : Delegate {
+        public T Get<T>(T param) where T : class?, Delegate? {
             return param;
         }
 

@@ -5,7 +5,7 @@ using Mumei.Roslyn;
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 
 public readonly struct ClassDeclarationFragment(
-    ImmutableArray<AttributeFragment> attributes,
+    AttributeListFragment attributes,
     AccessModifier accessModifier,
     string name,
     TypeParameterListFragment typeParameters,
@@ -19,7 +19,7 @@ public readonly struct ClassDeclarationFragment(
 ) : IRenderFragment {
     public static ClassDeclarationFragment Create(
         string name,
-        ImmutableArray<AttributeFragment> attributes = default,
+        AttributeListFragment attributes = default,
         AccessModifier accessModifier = AccessModifier.Internal,
         TypeParameterListFragment typeParameters = default,
         ImmutableArray<ParameterFragment> primaryConstructorParameters = default,
@@ -31,7 +31,7 @@ public readonly struct ClassDeclarationFragment(
         ImmutableArray<IRenderer.IFeature> renderFeatures = default
     ) {
         return new ClassDeclarationFragment(
-            attributes.EnsureInitialized(),
+            attributes,
             accessModifier,
             name,
             typeParameters,
@@ -51,7 +51,7 @@ public readonly struct ClassDeclarationFragment(
         }
 
         if (!attributes.IsEmpty) {
-            renderTree.List(attributes.AsSpan());
+            renderTree.Node(attributes);
             renderTree.NewLine();
         }
 

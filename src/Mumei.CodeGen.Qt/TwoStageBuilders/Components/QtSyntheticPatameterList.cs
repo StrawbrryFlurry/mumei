@@ -10,12 +10,24 @@ internal sealed class QtSyntheticParameterList(ReadOnlySpan<ISyntheticParameter>
 
     public static QtSyntheticParameterList FromMethodSymbol(IMethodSymbol method) {
         var parameters = new ISyntheticParameter[method.Parameters.Length];
+
+        for (var i = 0; i < method.Parameters.Length; i++) {
+            var parameter = method.Parameters[i];
+            parameters[i] = new RoslynSyntheticParameter(parameter);
+        }
+
         return new QtSyntheticParameterList(parameters);
     }
 
     public static QtSyntheticParameterList FromMethodInfo(MethodInfo method) {
         var methodParameters = method.GetParameters();
         var parameters = new ISyntheticParameter[methodParameters.Length];
+
+        for (var i = 0; i < methodParameters.Length; i++) {
+            var parameter = methodParameters[i];
+            parameters[i] = new RuntimeSyntheticParameter(parameter);
+        }
+
         return new QtSyntheticParameterList(parameters);
     }
 

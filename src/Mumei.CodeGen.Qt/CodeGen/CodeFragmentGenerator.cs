@@ -58,7 +58,7 @@ internal sealed class CodeFragmentGenerator : IIncrementalGenerator {
             new() {
                 Name = "declareFragment",
                 Type = typeof(Action),
-                Attributes = ParameterAttributes.None
+                ParameterAttributes = ParameterAttributes.None
             }
         ];
 

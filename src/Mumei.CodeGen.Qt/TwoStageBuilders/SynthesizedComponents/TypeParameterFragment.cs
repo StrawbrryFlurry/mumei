@@ -88,6 +88,7 @@ public readonly struct TypeParameterFragment(string name, ImmutableArray<TypePar
         }
 
         public static Constraint Class => new(new TypeInfoFragment("class"));
+        public static Constraint NullableClass => new(new TypeInfoFragment("class?"));
         public static Constraint Struct => new(new TypeInfoFragment("struct"));
         public static Constraint New => new(new TypeInfoFragment("new()"));
         public static Constraint NotNull => new(new TypeInfoFragment("notnull"));

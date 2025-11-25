@@ -25,7 +25,7 @@ internal sealed class QtSyntheticParameter(
         return new ParameterFragment {
             Name = Name,
             DefaultValue = defaultValue,
-            Attributes = Attributes,
+            ParameterAttributes = Attributes,
             Type = type
         };
     }
@@ -38,7 +38,40 @@ internal sealed class RuntimeSyntheticParameter(ParameterInfo parameterInfo) : I
 }
 
 internal sealed class RoslynSyntheticParameter(IParameterSymbol parameterSymbol) : ISyntheticParameter, ISyntheticConstructable<ParameterFragment> {
+    public ISyntheticAttributeList? AttributesList { get; private init; } = parameterSymbol.GetAttributes().Length > 0
+        ? QtSyntheticAttributeList.FromAttributeData(parameterSymbol.GetAttributes())
+        : null;
+
+    public ISyntheticExpression? DefaultValue { get; private init; } = parameterSymbol.HasExplicitDefaultValue
+        ? new RuntimeSyntheticLiteralExpression(parameterSymbol.ExplicitDefaultValue)
+        : null;
+
     public ParameterFragment Construct(ISyntheticCompilation compilation) {
-        throw new NotImplementedException();
+        var paramAttributes = ParameterAttributes.None;
+        if (parameterSymbol.RefKind == RefKind.Ref) {
+            paramAttributes |= ParameterAttributes.Ref;
+        } else if (parameterSymbol.RefKind == RefKind.RefReadOnlyParameter) {
+            paramAttributes |= ParameterAttributes.Ref | ParameterAttributes.Readonly;
+        } else if (parameterSymbol.RefKind == RefKind.Out) {
+            paramAttributes |= ParameterAttributes.Out;
+        } else if (parameterSymbol.IsParams) {
+            paramAttributes |= ParameterAttributes.Params;
+        } else if (parameterSymbol.RefKind == RefKind.In) {
+            paramAttributes |= ParameterAttributes.In;
+        }
+
+        if (parameterSymbol.IsThis) {
+            paramAttributes |= ParameterAttributes.This;
+        }
+
+        var attributesList = compilation.Synthesize(AttributesList, AttributeListFragment.Empty);
+        var defaultValue = compilation.SynthesizeOptional<ExpressionFragment?>(DefaultValue);
+        return new ParameterFragment {
+            Name = parameterSymbol.Name,
+            Type = new TypeInfoFragment(parameterSymbol.Type),
+            ParameterAttributes = paramAttributes,
+            AttributesList = attributesList,
+            DefaultValue = defaultValue
+        };
     }
 }

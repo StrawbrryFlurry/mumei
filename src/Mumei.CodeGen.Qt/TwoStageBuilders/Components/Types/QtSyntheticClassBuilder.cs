@@ -3,6 +3,8 @@
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 
 internal sealed partial class QtSyntheticClassBuilder<TClassDef>(SyntheticCompilation compilation) : ISyntheticClassBuilder<TClassDef> {
+    private CompilerApi? _compilerApi;
+
     private string _name = compilation.λCompilerApi.MakeArbitraryUniqueName("UnnamedClass");
 
     private QtSyntheticAttributeList? _attributes;
@@ -11,7 +13,7 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(SyntheticCompil
 
     private AccessModifierList _modifiers = AccessModifierList.Internal;
 
-    public IλInternalClassBuilderCompilerApi λCompilerApi { get; }
+    public IλInternalClassBuilderCompilerApi λCompilerApi => _compilerApi ??= new CompilerApi(compilation, this);
 
     public TClassDef New(object[] args) {
         throw new NotImplementedException();

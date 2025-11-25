@@ -10,12 +10,22 @@ internal sealed class QtSyntheticTypeParameterList(ReadOnlySpan<ISyntheticTypePa
 
     public static QtSyntheticTypeParameterList FromMethodSymbol(IMethodSymbol method) {
         var typeParameters = new ISyntheticTypeParameter[method.TypeParameters.Length];
+        for (var i = 0; i < method.TypeParameters.Length; i++) {
+            var typeParameter = method.TypeParameters[i];
+            typeParameters[i] = new RoslynSyntheticTypeParameter(typeParameter);
+        }
 
         return new QtSyntheticTypeParameterList(typeParameters);
     }
 
     public static QtSyntheticTypeParameterList FromMethodInfo(MethodInfo method) {
-        var typeParameters = new ISyntheticTypeParameter[method.GetGenericArguments().Length];
+        var methodTypeParameters = method.GetGenericArguments();
+        var typeParameters = new ISyntheticTypeParameter[methodTypeParameters.Length];
+
+        for (var i = 0; i < methodTypeParameters.Length; i++) {
+            var typeParameter = methodTypeParameters[i];
+            typeParameters[i] = new RuntimeSyntheticTypeParameter(typeParameter);
+        }
 
         return new QtSyntheticTypeParameterList(typeParameters);
     }
