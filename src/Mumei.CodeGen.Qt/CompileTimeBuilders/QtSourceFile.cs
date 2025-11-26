@@ -6,6 +6,7 @@ using Mumei.CodeGen.Qt.Containers;
 using Mumei.CodeGen.Qt.Output;
 using Mumei.CodeGen.Qt.Qt;
 using Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
+using AccessModifier = Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents.AccessModifier;
 
 namespace Mumei.CodeGen.Qt;
 
@@ -96,7 +97,7 @@ internal static class CodeGenFeature {
             renderTree.Node(NamespaceFragment.Create("System.Runtime.CompilerServices", [
                 ClassDeclarationFragment.Create(
                     "InterceptsLocationAttribute",
-                    accessModifier: AccessModifier.FileSealed,
+                    accessModifier: AccessModifier.File + AccessModifier.Sealed,
                     attributes: [
                         AttributeFragment.Create(
                             typeof(AttributeUsageAttribute),

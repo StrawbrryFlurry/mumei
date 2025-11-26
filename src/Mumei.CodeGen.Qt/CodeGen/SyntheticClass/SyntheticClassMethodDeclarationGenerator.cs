@@ -8,6 +8,7 @@ using Mumei.CodeGen.Playground;
 using Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 using Mumei.CodeGen.Qt.TwoStageBuilders.RoslynCodeProviders;
 using Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
+using AccessModifier = Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents.AccessModifier;
 
 namespace Mumei.CodeGen.Qt;
 
@@ -29,7 +30,7 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
         var interceptorClassWithInputs = interceptorMethodsWithInputs.Collect().Select((x, _) => {
             var classDecl = ClassDeclarationFragment.Create(
                 "SyntheticClassMethodWithBodyInterceptorsWithInputs",
-                accessModifier: AccessModifier.FileStatic,
+                accessModifier: AccessModifier.File + AccessModifier.Static,
                 methods: x.Select(x => x.Item1).ToImmutableArray(),
                 nestedClassDeclarations: x.Where(x => x.InputAccessorClass is not null).Select(x => x.InputAccessorClass!.Value).ToImmutableArray(),
                 renderFeatures: [CodeGenFeature.Interceptors]
@@ -40,7 +41,7 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
         var simpleInterceptorClass = simpleInterceptorMethods.Collect().Select((x, _) => {
             var classDecl = ClassDeclarationFragment.Create(
                 "SyntheticClassMethodWithBodyInterceptors",
-                accessModifier: AccessModifier.FileStatic,
+                accessModifier: AccessModifier.File + AccessModifier.Static,
                 methods: x,
                 renderFeatures: [CodeGenFeature.Interceptors]
             );
@@ -125,14 +126,14 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
             var propertyMembers = ImmutableArray.CreateBuilder<PropertyDeclarationFragment>(properties.Length);
             foreach (var inputMemberProperty in properties) {
                 propertyMembers.Add(PropertyDeclarationFragment.Create(
-                    AccessModifierList.Public,
+                    AccessModifier.Public,
                     new TypeInfoFragment(inputMemberProperty.Type),
                     inputMemberProperty.Name,
                     PropertyDeclarationFragment.AccessorFragment.Get()
                 ));
             }
 
-            inputAccessorClass = ClassDeclarationFragment.Create(accessorClassName, accessModifier: AccessModifier.PrivateSealed, properties: propertyMembers.MoveToImmutable());
+            inputAccessorClass = ClassDeclarationFragment.Create(accessorClassName, accessModifier: AccessModifier.Private + AccessModifier.Sealed, properties: propertyMembers.MoveToImmutable());
             normalizedInputType = accessorClassName;
             normalizedInputExpression = $"System.Runtime.CompilerServices.{nameof(Unsafe)}.{nameof(Unsafe.As)}<Tλ__Input, {accessorClassName}>(ref λ__input)";
         }
@@ -152,7 +153,7 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
         );
         var methodDecl = MethodDeclarationFragment.Create(
             [AttributeFragment.Intercept(invocation.Location)],
-            AccessModifierList.Internal + AccessModifierList.Static,
+            AccessModifier.Internal + AccessModifier.Static,
             [TypeParameterFragment.Create("Tλ__MethodSignature", out var tMethodSignature, typeof(Delegate)), TypeParameterFragment.Create("Tλ__Input", out var tInput)],
             TypeInfoFragment.ConstructGenericType(typeof(ISyntheticMethodBuilder<>), tMethodSignature),
             methodName,
@@ -205,7 +206,7 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
         );
         var methodDecl = MethodDeclarationFragment.Create(
             [AttributeFragment.Intercept(invocation.Location)],
-            AccessModifierList.Private + AccessModifierList.Static,
+            AccessModifier.Private + AccessModifier.Static,
             [],
             new TypeInfoFragment(lambda.Symbol.ReturnType),
             methodName,

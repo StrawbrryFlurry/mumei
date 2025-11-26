@@ -11,9 +11,9 @@ public abstract class SyntheticClassDefinition<TSelf> : ISyntheticClass<TSelf> w
         // throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
-    public virtual void SetupDynamic(ISyntheticClassBuilder<TSelf> classBuilder) { }
+    public virtual void Setup(ISyntheticClassBuilder<TSelf> classBuilder) { }
 
-    public IEnumerable<T> CompileTimeForEach<T>(IEnumerable<T> items) {
+    protected IEnumerable<T> CompileTimeForEach<T>(IEnumerable<T> items) {
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
 

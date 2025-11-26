@@ -81,7 +81,7 @@ file sealed class TestGenerator : IIncrementalGenerator {
         context.RegisterSourceOutput(invocations, (productionContext, node) => {
             var compilation = new QtSyntheticCompilation(node.SemanticModel.Compilation);
             var cls = compilation.DeclareClass("Test")
-                .WithModifiers(AccessModifierList.File + AccessModifierList.Static);
+                .WithModifiers(AccessModifier.File + AccessModifier.Static);
 
             cls.DeclareInterceptorMethod(
                 cls.MakeUniqueName("Intercept_Invoke"),

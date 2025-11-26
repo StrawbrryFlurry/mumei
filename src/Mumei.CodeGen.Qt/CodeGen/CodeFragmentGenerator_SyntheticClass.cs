@@ -59,7 +59,7 @@ internal sealed class CodeFragmentGenerator_SyntheticClass : IIncrementalGenerat
 
         var compilation = new QtSyntheticCompilation(codeFragments[0].SemanticModel.Compilation);
         var interceptorClass = compilation.DeclareClass(compilation.MakeUniqueName("CodeFragmentInterceptor"))
-            .WithModifiers(AccessModifierList.File + AccessModifierList.Sealed);
+            .WithModifiers(AccessModifier.File + AccessModifier.Sealed);
 
         foreach (var codeFragment in codeFragments) {
             var declaredBody = new GloballyQualifyingSyntaxRewriter(codeFragment.SemanticModel).Visit(codeFragment.State.Body);
@@ -72,12 +72,12 @@ internal sealed class CodeFragmentGenerator_SyntheticClass : IIncrementalGenerat
             interceptorClass.DeclareInterceptorMethod<SimpleCodeFragmentCreateMethod>(
                     interceptorClass.MakeUniqueName("Intercept_Create"),
                     codeFragment.Invocation,
+                    m => m.InterceptCreate,
                     m => {
                         m.Body = new SyntheticRawStringLiteralExpression(bodyContent.TrimEnd('\r', '\n'), Strings.RawStringLiteral12);
-                    },
-                    m => m.InterceptCreate
+                    }
                 )
-                .WithAccessibility(AccessModifierList.Internal + AccessModifierList.Static);
+                .WithAccessibility(AccessModifier.Internal + AccessModifier.Static);
         }
 
 
@@ -90,7 +90,7 @@ internal sealed class CodeFragmentInterceptor : SyntheticClassDefinition<CodeFra
     [Input]
     public ISyntheticMethod InterceptCreate { get; set; } = null!;
 
-    public override void SetupDynamic(ISyntheticClassBuilder<CodeFragmentInterceptor> builder) {
+    public override void Setup(ISyntheticClassBuilder<CodeFragmentInterceptor> builder) {
         // builder.DeclareMethod()
     }
 
@@ -99,7 +99,7 @@ internal sealed class CodeFragmentInterceptor : SyntheticClassDefinition<CodeFra
     }
 }
 
-internal sealed class SimpleCodeFragmentCreateMethod : SyntheticMethodDefinition {
+internal sealed class SimpleCodeFragmentCreateMethod : SyntheticInterceptorMethodDefinition {
     [Input]
     public SyntheticRawStringLiteralExpression Body { get; set; } = null!;
 
@@ -112,4 +112,7 @@ internal sealed class SimpleCodeFragmentCreateMethod : SyntheticMethodDefinition
     //public CodeFragment InterceptCreateCore(Func<Task> declareAsyncFragment) { }
     //
     //public CodeFragment InterceptCreateCore<TDeps>(TDeps deps, Func<TDeps, Task> declareAsyncFragment) { }
+    public override ISyntheticCodeBlock GenerateMethodBody() {
+        throw new NotImplementedException();
+    }
 }

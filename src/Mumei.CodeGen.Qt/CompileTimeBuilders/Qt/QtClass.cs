@@ -309,7 +309,7 @@ public class QtClass(
     public void Render(IRenderTreeBuilder renderTree) {
         renderTree.Interpolate(
             $$"""
-              {{modifiers.List}} class{{TypeParameters}} {{name}}
+              {{modifiers.AsCSharpString()}} class{{TypeParameters}} {{name}}
               """
         );
         renderTree.Text(" ");

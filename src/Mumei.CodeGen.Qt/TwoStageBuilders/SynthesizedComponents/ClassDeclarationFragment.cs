@@ -6,7 +6,7 @@ namespace Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 
 public readonly struct ClassDeclarationFragment(
     AttributeListFragment attributes,
-    AccessModifier accessModifier,
+    AccessModifierList accessModifier,
     string name,
     TypeParameterListFragment typeParameters,
     ImmutableArray<ParameterFragment> primaryConstructorParameters,
@@ -20,7 +20,7 @@ public readonly struct ClassDeclarationFragment(
     public static ClassDeclarationFragment Create(
         string name,
         AttributeListFragment attributes = default,
-        AccessModifier accessModifier = AccessModifier.Internal,
+        AccessModifierList accessModifier = default,
         TypeParameterListFragment typeParameters = default,
         ImmutableArray<ParameterFragment> primaryConstructorParameters = default,
         ImmutableArray<TypeInfoFragment> baseTypes = default,
@@ -32,7 +32,7 @@ public readonly struct ClassDeclarationFragment(
     ) {
         return new ClassDeclarationFragment(
             attributes,
-            accessModifier,
+            accessModifier.IsEmpty ? AccessModifier.Internal : accessModifier,
             name,
             typeParameters,
             primaryConstructorParameters.EnsureInitialized(),

@@ -6,10 +6,6 @@ using Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 namespace Mumei.CodeGen.Qt;
 
 internal static class SyntaxRendererExtensions {
-    extension(AccessModifier modifier) {
-        public string List => modifier.AsCSharpString();
-    }
-
     extension(AccessModifierList modifiers) {
         public string List => modifiers.AsCSharpString();
     }

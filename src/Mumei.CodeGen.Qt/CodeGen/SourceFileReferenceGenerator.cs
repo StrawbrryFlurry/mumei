@@ -1,6 +1,8 @@
 ﻿using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using Mumei.CodeGen.Qt.Qt;
 using Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 using Mumei.CodeGen.Qt.TwoStageBuilders.RoslynCodeProviders;
 
@@ -46,12 +48,17 @@ internal sealed class SourceFileReferenceGenerator : IIncrementalGenerator {
                 return SyntaxNodeFilter.IsInvocationOf(node, "Of", "SyntaxTreeReference");
             },
             static (syntaxContext, ct) => {
-                return syntaxContext.Node;
+                return (InvocationExpressionSyntax) syntaxContext.Node;
             }
         );
 
         var o = p.IncrementalCompile(static (compilation, ctx, ct) => {
-            var interceptor = compilation.DeclareClass("");
+            var interceptor = compilation.DeclareClass("SyntaxTreeReferenceInterceptor");
+
+            interceptor.DeclareInterceptorMethod(
+                interceptor.MakeUniqueName("Intercept_Of"),
+                ctx
+            );
 
             var toEmit = compilation.NamespaceFromCompilation("Generated").WithMember(interceptor);
             compilation.TrackForEmission("Generated", toEmit);
@@ -62,16 +69,28 @@ internal sealed class SourceFileReferenceGenerator : IIncrementalGenerator {
 }
 
 file sealed class InterceptorClassDecl : SyntheticClassDefinition<InterceptorClassDecl> {
-    public override void InternalBindCompilerOutputMembers(ISyntheticClassBuilder<InterceptorClassDecl> classBuilder, InterceptorClassDecl target) {
-        throw new NotImplementedException();
+    [Input]
+    public InvocationExpressionSyntax InvocationToIntercept { get; set; } = null!;
+
+    public override void Setup(ISyntheticClassBuilder<InterceptorClassDecl> classBuilder) {
+        classBuilder.DeclareInterceptorMethod<InterceptorMethodDecl>(
+            classBuilder.MakeUniqueName("Intercept_Of"),
+            InvocationToIntercept,
+            decl => decl.InterceptOf<CompileTimeUnknown>
+        );
     }
+
+    public override void InternalBindCompilerOutputMembers(ISyntheticClassBuilder<InterceptorClassDecl> classBuilder, InterceptorClassDecl target) { }
 }
 
-file sealed class InterceptorMethodDecl<TResult> : SyntheticInterceptorMethodDefinition<TResult> {
-    public override void BindDynamicComponents() {
-        base.BindDynamicComponents();
-    }
+file sealed class InterceptorMethodDecl : SyntheticInterceptorMethodDefinition {
+    public override void BindDynamicComponents(BindingContext ctx) { }
+
     public override ISyntheticCodeBlock GenerateMethodBody() {
         throw new NotImplementedException();
+    }
+
+    public TResult InterceptOf<TResult>() {
+        throw new CompileTimeComponentUsedAtRuntimeException();
     }
 }

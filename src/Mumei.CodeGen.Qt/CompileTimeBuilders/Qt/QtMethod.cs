@@ -85,7 +85,7 @@ internal readonly struct QtMethodRenderFragment(
             tree.NewLine();
         }
 
-        tree.Interpolate($"{modifiers.List} {returnType.Expression} {name}{typeParameters}({parameters})");
+        tree.Interpolate($"{modifiers.AsCSharpString()} {returnType.Expression} {name}{typeParameters}({parameters})");
 
         if (!typeParameters.Constraints.IsEmpty) {
             tree.Interpolate($" {typeParameters.Constraints}");

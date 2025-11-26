@@ -16,9 +16,9 @@ public interface ISyntheticClassBuilder<T> : ISyntheticMember, ISyntheticTypeInf
     public ISyntheticInterceptorMethodBuilder<Delegate> DeclareInterceptorMethod<TMethodDefinition>(
         string name,
         InvocationExpressionSyntax invocationToIntercept,
-        Action<TMethodDefinition> inputBinder,
-        Func<TMethodDefinition, Delegate> methodSelector
-    ) where TMethodDefinition : SyntheticMethodDefinition, new();
+        Func<TMethodDefinition, Delegate> methodSelector,
+        Action<TMethodDefinition>? inputBinder = null
+    ) where TMethodDefinition : SyntheticInterceptorMethodDefinition, new();
 
     public ISyntheticInterceptorMethodBuilder<Delegate> DeclareInterceptorMethod(
         string name,
@@ -27,14 +27,14 @@ public interface ISyntheticClassBuilder<T> : ISyntheticMember, ISyntheticTypeInf
 
     public ISyntheticMethodBuilder<Delegate> DeclareMethod<TMethodDefinition>(
         string name,
-        Action<TMethodDefinition> inputBinder,
-        Func<TMethodDefinition, Delegate> methodSelector
+        Func<TMethodDefinition, Delegate> methodSelector,
+        Action<TMethodDefinition> inputBinder
     ) where TMethodDefinition : SyntheticMethodDefinition, new();
 
     public ISyntheticMethodBuilder<TSignature> DeclareMethod<TMethodDefinition, TSignature>(
         string name,
-        Action<TMethodDefinition> inputBinder,
-        Func<TMethodDefinition, TSignature> methodSelector
+        Func<TMethodDefinition, TSignature> methodSelector,
+        Action<TMethodDefinition> inputBinder
     ) where TMethodDefinition : SyntheticMethodDefinition, new() where TSignature : Delegate;
 
     public ISyntheticMethodBuilder<TSignature> DeclareMethod<TSignature>(

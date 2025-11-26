@@ -65,7 +65,7 @@ public sealed class SyntheticCompilationClassFactoryGenerator : IIncrementalGene
     ) {
         var compilation = new QtSyntheticCompilation(classDeclarationCalls[0].SemanticModel.Compilation);
         var interceptorClass = compilation.DeclareClass("SyntheticCompilationClassFactory")
-            .WithModifiers(AccessModifierList.File + AccessModifierList.Static);
+            .WithModifiers(AccessModifier.File + AccessModifier.Static);
 
         foreach (var call in classDeclarationCalls) {
             DeclareInterceptorMethod(interceptorClass, call);
@@ -86,12 +86,12 @@ public sealed class SyntheticCompilationClassFactoryGenerator : IIncrementalGene
             binder => {
                 binder.DefinitionClass = declareClassInvocation.State;
             }
-        ).WithModifiers(AccessModifierList.Private + AccessModifierList.Sealed);
+        ).WithModifiers(AccessModifier.Private + AccessModifier.Sealed);
 
         var interceptMethod = classBuilder.DeclareInterceptorMethod(
             classBuilder.MakeUniqueName($"Intercept_DeclareClass__{declareClassInvocation.State.Name}}}"),
             declareClassInvocation.Invocation
-        ).WithAccessibility(AccessModifierList.Private + AccessModifierList.Static);
+        ).WithAccessibility(AccessModifier.Private + AccessModifier.Static);
 
         interceptMethod.WithBody(new QtSyntheticRenderCodeBlock(renderTree => {
             renderTree.Line("");
@@ -108,7 +108,7 @@ file sealed partial class SyntheticClassDynamicMemberBinder<TClassDefinition> {
         // classBuilder.λCompilerApi.BindMethodSlot();
         classBuilder.λCompilerApi.DeclareMethod(
             [],
-            AccessModifierList.Public,
+            AccessModifier.Public,
             new RuntimeSyntheticType(typeof(void)),
             "BindCompilerOutputMembers",
             [],
@@ -189,7 +189,7 @@ file sealed partial class SyntheticClassDynamicMemberBinder<[Bindable] TClassDef
 
     private readonly List<ISyntheticMethod<Action<ISyntheticClassBuilder<TClassDefinition>>>> _outputBinderMethods;
 
-    public override void SetupDynamic(ISyntheticClassBuilder<SyntheticClassDynamicMemberBinder<TClassDefinition>> classBuilder) {
+    public override void Setup(ISyntheticClassBuilder<SyntheticClassDynamicMemberBinder<TClassDefinition>> classBuilder) {
         classBuilder.Bind<TClassDefinition>(DefinitionClass);
 
         var outputAttribute = Compilation.TypeFromCompilation<OutputAttribute>();

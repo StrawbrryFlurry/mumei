@@ -11,7 +11,7 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(QtSyntheticComp
     private List<ISyntheticMethod> _methods;
     private List<ISyntheticClass> _nestedClasses;
 
-    private AccessModifierList _modifiers = AccessModifierList.Internal;
+    private AccessModifierList _modifiers = AccessModifier.Internal;
 
     public IλInternalClassBuilderCompilerApi λCompilerApi => _compilerApi ??= new CompilerApi(compilation, this);
 
@@ -57,7 +57,7 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(QtSyntheticComp
         ) {
             var method = new QtSyntheticMethod(
                 attributes,
-                modifiers,
+                modifiers + AccessModifier.Partial,
                 returnType,
                 name,
                 typeParameters,

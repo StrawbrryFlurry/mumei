@@ -6,6 +6,7 @@ using Mumei.CodeGen.Playground;
 using Mumei.CodeGen.Qt.TwoStageBuilders.RoslynCodeProviders;
 using Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 using Mumei.Roslyn.Common;
+using AccessModifier = Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents.AccessModifier;
 
 namespace Mumei.CodeGen.Qt;
 
@@ -22,7 +23,7 @@ internal sealed class CodeFragmentGenerator : IIncrementalGenerator {
         context.RegisterSourceOutput(interceptorMethods, (ctx, state) => {
             var method = state;
 
-            var cls = ClassDeclarationFragment.Create($"CodeFragments_{method.Name}", accessModifier: AccessModifier.FileSealed, methods: [method], renderFeatures: [CodeGenFeature.Interceptors]);
+            var cls = ClassDeclarationFragment.Create($"CodeFragments_{method.Name}", accessModifier: AccessModifier.File + AccessModifier.Sealed, methods: [method], renderFeatures: [CodeGenFeature.Interceptors]);
             var ns = NamespaceFragment.Create("Generated", [cls]);
             var fileTree = new SourceFileRenderTreeBuilder();
 
@@ -70,7 +71,7 @@ internal sealed class CodeFragmentGenerator : IIncrementalGenerator {
         var fragment = LiteralNode.ForRawString(bodyContent.TrimEnd('\r', '\n'));
         return MethodDeclarationFragment.Create(
             [],
-            AccessModifierList.Internal + AccessModifierList.Static,
+            AccessModifier.Internal + AccessModifier.Static,
             [],
             typeof(CodeFragment),
             name,

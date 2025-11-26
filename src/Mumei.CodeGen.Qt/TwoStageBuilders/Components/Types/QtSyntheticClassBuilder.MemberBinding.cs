@@ -7,17 +7,17 @@ namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
     public ISyntheticInterceptorMethodBuilder<Delegate> DeclareInterceptorMethod<TMethodDefinition>(
         string name, InvocationExpressionSyntax invocationToIntercept,
-        Action<TMethodDefinition> inputBinder,
-        Func<TMethodDefinition, Delegate> methodSelector
-    ) where TMethodDefinition : SyntheticMethodDefinition, new() {
+        Func<TMethodDefinition, Delegate> methodSelector,
+        Action<TMethodDefinition>? inputBinder = null
+    ) where TMethodDefinition : SyntheticInterceptorMethodDefinition, new() {
         throw new NotImplementedException();
     }
 
     public ISyntheticInterceptorMethodBuilder<TSignature> DeclareInterceptorMethod<TMethodDefinition, TSignature>(
         string name,
         InvocationExpressionSyntax invocationToIntercept,
-        Action<TMethodDefinition> inputBinder,
-        Func<TMethodDefinition, TSignature> methodSelector
+        Func<TMethodDefinition, TSignature> methodSelector,
+        Action<TMethodDefinition> inputBinder
     )
         where TMethodDefinition : SyntheticMethodDefinition, new() where TSignature : Delegate {
         throw new NotImplementedException();
@@ -27,11 +27,19 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
         return QtSyntheticInterceptorMethodBuilder<Delegate>.CreateFromInterceptionTargetInvocation(name, invocationToIntercept, λCompilerApi);
     }
 
-    public ISyntheticMethodBuilder<Delegate> DeclareMethod<TMethodDefinition>(string name, Action<TMethodDefinition> inputBinder, Func<TMethodDefinition, Delegate> methodSelector) where TMethodDefinition : SyntheticMethodDefinition, new() {
+    public ISyntheticMethodBuilder<Delegate> DeclareMethod<TMethodDefinition>(
+        string name,
+        Func<TMethodDefinition, Delegate> methodSelector,
+        Action<TMethodDefinition> inputBinder
+    ) where TMethodDefinition : SyntheticMethodDefinition, new() {
         throw new NotImplementedException();
     }
 
-    public ISyntheticMethodBuilder<TSignature> DeclareMethod<TMethodDefinition, TSignature>(string name, Action<TMethodDefinition> inputBinder, Func<TMethodDefinition, TSignature> methodSelector) where TMethodDefinition : SyntheticMethodDefinition, new() where TSignature : Delegate {
+    public ISyntheticMethodBuilder<TSignature> DeclareMethod<TMethodDefinition, TSignature>(
+        string name,
+        Func<TMethodDefinition, TSignature> methodSelector,
+        Action<TMethodDefinition> inputBinder
+    ) where TMethodDefinition : SyntheticMethodDefinition, new() where TSignature : Delegate {
         throw new NotImplementedException();
     }
 
