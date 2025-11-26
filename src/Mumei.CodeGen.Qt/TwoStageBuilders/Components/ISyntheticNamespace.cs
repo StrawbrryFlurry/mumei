@@ -1,19 +1,27 @@
-﻿using Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
+﻿using System.Collections.Immutable;
+using Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 using Mumei.Roslyn;
 
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 
 public interface ISyntheticNamespace {
+    public string FullyQualifiedName { get; }
+
+    public ImmutableArray<ISyntheticMember> Members { get; }
+
     public ISyntheticNamespace WithMember(ISyntheticMember member);
 }
 
 internal sealed class QtSyntheticNamespace(string name) : ISyntheticNamespace, ISyntheticConstructable<NamespaceFragment> {
     public string Name { get; } = name;
 
+    public string FullyQualifiedName { get; } = name;
+
+    public ImmutableArray<ISyntheticMember> Members => _members?.ToImmutableArray() ?? [];
     private List<ISyntheticMember>? _members;
 
     public ISyntheticNamespace WithMember(ISyntheticMember member) {
-        _members ??= new List<ISyntheticMember>();
+        _members ??= [];
         _members.Add(member);
         return this;
     }

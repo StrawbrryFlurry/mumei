@@ -17,7 +17,7 @@ public abstract class SyntheticClassDefinition<TSelf> : ISyntheticClass<TSelf> w
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
 
-    public virtual void BindCompilerOutputMembers(ISyntheticClassBuilder<TSelf> classBuilder, TSelf target) { }
+    public abstract void InternalBindCompilerOutputMembers(ISyntheticClassBuilder<TSelf> classBuilder, TSelf target);
 
     public ref SyntheticFieldRef<T> Field<T>(string name) {
         throw new NotImplementedException();

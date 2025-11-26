@@ -25,12 +25,6 @@
     <InternalsVisibleTo Include="Mumei.CodeGen.Playground"/>
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="..\Mumei.Roslyn.Common\Collections\CollectionExtensions.cs">
-      <Link>Collections\EnumeratorExtensions.cs</Link>
-    </Compile>
-  </ItemGroup>
-
   <PropertyGroup>
     <GetTargetPathDependsOn>$(GetTargetPathDependsOn);GetDependencyTargetPaths</GetTargetPathDependsOn>
   </PropertyGroup>

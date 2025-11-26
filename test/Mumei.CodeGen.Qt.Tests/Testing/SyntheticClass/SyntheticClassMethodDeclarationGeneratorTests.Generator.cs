@@ -22,7 +22,7 @@ file sealed class CompilationTestSource {
     private Type[] _compilationIncludes = [typeof(DefaultRenderExpressionExtensions)];
 
     public void TestInvocation() {
-        var c = default(SyntheticCompilation)!;
+        var c = default(QtSyntheticCompilation)!;
         var m = c.DeclareClass("Test").DeclareMethod<Action<ISyntheticClassBuilder<CompileTimeUnknown>>>("A");
         var field = typeof(CompilationTestSource).GetField(nameof(_compilationIncludes))!;
         m.WithBody(new { Field = field }, static state => defBuilder => {

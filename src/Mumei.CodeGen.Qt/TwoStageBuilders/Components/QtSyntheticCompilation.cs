@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Qt.Qt;
 using Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
@@ -31,6 +32,8 @@ public interface ISyntheticCompilation {
     public ISyntheticType GetType(Type type);
 
     public ISyntheticType GetType(TypeSyntax typeSyntax);
+
+    public void TrackForEmission(string hintName, ISyntheticNamespace ns);
 }
 
 /// <summary>
@@ -52,16 +55,20 @@ public interface IλInternalCompilerApi {
         where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new();
 
     public string NextId();
+
+    public ImmutableArray<(string TrackingName, ImmutableArray<ISyntheticNamespace> Namespaces)> EnumerateNamespacesToEmit();
 }
 
 /// <summary>
 /// Stores synthetic code components that can be built into compilation units or Synthesized trees.
 /// Components that reference other components use this to resolve those dependencies.
 /// </summary>
-internal sealed class SyntheticCompilation(Compilation compilation) : ISyntheticCompilation {
+internal sealed class QtSyntheticCompilation(Compilation compilation) : ISyntheticCompilation {
     // ReSharper disable once InconsistentNaming
     public IλInternalCompilerApi λCompilerApi => field ??= new QtSyntheticCompilationCompilerApi(this);
     public Compilation UnderlyingCompilation => compilation;
+
+    private readonly Dictionary<string, Dictionary<string, ISyntheticNamespace>> _namespacesToEmit = new();
 
     public ISyntheticNamespace NamespaceFromCompilation(string name) {
         return new QtSyntheticNamespace(name);
@@ -112,7 +119,25 @@ internal sealed class SyntheticCompilation(Compilation compilation) : ISynthetic
         return new RoslynSyntheticType(typeSymbol);
     }
 
-    private sealed class QtSyntheticCompilationCompilerApi(SyntheticCompilation compilation) : IλInternalCompilerApi {
+    public void TrackForEmission(string hintName, ISyntheticNamespace ns) {
+        if (!_namespacesToEmit.TryGetValue(hintName, out var existingNamespaceMap)) {
+            _namespacesToEmit[hintName] = new Dictionary<string, ISyntheticNamespace> {
+                [ns.FullyQualifiedName] = ns
+            };
+            return;
+        }
+
+        if (!existingNamespaceMap.TryGetValue(ns.FullyQualifiedName, out var existingMatchingNamespace)) {
+            existingNamespaceMap[ns.FullyQualifiedName] = ns;
+            return;
+        }
+
+        foreach (var member in ns.Members) {
+            existingMatchingNamespace.WithMember(member);
+        }
+    }
+
+    private sealed class QtSyntheticCompilationCompilerApi(QtSyntheticCompilation compilation) : IλInternalCompilerApi {
         private int _internalTrackingId = 0;
 
         public string MakeArbitraryUniqueName(string name) {
@@ -131,6 +156,10 @@ internal sealed class SyntheticCompilation(Compilation compilation) : ISynthetic
 
         public string NextId() {
             return (_uniqueNameGenerator ??= new UniqueNameGeneratorComponent()).MakeUnique("");
+        }
+
+        public ImmutableArray<(string TrackingName, ImmutableArray<ISyntheticNamespace> Namespaces)> EnumerateNamespacesToEmit() {
+            return compilation._namespacesToEmit.Select(x => (x.Key, x.Value.Values.ToImmutableArray())).ToImmutableArray();
         }
     }
 }

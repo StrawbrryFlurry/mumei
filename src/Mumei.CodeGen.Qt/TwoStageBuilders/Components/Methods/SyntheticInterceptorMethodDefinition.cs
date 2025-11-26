@@ -2,10 +2,12 @@
 
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 
-public abstract class SyntheticInterceptorMethodDefinition {
+public abstract class SyntheticInterceptorMethodDefinition<TResult> {
     public virtual void BindDynamicComponents() { }
 
-    public T Invoke<T>() {
+    public abstract ISyntheticCodeBlock GenerateMethodBody();
+
+    public TResult Invoke() {
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
 

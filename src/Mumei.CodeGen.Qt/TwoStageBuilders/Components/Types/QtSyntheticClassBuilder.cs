@@ -2,7 +2,7 @@
 
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 
-internal sealed partial class QtSyntheticClassBuilder<TClassDef>(SyntheticCompilation compilation) : ISyntheticClassBuilder<TClassDef> {
+internal sealed partial class QtSyntheticClassBuilder<TClassDef>(QtSyntheticCompilation compilation) : ISyntheticClassBuilder<TClassDef> {
     private CompilerApi? _compilerApi;
 
     private string _name = compilation.λCompilerApi.MakeArbitraryUniqueName("UnnamedClass");

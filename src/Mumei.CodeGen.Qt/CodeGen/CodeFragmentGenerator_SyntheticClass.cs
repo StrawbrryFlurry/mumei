@@ -57,7 +57,7 @@ internal sealed class CodeFragmentGenerator_SyntheticClass : IIncrementalGenerat
             return NamespaceFragment.Empty;
         }
 
-        var compilation = new SyntheticCompilation(codeFragments[0].SemanticModel.Compilation);
+        var compilation = new QtSyntheticCompilation(codeFragments[0].SemanticModel.Compilation);
         var interceptorClass = compilation.DeclareClass(compilation.MakeUniqueName("CodeFragmentInterceptor"))
             .WithModifiers(AccessModifierList.File + AccessModifierList.Sealed);
 
@@ -92,6 +92,10 @@ internal sealed class CodeFragmentInterceptor : SyntheticClassDefinition<CodeFra
 
     public override void SetupDynamic(ISyntheticClassBuilder<CodeFragmentInterceptor> builder) {
         // builder.DeclareMethod()
+    }
+
+    public override void InternalBindCompilerOutputMembers(ISyntheticClassBuilder<CodeFragmentInterceptor> classBuilder, CodeFragmentInterceptor target) {
+        throw new NotImplementedException();
     }
 }
 

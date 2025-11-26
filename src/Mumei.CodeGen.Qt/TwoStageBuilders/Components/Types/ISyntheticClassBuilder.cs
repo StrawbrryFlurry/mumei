@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Diagnostics;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Qt.Qt;
 using Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;

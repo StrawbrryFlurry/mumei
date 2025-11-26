@@ -32,7 +32,7 @@ public sealed class SyntheticCompilationClassFactoryGenerator : IIncrementalGene
     }
 
     private static bool IsCompilationDeclareClassInvocation(SyntaxNode node, CancellationToken _) {
-        return SyntaxNodeFilter.IsInvocationOf(node, nameof(SyntheticCompilation.DeclareClass), nameof(SyntheticCompilation), out var _, out var memberAccess)
+        return SyntaxNodeFilter.IsInvocationOf(node, nameof(QtSyntheticCompilation.DeclareClass), nameof(QtSyntheticCompilation), out var _, out var memberAccess)
                && memberAccess.Name is GenericNameSyntax;
     }
 
@@ -41,7 +41,7 @@ public sealed class SyntheticCompilationClassFactoryGenerator : IIncrementalGene
             return IntermediateNode.None;
         }
 
-        if (!invocation.MethodInfo.IsDeclaredIn<SyntheticCompilation>()) {
+        if (!invocation.MethodInfo.IsDeclaredIn<QtSyntheticCompilation>()) {
             return IntermediateNode.None;
         }
 
@@ -63,7 +63,7 @@ public sealed class SyntheticCompilationClassFactoryGenerator : IIncrementalGene
         ImmutableArray<InterceptInvocationIntermediateNode<ITypeSymbol>> classDeclarationCalls,
         CancellationToken _
     ) {
-        var compilation = new SyntheticCompilation(classDeclarationCalls[0].SemanticModel.Compilation);
+        var compilation = new QtSyntheticCompilation(classDeclarationCalls[0].SemanticModel.Compilation);
         var interceptorClass = compilation.DeclareClass("SyntheticCompilationClassFactory")
             .WithModifiers(AccessModifierList.File + AccessModifierList.Static);
 
@@ -104,7 +104,7 @@ public sealed class SyntheticCompilationClassFactoryGenerator : IIncrementalGene
 // We also use this as a container for generating all the method implementations
 [CompilerGenerated]
 file sealed partial class SyntheticClassDynamicMemberBinder<TClassDefinition> {
-    public override void BindCompilerOutputMembers(ISyntheticClassBuilder<SyntheticClassDynamicMemberBinder<TClassDefinition>> classBuilder, SyntheticClassDynamicMemberBinder<TClassDefinition> target) {
+    public override void InternalBindCompilerOutputMembers(ISyntheticClassBuilder<SyntheticClassDynamicMemberBinder<TClassDefinition>> classBuilder, SyntheticClassDynamicMemberBinder<TClassDefinition> target) {
         // classBuilder.λCompilerApi.BindMethodSlot();
         classBuilder.λCompilerApi.DeclareMethod(
             [],
@@ -185,7 +185,7 @@ file sealed partial class SyntheticClassDynamicMemberBinder<[Bindable] TClassDef
     public ITypeSymbol DefinitionClass { get; set; }
 
     [Input]
-    public SyntheticCompilation Compilation { get; set; }
+    public QtSyntheticCompilation Compilation { get; set; }
 
     private readonly List<ISyntheticMethod<Action<ISyntheticClassBuilder<TClassDefinition>>>> _outputBinderMethods;
 
@@ -236,7 +236,7 @@ file sealed partial class SyntheticClassDynamicMemberBinder<[Bindable] TClassDef
         _outputBinderMethods.Add(bindMethod);
     }
 
-    [Output(Name = nameof(SyntheticClassDefinition<>.BindCompilerOutputMembers))]
+    [Output(Name = nameof(SyntheticClassDefinition<>.InternalBindCompilerOutputMembers))]
     public void BindCompilerOutputMembers(ISyntheticClassBuilder<TClassDefinition> classBuilder) {
         foreach (var bindOutputMethod in CompileTimeForEach(_outputBinderMethods)) {
             bindOutputMethod.Bind(this)(classBuilder);

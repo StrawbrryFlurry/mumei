@@ -79,7 +79,7 @@ file sealed class TestGenerator : IIncrementalGenerator {
         );
 
         context.RegisterSourceOutput(invocations, (productionContext, node) => {
-            var compilation = new SyntheticCompilation(node.SemanticModel.Compilation);
+            var compilation = new QtSyntheticCompilation(node.SemanticModel.Compilation);
             var cls = compilation.DeclareClass("Test")
                 .WithModifiers(AccessModifierList.File + AccessModifierList.Static);
 
