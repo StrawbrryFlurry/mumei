@@ -16,7 +16,7 @@ internal static class FragmentConstructor {
             return constructable.Construct(compilation);
         }
 
-        if (defaultValue is not null) {
+        if (!defaultValue?.Equals(default(T)) ?? true) {
             return defaultValue;
         }
 

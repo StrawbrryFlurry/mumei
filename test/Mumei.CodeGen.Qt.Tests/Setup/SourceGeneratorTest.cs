@@ -33,17 +33,18 @@ public sealed class SourceGeneratorTest<TSourceGenerator> where TSourceGenerator
     }
 
     public SourceGeneratorTestResult Run() {
-        var driver = CSharpGeneratorDriver.Create(
-            [new TSourceGenerator().AsSourceGenerator()],
-            null,
-            _compilation.SyntaxTrees.FirstOrDefault()?.Options as CSharpParseOptions
-        );
+        var driver = CSharpGeneratorDriver.Create(new TSourceGenerator())
+            .WithUpdatedParseOptions((CSharpParseOptions) _compilation.SyntaxTrees.First().Options!);
 
         var runResult = driver.RunGeneratorsAndUpdateCompilation(
             _compilation,
             out var updatedCompilation,
             out var diagnostics
         ).GetRunResult();
+
+        foreach (var generatorResult in runResult.Results) {
+            Assert.Null(generatorResult.Exception);
+        }
 
         Assert.Empty(diagnostics);
         Assert.Empty(runResult.Diagnostics);

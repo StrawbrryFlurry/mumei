@@ -24,7 +24,15 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
     }
 
     public ISyntheticInterceptorMethodBuilder<Delegate> DeclareInterceptorMethod(string name, InvocationExpressionSyntax invocationToIntercept) {
-        return QtSyntheticInterceptorMethodBuilder<Delegate>.CreateFromInterceptionTargetInvocation(name, invocationToIntercept, λCompilerApi);
+        var method = QtSyntheticInterceptorMethodBuilder<Delegate>.CreateFromConstructedInterceptionTargetInvocation(name, invocationToIntercept, λCompilerApi);
+        DeclareMethod(method);
+        return method;
+    }
+
+    public ISyntheticInterceptorMethodBuilder<Delegate> DeclareUnconstructedInterceptorMethod(string name, InvocationExpressionSyntax invocationToIntercept) {
+        var method = QtSyntheticInterceptorMethodBuilder<Delegate>.CreateFromInterceptionTargetInvocation(name, invocationToIntercept, λCompilerApi);
+        DeclareMethod(method);
+        return method;
     }
 
     public ISyntheticMethodBuilder<Delegate> DeclareMethod<TMethodDefinition>(

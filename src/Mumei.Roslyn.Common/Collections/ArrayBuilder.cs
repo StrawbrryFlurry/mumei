@@ -19,6 +19,11 @@ public ref partial struct ArrayBuilder<TElement> {
 
     public static ArrayBuilder<TElement> Empty => new();
 
+    public bool IsEmpty {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _count == 0;
+    }
+
     public Span<TElement> Elements {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => _elements[.._count];
@@ -70,7 +75,7 @@ public ref partial struct ArrayBuilder<TElement> {
         var count = _count;
         var newCount = count + elements.Length;
         var buffer = _elements;
-        if ((uint)newCount < (uint)buffer.Length) {
+        if ((uint) newCount < (uint) buffer.Length) {
             elements.CopyTo(_elements[count..]);
             _count = newCount;
             return;
@@ -86,7 +91,7 @@ public ref partial struct ArrayBuilder<TElement> {
     public void Add(in TElement element) {
         var count = _count;
         var buffer = _elements;
-        if ((uint)count < (uint)buffer.Length) {
+        if ((uint) count < (uint) buffer.Length) {
             buffer[count] = element;
             _count = count + 1;
             return;
@@ -114,6 +119,11 @@ public ref partial struct ArrayBuilder<TElement> {
     }
 
     public TElement[] ToArrayAndFree() {
+        if (IsEmpty) {
+            Dispose();
+            return [];
+        }
+
         var array = new TElement[_count];
 
         Elements.CopyTo(array);
@@ -132,6 +142,11 @@ public ref partial struct ArrayBuilder<TElement> {
     }
 
     public Span<TElement> ToSpanAndFree() {
+        if (IsEmpty) {
+            Dispose();
+            return Span<TElement>.Empty;
+        }
+
         Span<TElement> backingArray = new TElement[_count];
 
         Elements.CopyTo(backingArray);
@@ -190,6 +205,11 @@ public static class ArrayBuilderExtensions {
     }
 
     public static unsafe string ToStringAndFree(this ArrayBuilder<char> builder) {
+        if (builder.IsEmpty) {
+            builder.Dispose();
+            return string.Empty;
+        }
+
         var chars = builder.DangerousAsSpanWithoutOwnership();
 
         // The string ctor should copy all chars to its own buffer and

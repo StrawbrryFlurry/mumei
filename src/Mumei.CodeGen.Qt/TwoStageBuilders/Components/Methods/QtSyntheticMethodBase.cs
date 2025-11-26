@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
@@ -75,13 +76,15 @@ internal abstract class QtSyntheticMethodBase<TBuilder>(string name, IλInternal
     }
 
     public MethodDeclarationFragment Construct(ISyntheticCompilation compilation) {
+        EnsureValid();
+
         var accessModifiers = _accessModifiers;
 
-        var attributes = FragmentConstructor.ConstructFragment<ImmutableArray<AttributeFragment>>(compilation, _attributes, []);
-        var typeParameters = FragmentConstructor.ConstructFragment<TypeParameterListFragment>(compilation, _typeParameters, []);
-        var returnType = FragmentConstructor.ConstructFragment<TypeInfoFragment>(compilation, _returnType);
-        var parameterList = FragmentConstructor.ConstructFragment<ImmutableArray<ParameterFragment>>(compilation, _parameters, []);
-        var body = FragmentConstructor.ConstructFragment<CodeBlockFragment>(compilation, _body);
+        var attributes = compilation.Synthesize<ImmutableArray<AttributeFragment>>(_attributes, []);
+        var typeParameters = compilation.Synthesize<TypeParameterListFragment>(_typeParameters, []);
+        var returnType = compilation.Synthesize<TypeInfoFragment>(_returnType);
+        var parameterList = compilation.Synthesize<ImmutableArray<ParameterFragment>>(_parameters, []);
+        var body = compilation.Synthesize<CodeBlockFragment>(_body);
 
         return MethodDeclarationFragment.Create(
             attributes,
@@ -92,6 +95,21 @@ internal abstract class QtSyntheticMethodBase<TBuilder>(string name, IλInternal
             parameterList,
             body
         );
+    }
+
+    private void EnsureValid() {
+        // TODO: We should report these in the compilation as diagnostics rather than throwing exceptions.
+        if (_returnType is null) {
+            throw new InvalidOperationException("Method must have a return type.");
+        }
+
+        if (_body is null && !_accessModifiers.Contains(AccessModifier.Abstract)) {
+            throw new InvalidOperationException("Non-Abstract methods must declare a body.");
+        }
+
+        if (_body is not null && _accessModifiers.Contains(AccessModifier.Abstract)) {
+            throw new InvalidOperationException("Abstract methods cannot declare a body.");
+        }
     }
 
     private sealed class CompilerApiImpl(ISyntheticCompilation compilation) : λIInternalMethodBuilderCompilerApi {
@@ -134,6 +152,20 @@ internal abstract class QtSyntheticMethodBase<TBuilder>(string name, IλInternal
 
             var typeParameters = QtSyntheticTypeParameterList.FromMethodSymbol(method);
             builder.WithTypeParameters(typeParameters);
+
+            var returnType = compilation.GetType(method.ReturnType);
+            builder.WithReturnType(returnType);
+        }
+
+        public void ApplyConstructedMethodSignatureToBuilder<TSignature>(ISyntheticInterceptorMethodBuilder<TSignature> builder, IMethodSymbol method) where TSignature : Delegate {
+            if (method.TypeParameters.IsEmpty) {
+                ApplyMethodSignatureToBuilder(builder, method);
+                return;
+            }
+
+            Debug.Assert(method.IsGenericMethod && method.TypeArguments.Length == method.TypeParameters.Length, "Method is not a constructed generic method.");
+            var parameterList = QtSyntheticParameterList.FromMethodSymbol(method);
+            builder.WithParameters(parameterList);
 
             var returnType = compilation.GetType(method.ReturnType);
             builder.WithReturnType(returnType);

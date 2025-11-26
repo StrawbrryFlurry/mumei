@@ -1,9 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 
 namespace Mumei.Roslyn;
 
-public readonly struct EquatableImmutableArray<T>(ImmutableArray<T> array) : IEquatable<EquatableImmutableArray<T>>, IEnumerable {
+[CollectionBuilder(typeof(ΦEquatableImmutableArrayBuilder), nameof(ΦEquatableImmutableArrayBuilder.Create))]
+public readonly struct EquatableImmutableArray<T>(ImmutableArray<T> array) : IEquatable<EquatableImmutableArray<T>>, IEnumerable<T> {
     public ImmutableArray<T> Array { get; } = array;
 
     public static implicit operator EquatableImmutableArray<T>(ImmutableArray<T> array) {
@@ -45,7 +47,19 @@ public readonly struct EquatableImmutableArray<T>(ImmutableArray<T> array) : IEq
         return Array.GetHashCode();
     }
 
+    IEnumerator<T> IEnumerable<T>.GetEnumerator() {
+        return Array.GetEnumeratorInterfaceImplementation();
+    }
+
     IEnumerator IEnumerable.GetEnumerator() {
         return Array.GetEnumeratorInterfaceImplementation();
+    }
+}
+
+public static class ΦEquatableImmutableArrayBuilder {
+    public static EquatableImmutableArray<TElement> Create<TElement>(ReadOnlySpan<TElement> elements) {
+        return new EquatableImmutableArray<TElement>([
+            ..elements
+        ]);
     }
 }

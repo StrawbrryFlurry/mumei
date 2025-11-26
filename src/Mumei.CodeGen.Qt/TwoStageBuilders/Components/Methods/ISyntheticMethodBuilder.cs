@@ -54,6 +54,12 @@ public interface λIInternalMethodBuilderCompilerApi {
         IMethodSymbol method
     ) where TSignature : Delegate;
 
+    public void ApplyConstructedMethodSignatureToBuilder<TSignature>(
+        ISyntheticInterceptorMethodBuilder<TSignature> builder,
+        IMethodSymbol method
+    ) where TSignature : Delegate;
+
+
     public ISyntheticCodeBlock CreateRendererCodeBlock(RenderFragment renderCodeBlock);
     public ISyntheticCodeBlock CreateRendererCodeBlock<TState>(RenderFragment<TState> renderCodeBlock);
 }

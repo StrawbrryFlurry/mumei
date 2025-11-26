@@ -1,5 +1,7 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 using SourceCodeFactory;
 
 namespace Mumei.CodeGen.Qt.Tests.Setup;
@@ -42,6 +44,11 @@ public sealed class TestCompilationBuilder {
 
     public TestCompilationBuilder AddSource(string content) {
         _sources.Add(CSharpSyntaxTree.ParseText(content, path: Guid.NewGuid().ToString("N")));
+        return this;
+    }
+
+    public TestCompilationBuilder AddSource([StringSyntax("cs")] ExpressionFragment.InterpolatedStringHandler content) {
+        _sources.Add(CSharpSyntaxTree.ParseText(content.GetValue(), path: Guid.NewGuid().ToString("N")));
         return this;
     }
 

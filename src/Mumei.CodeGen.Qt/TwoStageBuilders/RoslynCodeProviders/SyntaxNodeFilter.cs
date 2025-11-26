@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
@@ -27,13 +28,21 @@ internal sealed class SyntaxNodeFilter {
             return false;
         }
 
-        if (invocation.Expression is not MemberAccessExpressionSyntax { Name.Identifier.Text: var actualMethodName, Expression: SimpleNameSyntax { Identifier.Text: var actualTargetName } } memberAccessExpressionSyntax) {
+        if (invocation.Expression is not MemberAccessExpressionSyntax { Name.Identifier.Text: var actualMethodName, Expression: var targetExpression } memberAccessExpressionSyntax) {
             return false;
         }
 
         memberAccessExpression = memberAccessExpressionSyntax;
         if (actualMethodName != methodName) {
             return false;
+        }
+
+        if (targetExpression is not SimpleNameSyntax { Identifier.Text: var actualTargetName }) {
+            if (targetExpression is not AliasQualifiedNameSyntax { Name.Identifier.Text: var actualTargetNameIdentifier }) {
+                return false;
+            }
+
+            actualTargetName = actualTargetNameIdentifier;
         }
 
         if (actualTargetName != immediateTargetName) {

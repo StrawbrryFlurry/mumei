@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using Mumei.CodeGen.Playground;
 using Mumei.Roslyn;
 
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
@@ -11,6 +10,7 @@ public readonly struct ClassDeclarationFragment(
     TypeParameterListFragment typeParameters,
     ImmutableArray<ParameterFragment> primaryConstructorParameters,
     ImmutableArray<TypeInfoFragment> baseTypes,
+    ImmutableArray<ConstructorDeclarationFragment> constructors,
     ImmutableArray<FieldDeclarationFragment> fields,
     ImmutableArray<PropertyDeclarationFragment> properties,
     ImmutableArray<MethodDeclarationFragment> methods,
@@ -24,6 +24,7 @@ public readonly struct ClassDeclarationFragment(
         TypeParameterListFragment typeParameters = default,
         ImmutableArray<ParameterFragment> primaryConstructorParameters = default,
         ImmutableArray<TypeInfoFragment> baseTypes = default,
+        ImmutableArray<ConstructorDeclarationFragment> constructors = default,
         ImmutableArray<FieldDeclarationFragment> fields = default,
         ImmutableArray<PropertyDeclarationFragment> properties = default,
         ImmutableArray<MethodDeclarationFragment> methods = default,
@@ -37,6 +38,7 @@ public readonly struct ClassDeclarationFragment(
             typeParameters,
             primaryConstructorParameters.EnsureInitialized(),
             baseTypes.EnsureInitialized(),
+            constructors.EnsureInitialized(),
             fields.EnsureInitialized(),
             properties.EnsureInitialized(),
             methods.EnsureInitialized(),
@@ -96,7 +98,7 @@ public readonly struct MethodDeclarationFragment(
     string name,
     TypeParameterListFragment typeParameters,
     ImmutableArray<ParameterFragment> parameters,
-    CodeBlockFragment body
+    CodeBlockFragment? body
 ) : IRenderFragment {
     public string Name => name;
 
@@ -158,14 +160,14 @@ public readonly struct MethodDeclarationFragment(
 
         renderTree.Node(typeParameters.Constraints);
 
-        if (accessModifier.IsAbstract) {
+        if (body is not { } methodBody) {
             renderTree.Text(";");
             return;
         }
 
         renderTree.Text(" ");
         renderTree.StartCodeBlock();
-        renderTree.Node(body);
+        renderTree.Node(methodBody);
         renderTree.EndCodeBlock();
     }
 
@@ -287,4 +289,13 @@ public readonly struct PropertyDeclarationFragment(
             null
         );
     }
+}
+
+public readonly struct ConstructorDeclarationFragment(
+    ImmutableArray<AttributeFragment> attributes,
+    AccessModifierList accessModifier,
+    ImmutableArray<ParameterFragment> parameters,
+    CodeBlockFragment body
+) : IRenderFragment {
+    public void Render(IRenderTreeBuilder renderTree) { }
 }

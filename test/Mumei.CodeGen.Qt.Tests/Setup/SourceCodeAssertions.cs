@@ -9,7 +9,7 @@ internal static partial class SourceCodeAssertions {
     ) {
         var match = runResult.GeneratedTrees.FirstOrDefault(x => WildcardMatcher.Matches(x.FilePath, fileRegex))
                     ?? throw new Xunit.Sdk.XunitException(
-                        $"Run Result did not contain a file matching '{fileRegex}'. Has: {string.Join("\n", runResult.GeneratedTrees.Select(x => x.FilePath))}");
+                        $"Run Result did not contain a file matching '{fileRegex}'. Has:\n{string.Join("\n", runResult.GeneratedTrees.Select(x => $"- {x.FilePath}"))}");
 
         return match;
     }

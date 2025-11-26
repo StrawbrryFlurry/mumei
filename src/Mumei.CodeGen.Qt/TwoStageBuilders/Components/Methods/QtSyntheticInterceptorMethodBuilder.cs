@@ -1,4 +1,11 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.Reflection;
+using System.Reflection.Metadata;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
@@ -13,12 +20,27 @@ internal sealed class QtSyntheticInterceptorMethodBuilder<TSignature>(
         IλInternalClassBuilderCompilerApi classApi
     ) {
         var builder = new QtSyntheticInterceptorMethodBuilder<TSignature>(name, classApi);
-        var methodSymbol = classApi.Compilation.UnderlyingCompilation.GetSemanticModel(invocationToIntercept.SyntaxTree).GetSymbolInfo(invocationToIntercept).Symbol as IMethodSymbol;
+        var methodSymbol = ModelExtensions.GetSymbolInfo(classApi.Compilation.UnderlyingCompilation.GetSemanticModel(invocationToIntercept.SyntaxTree), invocationToIntercept).Symbol as IMethodSymbol;
         if (methodSymbol is null) {
             throw new InvalidOperationException("Could not resolve method symbol for interception target invocation.");
         }
 
         builder.λCompilerApi.ApplyMethodSignatureToBuilder(builder, methodSymbol);
+        return builder;
+    }
+
+    public static QtSyntheticInterceptorMethodBuilder<TSignature> CreateFromConstructedInterceptionTargetInvocation(
+        string name,
+        InvocationExpressionSyntax invocationToIntercept,
+        IλInternalClassBuilderCompilerApi classApi
+    ) {
+        var builder = new QtSyntheticInterceptorMethodBuilder<TSignature>(name, classApi);
+        var methodSymbol = ModelExtensions.GetSymbolInfo(classApi.Compilation.UnderlyingCompilation.GetSemanticModel(invocationToIntercept.SyntaxTree), invocationToIntercept).Symbol as IMethodSymbol;
+        if (methodSymbol is null) {
+            throw new InvalidOperationException("Could not resolve method symbol for interception target invocation.");
+        }
+
+        builder.λCompilerApi.ApplyConstructedMethodSignatureToBuilder(builder, methodSymbol);
         return builder;
     }
 

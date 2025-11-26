@@ -6,7 +6,7 @@ using Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 
-public interface ISyntheticClassBuilder<T> : ISyntheticMember, ISyntheticTypeInfo<T> {
+public interface ISyntheticClassBuilder<T> : ISyntheticClass, ISyntheticTypeInfo<T> {
     public IλInternalClassBuilderCompilerApi λCompilerApi { get; }
 
     public ISyntheticClassBuilder<T> WithName(string name);
@@ -21,6 +21,18 @@ public interface ISyntheticClassBuilder<T> : ISyntheticMember, ISyntheticTypeInf
     ) where TMethodDefinition : SyntheticInterceptorMethodDefinition, new();
 
     public ISyntheticInterceptorMethodBuilder<Delegate> DeclareInterceptorMethod(
+        string name,
+        InvocationExpressionSyntax invocationToIntercept
+    );
+
+    /// <summary>
+    /// Same as <see cref="DeclareInterceptorMethod"/>, but does not bind the declaration
+    /// to the intercepted invocation's type arguments.
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="invocationToIntercept"></param>
+    /// <returns></returns>
+    public ISyntheticInterceptorMethodBuilder<Delegate> DeclareUnconstructedInterceptorMethod(
         string name,
         InvocationExpressionSyntax invocationToIntercept
     );

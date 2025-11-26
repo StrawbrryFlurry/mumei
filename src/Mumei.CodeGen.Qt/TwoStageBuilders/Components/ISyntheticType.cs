@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 
@@ -26,12 +27,20 @@ internal sealed class ErrorSyntheticType(string? typeName, string errorReason, o
     public string Name { get; } = typeName ?? $"<error: {errorReason}>";
 }
 
-internal sealed class RuntimeSyntheticType(Type t) : ISyntheticType {
+internal sealed class RuntimeSyntheticType(Type t) : ISyntheticType, ISyntheticConstructable<TypeInfoFragment> {
     public string Name => t.Name;
+
+    public TypeInfoFragment Construct(ISyntheticCompilation compilation) {
+        return new TypeInfoFragment(t);
+    }
 }
 
-internal sealed class RoslynSyntheticType(ITypeSymbol t) : ISyntheticType {
+internal sealed class RoslynSyntheticType(ITypeSymbol t) : ISyntheticType, ISyntheticConstructable<TypeInfoFragment> {
     public string Name => t.Name;
+
+    public TypeInfoFragment Construct(ISyntheticCompilation compilation) {
+        return new TypeInfoFragment(t);
+    }
 }
 
 internal sealed class QtSyntheticTypeInfo<T> : ISyntheticTypeInfo<T> {

@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.Contracts;
 using Microsoft.CodeAnalysis;
 using Mumei.CodeGen.Qt.TwoStageBuilders.Components;
+using Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
 
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.RoslynCodeProviders;
 
@@ -58,8 +59,22 @@ public static class SyntheticSourceProviderExtensions {
                     emitCode(emitContext);
                 }
 
-                foreach (var (ns, name) in compilation.Compilation.λCompilerApi.EnumerateNamespacesToEmit()) {
-                    var fileTree = new SourceFileRenderTreeBuilder();
+                foreach (var (name, namespaces) in compilation.Compilation.λCompilerApi.EnumerateNamespacesToEmit()) {
+                    using var fileTree = new SourceFileRenderTreeBuilder();
+
+                    var text = "";
+                    for (var i = 0; i < namespaces.Length; i++) {
+                        var ns = namespaces[i];
+                        var isLast = i == namespaces.Length - 1;
+                        var fragment = compilation.Compilation.Synthesize<NamespaceFragment>(ns);
+                        if (isLast) {
+                            text = fileTree.RenderRootNode(fragment);
+                        } else {
+                            fileTree.Node(fragment);
+                        }
+                    }
+
+                    spc.AddSource($"{name}.g", text);
                 }
             });
         }
@@ -123,7 +138,11 @@ public static class SyntheticSourceProviderExtensions {
             [Pure] Action<ISyntheticCompilation, T, CancellationToken> compileSelector
         ) {
             // var valueWithCompilation = source.Select(selector);
-            return default;
+            return source.Select((valueWithCompilation, ct) => {
+                var compilation = new QtSyntheticCompilation(valueWithCompilation.Compilation);
+                compileSelector(compilation, valueWithCompilation.Value, ct);
+                return new IncrementalSyntheticCompilation(compilation, [valueWithCompilation.Value]);
+            });
         }
     }
 }

@@ -1,15 +1,20 @@
-﻿using Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
+﻿using Mumei.CodeGen.Qt.Qt;
+using Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
+using Mumei.Roslyn;
 
 namespace Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 
-internal sealed partial class QtSyntheticClassBuilder<TClassDef>(QtSyntheticCompilation compilation) : ISyntheticClassBuilder<TClassDef> {
+internal sealed partial class QtSyntheticClassBuilder<TClassDef>(QtSyntheticCompilation compilation) : ISyntheticClassBuilder<TClassDef>, ISyntheticConstructable<ClassDeclarationFragment> {
     private CompilerApi? _compilerApi;
+
+    public string Name => _name;
 
     private string _name = compilation.λCompilerApi.MakeArbitraryUniqueName("UnnamedClass");
 
-    private QtSyntheticAttributeList? _attributes;
-    private List<ISyntheticMethod> _methods;
-    private List<ISyntheticClass> _nestedClasses;
+    private ISyntheticAttributeList? _attributes;
+    private List<ISyntheticMethod>? _methods;
+    private List<ISyntheticClass>? _nestedClasses;
+    private ISyntheticTypeParameterList? _typeParameters;
 
     private AccessModifierList _modifiers = AccessModifier.Internal;
 
@@ -67,5 +72,49 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(QtSyntheticComp
 
             builder.DeclareMethod(method);
         }
+    }
+
+    public ClassDeclarationFragment Construct(ISyntheticCompilation compilation) {
+        var methods = new ArrayBuilder<MethodDeclarationFragment>();
+        var fields = new ArrayBuilder<FieldDeclarationFragment>();
+        var properties = new ArrayBuilder<PropertyDeclarationFragment>();
+        var constructors = new ArrayBuilder<ConstructorDeclarationFragment>();
+        var baseTypes = new ArrayBuilder<TypeInfoFragment>();
+
+        foreach (var synMethod in _methods ?? []) {
+            var fragment = compilation.Synthesize<MethodDeclarationFragment>(synMethod);
+            methods.Add(fragment);
+        }
+
+        return new ClassDeclarationFragment(
+            compilation.Synthesize(_attributes, AttributeListFragment.Empty),
+            _modifiers,
+            Name,
+            compilation.Synthesize(_typeParameters, TypeParameterListFragment.Empty),
+            [],
+            baseTypes.ToImmutableArrayAndFree(),
+            constructors.ToImmutableArrayAndFree(),
+            fields.ToImmutableArrayAndFree(),
+            properties.ToImmutableArrayAndFree(),
+            methods.ToImmutableArrayAndFree(),
+            [],
+            []
+        );
+    }
+
+    public ref SyntheticFieldRef<T> Field<T>(string name) {
+        throw new NotImplementedException();
+    }
+
+    public ref SyntheticFieldRef<CompileTimeUnknown> Field(string name) {
+        throw new NotImplementedException();
+    }
+
+    public SyntheticMethodRef<Delegate> Method(string name) {
+        throw new NotImplementedException();
+    }
+
+    public SyntheticMethodRef<TSignature> Method<TSignature>(string name) where TSignature : Delegate {
+        throw new NotImplementedException();
     }
 }
