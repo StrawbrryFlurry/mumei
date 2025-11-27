@@ -1,9 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <ItemGroup>
-    <PackageReference Include="FluentAssertions"/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Mumei.CodeGen\Mumei.CodeGen.csproj"/>
-  </ItemGroup>
-</Project>

@@ -25,9 +25,7 @@
   <Import Project="..\Mumei.Roslyn.SourceCodeReferenceGenerator\Mumei.Roslyn.SourceCodeReferenceGenerator.targets"/>
 
   <ItemGroup>
-    <ProjectReference Include="..\Mumei.CodeGen\Mumei.CodeGen.csproj"/>
     <ProjectReference Include="..\Mumei.DependencyInjection\Mumei.DependencyInjection.csproj"/>
-    <ProjectReference Include="..\Mumei.Roslyn\Mumei.Roslyn.csproj"/>
 
     <ProjectReference Include="..\Mumei.Roslyn.SourceCodeReferenceGenerator\Mumei.Roslyn.SourceCodeReferenceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
   </ItemGroup>

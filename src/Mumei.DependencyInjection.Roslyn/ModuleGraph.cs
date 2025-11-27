@@ -3,8 +3,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Mumei.DependencyInjection.Module.Markers;
 using Mumei.DependencyInjection.Roslyn.Module;
-using Mumei.Roslyn;
-using Mumei.Roslyn.Extensions;
 
 namespace Mumei.DependencyInjection.Roslyn;
 

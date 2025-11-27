@@ -3,10 +3,10 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Qt.Qt;
 using Mumei.CodeGen.Qt.Tests.CompileTimeBuilders.RoslynAsExpressionReplacement;
-using Mumei.CodeGen.Qt.Tests.Setup;
 using Mumei.CodeGen.Qt.TwoStageBuilders.Components;
 using Mumei.CodeGen.Qt.TwoStageBuilders.RoslynCodeProviders;
 using Mumei.CodeGen.Qt.TwoStageBuilders.SynthesizedComponents;
+using Mumei.Roslyn.Testing;
 using SourceCodeFactory;
 
 namespace Mumei.CodeGen.Qt.Tests.Testing;

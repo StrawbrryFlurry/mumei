@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
-    <PackageReference Include="FluentAssertions"/>
+    <PackageReference Include="DiffPlex"/>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Mumei.Roslyn\Mumei.Roslyn.csproj"/>
+    <Folder Include="TestCompilation\SourceGenerators\"/>
   </ItemGroup>
 </Project>

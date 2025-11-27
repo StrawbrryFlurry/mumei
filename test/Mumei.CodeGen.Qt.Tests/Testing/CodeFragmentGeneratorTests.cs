@@ -1,4 +1,4 @@
-﻿using Mumei.CodeGen.Qt.Tests.Setup;
+﻿using Mumei.Roslyn.Testing;
 using SourceCodeFactory;
 
 namespace Mumei.CodeGen.Qt.Tests.Testing;

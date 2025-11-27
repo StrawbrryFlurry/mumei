@@ -5,12 +5,12 @@ using System.Runtime.CompilerServices;
 
 namespace Mumei.Roslyn;
 
-public static class ArrayBuilder {
+internal static class ArrayBuilder {
     public const int LargeElementInitSize = 64;
     public const int InitSize = 256;
 }
 
-public ref partial struct ArrayBuilder<TElement> {
+internal ref partial struct ArrayBuilder<TElement> {
     private const int DefaultCapacity = 4;
 
     private Span<TElement> _elements;
@@ -161,11 +161,6 @@ public ref partial struct ArrayBuilder<TElement> {
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public TemporarySpan<TElement> AsRefForfeitOwnership() {
-        return new TemporarySpan<TElement>(Elements, _rentedArray);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ReadOnlySpan<TElement> DangerousAsSpanWithoutOwnership() {
         return Elements;
     }
@@ -186,7 +181,7 @@ public ref partial struct ArrayBuilder<TElement> {
     }
 }
 
-public static class ArrayBuilderExtensions {
+internal static class ArrayBuilderExtensions {
     public static int IndexOf<T>(this ArrayBuilder<T> builder, T value) where T : IEquatable<T> {
         return builder.DangerousAsSpanWithoutOwnership().IndexOf(value);
     }

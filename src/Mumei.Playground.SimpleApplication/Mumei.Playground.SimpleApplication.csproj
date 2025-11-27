@@ -1,26 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-    <PropertyGroup>
-        <RootNamespace>WeatherApplication</RootNamespace>
-        <outputType>Exe</outputType>
-    </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace>WeatherApplication</RootNamespace>
+    <outputType>Exe</outputType>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\Mumei.Roslyn\Mumei.Roslyn.csproj" />
-        <ProjectReference Include="..\Mumei.DependencyInjection\Mumei.DependencyInjection.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Mumei.DependencyInjection\Mumei.DependencyInjection.csproj"/>
+  </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.Configuration" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
-        <PackageReference Include="Microsoft.Extensions.Logging" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection"/>
+    <PackageReference Include="Microsoft.Extensions.Logging"/>
+  </ItemGroup>
 
-    <ItemGroup>
-        <Compile Include=".Generated\ApplicationEnvironment.cs" />
-        <Compile Include=".Generated\PlatformInjector.cs" />
-    </ItemGroup>
+  <ItemGroup>
+    <Compile Include=".Generated\ApplicationEnvironment.cs"/>
+    <Compile Include=".Generated\PlatformInjector.cs"/>
+  </ItemGroup>
 
-    <ItemGroup>
-        <None Remove="README.md" />
-    </ItemGroup>
+  <ItemGroup>
+    <None Remove="README.md"/>
+  </ItemGroup>
 </Project>

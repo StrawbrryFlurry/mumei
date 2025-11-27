@@ -1,0 +1,31 @@
+﻿using Microsoft.CodeAnalysis;
+
+namespace Mumei.Roslyn.Testing;
+
+public static partial class SourceCodeAssertions {
+    public static SyntaxTree HasFileMatching(
+        this SourceGeneratorTestResult runResult,
+        string fileRegex
+    ) {
+        var match = runResult.GeneratedTrees.FirstOrDefault(x => WildcardMatcher.Matches(x.FilePath, fileRegex))
+                    ?? throw new Xunit.Sdk.XunitException(
+                        $"Run Result did not contain a file matching '{fileRegex}'. Has:\n{string.Join("\n", runResult.GeneratedTrees.Select(x => $"- {x.FilePath}"))}");
+
+        return match;
+    }
+
+    public static SyntaxTree WithPartialContent(
+        this SyntaxTree syntaxTree,
+        CommonSyntaxStringInterpolationHandler expectation
+    ) {
+        var content = syntaxTree.GetText().ToString();
+        SyntaxVerifier.VerifyRegex(content, expectation);
+        return syntaxTree;
+    }
+
+    public static SyntaxTree WithContent(this SyntaxTree syntaxTree, CommonSyntaxStringInterpolationHandler expectation) {
+        var content = syntaxTree.GetText().ToString();
+        SyntaxVerifier.Verify(content, expectation);
+        return syntaxTree;
+    }
+}

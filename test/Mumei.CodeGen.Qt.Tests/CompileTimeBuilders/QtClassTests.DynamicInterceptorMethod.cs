@@ -1,7 +1,8 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Playground;
+using Mumei.CodeGen.Qt.Output;
 using Mumei.CodeGen.Qt.Qt;
-using Mumei.CodeGen.Qt.Tests.Setup;
+using Mumei.Roslyn.Testing;
 using SourceCodeFactory;
 
 namespace Mumei.CodeGen.Qt.Tests;
@@ -49,7 +50,7 @@ public sealed class QtClassTestsDynamicInterceptorMethod {
         );
 
         SyntaxVerifier.VerifyRegex(
-            cls,
+            cls.ToSyntaxInternal(),
             $$"""
               file static class TestClass {
                   [System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "*")]

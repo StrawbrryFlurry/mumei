@@ -8,7 +8,7 @@ namespace Microsoft.Interop {
     /// <summary>
     /// Exposes the hashing utilities from Roslyn
     /// </summary>
-    public class HashCode {
+    internal static class HashCode {
         public static int Combine<T1, T2>(T1 t1, T2 t2) {
             return Hash.Combine(t1 != null ? t1.GetHashCode() : 0, t2 != null ? t2.GetHashCode() : 0);
         }

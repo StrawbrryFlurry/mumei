@@ -3,8 +3,7 @@ using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Mumei.CodeGen.Qt.Qt;
 using Mumei.CodeGen.Qt.Roslyn;
-using Mumei.CodeGen.Qt.Tests.Setup;
-using Mumei.Roslyn.Testing.Comp;
+using Mumei.Roslyn.Testing;
 using SourceCodeFactory;
 
 namespace Mumei.CodeGen.Qt.Tests.CompileTimeBuilders;

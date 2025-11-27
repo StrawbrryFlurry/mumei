@@ -1,12 +1,11 @@
-﻿using System.Runtime.CompilerServices;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
 using Mumei.CodeGen.Playground;
 using Mumei.CodeGen.Qt.Qt;
 using Mumei.CodeGen.Qt.Tests.CompileTimeBuilders.RoslynAsExpressionReplacement;
-using Mumei.CodeGen.Qt.Tests.Setup;
+using Mumei.Roslyn.Testing;
 using SourceCodeFactory;
 
 namespace Mumei.CodeGen.Qt.Tests.CompileTimeBuilders;

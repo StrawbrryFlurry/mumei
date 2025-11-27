@@ -1,6 +1,6 @@
 ﻿using Mumei.CodeGen.Qt.Qt;
-using Mumei.CodeGen.Qt.Tests.Setup;
 using Mumei.CodeGen.Qt.TwoStageBuilders.Components;
+using Mumei.Roslyn.Testing;
 using SourceCodeFactory;
 
 namespace Mumei.CodeGen.Qt.Tests.Testing;

@@ -19,17 +19,41 @@ public class SourceCodeReferenceGenerator : IIncrementalGenerator {
 
         namespace SourceCodeFactory; 
 
-        internal interface ITypeRef {}
-
-        internal sealed class SourceCodeTypeRef : ITypeRef {
+        internal sealed class SourceCodeTypeRef : global::Mumei.Roslyn.Testing.ICompilationReference {
           public string TypeName { get; init; }
           public string SourceCode { get; init; }
-          public global::System.Collections.Immutable.ImmutableArray<ITypeRef> References { get; init; }
+          public global::System.Collections.Immutable.ImmutableArray<global::Mumei.Roslyn.Testing.ICompilationReference> References { get; init; }
+
+          public void AddToCompilation(System.Collections.Generic.List<Microsoft.CodeAnalysis.SyntaxTree> syntaxTreesRef, Mumei.Roslyn.Testing.MetadataReferenceCollection metadataRef) {
+            AddToCompilationCore(syntaxTreesRef, metadataRef, new System.Collections.Generic.HashSet<string>());
+          }
+          
+          private void AddToCompilationCore(System.Collections.Generic.List<Microsoft.CodeAnalysis.SyntaxTree> syntaxTreesRef, Mumei.Roslyn.Testing.MetadataReferenceCollection metadataRef, System.Collections.Generic.HashSet<string> seenTexts) {
+            if (seenTexts.Add(TypeName)) {
+              var syntaxTree = Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(SourceCode, path: TypeName);
+              syntaxTreesRef.Add(syntaxTree);
+            }
+            
+            foreach (var reference in References) {
+                if (reference is AssemblyTypeRef assemblyRef) {
+                    metadataRef.AddReference(assemblyRef.AssemblyName);
+                    continue;
+                }
+            
+                if (reference is SourceCodeTypeRef sourceRef) {
+                    sourceRef.AddToCompilationCore(syntaxTreesRef, metadataRef, seenTexts);
+                }
+            }
+           }
         }
 
-        internal sealed class AssemblyTypeRef : ITypeRef {
+        internal sealed class AssemblyTypeRef : global::Mumei.Roslyn.Testing.ICompilationReference {
           public string AssemblyName { get; init; }
           public string FullyQualifiedName { get; init; }
+          
+          public void AddToCompilation(System.Collections.Generic.List<Microsoft.CodeAnalysis.SyntaxTree> syntaxTreesRef, Mumei.Roslyn.Testing.MetadataReferenceCollection metadataRef) {
+            metadataRef.AddReference(AssemblyName);
+          }
         }
 
         internal static partial class SourceCode {
@@ -246,7 +270,7 @@ public class SourceCodeReferenceGenerator : IIncrementalGenerator {
         var references = InvocationExpression(
             MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression,
                 ParseTypeName("global::System.Collections.Immutable.ImmutableArray"),
-                GenericName("Create").WithTypeArgumentList(TypeArgumentList(SeparatedList([ParseTypeName("global::SourceCodeFactory.ITypeRef")])))
+                GenericName("Create").WithTypeArgumentList(TypeArgumentList(SeparatedList([ParseTypeName("global::Mumei.Roslyn.Testing.ICompilationReference")])))
             )
         );
 
