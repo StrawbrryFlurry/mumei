@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <NoWarn>xUnit1051</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+  </ItemGroup>
+</Project>

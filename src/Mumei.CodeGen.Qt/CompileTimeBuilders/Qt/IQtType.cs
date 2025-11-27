@@ -65,7 +65,7 @@ file sealed class QtRuntimeType(
             writer.Write("*");
         }
 
-        RuntimeTypeSerializer.SerializeInto(ref writer, t, format);
+        // RuntimeTypeSerializer.SerializeInto(ref writer, t, format);
     }
 
     public override string ToString() {

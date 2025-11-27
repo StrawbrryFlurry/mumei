@@ -1,7 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Mumei.CodeGen.Rendering;
 using Mumei.Roslyn;
 
-namespace Mumei.CodeGen.Qt.Output;
+namespace Mumei.CodeGen;
 
 internal static class RuntimeTypeSerializer {
     public static void RenderInto(IRenderTreeBuilder tree, Type type) {

@@ -3,7 +3,7 @@
     <MumeiInternalApiDiagnostic>MOOM9999</MumeiInternalApiDiagnostic>
 
     <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>Preview</LangVersion>
+    <LangVersion>Latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 
@@ -11,25 +11,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all"/>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\PolySharpCommon\PolySharpCommon.csproj"/>
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Mumei.CodeGen.Roslyn"/>
+  </ItemGroup>
+
   <Import Project="../Mumei.Roslyn.Common/Mumei.Roslyn.Common.props"/>
-
-  <ItemGroup>
-    <InternalsVisibleTo Include="Mumei.CodeGen.Qt.Tests"/>
-    <InternalsVisibleTo Include="Mumei.CodeGen.Playground"/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="CompileTimeBuilders\Output\RuntimeTypeSerializer.cs">
-      <Link>Common\RuntimeTypeSerializer.cs</Link>
-    </Compile>
-  </ItemGroup>
 
   <PropertyGroup>
     <GetTargetPathDependsOn>$(GetTargetPathDependsOn);GetDependencyTargetPaths</GetTargetPathDependsOn>

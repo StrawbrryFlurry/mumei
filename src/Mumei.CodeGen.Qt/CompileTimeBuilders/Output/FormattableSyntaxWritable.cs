@@ -38,7 +38,7 @@ public ref struct FormattableSyntaxWritable {
     }
 
     public void AppendFormatted(Type type, string? format = null) {
-        RuntimeTypeSerializer.SerializeInto(ref _writer, type, format);
+        // RuntimeTypeSerializer.SerializeInto(ref _writer, type, format);
     }
 
     public void AppendFormatted(AccessModifier modifier) {

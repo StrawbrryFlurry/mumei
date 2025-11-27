@@ -3,7 +3,7 @@
     <MumeiInternalApiDiagnostic>MOOM9999</MumeiInternalApiDiagnostic>
 
     <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>Preview</LangVersion>
+    <LangVersion>Latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 
@@ -15,20 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Mumei.CodeGen\Mumei.CodeGen.csproj"/>
     <ProjectReference Include="..\PolySharpCommon\PolySharpCommon.csproj"/>
-  </ItemGroup>
-
-  <Import Project="../Mumei.Roslyn.Common/Mumei.Roslyn.Common.props"/>
-
-  <ItemGroup>
-    <InternalsVisibleTo Include="Mumei.CodeGen.Qt.Tests"/>
-    <InternalsVisibleTo Include="Mumei.CodeGen.Playground"/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="CompileTimeBuilders\Output\RuntimeTypeSerializer.cs">
-      <Link>Common\RuntimeTypeSerializer.cs</Link>
-    </Compile>
   </ItemGroup>
 
   <PropertyGroup>
@@ -37,7 +25,10 @@
 
   <Target Name="GetDependencyTargetPaths" AfterTargets="ResolvePackageDependenciesForBuild">
     <ItemGroup>
-      <TargetPathWithTargetPlatformMoniker Include="..\..\PolySharpCommon\bin\$(Configuration)\netstandard2.0\*.dll" IncludeRuntimeDependency="false"/>
+      <TargetPathWithTargetPlatformMoniker Include="..\PolySharpCommon\bin\$(Configuration)\netstandard2.0\*.dll" IncludeRuntimeDependency="false"/>
+      <TargetPathWithTargetPlatformMoniker Include="..\Mumei.CodeGen\bin\$(Configuration)\netstandard2.0\*.dll" IncludeRuntimeDependency="false"/>
+
     </ItemGroup>
   </Target>
+
 </Project>
