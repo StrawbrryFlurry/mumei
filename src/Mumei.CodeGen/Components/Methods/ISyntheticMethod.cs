@@ -5,7 +5,7 @@ public interface ISyntheticMethod<TSignature> : ISyntheticMethod where TSignatur
 }
 
 public interface ISyntheticMethod {
-    public string Name { get; }
+    public ISyntheticIdentifier Name { get; }
 
     public TSignature BindAs<TSignature>(object target) where TSignature : Delegate;
 }

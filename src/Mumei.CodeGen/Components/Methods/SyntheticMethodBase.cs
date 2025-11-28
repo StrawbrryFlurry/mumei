@@ -8,11 +8,11 @@ using Mumei.CodeGen.Rendering.CSharp;
 
 namespace Mumei.CodeGen.Components;
 
-internal abstract class SyntheticMethodBase<TBuilder>(string name, IΦInternalClassBuilderCompilerApi classApi) : ISyntheticConstructable<MethodDeclarationFragment> where TBuilder : class {
+internal abstract class SyntheticMethodBase<TBuilder>(ISyntheticIdentifier name, IΦInternalClassBuilderCompilerApi classApi) : ISyntheticConstructable<MethodDeclarationFragment> where TBuilder : class {
     protected IΦInternalMethodBuilderCompilerApi CompilerApi => field ??= new CompilerApiImpl(classApi.Context);
     public IΦInternalMethodBuilderCompilerApi ΦCompilerApi => CompilerApi;
 
-    public string Name { get; protected set; } = name;
+    public ISyntheticIdentifier Name { get; protected set; } = name;
 
     public ISyntheticParameterList Parameters => _parameters ??= new QtSyntheticParameterList([]);
 
@@ -28,6 +28,11 @@ internal abstract class SyntheticMethodBase<TBuilder>(string name, IΦInternalCl
     private TBuilder Builder => Unsafe.As<TBuilder>(this);
 
     public TBuilder WithName(string name) {
+        Name = new ConstantSyntheticIdentifier(name);
+        return Builder;
+    }
+
+    public TBuilder WithName(ISyntheticIdentifier name) {
         Name = name;
         return Builder;
     }
@@ -93,7 +98,7 @@ internal abstract class SyntheticMethodBase<TBuilder>(string name, IΦInternalCl
             accessModifiers,
             typeParameters,
             returnType,
-            Name,
+            Name.Resolve(compilationUnit.IdentifierResolver),
             parameterList,
             body
         );

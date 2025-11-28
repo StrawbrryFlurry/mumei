@@ -15,8 +15,9 @@ internal interface ISyntheticConstructable<out TTarget> {
 
 internal interface ICompilationUnitContext {
     public ICodeGenerationContext CodeGenContext { get; }
+    public IIdentifierResolver IdentifierResolver { get; }
 
-    public void AddSharedLocalDeclaration(ICompilationUnitFeature feature);
+    public void AddSharedLocalCompilationUnitFeature(ICompilationUnitFeature feature);
 
     public T Synthesize<T>(object? constructable, T? defaultValue = default);
     public T? SynthesizeOptional<T>(object? constructable);

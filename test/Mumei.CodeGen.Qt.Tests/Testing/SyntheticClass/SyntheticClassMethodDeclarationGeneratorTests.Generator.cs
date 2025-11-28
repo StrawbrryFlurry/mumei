@@ -23,11 +23,17 @@ file sealed class CompilationTestSource {
 
     public void TestInvocation() {
         var c = default(QtSyntheticCompilation)!;
-        var m = c.DeclareClass("Test").DeclareMethod<Action<ISyntheticClassBuilder<CompileTimeUnknown>>>("A");
+        var a = c.DeclareClass("A")
+            .DeclareMethod<Action<ISyntheticClassBuilder<CompileTimeUnknown>>>("A");
+
+        var m = c.DeclareClass("Test")
+            .DeclareMethod<Action<ISyntheticClassBuilder<CompileTimeUnknown>>>("A");
+
         var field = typeof(CompilationTestSource).GetField(nameof(_compilationIncludes))!;
-        m.WithBody(new { Field = field }, static state => defBuilder => {
+
+        m.WithBody(new { Field = field, Cls = m }, static inputs => defBuilder => {
             // HellO!
-            defBuilder.DeclareField(state.Field.FieldType, state.Field.Name);
+            defBuilder.DeclareField(inputs.Field.FieldType, inputs.Field.Name);
         });
     }
 }

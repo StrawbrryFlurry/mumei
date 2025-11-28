@@ -12,6 +12,16 @@ public static class SyntheticClassBuilderExtensions {
             string name,
             InvocationExpressionSyntax invocationToIntercept
         ) {
+            return classBuilder.DeclareUnconstructedInterceptorMethod(
+                new ConstantSyntheticIdentifier(name),
+                invocationToIntercept
+            );
+        }
+
+        public ISyntheticInterceptorMethodBuilder<Delegate> DeclareUnconstructedInterceptorMethod(
+            ISyntheticIdentifier name,
+            InvocationExpressionSyntax invocationToIntercept
+        ) {
             var (ctx, builder, methodSymbol) = MakeInterceptorMethodBuilder(name, invocationToIntercept, classBuilder.ΦCompilerApi);
 
             ApplyMethodSignatureToBuilder(ctx, builder, methodSymbol);
@@ -24,6 +34,16 @@ public static class SyntheticClassBuilderExtensions {
 
         public ISyntheticInterceptorMethodBuilder<Delegate> DeclareInterceptorMethod(
             string name,
+            InvocationExpressionSyntax invocationToIntercept
+        ) {
+            return classBuilder.DeclareInterceptorMethod(
+                new ConstantSyntheticIdentifier(name),
+                invocationToIntercept
+            );
+        }
+
+        public ISyntheticInterceptorMethodBuilder<Delegate> DeclareInterceptorMethod(
+            ISyntheticIdentifier name,
             InvocationExpressionSyntax invocationToIntercept
         ) {
             var (ctx, builder, methodSymbol) = MakeInterceptorMethodBuilder(name, invocationToIntercept, classBuilder.ΦCompilerApi);
@@ -47,7 +67,7 @@ public static class SyntheticClassBuilderExtensions {
     }
 
     private static (ICodeGenerationContext ctx, SyntheticInterceptorMethodBuilder<Delegate> builder, IMethodSymbol methodSymbol) MakeInterceptorMethodBuilder(
-        string name,
+        ISyntheticIdentifier name,
         InvocationExpressionSyntax invocationToIntercept,
         IΦInternalClassBuilderCompilerApi classApi
     ) {

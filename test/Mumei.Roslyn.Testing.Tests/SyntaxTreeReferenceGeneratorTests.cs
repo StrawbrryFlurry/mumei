@@ -10,6 +10,7 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
         TestGenerator<SyntaxTreeReferenceGenerator>(
             b => {
                 b.AddSource(
+                    "foo",
                     """
                     public sealed class Test {
                         public void TestMethod() {
@@ -24,11 +25,11 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
                 ).WithAssemblyName("TestAssembly");
             }
         ).RunWithAssert(result => {
-            result.HasFileMatching("*SyntaxTreeReferenceInterceptor.g.cs")
+            result.HasFileMatching("*SyntaxTreeReferenceInterceptor_0__0.g.cs")
                 .WithPartialContent(
                     $$""""""""""
                       namespace Generated {
-                          file static class SyntaxTreeReferenceInterceptor {
+                          internal static partial class SyntaxTreeReferenceInterceptor {
                               [global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "*")]
                               public static global::Mumei.Roslyn.Testing.ICompilationReference Intercept_Of_0__0() {
                                   return new global::Mumei.Roslyn.Testing.SyntaxTreeCompilationReference {
@@ -36,8 +37,45 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
                                       SourceCode = "class root {}",
                                       References = [
                                       ]
-                                  }
-                                  ;
+                                  };
+                              }
+                          }
+                      }
+
+                      {{InterceptsLocationAttributeSource.Generated}}
+                      """"""""""
+                );
+        }).UpdateCompilation(x => {
+            x.UpdateFile(
+                "foo",
+                """
+                public sealed class Test {
+                    public void TestMethod() {
+                        var result = SyntaxTreeReference.Of<CompilationTestSource>(); 
+                        var result2 = SyntaxTreeReference.Of<CompilationTestSource>(); 
+                    }
+                }
+
+                file sealed class CompilationTestSource {
+                    public string s = null!;
+                }
+                """
+            );
+        }).RunWithAssert(result => {
+            var t = result.GeneratedTrees;
+            result.HasFileMatching("*SyntaxTreeReferenceInterceptor_0__1.g.cs")
+                .WithPartialContent(
+                    $$""""""""""
+                      namespace Generated {
+                          internal static partial class SyntaxTreeReferenceInterceptor {
+                              [global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "*")]
+                              public static global::Mumei.Roslyn.Testing.ICompilationReference Intercept_Of_0__1() {
+                                  return new global::Mumei.Roslyn.Testing.SyntaxTreeCompilationReference {
+                                      TypeName = "CompilationTestSource",
+                                      SourceCode = "class root {}",
+                                      References = [
+                                      ]
+                                  };
                               }
                           }
                       }

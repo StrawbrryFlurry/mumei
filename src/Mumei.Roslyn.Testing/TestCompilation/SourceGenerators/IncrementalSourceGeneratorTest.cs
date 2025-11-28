@@ -7,9 +7,7 @@ using Xunit;
 namespace Mumei.Roslyn.Testing;
 
 public sealed class IncrementalSourceGeneratorTest<TGenerator>(Compilation compilation) where TGenerator : IIncrementalGenerator, new() {
-    private GeneratorDriver _driver = CSharpGeneratorDriver.Create(new TGenerator())
-        .WithUpdatedParseOptions((CSharpParseOptions) compilation.SyntaxTrees.First().Options!);
-
+    private GeneratorDriver _driver = CreateDriver(compilation);
     private Compilation _currentCompilation = compilation;
 
     public IncrementalSourceGeneratorTest<TGenerator> RunWithAssert(Action<Result> assertResult) {
@@ -18,8 +16,8 @@ public sealed class IncrementalSourceGeneratorTest<TGenerator>(Compilation compi
             out var updatedCompilation,
             out var diagnostics
         );
-        var runResult = _driver.GetRunResult();
 
+        var runResult = _driver.GetRunResult();
         foreach (var generatorResult in runResult.Results) {
             Assert.Null(generatorResult.Exception);
         }
@@ -49,7 +47,6 @@ public sealed class IncrementalSourceGeneratorTest<TGenerator>(Compilation compi
             updatedCompilation
         );
         assertResult(result);
-        _currentCompilation = updatedCompilation;
 
         return this;
 
@@ -63,10 +60,19 @@ public sealed class IncrementalSourceGeneratorTest<TGenerator>(Compilation compi
 
             return text.GetSubText(new TextSpan(contextStart, totalLength)).ToString();
         }
+    }
 
+    private static CSharpGeneratorDriver CreateDriver(Compilation compilation) {
+        return (CSharpGeneratorDriver) CSharpGeneratorDriver.Create(
+                [new TGenerator().AsSourceGenerator()],
+                driverOptions: new GeneratorDriverOptions(IncrementalGeneratorOutputKind.None, true))
+            .WithUpdatedParseOptions((CSharpParseOptions) compilation.SyntaxTrees.First().Options!);
     }
 
     public IncrementalSourceGeneratorTest<TGenerator> UpdateCompilation(Action<UpdateCompilationContext> updateCompilation) {
+        var context = new UpdateCompilationContext();
+        updateCompilation(context);
+        _currentCompilation = context.GetUpdateCompilation(_currentCompilation);
         return this;
     }
 
@@ -81,10 +87,33 @@ public sealed class IncrementalSourceGeneratorTest<TGenerator>(Compilation compi
     }
 
     public sealed class UpdateCompilationContext {
-        public Compilation Compilation { get; init; }
         private readonly List<Func<Compilation, Compilation>> _updates = new();
 
-        public void UpdateFile(string name, string newText) { }
+        internal Compilation GetUpdateCompilation(Compilation compilation) {
+            var updatedCompilation = compilation;
+            foreach (var update in _updates) {
+                updatedCompilation = update(updatedCompilation);
+            }
+
+            return updatedCompilation;
+        }
+
+        public void UpdateFile(string name, string newText) {
+            UpdateFile(name, _ => newText);
+        }
+
+        public void UpdateFile(string name, Func<string, string> updateText) {
+            _updates.Add(c => {
+                var tree = c.SyntaxTrees.First(t => t.FilePath.StartsWith(name));
+                var newTree = CSharpSyntaxTree.ParseText(
+                    SourceText.From(updateText(tree.GetText().ToString())),
+                    (CSharpParseOptions) tree.Options,
+                    tree.FilePath
+                );
+
+                return c.ReplaceSyntaxTree(tree, newTree);
+            });
+        }
 
         public void UpdateCompilation(Func<Compilation, Compilation> updateCompilation) {
             _updates.Add(updateCompilation);

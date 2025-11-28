@@ -245,27 +245,23 @@ file sealed partial class SyntheticClassDynamicMemberBinder<[Bindable] TClassDef
 }
 
 // Since we now generate the dynamic part of the class binder in a partial class we don't need to intercept the declare class method anymore.
-// file sealed partial class DeclareClassDefinitionMethod<[Bindable] TClassDefinition> : SyntheticInterceptorMethodDefinition where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new() {
-//     [Input]
-//     public ITypeSymbol ClassDefinitionType { get; set; }
-//
-//     public override void BindDynamicComponents(IMethodBuilder builder) {
-//         builder.BindSyntheticType<TClassDefinition>(ClassDefinitionType);
-//     }
-//
-//     public ISyntheticClassBuilder<TClassDefinition> InterceptDeclareClass(
-//         SyntheticCompilation compilation,
-//         string name,
-//         Action<TClassDefinition> bindInputs
-//     ) {
-//         var definition = new TClassDefinition();
-//         bindInputs(definition);
-//
-//         var classBuilder = compilation.λCompilerApi.DeclareClassBuilder<TClassDefinition>(name);
-//         definition.SetupDynamic(classBuilder);
-//
-//         definition.BindCompilerOutputMembers(classBuilder);
-//
-//         return classBuilder;
-//     }
-// }
+file sealed partial class DeclareClassDefinitionMethod<[Bindable] TClassDefinition> : SyntheticInterceptorMethodDefinition where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new() {
+    [Input]
+    public ITypeSymbol ClassDefinitionType { get; set; }
+
+    public override void BindDynamicComponents(BindingContext ctx) {
+        ctx.Bind<TClassDefinition>(ClassDefinitionType);
+    }
+
+    public ISyntheticClassBuilder<TClassDefinition> InterceptDeclareClass(
+        ISyntheticCodeBlock compilation,
+        string name,
+        Action<TClassDefinition> bindInputs
+    ) {
+        return null!;
+    }
+
+    public override ISyntheticCodeBlock GenerateMethodBody() {
+        throw new NotImplementedException();
+    }
+}

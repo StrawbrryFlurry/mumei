@@ -6,7 +6,7 @@ namespace Mumei.CodeGen.Roslyn.Components;
 
 internal sealed class SyntheticInterceptLocationAttribute(InterceptableLocation location) : ISyntheticAttribute, ISyntheticConstructable<AttributeFragment> {
     public AttributeFragment Construct(ICompilationUnitContext compilationUnit) {
-        compilationUnit.AddSharedLocalDeclaration(AddInterceptsLocationAttributeCompilationUnitFeature.Instance);
+        compilationUnit.AddSharedLocalCompilationUnitFeature(AddInterceptsLocationAttributeCompilationUnitFeature.Instance);
         return AttributeFragment.Intercept(location);
     }
 }

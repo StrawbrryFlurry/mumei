@@ -8,6 +8,6 @@ public static class InterceptsLocationAttributeSource {
                                         file sealed class InterceptsLocationAttribute(int version, string data) : global::System.Attribute {
                                         }
                                     }
-                                    #pragma warning enable
+                                    #pragma warning restore
                                     """;
 }

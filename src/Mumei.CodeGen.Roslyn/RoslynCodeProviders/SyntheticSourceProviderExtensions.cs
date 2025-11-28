@@ -51,6 +51,7 @@ public static class SyntheticSourceProviderExtensions {
             IncrementalValuesProvider<IncrementalCodeGenContext> contextProvider,
             Action<CodeGenerationEmitContext>? emitCode = null
         ) {
+            var identifierResolver = new CompilationHostOutputIdentifierResolver();
             ctx.RegisterSourceOutput(contextProvider, (spc, compilation) => {
                 if (emitCode is not null) {
                     var emitContext = new CodeGenerationEmitContext(
@@ -62,9 +63,13 @@ public static class SyntheticSourceProviderExtensions {
 
                 foreach (var (name, namespaces) in compilation.Context.ΦCompilerApi.EnumerateNamespacesToEmit()) {
                     using var fileTree = new SourceFileRenderTreeBuilder();
-                    var compilationUnit = ((CSharpCodeGenerationContext) compilation.Context).SynthesizeCompilationUnit(namespaces);
+                    var compilationUnit = ((CSharpCodeGenerationContext) compilation.Context).SynthesizeCompilationUnit(
+                        namespaces,
+                        identifierResolver
+                    );
                     var text = fileTree.RenderRootNode(compilationUnit);
-                    spc.AddSource($"{name}.g", text);
+                    var fullName = name.Resolve(identifierResolver);
+                    spc.AddSource($"{fullName}.g", text);
                 }
             });
         }

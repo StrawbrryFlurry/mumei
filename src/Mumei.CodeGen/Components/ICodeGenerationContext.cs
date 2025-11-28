@@ -9,9 +9,11 @@ public interface ICodeGenerationContext {
     public ISyntheticCodeBlock Block<TInput>(TInput input, Action<IRenderTreeBuilder, TInput> renderBlock);
 
     public ISyntheticClassBuilder<CompileTimeUnknown> DeclareClass(string name);
+    public ISyntheticClassBuilder<CompileTimeUnknown> DeclareClass(ISyntheticIdentifier name);
     public ISyntheticNamespace Namespace(params ReadOnlySpan<string> namespaceSegments);
 
     public void Emit(string hintName, ISyntheticNamespace toEmit);
+    public void EmitIncremental(string hintName, ISyntheticNamespace toEmit);
 
     public void RegisterContextProvider<TProvider>(TProvider provider) where TProvider : ICodeGenerationContextProvider;
     public TProvider GetContextProvider<TProvider>() where TProvider : ICodeGenerationContextProvider;
@@ -27,6 +29,6 @@ public interface ICodeGenerationContext {
         public ISyntheticClassBuilder<TClassDefinition> TrackClass<TClassDefinition>(ISyntheticClassBuilder<TClassDefinition> classBuilder)
             where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new();
 
-        public ImmutableArray<(string TrackingName, ImmutableArray<ISyntheticNamespace> Namespaces)> EnumerateNamespacesToEmit();
+        public ImmutableArray<(ISyntheticIdentifier TrackingName, ImmutableArray<ISyntheticNamespace> Namespaces)> EnumerateNamespacesToEmit();
     }
 }

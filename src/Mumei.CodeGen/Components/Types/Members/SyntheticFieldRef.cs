@@ -1,4 +1,6 @@
-﻿namespace Mumei.CodeGen.Components;
+﻿using Mumei.CodeGen.Rendering;
+
+namespace Mumei.CodeGen.Components;
 
 public abstract class SyntheticFieldRef<T> {
     public static implicit operator SyntheticFieldRef<T>(T value) {
@@ -8,4 +10,7 @@ public abstract class SyntheticFieldRef<T> {
     public static implicit operator T(SyntheticFieldRef<T> value) {
         throw new NotSupportedException();
     }
+
+    public void RenderExpression(IRenderTreeBuilder builder) { }
+
 }
