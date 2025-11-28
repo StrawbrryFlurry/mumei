@@ -8,5 +8,9 @@
 /// </summary>
 /// <typeparam name="TTarget"></typeparam>
 internal interface ISyntheticConstructable<out TTarget> {
-    public TTarget Construct(ISyntheticCompilation compilation);
+    public TTarget Construct(ICompilationUnitContext compilationUnit);
+}
+
+internal interface ICompilationUnitContext : IComponentSynthesizer {
+    public ICodeGenerationContext CodeGenContext { get; }
 }

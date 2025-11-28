@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using Mumei.CodeGen.Components.Types;
 using Mumei.CodeGen.Rendering.CSharp;
 using Mumei.Roslyn;
 
@@ -27,7 +26,7 @@ internal sealed class QtSyntheticNamespace(string name) : ISyntheticNamespace, I
         return this;
     }
 
-    public NamespaceFragment Construct(ISyntheticCompilation compilation) {
+    public NamespaceFragment Construct(ICompilationUnitContext compilationUnit) {
         var classDeclarations = new ArrayBuilder<ClassDeclarationFragment>();
 
         if (_members is null) {
@@ -43,7 +42,7 @@ internal sealed class QtSyntheticNamespace(string name) : ISyntheticNamespace, I
                     );
                 }
 
-                classDeclarations.Add(syntheticClass.Construct(compilation));
+                classDeclarations.Add(syntheticClass.Construct(compilationUnit));
                 continue;
             }
         }

@@ -18,17 +18,4 @@
     <ProjectReference Include="..\Mumei.CodeGen\Mumei.CodeGen.csproj"/>
     <ProjectReference Include="..\PolySharpCommon\PolySharpCommon.csproj"/>
   </ItemGroup>
-
-  <PropertyGroup>
-    <GetTargetPathDependsOn>$(GetTargetPathDependsOn);GetDependencyTargetPaths</GetTargetPathDependsOn>
-  </PropertyGroup>
-
-  <Target Name="GetDependencyTargetPaths" AfterTargets="ResolvePackageDependenciesForBuild">
-    <ItemGroup>
-      <TargetPathWithTargetPlatformMoniker Include="..\PolySharpCommon\bin\$(Configuration)\netstandard2.0\*.dll" IncludeRuntimeDependency="false"/>
-      <TargetPathWithTargetPlatformMoniker Include="..\Mumei.CodeGen\bin\$(Configuration)\netstandard2.0\*.dll" IncludeRuntimeDependency="false"/>
-
-    </ItemGroup>
-  </Target>
-
 </Project>

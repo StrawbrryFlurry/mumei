@@ -48,18 +48,6 @@ public readonly struct ParameterFragment : IRenderFragment {
         };
     }
 
-    public static ParameterFragment Create(
-        ITypeSymbol type,
-        ExpressionFragment name,
-        ParameterAttributes parameterAttributes = ParameterAttributes.None
-    ) {
-        return new ParameterFragment {
-            Name = name,
-            Type = new TypeInfoFragment(type),
-            ParameterAttributes = parameterAttributes
-        };
-    }
-
     public static ParameterFragment Create<T>(
         ExpressionFragment name,
         ParameterAttributes attributes = ParameterAttributes.None

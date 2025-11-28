@@ -1,6 +1,4 @@
-﻿using Mumei.CodeGen.Components.Types.Members;
-
-namespace Mumei.CodeGen.Components.Types;
+﻿namespace Mumei.CodeGen.Components;
 
 public abstract class SyntheticClassDefinition<TSelf> : ISyntheticClass<TSelf> where TSelf : new() {
     public string Name { get; private set; }

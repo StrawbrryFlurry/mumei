@@ -1,4 +1,4 @@
-﻿namespace Mumei.CodeGen.Components.Types.Members;
+﻿namespace Mumei.CodeGen.Components;
 
 public abstract class SyntheticFieldRef<T> {
     public static implicit operator SyntheticFieldRef<T>(T value) {

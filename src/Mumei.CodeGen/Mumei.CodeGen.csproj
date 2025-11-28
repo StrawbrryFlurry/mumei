@@ -22,6 +22,10 @@
     <InternalsVisibleTo Include="Mumei.CodeGen.Roslyn"/>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Components\Generators\"/>
+  </ItemGroup>
+
   <Import Project="../Mumei.Roslyn.Common/Mumei.Roslyn.Common.props"/>
 
   <PropertyGroup>

@@ -30,15 +30,7 @@ internal sealed class ErrorSyntheticType(string? typeName, string errorReason, o
 internal sealed class RuntimeSyntheticType(Type t) : ISyntheticType, ISyntheticConstructable<TypeInfoFragment> {
     public string Name => t.Name;
 
-    public TypeInfoFragment Construct(ISyntheticCompilation compilation) {
-        return new TypeInfoFragment(t);
-    }
-}
-
-internal sealed class RoslynSyntheticType(ITypeSymbol t) : ISyntheticType, ISyntheticConstructable<TypeInfoFragment> {
-    public string Name => t.Name;
-
-    public TypeInfoFragment Construct(ISyntheticCompilation compilation) {
+    public TypeInfoFragment Construct(ICompilationUnitContext compilationUnit) {
         return new TypeInfoFragment(t);
     }
 }

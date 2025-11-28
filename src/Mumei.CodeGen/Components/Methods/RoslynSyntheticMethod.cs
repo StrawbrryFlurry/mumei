@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace Mumei.CodeGen.Components.Methods;
+namespace Mumei.CodeGen.Components;
 
 internal sealed class RoslynSyntheticMethod(IMethodSymbol method) : ISyntheticMethod {
     public string Name => method.Name;

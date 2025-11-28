@@ -1,9 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Mumei.CodeGen.Components.Methods;
-using Mumei.CodeGen.Components.Types.Members;
 
-namespace Mumei.CodeGen.Components.Types;
+namespace Mumei.CodeGen.Components;
 
 public interface ISyntheticClassBuilder<T> : ISyntheticClass, ISyntheticTypeInfo<T> {
     public IλInternalClassBuilderCompilerApi λCompilerApi { get; }
@@ -11,30 +8,6 @@ public interface ISyntheticClassBuilder<T> : ISyntheticClass, ISyntheticTypeInfo
     public ISyntheticClassBuilder<T> WithName(string name);
 
     public ISyntheticClassBuilder<T> WithModifiers(AccessModifierList modifiers);
-
-    public ISyntheticInterceptorMethodBuilder<Delegate> DeclareInterceptorMethod<TMethodDefinition>(
-        string name,
-        InvocationExpressionSyntax invocationToIntercept,
-        Func<TMethodDefinition, Delegate> methodSelector,
-        Action<TMethodDefinition>? inputBinder = null
-    ) where TMethodDefinition : SyntheticInterceptorMethodDefinition, new();
-
-    public ISyntheticInterceptorMethodBuilder<Delegate> DeclareInterceptorMethod(
-        string name,
-        InvocationExpressionSyntax invocationToIntercept
-    );
-
-    /// <summary>
-    /// Same as <see cref="DeclareInterceptorMethod"/>, but does not bind the declaration
-    /// to the intercepted invocation's type arguments.
-    /// </summary>
-    /// <param name="name"></param>
-    /// <param name="invocationToIntercept"></param>
-    /// <returns></returns>
-    public ISyntheticInterceptorMethodBuilder<Delegate> DeclareUnconstructedInterceptorMethod(
-        string name,
-        InvocationExpressionSyntax invocationToIntercept
-    );
 
     public ISyntheticMethodBuilder<Delegate> DeclareMethod<TMethodDefinition>(
         string name,
@@ -84,7 +57,7 @@ public interface ISyntheticClassBuilder<T> : ISyntheticClass, ISyntheticTypeInfo
 
 // ReSharper disable once InconsistentNaming
 public interface IλInternalClassBuilderCompilerApi {
-    public ISyntheticCompilation Compilation { get; }
+    public ICodeGenerationContext Context { get; }
 
     public void DeclareMethod(
         ISyntheticAttribute[] attributes,

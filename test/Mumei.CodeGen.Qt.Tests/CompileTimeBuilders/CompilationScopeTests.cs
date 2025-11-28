@@ -94,7 +94,7 @@ file sealed class CompilationScopeTestSourceGenerator : IIncrementalGenerator {
             return;
         }
 
-        var cls = new QtClass(AccessModifier.FileStatic, "cls");
+        var cls = new QtClass(Playground.AccessModifier.FileStatic, "cls");
         cls.AddDynamicTemplateInterceptMethod(
             invocation,
             new { ctx.State.Lambda },

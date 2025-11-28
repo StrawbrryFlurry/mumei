@@ -35,14 +35,6 @@ internal sealed class RuntimeSyntheticType(Type t) : ISyntheticType, ISyntheticC
     }
 }
 
-internal sealed class RoslynSyntheticType(ITypeSymbol t) : ISyntheticType, ISyntheticConstructable<TypeInfoFragment> {
-    public string Name => t.Name;
-
-    public TypeInfoFragment Construct(ISyntheticCompilation compilation) {
-        return new TypeInfoFragment(t);
-    }
-}
-
 internal sealed class QtSyntheticTypeInfo<T> : ISyntheticTypeInfo<T> {
     public T New(params object[] args) {
         throw new CompileTimeComponentUsedAtRuntimeException();

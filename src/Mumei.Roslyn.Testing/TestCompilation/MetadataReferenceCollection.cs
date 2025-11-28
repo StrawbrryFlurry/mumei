@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿#pragma warning disable RS1035 // This type is not used inside an analyzer or source generator
+using System.Reflection;
 using Microsoft.CodeAnalysis;
 
 namespace Mumei.Roslyn.Testing;

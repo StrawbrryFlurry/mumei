@@ -1,41 +1,9 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Mumei.CodeGen.Components.Methods;
-using Mumei.CodeGen.Components.Types.Members;
 
-namespace Mumei.CodeGen.Components.Types;
+namespace Mumei.CodeGen.Components;
 
 internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
-    public ISyntheticInterceptorMethodBuilder<Delegate> DeclareInterceptorMethod<TMethodDefinition>(
-        string name, InvocationExpressionSyntax invocationToIntercept,
-        Func<TMethodDefinition, Delegate> methodSelector,
-        Action<TMethodDefinition>? inputBinder = null
-    ) where TMethodDefinition : SyntheticInterceptorMethodDefinition, new() {
-        throw new NotImplementedException();
-    }
-
-    public ISyntheticInterceptorMethodBuilder<TSignature> DeclareInterceptorMethod<TMethodDefinition, TSignature>(
-        string name,
-        InvocationExpressionSyntax invocationToIntercept,
-        Func<TMethodDefinition, TSignature> methodSelector,
-        Action<TMethodDefinition> inputBinder
-    )
-        where TMethodDefinition : SyntheticMethodDefinition, new() where TSignature : Delegate {
-        throw new NotImplementedException();
-    }
-
-    public ISyntheticInterceptorMethodBuilder<Delegate> DeclareInterceptorMethod(string name, InvocationExpressionSyntax invocationToIntercept) {
-        var method = QtSyntheticInterceptorMethodBuilder<Delegate>.CreateFromConstructedInterceptionTargetInvocation(name, invocationToIntercept, λCompilerApi);
-        DeclareMethod(method);
-        return method;
-    }
-
-    public ISyntheticInterceptorMethodBuilder<Delegate> DeclareUnconstructedInterceptorMethod(string name, InvocationExpressionSyntax invocationToIntercept) {
-        var method = QtSyntheticInterceptorMethodBuilder<Delegate>.CreateFromInterceptionTargetInvocation(name, invocationToIntercept, λCompilerApi);
-        DeclareMethod(method);
-        return method;
-    }
-
     public ISyntheticMethodBuilder<Delegate> DeclareMethod<TMethodDefinition>(
         string name,
         Func<TMethodDefinition, Delegate> methodSelector,

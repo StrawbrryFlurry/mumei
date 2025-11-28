@@ -4,7 +4,7 @@ using Mumei.CodeGen.Components;
 using Mumei.CodeGen.Rendering;
 using Mumei.CodeGen.Rendering.CSharp;
 
-namespace Mumei.CodeGen.Qt.TwoStageBuilders.RoslynCodeProviders;
+namespace Mumei.CodeGen.Roslyn.RoslynCodeProviders;
 
 public static class SyntheticSourceProviderExtensions {
     private sealed class UserValueWithCompilationComparer<T>(IEqualityComparer<T> equalityComparer) : IEqualityComparer<UserValueWithCompilation<T>> {
@@ -48,26 +48,26 @@ public static class SyntheticSourceProviderExtensions {
         }
 
         public void RegisterCompilationOutput(
-            IncrementalValuesProvider<IncrementalSyntheticCompilation> compilationProvider,
-            Action<SyntheticCompilationGeneratorEmitContext>? emitCode = null
+            IncrementalValuesProvider<IncrementalCodeGenContext> contextProvider,
+            Action<CodeGenerationEmitContext>? emitCode = null
         ) {
-            ctx.RegisterSourceOutput(compilationProvider, (spc, compilation) => {
+            ctx.RegisterSourceOutput(contextProvider, (spc, compilation) => {
                 if (emitCode is not null) {
-                    var emitContext = new SyntheticCompilationGeneratorEmitContext(
-                        compilation.Compilation,
+                    var emitContext = new CodeGenerationEmitContext(
+                        compilation.Context,
                         spc.CancellationToken
                     );
                     emitCode(emitContext);
                 }
 
-                foreach (var (name, namespaces) in compilation.Compilation.λCompilerApi.EnumerateNamespacesToEmit()) {
+                foreach (var (name, namespaces) in compilation.Context.ΦCompilerApi.EnumerateNamespacesToEmit()) {
                     using var fileTree = new SourceFileRenderTreeBuilder();
 
                     var text = "";
                     for (var i = 0; i < namespaces.Length; i++) {
                         var ns = namespaces[i];
                         var isLast = i == namespaces.Length - 1;
-                        var fragment = compilation.Compilation.Synthesize<NamespaceFragment>(ns);
+                        var fragment = compilation.Context.Synthesize<NamespaceFragment>(ns);
                         if (isLast) {
                             text = fileTree.RenderRootNode(fragment);
                         } else {
@@ -81,41 +81,43 @@ public static class SyntheticSourceProviderExtensions {
         }
 
         public void RegisterCompilationOutput<T>(
-            IncrementalValuesProvider<IncrementalSyntheticCompilation<T>> compilationProvider,
-            Action<SyntheticCompilationGeneratorEmitContext, T>? emitCode = null
+            IncrementalValuesProvider<IncrementalCodeGenContext<T>> contextProvider,
+            Action<CodeGenerationEmitContext, T>? emitCode = null
         ) {
-            ctx.RegisterSourceOutput(compilationProvider, (spc, ctx) => {
-                var emitContext = new SyntheticCompilationGeneratorEmitContext(
-                    ctx.Compilation,
+            ctx.RegisterSourceOutput(contextProvider, (spc, ctx) => {
+                var emitContext = new CodeGenerationEmitContext(
+                    ctx.Context,
                     spc.CancellationToken
                 );
-                emitCode(emitContext, ctx.Context);
+                emitCode?.Invoke(emitContext, ctx.State);
             });
         }
 
         public void RegisterCompilationOutput<T>(
-            IncrementalValuesProvider<UserValueWithCompilation<T>> compilationProvider,
-            Action<SyntheticCompilationGeneratorEmitContext>? emitCode = null
+            IncrementalValuesProvider<UserValueWithCompilation<T>> contextProvider,
+            Action<CodeGenerationEmitContext>? emitCode = null
         ) {
-            ctx.RegisterSourceOutput(compilationProvider, (spc, ctx) => {
-                var emitContext = new SyntheticCompilationGeneratorEmitContext(
-                    new QtSyntheticCompilation(ctx.Compilation),
+            ctx.RegisterSourceOutput(contextProvider, (spc, ctx) => {
+                var context = new CSharpCodeGenerationContext();
+                context.RegisterSynthesisProvider(new CompilationSynthesisProvider(ctx.Compilation));
+                var emitContext = new CodeGenerationEmitContext(
+                    context,
                     spc.CancellationToken
                 );
-                emitCode(emitContext);
+                emitCode?.Invoke(emitContext);
             });
         }
     }
 
-    extension<T>(IncrementalValuesProvider<IncrementalSyntheticCompilation> source) {
-        public IncrementalValuesProvider<IncrementalSyntheticCompilation> ContinueCompile(
+    extension<T>(IncrementalValuesProvider<IncrementalCodeGenContext> source) {
+        public IncrementalValuesProvider<IncrementalCodeGenContext> ContinueCompile(
         ) {
             return default;
         }
     }
 
     extension<T>(IncrementalValuesProvider<T> source) {
-        public IncrementalValuesProvider<IncrementalSyntheticCompilation> SelectIntoCompilation<TTo>(
+        public IncrementalValuesProvider<IncrementalCodeGenContext> SelectIntoCompilation<TTo>(
             [Pure] Func<T, CancellationToken, UserValueWithCompilation<TTo>> selector
         ) {
             return default;
@@ -123,26 +125,27 @@ public static class SyntheticSourceProviderExtensions {
     }
 
     extension<T>(IncrementalValuesProvider<UserValueWithCompilation<T>> source) {
-        public IncrementalValuesProvider<IncrementalSyntheticCompilation> Combine<TOther>() {
+        public IncrementalValuesProvider<IncrementalCodeGenContext> Combine<TOther>() {
             // var valueWithCompilation = source.Select((vwc, ct) => new UserValueWithCompilation<TTo>(default!, vwc.Compilation));
             return default;
         }
 
-        public IncrementalValuesProvider<IncrementalSyntheticCompilation<TTo>> IncrementalCompile<TTo>(
-            [Pure] Func<ISyntheticCompilation, T, TTo> compileSelector
+        public IncrementalValuesProvider<IncrementalCodeGenContext<TTo>> IncrementalCompile<TTo>(
+            [Pure] Func<ICodeGenerationContext, T, TTo> compileSelector
         ) {
             // var valueWithCompilation = source.Select(selector);
             return default;
         }
 
-        public IncrementalValuesProvider<IncrementalSyntheticCompilation> IncrementalCompile(
-            [Pure] Action<ISyntheticCompilation, T, CancellationToken> compileSelector
+        public IncrementalValuesProvider<IncrementalCodeGenContext> IncrementalCompile(
+            [Pure] Action<ICodeGenerationContext, T, CancellationToken> compileSelector
         ) {
             // var valueWithCompilation = source.Select(selector);
             return source.Select((valueWithCompilation, ct) => {
-                var compilation = new QtSyntheticCompilation(valueWithCompilation.Compilation);
-                compileSelector(compilation, valueWithCompilation.Value, ct);
-                return new IncrementalSyntheticCompilation(compilation, [valueWithCompilation.Value]);
+                var context = new CSharpCodeGenerationContext();
+                context.RegisterSynthesisProvider(new CompilationSynthesisProvider(valueWithCompilation.Compilation));
+                compileSelector(context, valueWithCompilation.Value, ct);
+                return new IncrementalCodeGenContext(context, [valueWithCompilation.Value]);
             });
         }
     }
@@ -169,11 +172,11 @@ public readonly struct UserValueWithCompilation<T>(T userValue, Compilation comp
     }
 }
 
-public readonly struct SyntheticCompilationGeneratorEmitContext(ISyntheticCompilation compilation, CancellationToken ct) {
-    public ISyntheticCompilation Compilation { get; } = compilation;
+public readonly struct CodeGenerationEmitContext(ICodeGenerationContext context, CancellationToken ct) {
+    public ICodeGenerationContext Context { get; } = context;
     public CancellationToken CancellationToken { get; } = ct;
 
     public void Emit(string hintName, ISyntheticNamespace ns) {
-        Compilation.TrackForEmission(hintName, ns);
+        Context.Emit(hintName, ns);
     }
 }

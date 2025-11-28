@@ -25,7 +25,7 @@ internal sealed class QtSyntheticInterceptorMethodBuilder<TSignature>(
             throw new InvalidOperationException("Could not resolve method symbol for interception target invocation.");
         }
 
-        builder.λCompilerApi.ApplyMethodSignatureToBuilder(builder, methodSymbol);
+        // builder.λCompilerApi.ApplyMethodSignatureToBuilder(builder, methodSymbol);
         return builder;
     }
 
@@ -40,7 +40,7 @@ internal sealed class QtSyntheticInterceptorMethodBuilder<TSignature>(
             throw new InvalidOperationException("Could not resolve method symbol for interception target invocation.");
         }
 
-        builder.λCompilerApi.ApplyConstructedMethodSignatureToBuilder(builder, methodSymbol);
+        // builder.λCompilerApi.ApplyConstructedMethodSignatureToBuilder(builder, methodSymbol);
         return builder;
     }
 

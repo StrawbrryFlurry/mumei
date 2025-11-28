@@ -1,6 +1,4 @@
-﻿using Mumei.CodeGen.Components.Types.Members;
-
-namespace Mumei.CodeGen.Components.Types;
+﻿namespace Mumei.CodeGen.Components;
 
 public interface ISyntheticClass<TClass> : ISyntheticClass { }
 

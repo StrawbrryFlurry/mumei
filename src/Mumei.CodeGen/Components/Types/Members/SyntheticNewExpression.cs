@@ -1,6 +1,6 @@
 ﻿using Mumei.CodeGen.Rendering;
 
-namespace Mumei.CodeGen.Components.Types.Members;
+namespace Mumei.CodeGen.Components;
 
 public sealed class SyntheticNewExpression<TResult>(ISyntheticClass cls, object[] args) : IRenderFragment {
     public static implicit operator TResult(SyntheticNewExpression<TResult> value) {

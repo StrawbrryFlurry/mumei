@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace Mumei.CodeGen.Components.Methods;
+namespace Mumei.CodeGen.Components;
 
 public abstract class SyntheticMethodDefinition {
     public virtual void BindDynamicComponents(BindingContext ctx) { }

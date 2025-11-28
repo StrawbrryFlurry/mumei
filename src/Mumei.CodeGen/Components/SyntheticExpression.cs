@@ -4,7 +4,7 @@ using Mumei.CodeGen.Rendering.CSharp;
 namespace Mumei.CodeGen.Components;
 
 internal sealed class RuntimeSyntheticLiteralExpression(object? value) : ISyntheticExpression, ISyntheticConstructable<ExpressionFragment> {
-    public ExpressionFragment Construct(ISyntheticCompilation compilation) {
+    public ExpressionFragment Construct(ICompilationUnitContext compilationUnit) {
         if (value is null) {
             return ExpressionFragment.Null;
         }

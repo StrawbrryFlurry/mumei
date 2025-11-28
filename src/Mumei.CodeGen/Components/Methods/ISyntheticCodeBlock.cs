@@ -1,18 +1,18 @@
 ﻿using Mumei.CodeGen.Rendering;
 using Mumei.CodeGen.Rendering.CSharp;
 
-namespace Mumei.CodeGen.Components.Methods;
+namespace Mumei.CodeGen.Components;
 
 public interface ISyntheticCodeBlock { }
 
 internal sealed class QtSyntheticRenderCodeBlock(RenderFragment renderFragment) : ISyntheticCodeBlock, ISyntheticConstructable<CodeBlockFragment> {
-    public CodeBlockFragment Construct(ISyntheticCompilation compilation) {
+    public CodeBlockFragment Construct(ICompilationUnitContext compilationUnit) {
         return CodeBlockFragment.Create(renderFragment);
     }
 }
 
 internal sealed class QtSyntheticRenderCodeBlock<TState>(RenderFragment<TState> renderFragment) : ISyntheticCodeBlock, ISyntheticConstructable<CodeBlockFragment> {
-    public CodeBlockFragment Construct(ISyntheticCompilation compilation) {
+    public CodeBlockFragment Construct(ICompilationUnitContext compilationUnit) {
         return CodeBlockFragment.Create(renderFragment, (renderTree, state) => state.Render(renderTree));
     }
 }

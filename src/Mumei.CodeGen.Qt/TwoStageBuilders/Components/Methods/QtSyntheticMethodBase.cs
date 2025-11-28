@@ -113,64 +113,6 @@ internal abstract class QtSyntheticMethodBase<TBuilder>(string name, IλInternal
     }
 
     private sealed class CompilerApiImpl(ISyntheticCompilation compilation) : λIInternalMethodBuilderCompilerApi {
-        public void ApplyMethodSignatureToBuilder<TSignature>(ISyntheticMethodBuilder<TSignature> builder, MethodInfo methodInfo) where TSignature : Delegate {
-            var parameterList = QtSyntheticParameterList.FromMethodInfo(methodInfo);
-            builder.WithParameters(parameterList);
-
-            var typeParameters = QtSyntheticTypeParameterList.FromMethodInfo(methodInfo);
-            builder.WithTypeParameters(typeParameters);
-
-            var returnType = compilation.GetType(methodInfo.ReturnType);
-            builder.WithReturnType(returnType);
-        }
-
-        public void ApplyMethodSignatureToBuilder<TSignature>(ISyntheticMethodBuilder<TSignature> builder, IMethodSymbol method) where TSignature : Delegate {
-            var parameterList = QtSyntheticParameterList.FromMethodSymbol(method);
-            builder.WithParameters(parameterList);
-
-            var typeParameters = QtSyntheticTypeParameterList.FromMethodSymbol(method);
-            builder.WithTypeParameters(typeParameters);
-
-            var returnType = compilation.GetType(method.ReturnType);
-            builder.WithReturnType(returnType);
-        }
-
-        public void ApplyMethodSignatureToBuilder<TSignature>(ISyntheticInterceptorMethodBuilder<TSignature> builder, MethodInfo methodInfo) where TSignature : Delegate {
-            var parameterList = QtSyntheticParameterList.FromMethodInfo(methodInfo);
-            builder.WithParameters(parameterList);
-
-            var typeParameters = QtSyntheticTypeParameterList.FromMethodInfo(methodInfo);
-            builder.WithTypeParameters(typeParameters);
-
-            var returnType = compilation.GetType(methodInfo.ReturnType);
-            builder.WithReturnType(returnType);
-        }
-
-        public void ApplyMethodSignatureToBuilder<TSignature>(ISyntheticInterceptorMethodBuilder<TSignature> builder, IMethodSymbol method) where TSignature : Delegate {
-            var parameterList = QtSyntheticParameterList.FromMethodSymbol(method);
-            builder.WithParameters(parameterList);
-
-            var typeParameters = QtSyntheticTypeParameterList.FromMethodSymbol(method);
-            builder.WithTypeParameters(typeParameters);
-
-            var returnType = compilation.GetType(method.ReturnType);
-            builder.WithReturnType(returnType);
-        }
-
-        public void ApplyConstructedMethodSignatureToBuilder<TSignature>(ISyntheticInterceptorMethodBuilder<TSignature> builder, IMethodSymbol method) where TSignature : Delegate {
-            if (method.TypeParameters.IsEmpty) {
-                ApplyMethodSignatureToBuilder(builder, method);
-                return;
-            }
-
-            Debug.Assert(method.IsGenericMethod && method.TypeArguments.Length == method.TypeParameters.Length, "Method is not a constructed generic method.");
-            var parameterList = QtSyntheticParameterList.FromMethodSymbol(method);
-            builder.WithParameters(parameterList);
-
-            var returnType = compilation.GetType(method.ReturnType);
-            builder.WithReturnType(returnType);
-        }
-
         public ISyntheticCodeBlock CreateRendererCodeBlock(RenderFragment renderCodeBlock) {
             return new QtSyntheticRenderCodeBlock(renderCodeBlock);
         }

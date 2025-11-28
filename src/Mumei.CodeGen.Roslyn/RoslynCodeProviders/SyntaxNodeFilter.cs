@@ -1,13 +1,11 @@
-﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
-using Mumei.CodeGen.Roslyn.RoslynCodeProviders;
 
-namespace Mumei.CodeGen.Qt.TwoStageBuilders.RoslynCodeProviders;
+namespace Mumei.CodeGen.Roslyn.RoslynCodeProviders;
 
-internal sealed class SyntaxNodeFilter {
+public static class SyntaxNodeFilter {
     public static bool IsInvocationOf(
         SyntaxNode node,
         string methodName,

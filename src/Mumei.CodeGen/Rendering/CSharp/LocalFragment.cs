@@ -47,11 +47,4 @@ public readonly struct LocalFragment(TypeInfoFragment? type, ExpressionFragment 
     ) {
         return new LocalFragment(new TypeInfoFragment(typeof(T)), name);
     }
-
-    public static LocalFragment Create(
-        ITypeSymbol type,
-        ExpressionFragment name
-    ) {
-        return new LocalFragment(new TypeInfoFragment(type), name);
-    }
 }

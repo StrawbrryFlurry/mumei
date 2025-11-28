@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.CodeAnalysis;
 
-namespace Mumei.CodeGen.Components.Methods;
+namespace Mumei.CodeGen.Components;
 
 public abstract class SyntheticInterceptorMethodDefinition {
     public virtual void BindDynamicComponents(BindingContext ctx) { }

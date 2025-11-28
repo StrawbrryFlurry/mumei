@@ -1,4 +1,4 @@
-﻿namespace Mumei.CodeGen.Components.Types.Members;
+﻿namespace Mumei.CodeGen.Components;
 
 public sealed class SyntheticMethodRef<TSignature> where TSignature : Delegate {
     public TSignature Invoke { get; }

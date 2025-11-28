@@ -1,4 +1,4 @@
-﻿namespace Mumei.CodeGen.Components.Methods;
+﻿namespace Mumei.CodeGen.Components;
 
 internal sealed class QtSyntheticMethod : ISyntheticMethod {
     public QtSyntheticMethod(

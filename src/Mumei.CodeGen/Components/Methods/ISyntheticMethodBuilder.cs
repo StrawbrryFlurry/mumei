@@ -1,9 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using Microsoft.CodeAnalysis;
-using Mumei.CodeGen.Rendering;
 
-namespace Mumei.CodeGen.Components.Methods;
+namespace Mumei.CodeGen.Components;
 
 public interface ISyntheticMethodBuilder<TSignature> : ISyntheticMethod<TSignature> where TSignature : Delegate {
     [Experimental(Diagnostics.InternalFeatureId)]
@@ -33,34 +31,7 @@ public interface ISyntheticMethodBuilder<TSignature> : ISyntheticMethod<TSignatu
 // ReSharper disable once InconsistentNaming
 [Experimental(Diagnostics.InternalFeatureId)]
 public interface λIInternalMethodBuilderCompilerApi {
-    public void ApplyMethodSignatureToBuilder<TSignature>(
-        ISyntheticMethodBuilder<TSignature> builder,
-        MethodInfo methodInfo
-    ) where TSignature : Delegate;
-
-    public void ApplyMethodSignatureToBuilder<TSignature>(
-        ISyntheticMethodBuilder<TSignature> builder,
-        IMethodSymbol method
-    ) where TSignature : Delegate;
-
-    public void ApplyMethodSignatureToBuilder<TSignature>(
-        ISyntheticInterceptorMethodBuilder<TSignature> builder,
-        MethodInfo methodInfo
-    ) where TSignature : Delegate;
-
-    public void ApplyMethodSignatureToBuilder<TSignature>(
-        ISyntheticInterceptorMethodBuilder<TSignature> builder,
-        IMethodSymbol method
-    ) where TSignature : Delegate;
-
-    public void ApplyConstructedMethodSignatureToBuilder<TSignature>(
-        ISyntheticInterceptorMethodBuilder<TSignature> builder,
-        IMethodSymbol method
-    ) where TSignature : Delegate;
-
-
-    public ISyntheticCodeBlock CreateRendererCodeBlock(RenderFragment renderCodeBlock);
-    public ISyntheticCodeBlock CreateRendererCodeBlock<TState>(RenderFragment<TState> renderCodeBlock);
+    public ICodeGenerationContext Context { get; }
 }
 
 public interface ISyntheticInterceptorMethodBuilder<TSignature> : ISyntheticMethod<TSignature> where TSignature : Delegate {

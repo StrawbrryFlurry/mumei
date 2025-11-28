@@ -103,7 +103,8 @@ internal sealed class QtSyntheticCompilation(Compilation compilation) : ISynthet
     }
 
     public ISyntheticType GetType(ITypeSymbol typeSymbol) {
-        return new RoslynSyntheticType(typeSymbol);
+        // return new RoslynSyntheticType(typeSymbol);
+        return null!;
     }
 
     public ISyntheticType GetType(Type type) {
@@ -116,7 +117,8 @@ internal sealed class QtSyntheticCompilation(Compilation compilation) : ISynthet
             throw new InvalidOperationException($"Type not found for syntax: {typeSyntax}");
         }
 
-        return new RoslynSyntheticType(typeSymbol);
+        // return new RoslynSyntheticType(typeSymbol);
+        return null!;
     }
 
     public void TrackForEmission(string hintName, ISyntheticNamespace ns) {

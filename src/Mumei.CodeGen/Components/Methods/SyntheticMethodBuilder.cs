@@ -1,8 +1,6 @@
-﻿using Mumei.CodeGen.Components.Types;
+﻿namespace Mumei.CodeGen.Components;
 
-namespace Mumei.CodeGen.Components.Methods;
-
-internal sealed class QtSyntheticMethodBuilder<TSignature>(string name, IλInternalClassBuilderCompilerApi classApi) : QtSyntheticMethodBase<ISyntheticMethodBuilder<TSignature>>(name, classApi), ISyntheticMethodBuilder<TSignature> where TSignature : Delegate {
+internal sealed class SyntheticMethodBuilder<TSignature>(string name, IλInternalClassBuilderCompilerApi classApi) : SyntheticMethodBase<ISyntheticMethodBuilder<TSignature>>(name, classApi), ISyntheticMethodBuilder<TSignature> where TSignature : Delegate {
     // TODO: Use MethodRef here?
     public TSignature Bind(object target) {
         throw new CompileTimeComponentUsedAtRuntimeException();

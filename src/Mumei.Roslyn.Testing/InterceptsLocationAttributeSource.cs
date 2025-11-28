@@ -1,6 +1,6 @@
-﻿namespace Mumei.CodeGen.Qt.Tests;
+﻿namespace Mumei.Roslyn.Testing;
 
-internal sealed class InterceptsLocationAttributeSource {
+public static class InterceptsLocationAttributeSource {
     public const string Generated = """
                                     #pragma warning disable
                                     namespace System.Runtime.CompilerServices {

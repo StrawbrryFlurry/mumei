@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Mumei.CodeGen.Components.Methods;
+namespace Mumei.CodeGen.Components;
 
 internal sealed class RuntimeSyntheticMethod(MethodInfo method) : ISyntheticMethod {
     public string Name => method.Name;

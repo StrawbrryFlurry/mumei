@@ -5,10 +5,9 @@
     <PackageVersion Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageVersion Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="4.14.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.11.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0">
+    <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="5.0.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
@@ -19,5 +18,8 @@
     <PackageVersion Include="PolyfillLib" Version="8.7.3" />
     <PackageVersion Include="PolySharp" Version="1.15.0" />
     <PackageVersion Include="System.Memory" Version="4.6.3" />
+
+    <PackageVersion Include="xunit.v3.assert" Version="3.2.0" />
+    <PackageVersion Include="DiffPlex" Version="1.8.0" />
   </ItemGroup>
 </Project>

@@ -1,16 +1,17 @@
-﻿using Mumei.CodeGen.Components.Methods;
-using Mumei.CodeGen.Components.Types.Members;
-using Mumei.CodeGen.Rendering.CSharp;
+﻿using Mumei.CodeGen.Rendering.CSharp;
 using Mumei.Roslyn;
 
-namespace Mumei.CodeGen.Components.Types;
+namespace Mumei.CodeGen.Components;
 
-internal sealed partial class QtSyntheticClassBuilder<TClassDef>(QtSyntheticCompilation compilation) : ISyntheticClassBuilder<TClassDef>, ISyntheticConstructable<ClassDeclarationFragment> {
+internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
+    string name,
+    ICodeGenerationContext context
+) : ISyntheticClassBuilder<TClassDef>, ISyntheticConstructable<ClassDeclarationFragment> {
     private CompilerApi? _compilerApi;
 
     public string Name => _name;
 
-    private string _name = compilation.λCompilerApi.MakeArbitraryUniqueName("UnnamedClass");
+    private string _name = name;
 
     private ISyntheticAttributeList? _attributes;
     private List<ISyntheticMethod>? _methods;
@@ -19,7 +20,7 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(QtSyntheticComp
 
     private AccessModifierList _modifiers = AccessModifier.Internal;
 
-    public IλInternalClassBuilderCompilerApi λCompilerApi => _compilerApi ??= new CompilerApi(compilation, this);
+    public IλInternalClassBuilderCompilerApi λCompilerApi => _compilerApi ??= new CompilerApi(context, this);
 
     public TClassDef New(object[] args) {
         throw new NotImplementedException();
@@ -49,8 +50,8 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(QtSyntheticComp
         (_methods ??= []).Add(method);
     }
 
-    private sealed class CompilerApi(ISyntheticCompilation compilation, QtSyntheticClassBuilder<TClassDef> builder) : IλInternalClassBuilderCompilerApi {
-        public ISyntheticCompilation Compilation => compilation;
+    private sealed class CompilerApi(ICodeGenerationContext context, QtSyntheticClassBuilder<TClassDef> builder) : IλInternalClassBuilderCompilerApi {
+        public ICodeGenerationContext Context => context;
 
         public void DeclareMethod(
             ISyntheticAttribute[] attributes,
@@ -75,7 +76,7 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(QtSyntheticComp
         }
     }
 
-    public ClassDeclarationFragment Construct(ISyntheticCompilation compilation) {
+    public ClassDeclarationFragment Construct(ICompilationUnitContext compilationUnit) {
         var methods = new ArrayBuilder<MethodDeclarationFragment>();
         var fields = new ArrayBuilder<FieldDeclarationFragment>();
         var properties = new ArrayBuilder<PropertyDeclarationFragment>();
@@ -83,15 +84,15 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(QtSyntheticComp
         var baseTypes = new ArrayBuilder<TypeInfoFragment>();
 
         foreach (var synMethod in _methods ?? []) {
-            var fragment = compilation.Synthesize<MethodDeclarationFragment>(synMethod);
+            var fragment = compilationUnit.Synthesize<MethodDeclarationFragment>(synMethod);
             methods.Add(fragment);
         }
 
         return new ClassDeclarationFragment(
-            compilation.Synthesize(_attributes, AttributeListFragment.Empty),
+            compilationUnit.Synthesize(_attributes, AttributeListFragment.Empty),
             _modifiers,
             Name,
-            compilation.Synthesize(_typeParameters, TypeParameterListFragment.Empty),
+            compilationUnit.Synthesize(_typeParameters, TypeParameterListFragment.Empty),
             [],
             baseTypes.ToImmutableArrayAndFree(),
             constructors.ToImmutableArrayAndFree(),

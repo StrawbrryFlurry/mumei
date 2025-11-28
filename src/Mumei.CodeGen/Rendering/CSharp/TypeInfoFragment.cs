@@ -1,5 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-using Mumei.Roslyn;
+﻿using Mumei.Roslyn;
 
 namespace Mumei.CodeGen.Rendering.CSharp;
 
@@ -35,7 +34,6 @@ public readonly struct TypeInfoFragment : IEquatable<TypeInfoFragment> {
         return GenericTypeInfoFragment.Construct(unconstructedType, typeArguments);
     }
 
-    public TypeInfoFragment(ITypeSymbol type) : this(type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), type.NullableAnnotation == NullableAnnotation.Annotated, false) { }
     public TypeInfoFragment(Type type) : this(RuntimeTypeSerializer.GetTypeFullName(type), IsNullableWrapper(type), false) { }
     public TypeInfoFragment(string qualifiedTypeName) : this(qualifiedTypeName, qualifiedTypeName.EndsWith("?"), false) { }
 

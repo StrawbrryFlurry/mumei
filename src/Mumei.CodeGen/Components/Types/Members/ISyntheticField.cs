@@ -1,4 +1,4 @@
-﻿namespace Mumei.CodeGen.Components.Types.Members;
+﻿namespace Mumei.CodeGen.Components;
 
 public interface ISyntheticField { }
 public interface ISyntheticField<T> { }

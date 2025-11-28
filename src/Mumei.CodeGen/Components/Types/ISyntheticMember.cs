@@ -1,3 +1,3 @@
-﻿namespace Mumei.CodeGen.Components.Types;
+﻿namespace Mumei.CodeGen.Components;
 
 public interface ISyntheticMember { }
