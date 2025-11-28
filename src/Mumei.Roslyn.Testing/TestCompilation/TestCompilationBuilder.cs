@@ -5,17 +5,14 @@ using Microsoft.CodeAnalysis.CSharp;
 namespace Mumei.Roslyn.Testing;
 
 public sealed class TestCompilationBuilder {
-    public const string DefaultAssemblyName = "Compilation_____Assembly";
+    public const string DefaultAssemblyName = "TestAssembly";
 
     private readonly MetadataReferenceCollection _metadataReferences = new();
     private readonly List<SyntaxTree> _sources = new();
 
     private string _assemblyName = DefaultAssemblyName;
-    private Compilation? _compilation;
 
-    public Compilation Compilation => _compilation ??= CreateCompilation();
-
-    public CSharpParseOptions ParseOptions => new CSharpParseOptions(LanguageVersion.Preview)
+    private CSharpParseOptions ParseOptions => new CSharpParseOptions(LanguageVersion.Preview)
         .WithFeatures([
             new KeyValuePair<string, string>("InterceptorsNamespaces", $"{_assemblyName}.Generated;Generated")
         ]);
@@ -66,7 +63,7 @@ public sealed class TestCompilationBuilder {
     }
 
     public Compilation Build() {
-        return Compilation;
+        return CreateCompilation();
     }
 
     private Compilation CreateCompilation() {
@@ -86,10 +83,6 @@ public sealed class TestCompilationBuilder {
             var updatedTree = CSharpSyntaxTree.Create(syntaxRootNode, ParseOptions, syntaxTree.FilePath);
             _sources[i] = updatedTree;
         }
-    }
-
-    public static implicit operator Compilation(TestCompilationBuilder builder) {
-        return builder.Build();
     }
 
     public TestCompilationBuilder AddReference(ICompilationReference reference) {

@@ -2,7 +2,7 @@
 
 namespace Mumei.Roslyn.Testing;
 
-public static partial class WildcardMatcher {
+internal static class WildcardMatcher {
     public static bool Matches(string text, string pattern) {
         text = TrimEachLine(text.ReplaceLineEndings("\n"));
         pattern = TrimEachLine(pattern.ReplaceLineEndings("\n"));

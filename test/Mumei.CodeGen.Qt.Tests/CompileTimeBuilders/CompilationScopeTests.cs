@@ -18,7 +18,7 @@ public sealed class CompilationScopeTests {
                 .AddTypeReference<CSharpCompilation>()
         ).Run();
 
-        result.PassesAssemblyAction(x => {
+        result.Compilation.PassesAssemblyAction(x => {
             var t = x.CreateInstance<CompilationTestSource>();
             var r = x.Invoke(t, ts => ts.TestInvocation());
 

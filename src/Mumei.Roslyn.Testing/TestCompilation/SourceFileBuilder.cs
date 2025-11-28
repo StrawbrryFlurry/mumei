@@ -12,7 +12,6 @@ public sealed class SourceFileBuilder {
 
     public IEnumerable<Type> Usings => _usings;
 
-
     public SourceFileBuilder(string content) {
         _content = content;
     }

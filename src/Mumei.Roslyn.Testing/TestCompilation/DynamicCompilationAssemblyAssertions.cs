@@ -3,16 +3,17 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
 using System.Security.Cryptography;
+using Microsoft.CodeAnalysis;
 
 namespace Mumei.Roslyn.Testing;
 
 public static class DynamicCompilationAssemblyAssertions {
     public static void PassesAssemblyAction(
-        this SourceGeneratorTestResult runResult,
+        this Compilation compilation,
         Action<GeneratedAssembly> assemblyAction
     ) {
         var inMemoryAssemblyStream = new MemoryStream();
-        runResult.Compilation.Emit(inMemoryAssemblyStream);
+        compilation.Emit(inMemoryAssemblyStream);
         var alc = new AssemblyLoadContext($"DynamicCompilationAssemblyAssertions_{RandomNumberGenerator.GetHexString(16)}", true);
         inMemoryAssemblyStream.Position = 0; // Start reading from the beginning
         var assembly = alc.LoadFromStream(inMemoryAssemblyStream);

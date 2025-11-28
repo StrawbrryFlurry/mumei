@@ -23,6 +23,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Using Include="System.Collections.Immutable"/>
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Components\Generators\"/>
   </ItemGroup>
 

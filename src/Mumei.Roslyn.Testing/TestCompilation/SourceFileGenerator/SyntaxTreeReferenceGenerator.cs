@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.Text;
 using Mumei.CodeGen.Roslyn.Components;
 using Mumei.CodeGen.Roslyn.RoslynCodeProviders;
 
-namespace Mumei.Roslyn.Testing;
+namespace Mumei.Roslyn.Testing.SourceFileGenerator;
 
 [Generator]
 public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {

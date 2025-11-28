@@ -1,22 +1,12 @@
 ﻿using System.Collections.Immutable;
 using Mumei.CodeGen.Rendering;
+using Mumei.Roslyn;
 
 namespace Mumei.CodeGen.Components;
 
-internal sealed class CSharpCodeGenerationContext : ICodeGenerationContext {
+internal sealed partial class CSharpCodeGenerationContext : ICodeGenerationContext {
     private readonly Dictionary<string, Dictionary<string, ISyntheticNamespace>> _namespacesToEmit = new();
-
-    public ISyntheticCodeBlock Block(RenderFragment renderBlock) {
-        return new QtSyntheticRenderCodeBlock(renderBlock);
-    }
-
-    public ISyntheticClassBuilder<CompileTimeUnknown> DeclareClass(string name) {
-        return new QtSyntheticClassBuilder<CompileTimeUnknown>(name, this);
-    }
-
-    public ISyntheticNamespace Namespace(params ReadOnlySpan<string> namespaceSegments) {
-        throw new NotImplementedException();
-    }
+    private readonly Dictionary<Type, object> _synthesisProviders = new();
 
     public T? Synthesize<T>(object? constructable, T? defaultValue = default) {
         if (constructable is ISyntheticConstructable<T> c) {
@@ -40,25 +30,7 @@ internal sealed class CSharpCodeGenerationContext : ICodeGenerationContext {
         return default;
     }
 
-    public void Emit(string hintName, ISyntheticNamespace toEmit) {
-        throw new NotImplementedException();
-    }
-
-    public void RegisterSynthesisProvider<TSynthesizer>(TSynthesizer synthesizer) where TSynthesizer : ISynthesisProvider {
-        throw new NotImplementedException();
-    }
-
-    public TProvider GetSynthesisProvider<TProvider>() where TProvider : ISynthesisProvider {
-        throw new NotImplementedException();
-    }
-
-    public ICodeGenerationContext.IΦInternalCompilerApi ΦCompilerApi => field ??= new CompilerApiImpl(this);
-
-    public ISyntheticClassBuilder<TClassDefinition> DeclareClass<TClassDefinition>(string name, Action<TClassDefinition> inputBinder) where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new() {
-        throw new NotImplementedException();
-    }
-
-    public void TrackForEmission(string hintName, ISyntheticNamespace ns) {
+    public void Emit(string hintName, ISyntheticNamespace ns) {
         if (!_namespacesToEmit.TryGetValue(hintName, out var existingNamespaceMap)) {
             _namespacesToEmit[hintName] = new Dictionary<string, ISyntheticNamespace> {
                 [ns.FullyQualifiedName] = ns
@@ -76,30 +48,16 @@ internal sealed class CSharpCodeGenerationContext : ICodeGenerationContext {
         }
     }
 
-    private sealed class CompilerApiImpl(CSharpCodeGenerationContext context) : ICodeGenerationContext.IΦInternalCompilerApi {
-        private int _internalTrackingId = 0;
+    public void RegisterSynthesisProvider<TSynthesizer>(TSynthesizer synthesizer) where TSynthesizer : ISynthesisProvider {
+        _synthesisProviders[typeof(TSynthesizer)] = synthesizer;
+    }
 
-        public string MakeArbitraryUniqueName(string name) {
-            return $"{name}__{_internalTrackingId++}";
+    public TProvider GetSynthesisProvider<TProvider>() where TProvider : ISynthesisProvider {
+        if (_synthesisProviders.TryGetValue(typeof(TProvider), out var provider)) {
+            return (TProvider) provider;
         }
 
-        public ISyntheticClassBuilder<TClassDefinition> DeclareClassBuilder<TClassDefinition>(string name) {
-            return new QtSyntheticClassBuilder<TClassDefinition>(name, context);
-        }
-
-        public ISyntheticClassBuilder<TClassDefinition> TrackClass<TClassDefinition>(ISyntheticClassBuilder<TClassDefinition> classBuilder) where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new() {
-            return classBuilder;
-        }
-
-        private UniqueNameGeneratorComponent? _uniqueNameGenerator;
-
-        public string NextId() {
-            return (_uniqueNameGenerator ??= new UniqueNameGeneratorComponent()).MakeUnique("");
-        }
-
-        public ImmutableArray<(string TrackingName, ImmutableArray<ISyntheticNamespace> Namespaces)> EnumerateNamespacesToEmit() {
-            return context._namespacesToEmit.Select(x => (x.Key, x.Value.Values.ToImmutableArray())).ToImmutableArray();
-        }
+        throw new InvalidOperationException($"No synthesis provider of type {typeof(TProvider)} has been registered.");
     }
 }
 

@@ -20,18 +20,6 @@ public sealed class SourceGeneratorTest<TSourceGenerator> where TSourceGenerator
         _compilation = compilationBuilder.Build();
     }
 
-    internal SourceGeneratorTest(ICompilationReference reference) {
-        var compilationBuilder = new TestCompilationBuilder();
-        compilationBuilder.AddReference(reference);
-        _compilation = compilationBuilder.Build();
-    }
-
-    public SourceGeneratorTest(params string[] sources) {
-        var compilationBuilder = new TestCompilationBuilder();
-        compilationBuilder.AddSources(sources);
-        _compilation = compilationBuilder.Build();
-    }
-
     public SourceGeneratorTestResult Run() {
         var driver = CSharpGeneratorDriver.Create(new TSourceGenerator())
             .WithUpdatedParseOptions((CSharpParseOptions) _compilation.SyntaxTrees.First().Options!);

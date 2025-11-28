@@ -19,7 +19,7 @@ public sealed class InterceptorMethodTemplateTests {
                 .AddTypeReference<CSharpCompilation>()
         ).Run();
 
-        result.PassesAssemblyAction(x => {
+        result.Compilation.PassesAssemblyAction(x => {
             var t = x.CreateInstance<CompilationTestSource>();
             var r = t.Invoke(ts => ts.TestInvocation());
 
