@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Mumei.CodeGen.Rendering;
 
-internal abstract class GenericRenderTreeBuilder<TResult> : IRenderTreeBuilder {
+public abstract class GenericRenderTreeBuilder<TResult> : IRenderTreeBuilder {
 #if DEBUG
     protected readonly DebugRenderGraph DebugRenderGraph = new();
 #endif
@@ -140,6 +140,8 @@ public interface IRenderTreeBuilder {
     public void Node(RenderFragment render);
     public void Node<TState>(in RenderFragment<TState> render);
 
+    public string ToString();
+
     [InterpolatedStringHandler]
     public readonly ref struct InterpolatedStringHandler(int literalLength, int formattedCount, IRenderTreeBuilder tree) {
         public void AppendLiteral(string s) {
@@ -148,6 +150,15 @@ public interface IRenderTreeBuilder {
 
         public void AppendFormatted<TRenderNode>(in TRenderNode node) where TRenderNode : IRenderFragment {
             tree.Node(node);
+        }
+
+        public void AppendFormatted(string str, string format = "") {
+            if (format == "q") {
+                tree.Text("\"" + str + "\"");
+                return;
+            }
+
+            tree.Text(str);
         }
 
         public void AppendFormatted(Type type, string format = "") {

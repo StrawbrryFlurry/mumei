@@ -1,5 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);Generated</InterceptorsNamespaces>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Mumei.Roslyn.Testing\Mumei.Roslyn.Testing.csproj"/>
+    <ProjectReference Include="..\..\src\Mumei.Roslyn.Testing.CompilationReferenceGenerator\Mumei.Roslyn.Testing.CompilationReferenceGenerator.csproj" OutputItemType="Analyzer"/>
   </ItemGroup>
 </Project>

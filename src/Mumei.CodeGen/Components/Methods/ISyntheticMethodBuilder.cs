@@ -5,7 +5,7 @@ namespace Mumei.CodeGen.Components;
 
 public interface ISyntheticMethodBuilder<TSignature> : ISyntheticMethod<TSignature> where TSignature : Delegate {
     [Experimental(Diagnostics.InternalFeatureId)]
-    public λIInternalMethodBuilderCompilerApi λCompilerApi { get; }
+    public IΦInternalMethodBuilderCompilerApi ΦCompilerApi { get; }
 
     public ISyntheticMethodBuilder<TSignature> WithName(string name);
 
@@ -30,13 +30,15 @@ public interface ISyntheticMethodBuilder<TSignature> : ISyntheticMethod<TSignatu
 /// </summary>
 // ReSharper disable once InconsistentNaming
 [Experimental(Diagnostics.InternalFeatureId)]
-public interface λIInternalMethodBuilderCompilerApi {
+public interface IΦInternalMethodBuilderCompilerApi {
     public ICodeGenerationContext Context { get; }
 }
 
 public interface ISyntheticInterceptorMethodBuilder<TSignature> : ISyntheticMethod<TSignature> where TSignature : Delegate {
     [Experimental(Diagnostics.InternalFeatureId)]
-    public λIInternalMethodBuilderCompilerApi λCompilerApi { get; }
+    public IΦInternalMethodBuilderCompilerApi ΦCompilerApi { get; }
+
+    public ISyntheticParameterList Parameters { get; }
 
     public ISyntheticInterceptorMethodBuilder<TSignature> WithBody(TSignature bodyImpl);
     public ISyntheticInterceptorMethodBuilder<TSignature> WithBody(Func<IInterceptedMethodContext, TSignature> bodyImpl);

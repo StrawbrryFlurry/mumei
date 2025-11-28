@@ -1,35 +1,34 @@
 <Solution>
   <Folder Name="/AspNetCore/">
-    <Project Path="src/Mumei.AspNetCore.Common/Mumei.AspNetCore.Common.csproj"/>
-    <Project Path="src/Mumei.AspNetCore/Mumei.AspNetCore.csproj"/>
+    <Project Path="src/Mumei.AspNetCore.Common/Mumei.AspNetCore.Common.csproj" />
+    <Project Path="src/Mumei.AspNetCore/Mumei.AspNetCore.csproj" />
   </Folder>
   <Folder Name="/CodeGen/">
-    <Project Path="src/Mumei.CodeGen.Qt/Mumei.CodeGen.Qt.csproj"/>
-    <Project Path="src/Mumei.CodeGen.Roslyn/Mumei.CodeGen.Roslyn.csproj"/>
-    <Project Path="src/Mumei.CodeGen/Mumei.CodeGen.csproj"/>
-    <Project Path="src/PolySharpCommon/PolySharpCommon.csproj"/>
-    <Project Path="test/Mumei.CodeGen.Qt.Tests/Mumei.CodeGen.Qt.Tests.csproj"/>
-    <Project Path="test/Mumei.CodeGen.Tests/Mumei.CodeGen.Tests.csproj"/>
+    <Project Path="src/Mumei.CodeGen.Qt/Mumei.CodeGen.Qt.csproj" />
+    <Project Path="src/Mumei.CodeGen.Roslyn/Mumei.CodeGen.Roslyn.csproj" />
+    <Project Path="src/Mumei.CodeGen/Mumei.CodeGen.csproj" />
+    <Project Path="src/PolySharpCommon/PolySharpCommon.csproj" />
+    <Project Path="test/Mumei.CodeGen.Qt.Tests/Mumei.CodeGen.Qt.Tests.csproj" />
+    <Project Path="test/Mumei.CodeGen.Tests/Mumei.CodeGen.Tests.csproj" />
   </Folder>
   <Folder Name="/DependencyInjection/">
-    <Project Path="src/Mumei.DependencyInjection.Roslyn/Mumei.DependencyInjection.Roslyn.csproj"/>
-    <Project
-      Path="src/Mumei.DependencyInjection.ServiceCollectionInterOpt/Mumei.DependencyInjection.ServiceCollectionInterOpt.csproj"/>
-    <Project Path="src/Mumei.DependencyInjection.Testing/Mumei.DependencyInjection.Testing.csproj"/>
-    <Project Path="src/Mumei.DependencyInjection/Mumei.DependencyInjection.csproj"/>
+    <Project Path="src/Mumei.DependencyInjection.Roslyn/Mumei.DependencyInjection.Roslyn.csproj" />
+    <Project Path="src/Mumei.DependencyInjection.ServiceCollectionInterOpt/Mumei.DependencyInjection.ServiceCollectionInterOpt.csproj" />
+    <Project Path="src/Mumei.DependencyInjection.Testing/Mumei.DependencyInjection.Testing.csproj" />
+    <Project Path="src/Mumei.DependencyInjection/Mumei.DependencyInjection.csproj" />
   </Folder>
   <Folder Name="/Roslyn/">
-    <Project Path="src/Mumei.Roslyn.Common/Mumei.Roslyn.Common.csproj"/>
-    <Project Path="src/Mumei.Roslyn.SourceCodeReferenceGenerator/Mumei.Roslyn.SourceCodeReferenceGenerator.csproj"/>
-    <Project Path="src/Mumei.Roslyn.Testing/Mumei.Roslyn.Testing.csproj"/>
-    <Project Path="test/Mumei.Roslyn.Common.Tests/Mumei.Roslyn.Common.Tests.csproj"/>
-    <Project Path="test/Mumei.Roslyn.Testing.Tests/Mumei.Roslyn.Testing.Tests.csproj"/>
+    <Project Path="src/Mumei.Roslyn.Common/Mumei.Roslyn.Common.csproj" />
+    <Project Path="src/Mumei.Roslyn.SourceCodeReferenceGenerator/Mumei.Roslyn.SourceCodeReferenceGenerator.csproj" />
+    <Project Path="src/Mumei.Roslyn.Testing.CompilationReferenceGenerator/Mumei.Roslyn.Testing.CompilationReferenceGenerator.csproj" />
+    <Project Path="src/Mumei.Roslyn.Testing/Mumei.Roslyn.Testing.csproj" />
+    <Project Path="test/Mumei.Roslyn.Common.Tests/Mumei.Roslyn.Common.Tests.csproj" />
+    <Project Path="test/Mumei.Roslyn.Testing.Tests/Mumei.Roslyn.Testing.Tests.csproj" />
   </Folder>
   <Folder Name="/_Playground/">
-    <Project Path="src/Mumei.CodeGen.Playground/Mumei.CodeGen.Playground.csproj"/>
-    <Project Path="src/Mumei.DependencyInjection.Playground/Mumei.DependencyInjection.Playground.csproj"/>
-    <Project
-      Path="src/Mumei.Playground.CleanArchitectureApplication/Mumei.Playground.CleanArchitectureApplication.csproj"/>
-    <Project Path="src/Mumei.Playground.SimpleApplication/Mumei.Playground.SimpleApplication.csproj"/>
+    <Project Path="src/Mumei.CodeGen.Playground/Mumei.CodeGen.Playground.csproj" />
+    <Project Path="src/Mumei.DependencyInjection.Playground/Mumei.DependencyInjection.Playground.csproj" />
+    <Project Path="src/Mumei.Playground.CleanArchitectureApplication/Mumei.Playground.CleanArchitectureApplication.csproj" />
+    <Project Path="src/Mumei.Playground.SimpleApplication/Mumei.Playground.SimpleApplication.csproj" />
   </Folder>
 </Solution>

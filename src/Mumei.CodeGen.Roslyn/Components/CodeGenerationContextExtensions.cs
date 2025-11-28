@@ -1,14 +1,17 @@
-﻿using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Components;
+using Mumei.CodeGen.Rendering.CSharp;
 
 namespace Mumei.CodeGen.Roslyn.Components;
 
 public static class CodeGenerationContextExtensions {
     extension(ICodeGenerationContext ctx) {
+        public Compilation Compilation => ctx.GetContextProvider<CompilationCodeGenerationContextProvider>().Compilation;
+
         public ITypeSymbol TypeFromCompilation<T>() {
-            return ctx.GetSynthesisProvider<CompilationSynthesisProvider>().Compilation.GetTypeByMetadataName(typeof(T).FullName);
+            return ctx.GetContextProvider<CompilationCodeGenerationContextProvider>().Compilation.GetTypeByMetadataName(typeof(T).FullName);
         }
 
         public ISyntheticType Type(ITypeSymbol typeSymbol) {
@@ -16,8 +19,8 @@ public static class CodeGenerationContextExtensions {
         }
 
         public ISyntheticType Type(TypeSyntax typeSyntax) {
-            var semanticModel = ctx.GetSynthesisProvider<CompilationSynthesisProvider>().Compilation.GetSemanticModel(typeSyntax.SyntaxTree);
-            var typeSymbol = semanticModel.GetTypeInfo(typeSyntax).Type ?? throw new InvalidOperationException("Could not resolve type symbol from syntax.");
+            var semanticModel = ctx.GetContextProvider<CompilationCodeGenerationContextProvider>().Compilation.GetSemanticModel(typeSyntax.SyntaxTree);
+            var typeSymbol = ModelExtensions.GetTypeInfo(semanticModel, typeSyntax).Type ?? throw new InvalidOperationException("Could not resolve type symbol from syntax.");
             return ctx.Type(typeSymbol);
         }
 
@@ -35,6 +38,11 @@ public static class CodeGenerationContextExtensions {
             return new QtSyntheticParameterList(parameters);
         }
 
+        public ISyntheticParameter Parameter(string name, ITypeSymbol type, ParameterAttributes attributes = ParameterAttributes.None) {
+            var parameterType = ctx.Type(type);
+            return new SyntheticParameter(name, parameterType, attributes: attributes);
+        }
+
         public ISyntheticTypeParameterList TypeParameterListFrom(IMethodSymbol methodSymbol) {
             var typeParameters = new ISyntheticTypeParameter[methodSymbol.TypeParameters.Length];
             for (var i = 0; i < methodSymbol.TypeParameters.Length; i++) {
@@ -43,6 +51,17 @@ public static class CodeGenerationContextExtensions {
             }
 
             return new QtSyntheticTypeParameterList(typeParameters);
+        }
+
+        public ISyntheticAttribute InterceptLocationAttribute(InterceptableLocation location) {
+            return new SyntheticInterceptLocationAttribute(location);
+        }
+
+        public ISyntheticAttribute InterceptLocationAttribute(InvocationExpressionSyntax invocationToIntercept) {
+            var semanticModel = ctx.Compilation.GetSemanticModel(invocationToIntercept.SyntaxTree);
+            var location = semanticModel.GetInterceptableLocation(invocationToIntercept)
+                           ?? throw new InvalidOperationException("Could not resolve interceptable location from invocation syntax.");
+            return new SyntheticInterceptLocationAttribute(location);
         }
     }
 }

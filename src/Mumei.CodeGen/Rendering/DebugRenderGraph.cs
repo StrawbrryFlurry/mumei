@@ -1,6 +1,6 @@
 ﻿namespace Mumei.CodeGen.Rendering;
 
-internal sealed class DebugRenderGraph {
+public sealed class DebugRenderGraph {
     private List<IRenderFragment> _nodeStack = new();
 
     public void StartNode(IRenderFragment fragment) {

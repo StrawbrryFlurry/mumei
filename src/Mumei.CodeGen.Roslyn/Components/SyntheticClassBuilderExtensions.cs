@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Components;
+using Mumei.CodeGen.Rendering.CSharp;
 
 namespace Mumei.CodeGen.Roslyn.Components;
 
@@ -11,16 +12,13 @@ public static class SyntheticClassBuilderExtensions {
             string name,
             InvocationExpressionSyntax invocationToIntercept
         ) {
-            var ctx = classBuilder.λCompilerApi.Context;
-            var builder = new SyntheticInterceptorMethodBuilder<Delegate>(name, classBuilder.λCompilerApi);
-            var compilation = ctx.GetSynthesisProvider<CompilationSynthesisProvider>().Compilation;
-
-            var methodSymbol = compilation.GetSemanticModel(invocationToIntercept.SyntaxTree).GetSymbolInfo(invocationToIntercept).Symbol as IMethodSymbol;
-            if (methodSymbol is null) {
-                throw new InvalidOperationException("Could not resolve method symbol for interception target invocation.");
-            }
+            var (ctx, builder, methodSymbol) = MakeInterceptorMethodBuilder(name, invocationToIntercept, classBuilder.ΦCompilerApi);
 
             ApplyMethodSignatureToBuilder(ctx, builder, methodSymbol);
+            RewriteInterceptorMethod(builder, methodSymbol, invocationToIntercept);
+
+            classBuilder.DeclareMethod(builder);
+
             return builder;
         }
 
@@ -28,16 +26,13 @@ public static class SyntheticClassBuilderExtensions {
             string name,
             InvocationExpressionSyntax invocationToIntercept
         ) {
-            var ctx = classBuilder.λCompilerApi.Context;
-            var builder = new SyntheticInterceptorMethodBuilder<Delegate>(name, classBuilder.λCompilerApi);
-            var compilation = ctx.GetSynthesisProvider<CompilationSynthesisProvider>().Compilation;
-
-            var methodSymbol = compilation.GetSemanticModel(invocationToIntercept.SyntaxTree).GetSymbolInfo(invocationToIntercept).Symbol as IMethodSymbol;
-            if (methodSymbol is null) {
-                throw new InvalidOperationException("Could not resolve method symbol for interception target invocation.");
-            }
+            var (ctx, builder, methodSymbol) = MakeInterceptorMethodBuilder(name, invocationToIntercept, classBuilder.ΦCompilerApi);
 
             ApplyConstructedMethodSignatureToBuilder(ctx, builder, methodSymbol);
+            RewriteInterceptorMethod(builder, methodSymbol, invocationToIntercept);
+
+            classBuilder.DeclareMethod(builder);
+
             return builder;
         }
 
@@ -49,6 +44,23 @@ public static class SyntheticClassBuilderExtensions {
         ) where TMethodDefinition : SyntheticInterceptorMethodDefinition, new() {
             throw new NotImplementedException();
         }
+    }
+
+    private static (ICodeGenerationContext ctx, SyntheticInterceptorMethodBuilder<Delegate> builder, IMethodSymbol methodSymbol) MakeInterceptorMethodBuilder(
+        string name,
+        InvocationExpressionSyntax invocationToIntercept,
+        IΦInternalClassBuilderCompilerApi classApi
+    ) {
+        var ctx = classApi.Context;
+        var builder = new SyntheticInterceptorMethodBuilder<Delegate>(name, classApi);
+        var compilation = ctx.GetContextProvider<CompilationCodeGenerationContextProvider>().Compilation;
+
+        var methodSymbol = compilation.GetSemanticModel(invocationToIntercept.SyntaxTree).GetSymbolInfo(invocationToIntercept).Symbol as IMethodSymbol;
+        if (methodSymbol is null) {
+            throw new InvalidOperationException("Could not resolve method symbol for interception target invocation.");
+        }
+
+        return (ctx, builder, methodSymbol);
     }
 
     private static void ApplyMethodSignatureToBuilder<TSignature>(
@@ -82,5 +94,22 @@ public static class SyntheticClassBuilderExtensions {
 
         var returnType = ctx.Type(method.ReturnType);
         builder.WithReturnType(returnType);
+    }
+
+    private static void RewriteInterceptorMethod<TSignature>(
+        ISyntheticInterceptorMethodBuilder<TSignature> builder,
+        IMethodSymbol method,
+        InvocationExpressionSyntax invocationToIntercept
+    ) where TSignature : Delegate {
+        var ctx = builder.ΦCompilerApi.Context;
+        var interceptAttribute = ctx.InterceptLocationAttribute(invocationToIntercept);
+        builder.WithAttributes(interceptAttribute);
+
+        if (!method.IsStatic) {
+            var receiverParameter = ctx.Parameter("ϕthis", method.ReceiverType, ParameterAttributes.This);
+            builder.Parameters.InsertAt(0, receiverParameter);
+        }
+
+        builder.WithAccessibility(AccessModifier.Public + AccessModifier.Static);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Mumei.CodeGen.Rendering;
 
-public readonly struct RenderFragment<TState>(TState state, Action<IRenderTreeBuilder, TState> renderTree) : IRenderFragment {
+public readonly struct RenderFragment<TInput>(TInput state, Action<IRenderTreeBuilder, TInput> renderTree) : IRenderFragment {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Render(IRenderTreeBuilder outerRenderTree) {
         renderTree(outerRenderTree, state);

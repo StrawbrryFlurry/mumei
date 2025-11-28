@@ -32,4 +32,18 @@ internal sealed class QtSyntheticParameterList(ReadOnlySpan<ISyntheticParameter>
 
         return result.ToImmutable();
     }
+
+    public void InsertAt(int i, ISyntheticParameter parameter) {
+        if (_parameters is null) {
+            _parameters = [parameter];
+            return;
+        }
+
+        var newParameters = new ISyntheticParameter[_parameters.Length + 1];
+        Array.Copy(_parameters, 0, newParameters, 0, i);
+        newParameters[i] = parameter;
+        Array.Copy(_parameters, i, newParameters, i + 1, _parameters.Length);
+
+        _parameters = newParameters;
+    }
 }

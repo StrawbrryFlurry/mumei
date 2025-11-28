@@ -3,7 +3,7 @@
 namespace Mumei.CodeGen.Rendering;
 
 [DebuggerTypeProxy(typeof(RenderTreeBuilderDebugView))]
-internal sealed class SourceFileRenderTreeBuilder : GenericRenderTreeBuilder<string>, IDisposable {
+public sealed class SourceFileRenderTreeBuilder : GenericRenderTreeBuilder<string>, IDisposable {
     private SyntaxWriter _sourceFile = new();
 
     protected override void TextCore(ReadOnlySpan<char> s) {
@@ -48,6 +48,10 @@ internal sealed class SourceFileRenderTreeBuilder : GenericRenderTreeBuilder<str
         return GetSourceText();
     }
 
+    public override string ToString() {
+        return GetSourceText();
+    }
+
     internal string GetSourceText() {
         return _sourceFile.ToString();
     }
@@ -61,6 +65,6 @@ internal sealed class SourceFileRenderTreeBuilder : GenericRenderTreeBuilder<str
         public string CurrentTree => builder.GetSourceText();
 
         [DebuggerBrowsable(DebuggerBrowsableState.Collapsed)]
-        public IEnumerable<IRenderFragment> Graph => builder.DebugRenderGraph.Stack;
+        private IEnumerable<IRenderFragment> Graph => builder.DebugRenderGraph.Stack;
     }
 }

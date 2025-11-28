@@ -47,7 +47,7 @@ public static class SyntheticSourceProviderExtensions {
             );
         }
 
-        public void RegisterCompilationOutput(
+        public void RegisterCodeGenerationOutput(
             IncrementalValuesProvider<IncrementalCodeGenContext> contextProvider,
             Action<CodeGenerationEmitContext>? emitCode = null
         ) {
@@ -62,25 +62,14 @@ public static class SyntheticSourceProviderExtensions {
 
                 foreach (var (name, namespaces) in compilation.Context.ΦCompilerApi.EnumerateNamespacesToEmit()) {
                     using var fileTree = new SourceFileRenderTreeBuilder();
-
-                    var text = "";
-                    for (var i = 0; i < namespaces.Length; i++) {
-                        var ns = namespaces[i];
-                        var isLast = i == namespaces.Length - 1;
-                        var fragment = compilation.Context.Synthesize<NamespaceFragment>(ns);
-                        if (isLast) {
-                            text = fileTree.RenderRootNode(fragment);
-                        } else {
-                            fileTree.Node(fragment);
-                        }
-                    }
-
+                    var compilationUnit = ((CSharpCodeGenerationContext) compilation.Context).SynthesizeCompilationUnit(namespaces);
+                    var text = fileTree.RenderRootNode(compilationUnit);
                     spc.AddSource($"{name}.g", text);
                 }
             });
         }
 
-        public void RegisterCompilationOutput<T>(
+        public void RegisterCodeGenerationOutput<T>(
             IncrementalValuesProvider<IncrementalCodeGenContext<T>> contextProvider,
             Action<CodeGenerationEmitContext, T>? emitCode = null
         ) {
@@ -93,13 +82,13 @@ public static class SyntheticSourceProviderExtensions {
             });
         }
 
-        public void RegisterCompilationOutput<T>(
+        public void RegisterCodeGenerationOutput<T>(
             IncrementalValuesProvider<UserValueWithCompilation<T>> contextProvider,
             Action<CodeGenerationEmitContext>? emitCode = null
         ) {
             ctx.RegisterSourceOutput(contextProvider, (spc, ctx) => {
                 var context = new CSharpCodeGenerationContext();
-                context.RegisterSynthesisProvider(new CompilationSynthesisProvider(ctx.Compilation));
+                context.RegisterContextProvider(new CompilationCodeGenerationContextProvider(ctx.Compilation));
                 var emitContext = new CodeGenerationEmitContext(
                     context,
                     spc.CancellationToken
@@ -130,20 +119,20 @@ public static class SyntheticSourceProviderExtensions {
             return default;
         }
 
-        public IncrementalValuesProvider<IncrementalCodeGenContext<TTo>> IncrementalCompile<TTo>(
+        public IncrementalValuesProvider<IncrementalCodeGenContext<TTo>> IncrementalGenerate<TTo>(
             [Pure] Func<ICodeGenerationContext, T, TTo> compileSelector
         ) {
             // var valueWithCompilation = source.Select(selector);
             return default;
         }
 
-        public IncrementalValuesProvider<IncrementalCodeGenContext> IncrementalCompile(
+        public IncrementalValuesProvider<IncrementalCodeGenContext> IncrementalGenerate(
             [Pure] Action<ICodeGenerationContext, T, CancellationToken> compileSelector
         ) {
             // var valueWithCompilation = source.Select(selector);
             return source.Select((valueWithCompilation, ct) => {
                 var context = new CSharpCodeGenerationContext();
-                context.RegisterSynthesisProvider(new CompilationSynthesisProvider(valueWithCompilation.Compilation));
+                context.RegisterContextProvider(new CompilationCodeGenerationContextProvider(valueWithCompilation.Compilation));
                 compileSelector(context, valueWithCompilation.Value, ct);
                 return new IncrementalCodeGenContext(context, [valueWithCompilation.Value]);
             });

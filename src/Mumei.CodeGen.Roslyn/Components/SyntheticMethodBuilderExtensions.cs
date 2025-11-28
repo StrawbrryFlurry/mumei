@@ -6,7 +6,7 @@ namespace Mumei.CodeGen.Roslyn.Components;
 public static class SyntheticMethodBuilderExtensions {
     extension<TSignature>(ISyntheticMethodBuilder<TSignature> builder) where TSignature : Delegate {
         public ISyntheticMethodBuilder<TSignature> UpdateSignatureFrom(IMethodSymbol target) {
-            var ctx = builder.λCompilerApi.Context;
+            var ctx = builder.ΦCompilerApi.Context;
             ApplyMethodSignatureToBuilder(ctx, builder, target);
             return builder;
         }

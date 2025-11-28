@@ -5,7 +5,7 @@ using ParameterAttributes = Mumei.CodeGen.Rendering.CSharp.ParameterAttributes;
 
 namespace Mumei.CodeGen.Components;
 
-internal sealed class QtSyntheticParameter(
+internal sealed class SyntheticParameter(
     string name,
     ISyntheticType type,
     ISyntheticAttributeList? attributesList = null,

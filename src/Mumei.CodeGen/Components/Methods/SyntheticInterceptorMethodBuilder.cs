@@ -2,7 +2,7 @@
 
 internal sealed class SyntheticInterceptorMethodBuilder<TSignature>(
     string name,
-    IλInternalClassBuilderCompilerApi classApi
+    IΦInternalClassBuilderCompilerApi classApi
 ) : SyntheticMethodBase<ISyntheticInterceptorMethodBuilder<TSignature>>(name, classApi), ISyntheticInterceptorMethodBuilder<TSignature> where TSignature : Delegate {
     public TSignature Bind(object target) {
         throw new CompileTimeComponentUsedAtRuntimeException();

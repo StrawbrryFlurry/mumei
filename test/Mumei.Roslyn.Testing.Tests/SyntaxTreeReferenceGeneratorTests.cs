@@ -1,4 +1,5 @@
-﻿using Mumei.Roslyn.Testing.SourceFileGenerator;
+﻿using System.Linq.Expressions;
+using Mumei.Roslyn.Testing.CompilationReferenceGenerator;
 using static Mumei.Roslyn.Testing.SourceGeneratorTest;
 
 namespace Mumei.Roslyn.Testing.Tests;
@@ -27,10 +28,47 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
                 .WithPartialContent(
                     $$""""""""""
                       namespace Generated {
+                          file static class SyntaxTreeReferenceInterceptor {
+                              [global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "*")]
+                              public static global::Mumei.Roslyn.Testing.ICompilationReference Intercept_Of_0__0() {
+                                  return new global::Mumei.Roslyn.Testing.SyntaxTreeCompilationReference {
+                                      TypeName = "CompilationTestSource",
+                                      SourceCode = "class root {}",
+                                      References = [
+                                      ]
+                                  }
+                                  ;
+                              }
+                          }
                       }
+
                       {{InterceptsLocationAttributeSource.Generated}}
                       """"""""""
                 );
-        }).UpdateCompilation(c => { });
+        });
+
+        var r = SyntaxTreeReference.Of(typeof(CompilationSource));
+    }
+}
+
+file static class CompilationSource {
+    public sealed class Foo {
+        public TestReceivable TestInvocation() {
+            var r = new TestReceivable();
+            r.Invoke(s => s.Length > 0);
+            return r;
+        }
+    }
+
+    public sealed class TestReceivable {
+        public string ParameterName { get; private set; } = null!;
+        public string Body { get; private set; } = null!;
+
+        public void Invoke(Func<string, bool> expression) { }
+
+        public void ReceiveExpression(Expression<Func<string, bool>> expression) {
+            ParameterName = expression.Parameters[0].Name;
+            Body = expression.Body.ToString();
+        }
     }
 }

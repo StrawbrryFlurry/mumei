@@ -1,19 +1,20 @@
-﻿using System.Collections.Immutable;
-using Mumei.CodeGen.Rendering;
+﻿using Mumei.CodeGen.Rendering;
 
 namespace Mumei.CodeGen.Components;
 
-public interface ICodeGenerationContext : IComponentSynthesizer {
+public interface ICodeGenerationContext {
     public IΦInternalCompilerApi ΦCompilerApi { get; }
 
     public ISyntheticCodeBlock Block(RenderFragment renderBlock);
+    public ISyntheticCodeBlock Block<TInput>(TInput input, Action<IRenderTreeBuilder, TInput> renderBlock);
+
     public ISyntheticClassBuilder<CompileTimeUnknown> DeclareClass(string name);
     public ISyntheticNamespace Namespace(params ReadOnlySpan<string> namespaceSegments);
 
     public void Emit(string hintName, ISyntheticNamespace toEmit);
 
-    public void RegisterSynthesisProvider<TProvider>(TProvider provider) where TProvider : ISynthesisProvider;
-    public TProvider GetSynthesisProvider<TProvider>() where TProvider : ISynthesisProvider;
+    public void RegisterContextProvider<TProvider>(TProvider provider) where TProvider : ICodeGenerationContextProvider;
+    public TProvider GetContextProvider<TProvider>() where TProvider : ICodeGenerationContextProvider;
 
     public ISyntheticClassBuilder<TClassDefinition> DeclareClass<TClassDefinition>(
         string name,

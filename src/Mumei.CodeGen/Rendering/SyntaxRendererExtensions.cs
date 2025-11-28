@@ -3,7 +3,7 @@ using Mumei.CodeGen.Rendering.CSharp;
 
 namespace Mumei.CodeGen.Rendering;
 
-internal static class SyntaxRendererExtensions {
+public static class SyntaxRendererExtensions {
     extension(AccessModifierList modifiers) {
         public string List => modifiers.AsCSharpString();
     }
@@ -44,6 +44,12 @@ internal static class SyntaxRendererExtensions {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Line(string line) {
             renderTree.Text(line);
+            renderTree.NewLine();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void InterpolatedLine([InterpolatedStringHandlerArgument(nameof(renderTree))] IRenderTreeBuilder.InterpolatedStringHandler line) {
+            renderTree.Interpolate(line);
             renderTree.NewLine();
         }
 

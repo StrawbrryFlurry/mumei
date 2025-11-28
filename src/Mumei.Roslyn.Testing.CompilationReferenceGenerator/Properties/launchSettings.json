@@ -1,0 +1,9 @@
+﻿{
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "DebugCompilationReferenceGenerator": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../../test/Mumei.Roslyn.Testing.Tests/Mumei.Roslyn.Testing.Tests.csproj"
+    }
+  }
+}

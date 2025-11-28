@@ -8,6 +8,10 @@ internal sealed partial class CSharpCodeGenerationContext {
         return new QtSyntheticRenderCodeBlock(renderBlock);
     }
 
+    public ISyntheticCodeBlock Block<TInput>(TInput input, Action<IRenderTreeBuilder, TInput> renderBlock) {
+        return new QtSyntheticRenderCodeBlock<TInput>(new RenderFragment<TInput>(input, renderBlock));
+    }
+
     public ISyntheticClassBuilder<CompileTimeUnknown> DeclareClass(string name) {
         return new QtSyntheticClassBuilder<CompileTimeUnknown>(name, this);
     }

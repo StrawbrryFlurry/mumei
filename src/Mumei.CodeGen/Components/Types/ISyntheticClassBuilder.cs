@@ -3,11 +3,13 @@
 namespace Mumei.CodeGen.Components;
 
 public interface ISyntheticClassBuilder<T> : ISyntheticClass, ISyntheticTypeInfo<T> {
-    public IλInternalClassBuilderCompilerApi λCompilerApi { get; }
+    public IΦInternalClassBuilderCompilerApi ΦCompilerApi { get; }
 
     public ISyntheticClassBuilder<T> WithName(string name);
 
-    public ISyntheticClassBuilder<T> WithModifiers(AccessModifierList modifiers);
+    public ISyntheticClassBuilder<T> WithAccessibility(AccessModifierList accessModifiers);
+
+    public ISyntheticClassBuilder<T> DeclareMethod(ISyntheticMethod method);
 
     public ISyntheticMethodBuilder<Delegate> DeclareMethod<TMethodDefinition>(
         string name,
@@ -56,7 +58,7 @@ public interface ISyntheticClassBuilder<T> : ISyntheticClass, ISyntheticTypeInfo
 }
 
 // ReSharper disable once InconsistentNaming
-public interface IλInternalClassBuilderCompilerApi {
+public interface IΦInternalClassBuilderCompilerApi {
     public ICodeGenerationContext Context { get; }
 
     public void DeclareMethod(

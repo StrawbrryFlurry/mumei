@@ -1,4 +1,6 @@
-﻿namespace Mumei.CodeGen.Components;
+﻿using Mumei.CodeGen.Rendering.CSharp;
+
+namespace Mumei.CodeGen.Components;
 
 /// <summary>
 /// Declares that a synthetic component can be constructed into a target type.
@@ -11,6 +13,15 @@ internal interface ISyntheticConstructable<out TTarget> {
     public TTarget Construct(ICompilationUnitContext compilationUnit);
 }
 
-internal interface ICompilationUnitContext : IComponentSynthesizer {
+internal interface ICompilationUnitContext {
     public ICodeGenerationContext CodeGenContext { get; }
+
+    public void AddSharedLocalDeclaration(ICompilationUnitFeature feature);
+
+    public T Synthesize<T>(object? constructable, T? defaultValue = default);
+    public T? SynthesizeOptional<T>(object? constructable);
+}
+
+internal interface ICompilationUnitFeature {
+    public CompilationUnitFragment Implement(ICompilationUnitContext compilationUnit, CompilationUnitFragment currentUnit);
 }

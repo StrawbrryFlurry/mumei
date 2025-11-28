@@ -20,7 +20,7 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
 
     private AccessModifierList _modifiers = AccessModifier.Internal;
 
-    public IλInternalClassBuilderCompilerApi λCompilerApi => _compilerApi ??= new CompilerApi(context, this);
+    public IΦInternalClassBuilderCompilerApi ΦCompilerApi => _compilerApi ??= new CompilerApi(context, this);
 
     public TClassDef New(object[] args) {
         throw new NotImplementedException();
@@ -35,8 +35,8 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
         return this;
     }
 
-    public ISyntheticClassBuilder<TClassDef> WithModifiers(AccessModifierList modifiers) {
-        _modifiers = modifiers;
+    public ISyntheticClassBuilder<TClassDef> WithAccessibility(AccessModifierList accessModifiers) {
+        _modifiers = accessModifiers;
         return this;
     }
 
@@ -46,11 +46,12 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
         return (_uniqueNameGenerator ??= new UniqueNameGeneratorComponent()).MakeUnique(n);
     }
 
-    private void DeclareMethod(ISyntheticMethod method) {
+    public ISyntheticClassBuilder<TClassDef> DeclareMethod(ISyntheticMethod method) {
         (_methods ??= []).Add(method);
+        return this;
     }
 
-    private sealed class CompilerApi(ICodeGenerationContext context, QtSyntheticClassBuilder<TClassDef> builder) : IλInternalClassBuilderCompilerApi {
+    private sealed class CompilerApi(ICodeGenerationContext context, QtSyntheticClassBuilder<TClassDef> builder) : IΦInternalClassBuilderCompilerApi {
         public ICodeGenerationContext Context => context;
 
         public void DeclareMethod(
