@@ -25,13 +25,27 @@ public interface ISyntheticTypeInfo<T> {
 
 internal sealed class ErrorSyntheticType(string? typeName, string errorReason, object declarationSite) : ISyntheticType {
     public ISyntheticIdentifier Name { get; } = new ConstantSyntheticIdentifier(typeName ?? $"<error: {errorReason}>");
+    public ISyntheticNamespace? Namespace { get; }
 }
 
 internal sealed class RuntimeSyntheticType(Type t) : ISyntheticType, ISyntheticConstructable<TypeInfoFragment> {
     public ISyntheticIdentifier Name => new ConstantSyntheticIdentifier(t.Name);
+    public ISyntheticNamespace? Namespace => t.Namespace is null ? null : new RuntimeSyntheticNamespace(t.Namespace);
 
     public TypeInfoFragment Construct(ICompilationUnitContext compilationUnit) {
         return new TypeInfoFragment(t);
+    }
+}
+
+internal sealed class RuntimeSyntheticNamespace : ISyntheticNamespace {
+    public RuntimeSyntheticNamespace(string tNamespace) {
+        throw new NotImplementedException();
+    }
+
+    public string FullyQualifiedName { get; }
+    public ImmutableArray<ISyntheticMember> Members { get; }
+    public ISyntheticNamespace WithMember(ISyntheticMember member) {
+        throw new NotImplementedException();
     }
 }
 

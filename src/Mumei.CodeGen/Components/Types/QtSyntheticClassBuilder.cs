@@ -17,6 +17,8 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
     private List<ISyntheticClass>? _nestedClasses;
     private ISyntheticTypeParameterList? _typeParameters;
 
+    private IdentifierScope? _scope;
+
     private AccessModifierList _modifiers = AccessModifier.Internal;
 
     public IΦInternalClassBuilderCompilerApi ΦCompilerApi => _compilerApi ??= new CompilerApi(context, this);
@@ -49,7 +51,8 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
     }
 
     public ISyntheticIdentifier UniqueName(string name) {
-        return new UniqueSyntheticIdentifier(this, name);
+        _scope ??= context.ΦCompilerApi.IdentifierProvider.CreateScope(name);
+        return new UniqueSyntheticIdentifier(_scope.Value, name);
     }
 
     private sealed class CompilerApi(ICodeGenerationContext context, QtSyntheticClassBuilder<TClassDef> builder) : IΦInternalClassBuilderCompilerApi {

@@ -1,8 +1,34 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Mumei.Roslyn.Common.Polyfill;
 
 internal static class SpanExtensions {
+    private const int MaxUInt32AsciiLength = 10;
+
+    extension(char) {
+        public static int MaxAsciiIntLength => MaxUInt32AsciiLength;
+
+        public static int WriteIntAsAsciiChars(uint value, Span<char> target) {
+            Debug.Assert(target.Length >= MaxUInt32AsciiLength);
+            var index = 0;
+
+            // > Number Formatting UInt32ToDecChars
+            var intValue = (int) value;
+            while (intValue >= 10) {
+                intValue = Math.DivRem(intValue, 10, out var remainder);
+                var digit = (char) ('0' + remainder);
+                target[index] = digit;
+                index++;
+            }
+
+            var finalDigit = (char) ('0' + intValue);
+            target[index] = finalDigit;
+            var charsWritten = index + 1;
+            return charsWritten;
+        }
+    }
+
     extension(int) {
         public static bool TryParseAsciiInt(ReadOnlySpan<char> chars, out int result) {
             if (chars.IsEmpty) {

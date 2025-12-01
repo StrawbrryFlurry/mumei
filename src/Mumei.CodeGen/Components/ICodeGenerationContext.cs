@@ -24,6 +24,8 @@ public interface ICodeGenerationContext {
     ) where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new();
 
     public interface IΦInternalCompilerApi {
+        public ICodeGenerationIdentifierProvider IdentifierProvider { get; }
+
         public ISyntheticClassBuilder<TClassDefinition> DeclareClassBuilder<TClassDefinition>(string name);
 
         public ISyntheticClassBuilder<TClassDefinition> TrackClass<TClassDefinition>(ISyntheticClassBuilder<TClassDefinition> classBuilder)

@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using Microsoft.CodeAnalysis.CSharp;
 using Mumei.Roslyn.Testing.CompilationReferenceGenerator;
 using static Mumei.Roslyn.Testing.SourceGeneratorTest;
 
@@ -12,6 +13,8 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
                 b.AddSource(
                     "foo",
                     """
+                    using Mumei.Roslyn.Testing;
+
                     public sealed class Test {
                         public void TestMethod() {
                             var result = SyntaxTreeReference.Of<CompilationTestSource>(); 
@@ -22,7 +25,7 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
                         public string s = null!;
                     }
                     """
-                ).WithAssemblyName("TestAssembly");
+                ).WithAssemblyName("TestAssembly").AddTypeReference<CSharpCompilation>();
             }
         ).RunWithAssert(result => {
             result.HasFileMatching("*SyntaxTreeReferenceInterceptor_0__0.g.cs")
@@ -49,6 +52,8 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
             x.UpdateFile(
                 "foo",
                 """
+                using Mumei.Roslyn.Testing;
+
                 public sealed class Test {
                     public void TestMethod() {
                         var result = SyntaxTreeReference.Of<CompilationTestSource>(); 

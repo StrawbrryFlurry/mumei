@@ -1,6 +1,7 @@
 ﻿using System.Buffers;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace Mumei.Roslyn;
@@ -71,7 +72,7 @@ internal ref partial struct ArrayBuilder<TElement> {
         };
     }
 
-    public void AddRange(in ReadOnlySpan<TElement> elements) {
+    public void AddRange(scoped ReadOnlySpan<TElement> elements) {
         var count = _count;
         var newCount = count + elements.Length;
         var buffer = _elements;

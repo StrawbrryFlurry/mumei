@@ -53,7 +53,7 @@ internal sealed partial class CSharpCodeGenerationContext : ICodeGenerationConte
     }
 
     public void EmitIncremental(string hintName, ISyntheticNamespace toEmit) {
-        var dynamicHintName = new UniqueSyntheticIdentifier(hintName, hintName);
+        var dynamicHintName = new UniqueSyntheticIdentifier(IdentifierScope.Global, hintName);
         Emit(dynamicHintName, toEmit);
     }
 
