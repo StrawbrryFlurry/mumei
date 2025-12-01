@@ -14,13 +14,6 @@ internal sealed partial class CSharpCodeGenerationContext {
 
     public ISyntheticClassBuilder<CompileTimeUnknown> DeclareClass(string name) {
         return new QtSyntheticClassBuilder<CompileTimeUnknown>(
-            new ConstantSyntheticIdentifier(name),
-            this
-        );
-    }
-
-    public ISyntheticClassBuilder<CompileTimeUnknown> DeclareClass(ISyntheticIdentifier name) {
-        return new QtSyntheticClassBuilder<CompileTimeUnknown>(
             name,
             this
         );

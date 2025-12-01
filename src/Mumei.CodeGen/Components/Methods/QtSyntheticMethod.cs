@@ -5,7 +5,7 @@ internal sealed class QtSyntheticMethod : ISyntheticMethod {
         ISyntheticAttribute[] attributes,
         AccessModifierList modifiers,
         ISyntheticType returnType,
-        ISyntheticIdentifier name,
+        string name,
         ISyntheticTypeParameter[] typeParameters,
         ISyntheticParameter[] parameters,
         ISyntheticCodeBlock body
@@ -13,7 +13,7 @@ internal sealed class QtSyntheticMethod : ISyntheticMethod {
         Name = name;
     }
 
-    public ISyntheticIdentifier Name { get; }
+    public string Name { get; }
 
     public TSignature BindAs<TSignature>(object target) where TSignature : Delegate {
         throw new NotImplementedException();

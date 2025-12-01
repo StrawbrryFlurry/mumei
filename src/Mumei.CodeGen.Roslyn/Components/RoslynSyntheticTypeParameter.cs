@@ -7,7 +7,7 @@ using Mumei.CodeGen.Roslyn.RendererExtensions;
 namespace Mumei.CodeGen.Roslyn.Components;
 
 internal sealed class RoslynSyntheticTypeParameter(ITypeParameterSymbol parameter) : ISyntheticTypeParameter, ISyntheticConstructable<TypeParameterFragment> {
-    public ISyntheticIdentifier Name { get; init; } = new ConstantSyntheticIdentifier(parameter.Name);
+    public string Name { get; init; } = parameter.Name;
 
     public sealed class Constraint(ISyntheticType typeConstraint) : ISyntheticTypeParameter.IConstraint {
         public ISyntheticType TypeConstraint { get; init; } = typeConstraint;
@@ -45,7 +45,7 @@ internal sealed class RoslynSyntheticTypeParameter(ITypeParameterSymbol paramete
         }
 
         return new TypeParameterFragment(
-            Name.Resolve(compilationUnit.IdentifierResolver),
+            Name,
             constraints.ToImmutable()
         );
     }

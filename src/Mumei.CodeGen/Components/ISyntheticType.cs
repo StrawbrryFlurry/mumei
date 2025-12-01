@@ -8,7 +8,7 @@ namespace Mumei.CodeGen.Components;
 /// or a reference to a runtime or compile-time type.
 /// </summary>
 public interface ISyntheticType {
-    public ISyntheticIdentifier Name { get; }
+    public string Name { get; }
 }
 
 /// <summary>
@@ -24,12 +24,12 @@ public interface ISyntheticTypeInfo<T> {
 }
 
 internal sealed class ErrorSyntheticType(string? typeName, string errorReason, object declarationSite) : ISyntheticType {
-    public ISyntheticIdentifier Name { get; } = new ConstantSyntheticIdentifier(typeName ?? $"<error: {errorReason}>");
+    public string Name { get; } = typeName ?? $"<error: {errorReason}>";
     public ISyntheticNamespace? Namespace { get; }
 }
 
 internal sealed class RuntimeSyntheticType(Type t) : ISyntheticType, ISyntheticConstructable<TypeInfoFragment> {
-    public ISyntheticIdentifier Name => new ConstantSyntheticIdentifier(t.Name);
+    public string Name => t.Name;
     public ISyntheticNamespace? Namespace => t.Namespace is null ? null : new RuntimeSyntheticNamespace(t.Namespace);
 
     public TypeInfoFragment Construct(ICompilationUnitContext compilationUnit) {

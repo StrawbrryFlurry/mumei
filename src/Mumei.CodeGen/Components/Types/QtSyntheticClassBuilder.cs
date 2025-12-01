@@ -4,20 +4,18 @@ using Mumei.Roslyn;
 namespace Mumei.CodeGen.Components;
 
 internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
-    ISyntheticIdentifier name,
+    string name,
     ICodeGenerationContext context
 ) : ISyntheticClassBuilder<TClassDef>, ISyntheticConstructable<ClassDeclarationFragment> {
     private CompilerApi? _compilerApi;
 
-    public ISyntheticIdentifier Name => _name;
-    private ISyntheticIdentifier _name = name;
+    public string Name => _name;
+    private string _name = name;
 
     private ISyntheticAttributeList? _attributes;
     private List<ISyntheticMethod>? _methods;
     private List<ISyntheticClass>? _nestedClasses;
     private ISyntheticTypeParameterList? _typeParameters;
-
-    private IdentifierScope? _scope;
 
     private AccessModifierList _modifiers = AccessModifier.Internal;
 
@@ -32,12 +30,8 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
     }
 
     public ISyntheticClassBuilder<TClassDef> WithName(string name) {
-        _name = new ConstantSyntheticIdentifier(name);
+        _name = name;
         return this;
-    }
-
-    public ISyntheticClassBuilder<TClassDef> WithName(ISyntheticIdentifier name) {
-        throw new NotImplementedException();
     }
 
     public ISyntheticClassBuilder<TClassDef> WithAccessibility(AccessModifierList accessModifiers) {
@@ -50,9 +44,9 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
         return this;
     }
 
-    public ISyntheticIdentifier UniqueName(string name) {
-        _scope ??= context.ΦCompilerApi.IdentifierProvider.CreateScope(name);
-        return new UniqueSyntheticIdentifier(_scope.Value, name);
+    public string UniqueName(string name) {
+        // TODO: Implement unique name generation
+        return name;
     }
 
     private sealed class CompilerApi(ICodeGenerationContext context, QtSyntheticClassBuilder<TClassDef> builder) : IΦInternalClassBuilderCompilerApi {
@@ -62,7 +56,7 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
             ISyntheticAttribute[] attributes,
             AccessModifierList modifiers,
             ISyntheticType returnType,
-            ISyntheticIdentifier name,
+            string name,
             ISyntheticTypeParameter[] typeParameters,
             ISyntheticParameter[] parameters,
             ISyntheticCodeBlock body
@@ -96,7 +90,7 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
         return new ClassDeclarationFragment(
             compilationUnit.Synthesize(_attributes, AttributeListFragment.Empty),
             _modifiers,
-            Name.Resolve(compilationUnit.IdentifierResolver),
+            Name,
             compilationUnit.Synthesize(_typeParameters, TypeParameterListFragment.Empty),
             [],
             baseTypes.ToImmutableArrayAndFree(),

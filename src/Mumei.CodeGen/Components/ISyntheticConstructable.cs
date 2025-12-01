@@ -15,7 +15,6 @@ internal interface ISyntheticConstructable<out TTarget> {
 
 internal interface ICompilationUnitContext {
     public ICodeGenerationContext CodeGenContext { get; }
-    public IIdentifierResolver IdentifierResolver { get; }
 
     public void AddSharedLocalCompilationUnitFeature(ICompilationUnitFeature feature);
 

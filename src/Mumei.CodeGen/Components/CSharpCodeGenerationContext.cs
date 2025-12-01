@@ -4,17 +4,15 @@ using Mumei.Roslyn;
 namespace Mumei.CodeGen.Components;
 
 internal sealed partial class CSharpCodeGenerationContext : ICodeGenerationContext {
-    private readonly Dictionary<ISyntheticIdentifier, Dictionary<string, ISyntheticNamespace>> _namespacesToEmit = new();
+    private readonly Dictionary<string, Dictionary<string, ISyntheticNamespace>> _namespacesToEmit = new();
     private readonly Dictionary<Type, object> _synthesisProviders = new();
 
     public CompilationUnitFragment SynthesizeCompilationUnit(
-        ImmutableArray<ISyntheticNamespace> namespaces,
-        IIdentifierResolver identifierResolver
+        ImmutableArray<ISyntheticNamespace> namespaces
     ) {
         var constructedNamespaces = new ArrayBuilder<NamespaceFragment>();
         var ctx = new CSharpCompilationUnitContext(
-            this,
-            identifierResolver
+            this
         );
         foreach (var ns in namespaces) {
             var fragment = ctx.Synthesize<NamespaceFragment>(ns);
@@ -30,13 +28,8 @@ internal sealed partial class CSharpCodeGenerationContext : ICodeGenerationConte
     }
 
     public void Emit(string hintName, ISyntheticNamespace ns) {
-        var identifier = new ConstantSyntheticIdentifier(hintName);
-        Emit(identifier, ns);
-    }
-
-    private void Emit(ISyntheticIdentifier identifier, ISyntheticNamespace ns) {
-        if (!_namespacesToEmit.TryGetValue(identifier, out var existingNamespaceMap)) {
-            _namespacesToEmit[identifier] = new Dictionary<string, ISyntheticNamespace> {
+        if (!_namespacesToEmit.TryGetValue(hintName, out var existingNamespaceMap)) {
+            _namespacesToEmit[hintName] = new Dictionary<string, ISyntheticNamespace> {
                 [ns.FullyQualifiedName] = ns
             };
             return;
@@ -53,8 +46,8 @@ internal sealed partial class CSharpCodeGenerationContext : ICodeGenerationConte
     }
 
     public void EmitIncremental(string hintName, ISyntheticNamespace toEmit) {
-        var dynamicHintName = new UniqueSyntheticIdentifier(IdentifierScope.Global, hintName);
-        Emit(dynamicHintName, toEmit);
+        // TODO: This needs to be unique per invocation to avoid collisions
+        Emit(hintName, toEmit);
     }
 
     public void RegisterContextProvider<TSynthesizer>(TSynthesizer synthesizer) where TSynthesizer : ICodeGenerationContextProvider {
@@ -71,11 +64,9 @@ internal sealed partial class CSharpCodeGenerationContext : ICodeGenerationConte
 }
 
 internal sealed class CSharpCompilationUnitContext(
-    ICodeGenerationContext codeGenContext,
-    IIdentifierResolver identifierResolver
+    ICodeGenerationContext codeGenContext
 ) : ICompilationUnitContext {
     public ICodeGenerationContext CodeGenContext => codeGenContext;
-    public IIdentifierResolver IdentifierResolver => identifierResolver;
 
     private HashSet<ICompilationUnitFeature>? _sharedLocalDeclarations;
 

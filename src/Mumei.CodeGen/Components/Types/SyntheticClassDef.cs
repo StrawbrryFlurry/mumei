@@ -1,11 +1,11 @@
 ﻿namespace Mumei.CodeGen.Components;
 
 public abstract class SyntheticClassDefinition<TSelf> : ISyntheticClass<TSelf> where TSelf : new() {
-    public ISyntheticIdentifier Name { get; private set; }
+    public string Name { get; private set; }
 
     // Add an analyzer that ensures Synthetic Classes are never instantiated by user code!
     protected SyntheticClassDefinition() {
-        Name = new ConstantSyntheticIdentifier(typeof(TSelf).Name);
+        Name = typeof(TSelf).Name;
         // throw new CompileTimeComponentUsedAtRuntimeException();
     }
 

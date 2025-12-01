@@ -9,7 +9,6 @@ public interface ICodeGenerationContext {
     public ISyntheticCodeBlock Block<TInput>(TInput input, Action<IRenderTreeBuilder, TInput> renderBlock);
 
     public ISyntheticClassBuilder<CompileTimeUnknown> DeclareClass(string name);
-    public ISyntheticClassBuilder<CompileTimeUnknown> DeclareClass(ISyntheticIdentifier name);
     public ISyntheticNamespace Namespace(params ReadOnlySpan<string> namespaceSegments);
 
     public void Emit(string hintName, ISyntheticNamespace toEmit);
@@ -24,13 +23,12 @@ public interface ICodeGenerationContext {
     ) where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new();
 
     public interface IΦInternalCompilerApi {
-        public ICodeGenerationIdentifierProvider IdentifierProvider { get; }
 
         public ISyntheticClassBuilder<TClassDefinition> DeclareClassBuilder<TClassDefinition>(string name);
 
         public ISyntheticClassBuilder<TClassDefinition> TrackClass<TClassDefinition>(ISyntheticClassBuilder<TClassDefinition> classBuilder)
             where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new();
 
-        public ImmutableArray<(ISyntheticIdentifier TrackingName, ImmutableArray<ISyntheticNamespace> Namespaces)> EnumerateNamespacesToEmit();
+        public ImmutableArray<(string TrackingName, ImmutableArray<ISyntheticNamespace> Namespaces)> EnumerateNamespacesToEmit();
     }
 }

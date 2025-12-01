@@ -1,7 +1,7 @@
 ﻿namespace Mumei.CodeGen.Components;
 
 internal sealed class SyntheticInterceptorMethodBuilder<TSignature>(
-    ISyntheticIdentifier name,
+    string name,
     IΦInternalClassBuilderCompilerApi classApi
 ) : SyntheticMethodBase<ISyntheticInterceptorMethodBuilder<TSignature>>(name, classApi), ISyntheticInterceptorMethodBuilder<TSignature> where TSignature : Delegate {
     public TSignature Bind(object target) {

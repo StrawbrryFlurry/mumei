@@ -6,13 +6,12 @@ public interface ISyntheticClassBuilder<T> : ISyntheticClass, ISyntheticTypeInfo
     public IΦInternalClassBuilderCompilerApi ΦCompilerApi { get; }
 
     public ISyntheticClassBuilder<T> WithName(string name);
-    public ISyntheticClassBuilder<T> WithName(ISyntheticIdentifier name);
 
     public ISyntheticClassBuilder<T> WithAccessibility(AccessModifierList accessModifiers);
 
     public ISyntheticClassBuilder<T> DeclareMethod(ISyntheticMethod method);
 
-    public ISyntheticIdentifier UniqueName(string name);
+    public string UniqueName(string name);
 
     public ISyntheticMethodBuilder<Delegate> DeclareMethod<TMethodDefinition>(
         string name,
@@ -66,7 +65,7 @@ public interface IΦInternalClassBuilderCompilerApi {
         ISyntheticAttribute[] attributes,
         AccessModifierList modifiers,
         ISyntheticType returnType,
-        ISyntheticIdentifier name,
+        string name,
         ISyntheticTypeParameter[] typeParameters,
         ISyntheticParameter[] parameters,
         ISyntheticCodeBlock body
