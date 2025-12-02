@@ -51,6 +51,7 @@ public static class SyntheticSourceProviderExtensions {
             IncrementalValuesProvider<IncrementalCodeGenContext> contextProvider,
             Action<CodeGenerationEmitContext>? emitCode = null
         ) {
+            var thisOwnedScopeProvider = new RoslynIdentifierScopeProvider();
             ctx.RegisterSourceOutput(contextProvider, (spc, compilation) => {
                 if (emitCode is not null) {
                     var emitContext = new CodeGenerationEmitContext(
@@ -60,13 +61,16 @@ public static class SyntheticSourceProviderExtensions {
                     emitCode(emitContext);
                 }
 
-                foreach (var (name, namespaces) in compilation.Context.ΦCompilerApi.EnumerateNamespacesToEmit()) {
+                var identifierScopeProvider = compilation.SharedIdentifierScopeProvider ?? thisOwnedScopeProvider;
+                foreach (var (name, declarations) in compilation.Context.ΦCompilerApi.EnumerateDeclarationsToEmit()) {
                     using var fileTree = new SourceFileRenderTreeBuilder();
                     var compilationUnit = ((CSharpCodeGenerationContext) compilation.Context).SynthesizeCompilationUnit(
-                        namespaces
+                        declarations,
+                        identifierScopeProvider
                     );
                     var text = fileTree.RenderRootNode(compilationUnit);
-                    spc.AddSource($"{name}.g", text);
+                    var resolvedName = name.Resolve(identifierScopeProvider);
+                    spc.AddSource($"{resolvedName}.g", text);
                 }
             });
         }
@@ -122,27 +126,30 @@ public static class SyntheticSourceProviderExtensions {
         }
 
         public IncrementalValuesProvider<IncrementalCodeGenContext<TTo>> IncrementalGenerate<TTo>(
-            [Pure] Func<ICodeGenerationContext, T, TTo> compileSelector
+            [Pure] Func<ICodeGenerationContext, T, TTo> generateCodeWithState
         ) {
             // var valueWithCompilation = source.Select(selector);
             return default;
         }
 
         public IncrementalValuesProvider<IncrementalCodeGenContext> IncrementalGenerate(
-            [Pure] Action<ICodeGenerationContext, T, CancellationToken> compileSelector
+            [Pure] Action<ICodeGenerationContext, T, CancellationToken> generateCode
         ) {
             // var valueWithCompilation = source.Select(selector);
             return source.Select((valueWithCompilation, ct) => {
                 var context = new CSharpCodeGenerationContext();
                 context.RegisterContextProvider(new CompilationCodeGenerationContextProvider(valueWithCompilation.Compilation));
-                compileSelector(context, valueWithCompilation.Value, ct);
+                generateCode(context, valueWithCompilation.Value, ct);
                 return new IncrementalCodeGenContext(context, [valueWithCompilation.Value]);
             });
         }
     }
 }
 
-public readonly struct UserValueWithCompilation<T>(T userValue, Compilation compilation) : IEquatable<UserValueWithCompilation<T>> {
+public readonly struct UserValueWithCompilation<T>(
+    T userValue,
+    Compilation compilation
+) : IEquatable<UserValueWithCompilation<T>> {
     public T Value { get; } = userValue;
     public Compilation Compilation { get; } = compilation;
 
@@ -163,7 +170,10 @@ public readonly struct UserValueWithCompilation<T>(T userValue, Compilation comp
     }
 }
 
-public readonly struct CodeGenerationEmitContext(ICodeGenerationContext context, CancellationToken ct) {
+public readonly struct CodeGenerationEmitContext(
+    ICodeGenerationContext context,
+    CancellationToken ct
+) {
     public ICodeGenerationContext Context { get; } = context;
     public CancellationToken CancellationToken { get; } = ct;
 

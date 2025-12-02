@@ -2,10 +2,10 @@
 
 public readonly struct CompilationUnitFragment(
     TriviaFragment leadingTrivia,
-    ImmutableArray<NamespaceFragment> namespaces,
+    ImmutableArray<NamespaceOrGlobalScopeFragment> namespaces,
     TriviaFragment trailingTrivia
 ) : IRenderFragment {
-    public ImmutableArray<NamespaceFragment> Namespaces { get; } = namespaces;
+    public ImmutableArray<NamespaceOrGlobalScopeFragment> Namespaces { get; } = namespaces;
 
     public void Render(IRenderTreeBuilder renderTree) {
         renderTree.Node(leadingTrivia);
@@ -13,7 +13,7 @@ public readonly struct CompilationUnitFragment(
         renderTree.Node(trailingTrivia);
     }
 
-    public CompilationUnitFragment AddNamespace(NamespaceFragment namespaceFragment) {
+    public CompilationUnitFragment AddNamespace(NamespaceOrGlobalScopeFragment namespaceFragment) {
         var newNamespaces = Namespaces.Add(namespaceFragment);
         return new CompilationUnitFragment(
             leadingTrivia, newNamespaces, trailingTrivia

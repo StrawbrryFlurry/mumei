@@ -1,5 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-using Mumei.CodeGen.Rendering.CSharp;
+﻿using Mumei.CodeGen.Rendering.CSharp;
 
 namespace Mumei.CodeGen.Components;
 
@@ -8,7 +7,7 @@ namespace Mumei.CodeGen.Components;
 /// or a reference to a runtime or compile-time type.
 /// </summary>
 public interface ISyntheticType {
-    public string Name { get; }
+    public SyntheticIdentifier Name { get; }
 }
 
 /// <summary>
@@ -24,12 +23,12 @@ public interface ISyntheticTypeInfo<T> {
 }
 
 internal sealed class ErrorSyntheticType(string? typeName, string errorReason, object declarationSite) : ISyntheticType {
-    public string Name { get; } = typeName ?? $"<error: {errorReason}>";
+    public SyntheticIdentifier Name { get; } = typeName ?? $"<error: {errorReason}>";
     public ISyntheticNamespace? Namespace { get; }
 }
 
 internal sealed class RuntimeSyntheticType(Type t) : ISyntheticType, ISyntheticConstructable<TypeInfoFragment> {
-    public string Name => t.Name;
+    public SyntheticIdentifier Name => t.Name;
     public ISyntheticNamespace? Namespace => t.Namespace is null ? null : new RuntimeSyntheticNamespace(t.Namespace);
 
     public TypeInfoFragment Construct(ICompilationUnitContext compilationUnit) {
@@ -47,6 +46,8 @@ internal sealed class RuntimeSyntheticNamespace : ISyntheticNamespace {
     public ISyntheticNamespace WithMember(ISyntheticMember member) {
         throw new NotImplementedException();
     }
+    public SyntheticIdentifier Identifier { get; }
+    public SyntheticIdentifier Name { get; }
 }
 
 internal sealed class QtSyntheticTypeInfo<T> : ISyntheticTypeInfo<T> {

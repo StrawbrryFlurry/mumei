@@ -11,8 +11,8 @@ public interface ICodeGenerationContext {
     public ISyntheticClassBuilder<CompileTimeUnknown> DeclareClass(string name);
     public ISyntheticNamespace Namespace(params ReadOnlySpan<string> namespaceSegments);
 
-    public void Emit(string hintName, ISyntheticNamespace toEmit);
-    public void EmitIncremental(string hintName, ISyntheticNamespace toEmit);
+    public void Emit(string hintName, ISyntheticDeclaration toEmit);
+    public void EmitIncremental(string hintName, ISyntheticDeclaration toEmit);
 
     public void RegisterContextProvider<TProvider>(TProvider provider) where TProvider : ICodeGenerationContextProvider;
     public TProvider GetContextProvider<TProvider>() where TProvider : ICodeGenerationContextProvider;
@@ -23,12 +23,11 @@ public interface ICodeGenerationContext {
     ) where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new();
 
     public interface IΦInternalCompilerApi {
-
         public ISyntheticClassBuilder<TClassDefinition> DeclareClassBuilder<TClassDefinition>(string name);
 
         public ISyntheticClassBuilder<TClassDefinition> TrackClass<TClassDefinition>(ISyntheticClassBuilder<TClassDefinition> classBuilder)
             where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new();
 
-        public ImmutableArray<(string TrackingName, ImmutableArray<ISyntheticNamespace> Namespaces)> EnumerateNamespacesToEmit();
+        public ImmutableArray<(SyntheticIdentifier TrackingName, ImmutableArray<ISyntheticDeclaration> Declarations)> EnumerateDeclarationsToEmit();
     }
 }

@@ -1,10 +1,9 @@
-﻿using System.Collections.Immutable;
-using Mumei.CodeGen.Rendering.CSharp;
+﻿using Mumei.CodeGen.Rendering.CSharp;
 using Mumei.Roslyn;
 
 namespace Mumei.CodeGen.Components;
 
-public interface ISyntheticNamespace {
+public interface ISyntheticNamespace : ISyntheticDeclaration {
     public string FullyQualifiedName { get; }
 
     public ImmutableArray<ISyntheticMember> Members { get; }
@@ -12,10 +11,11 @@ public interface ISyntheticNamespace {
     public ISyntheticNamespace WithMember(ISyntheticMember member);
 }
 
-internal sealed class QtSyntheticNamespace(string name) : ISyntheticNamespace, ISyntheticConstructable<NamespaceFragment> {
-    public string Name { get; } = name;
+internal sealed class QtSyntheticNamespace(string name) : ISyntheticNamespace, ISyntheticConstructable<NamespaceOrGlobalScopeFragment> {
+    public SyntheticIdentifier Name { get; } = name;
 
     public string FullyQualifiedName { get; } = name;
+    public SyntheticIdentifier Identifier { get; } = SyntheticIdentifier.Constant(name);
 
     public ImmutableArray<ISyntheticMember> Members => _members?.ToImmutableArray() ?? [];
     private List<ISyntheticMember>? _members;
@@ -26,11 +26,11 @@ internal sealed class QtSyntheticNamespace(string name) : ISyntheticNamespace, I
         return this;
     }
 
-    public NamespaceFragment Construct(ICompilationUnitContext compilationUnit) {
+    public NamespaceOrGlobalScopeFragment Construct(ICompilationUnitContext compilationUnit) {
         var classDeclarations = new ArrayBuilder<ClassDeclarationFragment>();
 
         if (_members is null) {
-            return NamespaceFragment.Create(Name, []);
+            return NamespaceOrGlobalScopeFragment.Create(Name.Resolve(compilationUnit), []);
         }
 
         foreach (var member in _members) {
@@ -47,6 +47,6 @@ internal sealed class QtSyntheticNamespace(string name) : ISyntheticNamespace, I
             }
         }
 
-        return NamespaceFragment.Create(Name, classDeclarations.ToImmutableArrayAndFree());
+        return NamespaceOrGlobalScopeFragment.Create(Name.Resolve(compilationUnit), classDeclarations.ToImmutableArrayAndFree());
     }
 }

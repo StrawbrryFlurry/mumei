@@ -5,7 +5,7 @@ namespace Mumei.CodeGen.Components;
 
 internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
     public ISyntheticMethodBuilder<Delegate> DeclareMethod<TMethodDefinition>(
-        string name,
+        SyntheticIdentifier name,
         Func<TMethodDefinition, Delegate> methodSelector,
         Action<TMethodDefinition> inputBinder
     ) where TMethodDefinition : SyntheticMethodDefinition, new() {
@@ -13,14 +13,14 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
     }
 
     public ISyntheticMethodBuilder<TSignature> DeclareMethod<TMethodDefinition, TSignature>(
-        string name,
+        SyntheticIdentifier name,
         Func<TMethodDefinition, TSignature> methodSelector,
         Action<TMethodDefinition> inputBinder
     ) where TMethodDefinition : SyntheticMethodDefinition, new() where TSignature : Delegate {
         throw new NotImplementedException();
     }
 
-    public ISyntheticMethodBuilder<TSignature> DeclareMethod<TSignature>(string name) where TSignature : Delegate {
+    public ISyntheticMethodBuilder<TSignature> DeclareMethod<TSignature>(SyntheticIdentifier name) where TSignature : Delegate {
         throw new NotImplementedException();
     }
 
@@ -40,23 +40,23 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
         throw new NotImplementedException();
     }
 
-    public ISyntheticField<TField> DeclareField<TField>(string name) {
+    public ISyntheticField<TField> DeclareField<TField>(SyntheticIdentifier name) {
         throw new NotImplementedException();
     }
 
-    public ISyntheticField<CompileTimeUnknown> DeclareField(Type type, string name) {
+    public ISyntheticField<CompileTimeUnknown> DeclareField(Type type, SyntheticIdentifier name) {
         throw new NotImplementedException();
     }
 
-    public ISyntheticField<CompileTimeUnknown> DeclareField(ITypeSymbol type, string name) {
+    public ISyntheticField<CompileTimeUnknown> DeclareField(ITypeSymbol type, SyntheticIdentifier name) {
         throw new NotImplementedException();
     }
 
-    public ISyntheticField<CompileTimeUnknown> DeclareField(ISyntheticType type, string name) {
+    public ISyntheticField<CompileTimeUnknown> DeclareField(ISyntheticType type, SyntheticIdentifier name) {
         throw new NotImplementedException();
     }
 
-    public void DeclareProperty(ITypeSymbol type, string name) {
+    public void DeclareProperty(ITypeSymbol type, SyntheticIdentifier name) {
         throw new NotImplementedException();
     }
 
@@ -92,7 +92,7 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
         throw new NotImplementedException();
     }
 
-    public ISyntheticClassBuilder<TNested> DeclareNestedClass<TNested>(string name, Action<TNested> bindInputs) where TNested : ISyntheticClass {
+    public ISyntheticClassBuilder<TNested> DeclareNestedClass<TNested>(SyntheticIdentifier name, Action<TNested> bindInputs) where TNested : ISyntheticClass {
         throw new NotImplementedException();
     }
 }

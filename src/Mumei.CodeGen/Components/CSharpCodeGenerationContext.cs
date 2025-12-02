@@ -4,18 +4,20 @@ using Mumei.Roslyn;
 namespace Mumei.CodeGen.Components;
 
 internal sealed partial class CSharpCodeGenerationContext : ICodeGenerationContext {
-    private readonly Dictionary<string, Dictionary<string, ISyntheticNamespace>> _namespacesToEmit = new();
     private readonly Dictionary<Type, object> _synthesisProviders = new();
 
     public CompilationUnitFragment SynthesizeCompilationUnit(
-        ImmutableArray<ISyntheticNamespace> namespaces
+        ImmutableArray<ISyntheticDeclaration> declarations,
+        ISyntheticIdentifierScopeProvider identifierScopeProvider
     ) {
-        var constructedNamespaces = new ArrayBuilder<NamespaceFragment>();
+        var constructedNamespaces = new ArrayBuilder<NamespaceOrGlobalScopeFragment>();
         var ctx = new CSharpCompilationUnitContext(
-            this
+            this,
+            identifierScopeProvider
         );
-        foreach (var ns in namespaces) {
-            var fragment = ctx.Synthesize<NamespaceFragment>(ns);
+
+        foreach (var declaration in declarations) {
+            var fragment = ctx.Synthesize<NamespaceOrGlobalScopeFragment>(declaration);
             constructedNamespaces.Add(fragment);
         }
 
@@ -25,29 +27,6 @@ internal sealed partial class CSharpCodeGenerationContext : ICodeGenerationConte
             TriviaFragment.Empty
         ));
         return updatedCompilationUnit;
-    }
-
-    public void Emit(string hintName, ISyntheticNamespace ns) {
-        if (!_namespacesToEmit.TryGetValue(hintName, out var existingNamespaceMap)) {
-            _namespacesToEmit[hintName] = new Dictionary<string, ISyntheticNamespace> {
-                [ns.FullyQualifiedName] = ns
-            };
-            return;
-        }
-
-        if (!existingNamespaceMap.TryGetValue(ns.FullyQualifiedName, out var existingMatchingNamespace)) {
-            existingNamespaceMap[ns.FullyQualifiedName] = ns;
-            return;
-        }
-
-        foreach (var member in ns.Members) {
-            existingMatchingNamespace.WithMember(member);
-        }
-    }
-
-    public void EmitIncremental(string hintName, ISyntheticNamespace toEmit) {
-        // TODO: This needs to be unique per invocation to avoid collisions
-        Emit(hintName, toEmit);
     }
 
     public void RegisterContextProvider<TSynthesizer>(TSynthesizer synthesizer) where TSynthesizer : ICodeGenerationContextProvider {
@@ -64,10 +43,10 @@ internal sealed partial class CSharpCodeGenerationContext : ICodeGenerationConte
 }
 
 internal sealed class CSharpCompilationUnitContext(
-    ICodeGenerationContext codeGenContext
+    ICodeGenerationContext codeGenContext,
+    ISyntheticIdentifierScopeProvider identifierScopeProvider
 ) : ICompilationUnitContext {
     public ICodeGenerationContext CodeGenContext => codeGenContext;
-
     private HashSet<ICompilationUnitFeature>? _sharedLocalDeclarations;
 
     public CompilationUnitFragment ApplyCodeGenerationFeatures(CompilationUnitFragment currentUnit) {
@@ -106,5 +85,9 @@ internal sealed class CSharpCompilationUnitContext(
         }
 
         return default;
+    }
+
+    public ISyntheticIdentifierScope GetDeclarationScope(ISyntheticDeclaration scope) {
+        return identifierScopeProvider.GetDeclarationScope(scope);
     }
 }

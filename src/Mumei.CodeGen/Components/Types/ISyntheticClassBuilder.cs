@@ -5,41 +5,41 @@ namespace Mumei.CodeGen.Components;
 public interface ISyntheticClassBuilder<T> : ISyntheticClass, ISyntheticTypeInfo<T> {
     public IΦInternalClassBuilderCompilerApi ΦCompilerApi { get; }
 
-    public ISyntheticClassBuilder<T> WithName(string name);
+    public ISyntheticClassBuilder<T> WithName(SyntheticIdentifier name);
 
     public ISyntheticClassBuilder<T> WithAccessibility(AccessModifierList accessModifiers);
 
     public ISyntheticClassBuilder<T> DeclareMethod(ISyntheticMethod method);
 
-    public string UniqueName(string name);
+    public SyntheticIdentifier MakeUniqueName(string name);
 
     public ISyntheticMethodBuilder<Delegate> DeclareMethod<TMethodDefinition>(
-        string name,
+        SyntheticIdentifier name,
         Func<TMethodDefinition, Delegate> methodSelector,
         Action<TMethodDefinition> inputBinder
     ) where TMethodDefinition : SyntheticMethodDefinition, new();
 
     public ISyntheticMethodBuilder<TSignature> DeclareMethod<TMethodDefinition, TSignature>(
-        string name,
+        SyntheticIdentifier name,
         Func<TMethodDefinition, TSignature> methodSelector,
         Action<TMethodDefinition> inputBinder
     ) where TMethodDefinition : SyntheticMethodDefinition, new() where TSignature : Delegate;
 
     public ISyntheticMethodBuilder<TSignature> DeclareMethod<TSignature>(
-        string name
+        SyntheticIdentifier name
     ) where TSignature : Delegate;
 
     public void BindSyntheticImplementation(ISyntheticType member, ISyntheticType actualType);
     public void BindSyntheticImplementation(Type member, ISyntheticType actualType);
     public void BindSyntheticImplementation(Type member, ITypeSymbol actualType);
 
-    public ISyntheticField<TField> DeclareField<TField>(string name);
+    public ISyntheticField<TField> DeclareField<TField>(SyntheticIdentifier name);
 
-    public ISyntheticField<CompileTimeUnknown> DeclareField(Type type, string name);
-    public ISyntheticField<CompileTimeUnknown> DeclareField(ITypeSymbol type, string name);
-    public ISyntheticField<CompileTimeUnknown> DeclareField(ISyntheticType type, string name);
+    public ISyntheticField<CompileTimeUnknown> DeclareField(Type type, SyntheticIdentifier name);
+    public ISyntheticField<CompileTimeUnknown> DeclareField(ITypeSymbol type, SyntheticIdentifier name);
+    public ISyntheticField<CompileTimeUnknown> DeclareField(ISyntheticType type, SyntheticIdentifier name);
 
-    void DeclareProperty(ITypeSymbol type, string name);
+    void DeclareProperty(ITypeSymbol type, SyntheticIdentifier name);
 
     public ISyntheticClassBuilder<T> Bind<TTarget>(ITypeSymbol type);
 
@@ -54,7 +54,7 @@ public interface ISyntheticClassBuilder<T> : ISyntheticClass, ISyntheticTypeInfo
     public void Extend(ISyntheticType baseType);
     public void Extend(ITypeSymbol baseType);
 
-    public ISyntheticClassBuilder<TNested> DeclareNestedClass<TNested>(string name, Action<TNested> bindInputs) where TNested : ISyntheticClass;
+    public ISyntheticClassBuilder<TNested> DeclareNestedClass<TNested>(SyntheticIdentifier name, Action<TNested> bindInputs) where TNested : ISyntheticClass;
 }
 
 // ReSharper disable once InconsistentNaming
@@ -65,7 +65,7 @@ public interface IΦInternalClassBuilderCompilerApi {
         ISyntheticAttribute[] attributes,
         AccessModifierList modifiers,
         ISyntheticType returnType,
-        string name,
+        SyntheticIdentifier name,
         ISyntheticTypeParameter[] typeParameters,
         ISyntheticParameter[] parameters,
         ISyntheticCodeBlock body

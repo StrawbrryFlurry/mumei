@@ -48,12 +48,6 @@ public static class SyntaxRendererExtensions {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void InterpolatedLine([InterpolatedStringHandlerArgument(nameof(renderTree))] IRenderTreeBuilder.InterpolatedStringHandler line) {
-            renderTree.Interpolate(line);
-            renderTree.NewLine();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void StartCodeBlock() {
             renderTree.Line("{");
             renderTree.StartBlock();
@@ -112,5 +106,13 @@ public static class SyntaxRendererExtensions {
             RuntimeTypeSerializer.RenderInto(renderTree, type);
             renderTree.Text(")");
         }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    // Rider doesn't seem to be able to recognize InterpolatedStringHandlerArgument attribute targets
+    // in extension blocks, use a regular extension method instead.
+    public static void InterpolatedLine(this IRenderTreeBuilder renderTree, [InterpolatedStringHandlerArgument(nameof(renderTree))] IRenderTreeBuilder.InterpolatedStringHandler line) {
+        renderTree.Interpolate(line);
+        renderTree.NewLine();
     }
 }

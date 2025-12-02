@@ -129,7 +129,7 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
             );
 
             interceptor.DeclareInterceptorMethod(
-                    interceptor.UniqueName("Intercept_Of"),
+                    interceptor.MakeUniqueName("Intercept_Of"),
                     expr.InvocationNode
                 )
                 .WithBody(ctx.Block(renderTree => {

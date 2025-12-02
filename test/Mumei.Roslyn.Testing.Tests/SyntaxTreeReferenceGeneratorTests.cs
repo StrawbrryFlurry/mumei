@@ -28,16 +28,14 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
                 ).WithAssemblyName("TestAssembly").AddTypeReference<CSharpCompilation>();
             }
         ).RunWithAssert(result => {
-            result.HasFileMatching("*SyntaxTreeReferenceInterceptor_0__0.g.cs")
+            result.HasFileMatching("*SyntaxTreeReferenceInterceptor__0.g.cs")
                 .WithPartialContent(
                     $$""""""""""
                       namespace Generated {
                           internal static partial class SyntaxTreeReferenceInterceptor {
                               [global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "*")]
-                              public static global::Mumei.Roslyn.Testing.ICompilationReference Intercept_Of_0__0() {
-                                  return new global::Mumei.Roslyn.Testing.SyntaxTreeCompilationReference {
-                                      TypeName = "CompilationTestSource",
-                                      SourceCode = "class root {}",
+                              public static global::Mumei.Roslyn.Testing.ICompilationReference Intercept_Of__0() {
+                                  return new global::Mumei.Roslyn.Testing.RootCompilationReference {
                                       References = [
                                       ]
                                   };
@@ -68,16 +66,14 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
             );
         }).RunWithAssert(result => {
             var t = result.GeneratedTrees;
-            result.HasFileMatching("*SyntaxTreeReferenceInterceptor_0__1.g.cs")
+            result.HasFileMatching("*SyntaxTreeReferenceInterceptor__1.g.cs")
                 .WithPartialContent(
                     $$""""""""""
                       namespace Generated {
                           internal static partial class SyntaxTreeReferenceInterceptor {
                               [global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "*")]
-                              public static global::Mumei.Roslyn.Testing.ICompilationReference Intercept_Of_0__1() {
-                                  return new global::Mumei.Roslyn.Testing.SyntaxTreeCompilationReference {
-                                      TypeName = "CompilationTestSource",
-                                      SourceCode = "class root {}",
+                              public static global::Mumei.Roslyn.Testing.ICompilationReference Intercept_Of__0() {
+                                  return new global::Mumei.Roslyn.Testing.RootCompilationReference {
                                       References = [
                                       ]
                                   };

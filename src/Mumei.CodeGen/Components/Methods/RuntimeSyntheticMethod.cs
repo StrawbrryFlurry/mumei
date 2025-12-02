@@ -3,7 +3,7 @@
 namespace Mumei.CodeGen.Components;
 
 internal sealed class RuntimeSyntheticMethod(MethodInfo method) : ISyntheticMethod {
-    public string Name => method.Name;
+    public SyntheticIdentifier Name { get; } = method.Name;
 
     public TSignature BindAs<TSignature>(object target) where TSignature : Delegate {
         throw new NotImplementedException();

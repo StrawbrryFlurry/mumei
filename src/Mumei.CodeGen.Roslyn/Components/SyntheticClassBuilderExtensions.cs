@@ -9,7 +9,7 @@ namespace Mumei.CodeGen.Roslyn.Components;
 public static class SyntheticClassBuilderExtensions {
     extension<TClass>(ISyntheticClassBuilder<TClass> classBuilder) {
         public ISyntheticInterceptorMethodBuilder<Delegate> DeclareUnconstructedInterceptorMethod(
-            string name,
+            SyntheticIdentifier name,
             InvocationExpressionSyntax invocationToIntercept
         ) {
             var (ctx, builder, methodSymbol) = MakeInterceptorMethodBuilder(name, invocationToIntercept, classBuilder.ΦCompilerApi);
@@ -23,7 +23,7 @@ public static class SyntheticClassBuilderExtensions {
         }
 
         public ISyntheticInterceptorMethodBuilder<Delegate> DeclareInterceptorMethod(
-            string name,
+            SyntheticIdentifier name,
             InvocationExpressionSyntax invocationToIntercept
         ) {
             var (ctx, builder, methodSymbol) = MakeInterceptorMethodBuilder(name, invocationToIntercept, classBuilder.ΦCompilerApi);
@@ -37,7 +37,7 @@ public static class SyntheticClassBuilderExtensions {
         }
 
         public ISyntheticInterceptorMethodBuilder<Delegate> DeclareInterceptorMethod<TMethodDefinition>(
-            string name,
+            SyntheticIdentifier name,
             InvocationExpressionSyntax invocationToIntercept,
             Func<TMethodDefinition, Delegate> methodSelector,
             Action<TMethodDefinition>? inputBinder = null
@@ -47,7 +47,7 @@ public static class SyntheticClassBuilderExtensions {
     }
 
     private static (ICodeGenerationContext ctx, SyntheticInterceptorMethodBuilder<Delegate> builder, IMethodSymbol methodSymbol) MakeInterceptorMethodBuilder(
-        string name,
+        SyntheticIdentifier name,
         InvocationExpressionSyntax invocationToIntercept,
         IΦInternalClassBuilderCompilerApi classApi
     ) {

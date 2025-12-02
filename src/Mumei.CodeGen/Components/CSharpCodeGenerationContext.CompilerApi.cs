@@ -1,13 +1,11 @@
-﻿using System.Collections.Concurrent;
-using Microsoft.Interop;
-
-namespace Mumei.CodeGen.Components;
+﻿namespace Mumei.CodeGen.Components;
 
 internal sealed partial class CSharpCodeGenerationContext {
     public ICodeGenerationContext.IΦInternalCompilerApi ΦCompilerApi => field ??= new CompilerApiImpl(this);
 
-    private sealed class CompilerApiImpl(CSharpCodeGenerationContext context) : ICodeGenerationContext.IΦInternalCompilerApi {
-
+    private sealed class CompilerApiImpl(
+        CSharpCodeGenerationContext context
+    ) : ICodeGenerationContext.IΦInternalCompilerApi {
         public ISyntheticClassBuilder<TClassDefinition> DeclareClassBuilder<TClassDefinition>(string name) {
             return new QtSyntheticClassBuilder<TClassDefinition>(name, context);
         }
@@ -16,8 +14,8 @@ internal sealed partial class CSharpCodeGenerationContext {
             return classBuilder;
         }
 
-        public ImmutableArray<(string TrackingName, ImmutableArray<ISyntheticNamespace> Namespaces)> EnumerateNamespacesToEmit() {
-            return context._namespacesToEmit.Select(x => (x.Key, x.Value.Values.ToImmutableArray())).ToImmutableArray();
+        public ImmutableArray<(SyntheticIdentifier TrackingName, ImmutableArray<ISyntheticDeclaration> Declarations)> EnumerateDeclarationsToEmit() {
+            return context._emitGraph.EnumerateDeclarationsToEmit();
         }
     }
 }

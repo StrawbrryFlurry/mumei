@@ -14,7 +14,7 @@ internal sealed class SyntheticInterceptLocationAttribute(InterceptableLocation 
 internal sealed class AddInterceptsLocationAttributeCompilationUnitFeature : ICompilationUnitFeature {
     public static readonly AddInterceptsLocationAttributeCompilationUnitFeature Instance = new();
     public CompilationUnitFragment Implement(ICompilationUnitContext compilationUnit, CompilationUnitFragment currentUnit) {
-        var interceptsLocationNamespace = NamespaceFragment.Create("System.Runtime.CompilerServices", [
+        var interceptsLocationNamespace = NamespaceOrGlobalScopeFragment.Create("System.Runtime.CompilerServices", [
                 ClassDeclarationFragment.Create(
                     "InterceptsLocationAttribute",
                     accessModifier: AccessModifier.File + AccessModifier.Sealed,

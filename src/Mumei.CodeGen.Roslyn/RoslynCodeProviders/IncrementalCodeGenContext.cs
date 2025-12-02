@@ -9,9 +9,11 @@ namespace Mumei.CodeGen.Roslyn.RoslynCodeProviders;
 // to ensure that the outputs are consistent.
 public readonly struct IncrementalCodeGenContext(
     ICodeGenerationContext context,
-    EquatableImmutableArray<object> dependencies
+    EquatableImmutableArray<object> dependencies,
+    ISyntheticIdentifierScopeProvider? sharedIdentifierScopeProvider = null
 ) : IEquatable<IncrementalCodeGenContext> {
     public ICodeGenerationContext Context { get; } = context;
+    public ISyntheticIdentifierScopeProvider? SharedIdentifierScopeProvider { get; } = sharedIdentifierScopeProvider;
 
     // Since we can assume that any compilation created from the same inputs will always lead to the same output,
     // we can use the dependencies to determine equality.

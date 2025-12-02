@@ -13,7 +13,7 @@ internal interface ISyntheticConstructable<out TTarget> {
     public TTarget Construct(ICompilationUnitContext compilationUnit);
 }
 
-internal interface ICompilationUnitContext {
+internal interface ICompilationUnitContext : ISyntheticIdentifierScopeProvider {
     public ICodeGenerationContext CodeGenContext { get; }
 
     public void AddSharedLocalCompilationUnitFeature(ICompilationUnitFeature feature);
