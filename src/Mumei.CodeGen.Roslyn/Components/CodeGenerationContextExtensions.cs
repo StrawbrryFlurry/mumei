@@ -3,12 +3,28 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Components;
 using Mumei.CodeGen.Rendering.CSharp;
+using Mumei.Roslyn;
 
 namespace Mumei.CodeGen.Roslyn.Components;
 
 public static class CodeGenerationContextExtensions {
     extension(ICodeGenerationContext ctx) {
         public Compilation Compilation => ctx.GetContextProvider<CompilationCodeGenerationContextProvider>().Compilation;
+
+        public ISyntheticNamespaceBuilder NamespaceFromAssemblyName(params ReadOnlySpan<string> namespaceParts) {
+            var nameBuilder = new ArrayBuilder<char>(stackalloc char[ArrayBuilder.InitSize]);
+            var baseName = ctx.Compilation.SourceModule.Name;
+            nameBuilder.AddRange(baseName);
+            if (!namespaceParts.IsEmpty) {
+                foreach (var part in namespaceParts) {
+                    nameBuilder.Add('.');
+                    nameBuilder.AddRange(part);
+                }
+            }
+
+            var name = nameBuilder.ToStringAndFree();
+            return ctx.Namespace(name);
+        }
 
         public ITypeSymbol TypeFromCompilation<T>() {
             return ctx.GetContextProvider<CompilationCodeGenerationContextProvider>().Compilation.GetTypeByMetadataName(typeof(T).FullName);

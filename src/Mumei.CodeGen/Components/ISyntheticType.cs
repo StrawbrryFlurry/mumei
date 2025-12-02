@@ -29,25 +29,11 @@ internal sealed class ErrorSyntheticType(string? typeName, string errorReason, o
 
 internal sealed class RuntimeSyntheticType(Type t) : ISyntheticType, ISyntheticConstructable<TypeInfoFragment> {
     public SyntheticIdentifier Name => t.Name;
-    public ISyntheticNamespace? Namespace => t.Namespace is null ? null : new RuntimeSyntheticNamespace(t.Namespace);
+    public ISyntheticNamespace? Namespace => throw new NotImplementedException();
 
     public TypeInfoFragment Construct(ICompilationUnitContext compilationUnit) {
         return new TypeInfoFragment(t);
     }
-}
-
-internal sealed class RuntimeSyntheticNamespace : ISyntheticNamespace {
-    public RuntimeSyntheticNamespace(string tNamespace) {
-        throw new NotImplementedException();
-    }
-
-    public string FullyQualifiedName { get; }
-    public ImmutableArray<ISyntheticMember> Members { get; }
-    public ISyntheticNamespace WithMember(ISyntheticMember member) {
-        throw new NotImplementedException();
-    }
-    public SyntheticIdentifier Identifier { get; }
-    public SyntheticIdentifier Name { get; }
 }
 
 internal sealed class QtSyntheticTypeInfo<T> : ISyntheticTypeInfo<T> {

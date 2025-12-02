@@ -12,14 +12,19 @@ internal sealed partial class CSharpCodeGenerationContext {
         return new QtSyntheticRenderCodeBlock<TInput>(new RenderFragment<TInput>(input, renderBlock));
     }
 
-    public ISyntheticClassBuilder<CompileTimeUnknown> DeclareClass(string name) {
+    public ISyntheticClassBuilder<TClassDefinition> DeclareClass<TClassDefinition>(SyntheticIdentifier name, Action<TClassDefinition> inputBinder) where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new() {
+        throw new NotImplementedException();
+    }
+
+    public ISyntheticClassBuilder<CompileTimeUnknown> DeclareClass(SyntheticIdentifier name) {
         return new QtSyntheticClassBuilder<CompileTimeUnknown>(
             name,
+            null,
             this
         );
     }
 
-    public ISyntheticNamespace Namespace(params ReadOnlySpan<string> namespaceSegments) {
+    public ISyntheticNamespaceBuilder Namespace(params ReadOnlySpan<string> namespaceSegments) {
         var s = new ArrayBuilder<char>(stackalloc char[ArrayBuilder.InitSize]);
         for (var i = 0; i < namespaceSegments.Length; i++) {
             if (i > 0) {
@@ -29,10 +34,9 @@ internal sealed partial class CSharpCodeGenerationContext {
             s.AddRange(namespaceSegments[i]);
         }
 
-        return new QtSyntheticNamespace(s.ToStringAndFree());
-    }
-
-    public ISyntheticClassBuilder<TClassDefinition> DeclareClass<TClassDefinition>(string name, Action<TClassDefinition> inputBinder) where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new() {
-        throw new NotImplementedException();
+        // TODO: should we create all namespace levels as well?
+        var ns = new QtSyntheticNamespace(s.ToStringAndFree(), _globalNamespaceBuilder, ΦCompilerApi);
+        _globalNamespaceBuilder.WithMember(ns);
+        return ns;
     }
 }

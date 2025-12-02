@@ -5,12 +5,15 @@ namespace Mumei.CodeGen.Components;
 
 internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
     SyntheticIdentifier name,
+    ISyntheticDeclaration parent,
     ICodeGenerationContext context
-) : ISyntheticClassBuilder<TClassDef>, ISyntheticDeclaration, ISyntheticConstructable<ClassDeclarationFragment> {
+) : ISyntheticClassBuilder<TClassDef>, ISyntheticConstructable<ClassDeclarationFragment>, ISyntheticConstructable<NamespaceOrGlobalScopeFragment> {
     private CompilerApi? _compilerApi;
 
     public SyntheticIdentifier Name => _name;
     private SyntheticIdentifier _name = name;
+
+    public ISyntheticDeclaration Parent { get; } = parent;
 
     private ISyntheticAttributeList? _attributes;
     private List<ISyntheticMethod>? _methods;
@@ -99,6 +102,25 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
             methods.ToImmutableArrayAndFree(),
             []
         );
+    }
+
+    NamespaceOrGlobalScopeFragment ISyntheticConstructable<NamespaceOrGlobalScopeFragment>.Construct(ICompilationUnitContext compilationUnit) {
+        // TODO: Figure out how we can recursively create containers e.g. nested classes
+        if (Parent is ISyntheticNamespace { IsGlobalNamespace: true }) {
+            var globalFragment = NamespaceOrGlobalScopeFragment.GlobalScope;
+            globalFragment = globalFragment.WithClassDeclarations([Construct(compilationUnit)]);
+            return globalFragment;
+        }
+
+        if (Parent is ISyntheticNamespace parentNamespace) {
+            var namespaceFragment = NamespaceOrGlobalScopeFragment.Create(
+                parentNamespace.FullyQualifiedName,
+                [Construct(compilationUnit)]
+            );
+            return namespaceFragment;
+        }
+
+        throw new NotImplementedException("Nested classes are not yet supported in QtSyntheticClassBuilder.");
     }
 
     public ref SyntheticFieldRef<T> Field<T>(string name) {

@@ -67,6 +67,7 @@ public sealed class TestCompilationBuilder {
     }
 
     private Compilation CreateCompilation() {
+        AddGlobalUsings();
         UpdateSyntaxTreesWithParseOptions();
         return CSharpCompilation.Create(
             _assemblyName,
@@ -83,6 +84,25 @@ public sealed class TestCompilationBuilder {
             var updatedTree = CSharpSyntaxTree.Create(syntaxRootNode, ParseOptions, syntaxTree.FilePath);
             _sources[i] = updatedTree;
         }
+    }
+
+    private void AddGlobalUsings() {
+        const string globalUsings = """
+                                    global using System;
+                                    global using System.Collections.Generic;
+                                    global using System.IO;
+                                    global using System.Linq;
+                                    global using System.Net.Http;
+                                    global using System.Threading;
+                                    global using System.Threading.Tasks;
+                                    """;
+
+        _sources.Add(
+            CSharpSyntaxTree.ParseText(
+                globalUsings,
+                path: "__GlobalUsings.cs"
+            )
+        );
     }
 
     public TestCompilationBuilder AddReference(ICompilationReference reference) {

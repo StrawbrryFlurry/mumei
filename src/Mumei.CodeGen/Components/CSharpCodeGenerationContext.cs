@@ -1,10 +1,20 @@
-﻿using Mumei.CodeGen.Rendering.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Mumei.CodeGen.Rendering;
+using Mumei.CodeGen.Rendering.CSharp;
 using Mumei.Roslyn;
 
 namespace Mumei.CodeGen.Components;
 
 internal sealed partial class CSharpCodeGenerationContext : ICodeGenerationContext {
     private readonly Dictionary<Type, object> _synthesisProviders = new();
+
+    private ISyntheticNamespaceBuilder _globalNamespaceBuilder;
+    public ISyntheticNamespace GlobalNamespace => _globalNamespaceBuilder;
+
+    public CSharpCodeGenerationContext() {
+        ΦCompilerApi = new CompilerApiImpl(this);
+        _globalNamespaceBuilder = new GlobalSyntheticNamespace(ΦCompilerApi);
+    }
 
     public CompilationUnitFragment SynthesizeCompilationUnit(
         ImmutableArray<ISyntheticDeclaration> declarations,
@@ -39,6 +49,56 @@ internal sealed partial class CSharpCodeGenerationContext : ICodeGenerationConte
         }
 
         throw new InvalidOperationException($"No synthesis provider of type {typeof(TProvider)} has been registered.");
+    }
+
+    public bool Equals(ICodeGenerationContext? other) {
+        if (other is null) { return false; }
+        if (ReferenceEquals(this, other)) { return true; }
+        return GlobalNamespacesAreSame(GlobalNamespace, other.GlobalNamespace);
+    }
+
+    private bool GlobalNamespacesAreSame(ISyntheticNamespace a, ISyntheticNamespace b) {
+        var resultA = SynthesizeCompilationUnit(
+            a.Members,
+            NoOpSyntheticIdentifierScopeProvider.Instance
+        );
+
+        var resultB = SynthesizeCompilationUnit(
+            b.Members,
+            NoOpSyntheticIdentifierScopeProvider.Instance
+        );
+
+        var emitA = new SourceFileRenderTreeBuilder();
+        var emitB = new SourceFileRenderTreeBuilder();
+
+        emitA.RenderRootNode(resultA);
+        emitB.RenderRootNode(resultB);
+
+        return emitA.ToString() == emitB.ToString();
+    }
+
+    public override bool Equals(object? obj) {
+        return ReferenceEquals(this, obj) || obj is CSharpCodeGenerationContext other && Equals(other);
+    }
+
+    public override int GetHashCode() {
+        return 0;
+    }
+
+    private sealed class NoOpSyntheticIdentifierScopeProvider : ISyntheticIdentifierScopeProvider {
+        public static readonly NoOpSyntheticIdentifierScopeProvider Instance = new();
+
+        public ISyntheticIdentifierScope GetDeclarationScope(ISyntheticDeclaration scope) {
+            return NoOpSyntheticIdentifierScope.Instance;
+        }
+
+        private sealed class NoOpSyntheticIdentifierScope : ISyntheticIdentifierScope {
+            public static readonly NoOpSyntheticIdentifierScope Instance = new();
+
+            public string MakeUnique(string baseName) {
+                return baseName;
+            }
+        }
     }
 }
 
@@ -76,7 +136,7 @@ internal sealed class CSharpCompilationUnitContext(
             return defaultValue!;
         }
 
-        throw new NotSupportedException();
+        throw new NotSupportedException($"Cannot synthesize the requested type {typeof(T).FullName} from {constructable?.GetType().FullName ?? "null"}.");
     }
 
     public T? SynthesizeOptional<T>(object? constructable) {

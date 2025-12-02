@@ -161,6 +161,7 @@ public readonly struct MethodDeclarationFragment(
         renderTree.Text(" ");
         renderTree.StartCodeBlock();
         renderTree.Node(methodBody);
+        renderTree.NewLine();
         renderTree.EndCodeBlock();
     }
 

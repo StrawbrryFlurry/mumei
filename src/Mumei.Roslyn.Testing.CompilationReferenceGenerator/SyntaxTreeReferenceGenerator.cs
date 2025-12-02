@@ -120,7 +120,10 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
         ).Where(x => x.Value.IsMatch);
 
         var o = p.IncrementalGenerate(static (ctx, expr, ct) => {
-            var interceptor = ctx.DeclareClass("SyntaxTreeReferenceInterceptor")
+            // var interceptorNamespace = ctx.NamespaceFromAssemblyName("Interceptors");
+            var interceptorNamespace = ctx.Namespace("Generated");
+
+            var interceptor = interceptorNamespace.DeclareClass("SyntaxTreeReferenceInterceptor")
                 .WithAccessibility(AccessModifier.Internal + AccessModifier.Partial + AccessModifier.Static);
 
             var syntaxTreeRef = CreateSyntaxTreeReferenceExpression(
@@ -136,8 +139,7 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
                     renderTree.Interpolate($"return {syntaxTreeRef};");
                 }));
 
-            var toEmit = ctx.Namespace("Generated").WithMember(interceptor);
-            ctx.EmitIncremental("SyntaxTreeReferenceInterceptor", toEmit);
+            ctx.EmitIncremental("SyntaxTreeReferenceInterceptor", interceptor);
         });
 
         context.RegisterCodeGenerationOutput(o);
@@ -255,7 +257,7 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
         renderTree.EndBlock();
         renderTree.Line("]");
         renderTree.EndBlock();
-        renderTree.Text("},");
+        renderTree.Line("},");
     }
 
     private static RawStringLiteralFragment GetTypeDeclarationSyntaxTree(

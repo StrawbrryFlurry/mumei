@@ -17,6 +17,16 @@ public readonly struct NamespaceOrGlobalScopeFragment(
 
     public bool IsGlobalScope => name is null;
 
+    public NamespaceOrGlobalScopeFragment WithClassDeclarations(ImmutableArray<ClassDeclarationFragment> classDeclarations) {
+        return new NamespaceOrGlobalScopeFragment(
+            ParentNamespace,
+            Name,
+            classDeclarations,
+            leadingTrivia,
+            trailingTrivia
+        );
+    }
+
     public static NamespaceOrGlobalScopeFragment Create(string name, ImmutableArray<ClassDeclarationFragment> classDeclarations) {
         return new NamespaceOrGlobalScopeFragment(null, name, classDeclarations, TriviaFragment.Empty, TriviaFragment.Empty);
     }

@@ -55,6 +55,7 @@ internal sealed partial class CSharpCodeGenerationContext {
 
     private sealed class EmitDeclarationScope : ISyntheticDeclaration {
         public static readonly EmitDeclarationScope Instance = new();
-        public SyntheticIdentifier Name { get; } = SyntheticIdentifier.Constant("<>__OutputScope");
+        public SyntheticIdentifier Name { get; } = SyntheticIdentifier.Constant("<>__EmitScope");
+        public ISyntheticDeclaration? Parent { get; } = null;
     }
 }

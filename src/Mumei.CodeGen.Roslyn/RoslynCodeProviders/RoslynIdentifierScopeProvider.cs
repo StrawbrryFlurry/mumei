@@ -7,6 +7,9 @@ internal sealed class RoslynIdentifierScopeProvider : ISyntheticIdentifierScopeP
     private readonly ConcurrentDictionary<SyntheticIdentifier, ISyntheticIdentifierScope> _identifierScopes = new();
 
     public ISyntheticIdentifierScope GetDeclarationScope(ISyntheticDeclaration scope) {
+        // TODO: We should represent all known scopes as a tree based on the root declaration
+        // this scope is part of to make identifier names more predictable.
+        // For now this is sufficient and still guarantees uniqueness.
         return _identifierScopes.GetOrAdd(scope.Name, _ => new SyntheticIdentifierScope());
     }
 }

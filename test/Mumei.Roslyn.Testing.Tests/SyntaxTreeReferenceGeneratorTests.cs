@@ -17,12 +17,18 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
 
                     public sealed class Test {
                         public void TestMethod() {
-                            var result = SyntaxTreeReference.Of<CompilationTestSource>(); 
+                            _ = SyntaxTreeReference.Of(typeof(CompilationTestSource)); 
                         }
                     }
 
                     file sealed class CompilationTestSource {
-                        public string s = null!;
+                        public class Foo {
+                            public Func<string> DoS { get; set; } = null!;
+                        }
+                        
+                        public class Bar {
+                            public string S { get; set; } = null!;
+                        }
                     }
                     """
                 ).WithAssemblyName("TestAssembly").AddTypeReference<CSharpCompilation>();
@@ -34,9 +40,43 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
                       namespace Generated {
                           internal static partial class SyntaxTreeReferenceInterceptor {
                               [global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "*")]
-                              public static global::Mumei.Roslyn.Testing.ICompilationReference Intercept_Of__0() {
-                                  return new global::Mumei.Roslyn.Testing.RootCompilationReference {
+                              public static {{typeof(ICompilationReference):g}} Intercept_Of__0(global::System.Type t) {
+                                  return new {{typeof(RootCompilationReference):g}} {
                                       References = [
+                                          new global::Mumei.Roslyn.Testing.SyntaxTreeCompilationReference {
+                                              TypeName = "Foo",
+                                              SourceCode = """""""""
+                                              using global::System;
+                                              
+                                              public class Foo
+                                              {
+                                                  public Func<string> DoS { get; set; } = null !;
+                                              }
+                                              """"""""",
+                                              References = [
+                                                  new global::Mumei.Roslyn.Testing.AssemblyCompilationReference {
+                                                      TypeName = "Func<string>",
+                                                      AssemblyName = "System.Private.CoreLib, *",
+                                                  },
+                                              ]
+                                          },
+                                          new global::Mumei.Roslyn.Testing.SyntaxTreeCompilationReference {
+                                              TypeName = "Bar",
+                                              SourceCode = """""""""
+                                              using global::System;
+                                              
+                                              public class Bar
+                                              {
+                                                  public string S { get; set; } = null !;
+                                              }
+                                              """"""""",
+                                              References = [
+                                                  new global::Mumei.Roslyn.Testing.AssemblyCompilationReference {
+                                                      TypeName = "string",
+                                                      AssemblyName = "System.Private.CoreLib, *",
+                                                  },
+                                              ]
+                                          },
                                       ]
                                   };
                               }
@@ -54,27 +94,66 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
 
                 public sealed class Test {
                     public void TestMethod() {
-                        var result = SyntaxTreeReference.Of<CompilationTestSource>(); 
-                        var result2 = SyntaxTreeReference.Of<CompilationTestSource>(); 
+                        _ = SyntaxTreeReference.Of(typeof(CompilationTestSource));
+                        _ = SyntaxTreeReference.Of<CompilationTestSource>();
                     }
                 }
 
                 file sealed class CompilationTestSource {
-                    public string s = null!;
+                    public class Foo {
+                        public Func<string> DoS { get; set; } = null!;
+                    }
+                    
+                    public class Bar {
+                        public string S { get; set; } = null!;
+                    }
                 }
                 """
             );
         }).RunWithAssert(result => {
-            var t = result.GeneratedTrees;
-            result.HasFileMatching("*SyntaxTreeReferenceInterceptor__1.g.cs")
+            result.HasFileMatching("*SyntaxTreeReferenceInterceptor__2.g.cs")
                 .WithPartialContent(
                     $$""""""""""
                       namespace Generated {
                           internal static partial class SyntaxTreeReferenceInterceptor {
                               [global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "*")]
-                              public static global::Mumei.Roslyn.Testing.ICompilationReference Intercept_Of__0() {
-                                  return new global::Mumei.Roslyn.Testing.RootCompilationReference {
+                              public static {{typeof(ICompilationReference):g}} Intercept_Of__2() {
+                                  return new {{typeof(RootCompilationReference):g}} {
                                       References = [
+                                          new global::Mumei.Roslyn.Testing.SyntaxTreeCompilationReference {
+                                              TypeName = "Foo",
+                                              SourceCode = """""""""
+                                              using global::System;
+                                              
+                                              public class Foo
+                                              {
+                                                  public Func<string> DoS { get; set; } = null !;
+                                              }
+                                              """"""""",
+                                              References = [
+                                                  new global::Mumei.Roslyn.Testing.AssemblyCompilationReference {
+                                                      TypeName = "Func<string>",
+                                                      AssemblyName = "System.Private.CoreLib, *",
+                                                  },
+                                              ]
+                                          },
+                                          new global::Mumei.Roslyn.Testing.SyntaxTreeCompilationReference {
+                                              TypeName = "Bar",
+                                              SourceCode = """""""""
+                                              using global::System;
+                                              
+                                              public class Bar
+                                              {
+                                                  public string S { get; set; } = null !;
+                                              }
+                                              """"""""",
+                                              References = [
+                                                  new global::Mumei.Roslyn.Testing.AssemblyCompilationReference {
+                                                      TypeName = "string",
+                                                      AssemblyName = "System.Private.CoreLib, *",
+                                                  },
+                                              ]
+                                          },
                                       ]
                                   };
                               }

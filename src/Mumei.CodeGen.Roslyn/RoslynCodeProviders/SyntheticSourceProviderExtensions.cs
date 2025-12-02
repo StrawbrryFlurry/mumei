@@ -140,7 +140,7 @@ public static class SyntheticSourceProviderExtensions {
                 var context = new CSharpCodeGenerationContext();
                 context.RegisterContextProvider(new CompilationCodeGenerationContextProvider(valueWithCompilation.Compilation));
                 generateCode(context, valueWithCompilation.Value, ct);
-                return new IncrementalCodeGenContext(context, [valueWithCompilation.Value]);
+                return new IncrementalCodeGenContext(context);
             });
         }
     }
@@ -177,7 +177,7 @@ public readonly struct CodeGenerationEmitContext(
     public ICodeGenerationContext Context { get; } = context;
     public CancellationToken CancellationToken { get; } = ct;
 
-    public void Emit(string hintName, ISyntheticNamespace ns) {
+    public void Emit(string hintName, ISyntheticDeclaration ns) {
         Context.Emit(hintName, ns);
     }
 }

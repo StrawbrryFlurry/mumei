@@ -40,6 +40,16 @@ internal sealed class TypeUsageTracker : CSharpSyntaxWalker {
         base.VisitParameter(node);
     }
 
+    public override void VisitFieldDeclaration(FieldDeclarationSyntax node) {
+        TryTrackType(node.Declaration.Type);
+        base.VisitFieldDeclaration(node);
+    }
+
+    public override void VisitPropertyDeclaration(PropertyDeclarationSyntax node) {
+        TryTrackType(node.Type);
+        base.VisitPropertyDeclaration(node);
+    }
+
     public override void VisitInvocationExpression(InvocationExpressionSyntax node) {
         var targetMethod = _sm.GetSymbolInfo(node).Symbol as IMethodSymbol;
         if (targetMethod?.IsExtensionMethod ?? false) {

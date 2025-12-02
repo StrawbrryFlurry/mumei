@@ -9,18 +9,16 @@ namespace Mumei.CodeGen.Roslyn.RoslynCodeProviders;
 // to ensure that the outputs are consistent.
 public readonly struct IncrementalCodeGenContext(
     ICodeGenerationContext context,
-    EquatableImmutableArray<object> dependencies,
     ISyntheticIdentifierScopeProvider? sharedIdentifierScopeProvider = null
 ) : IEquatable<IncrementalCodeGenContext> {
     public ICodeGenerationContext Context { get; } = context;
     public ISyntheticIdentifierScopeProvider? SharedIdentifierScopeProvider { get; } = sharedIdentifierScopeProvider;
 
-    // Since we can assume that any compilation created from the same inputs will always lead to the same output,
-    // we can use the dependencies to determine equality.
-    private readonly EquatableImmutableArray<object> _dependencies = dependencies;
-
     public bool Equals(IncrementalCodeGenContext other) {
-        return _dependencies.Equals(other._dependencies);
+        // TODO: We should ideally compare the global namespace of one compilation with another
+        // to ensure changes that happen outside of our dependencies are also detected. E.g. changing a method signature
+        // from a syntax node that resides in that method declaration and is part of the dependencies.
+        return context.Equals(other.Context);
     }
 
     public override bool Equals(object? obj) {
@@ -28,7 +26,7 @@ public readonly struct IncrementalCodeGenContext(
     }
 
     public override int GetHashCode() {
-        return _dependencies.GetHashCode();
+        return context.GetHashCode();
     }
 }
 

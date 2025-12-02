@@ -2,14 +2,16 @@
 
 namespace Mumei.CodeGen.Components;
 
-public interface ICodeGenerationContext {
+public interface ICodeGenerationContext : IEquatable<ICodeGenerationContext> {
     public IΦInternalCompilerApi ΦCompilerApi { get; }
+
+    public ISyntheticNamespace GlobalNamespace { get; }
 
     public ISyntheticCodeBlock Block(RenderFragment renderBlock);
     public ISyntheticCodeBlock Block<TInput>(TInput input, Action<IRenderTreeBuilder, TInput> renderBlock);
 
-    public ISyntheticClassBuilder<CompileTimeUnknown> DeclareClass(string name);
-    public ISyntheticNamespace Namespace(params ReadOnlySpan<string> namespaceSegments);
+    public ISyntheticClassBuilder<CompileTimeUnknown> DeclareClass(SyntheticIdentifier name);
+    public ISyntheticNamespaceBuilder Namespace(params ReadOnlySpan<string> namespaceSegments);
 
     public void Emit(string hintName, ISyntheticDeclaration toEmit);
     public void EmitIncremental(string hintName, ISyntheticDeclaration toEmit);
@@ -18,12 +20,15 @@ public interface ICodeGenerationContext {
     public TProvider GetContextProvider<TProvider>() where TProvider : ICodeGenerationContextProvider;
 
     public ISyntheticClassBuilder<TClassDefinition> DeclareClass<TClassDefinition>(
-        string name,
+        SyntheticIdentifier name,
         Action<TClassDefinition> inputBinder
     ) where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new();
 
     public interface IΦInternalCompilerApi {
-        public ISyntheticClassBuilder<TClassDefinition> DeclareClassBuilder<TClassDefinition>(string name);
+        public ISyntheticClassBuilder<TClassDefinition> DeclareClassBuilder<TClassDefinition>(
+            SyntheticIdentifier name,
+            ISyntheticDeclaration? parentDeclaration
+        );
 
         public ISyntheticClassBuilder<TClassDefinition> TrackClass<TClassDefinition>(ISyntheticClassBuilder<TClassDefinition> classBuilder)
             where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new();

@@ -18,7 +18,7 @@ public static class SyntaxVerifier {
                 ignoreLineEndingDifferences: true
             );
         } catch (EqualException e) {
-            var diff = Diff(actual, expectedStr);
+            var diff = Diff(actual, expectedStr, false);
             throw new XunitException(
                 $"""
                  Syntax verification failed.
@@ -47,7 +47,7 @@ public static class SyntaxVerifier {
             expectedString
         );
         if (!doesMatch) {
-            var result = Diff(actual, expectedString);
+            var result = Diff(actual, expectedString, true);
 
             throw new XunitException(
                 $"""
@@ -65,23 +65,53 @@ public static class SyntaxVerifier {
         }
     }
 
-    private static string Diff(string actual, string expected) {
+    private static string Diff(string actual, string expected, bool ignoreRegex) {
         var diff = InlineDiffBuilder.Diff(actual, expected, true, true);
         var result = new StringBuilder();
-        foreach (var line in diff.Lines) {
-            switch (line.Type) {
+
+        var lineIdx = 0;
+        while (lineIdx < diff.Lines.Count) {
+            var currentLine = diff.Lines[lineIdx];
+            if (currentLine.Type == ChangeType.Unchanged) {
+                goto WriteThisLine;
+            }
+
+            // Ignore changes if they are wildcard differences
+            if (!ignoreRegex) {
+                goto WriteThisLine;
+            }
+
+            if (currentLine.Type == ChangeType.Deleted && lineIdx > 0 && diff.Lines[lineIdx - 1].Type == ChangeType.Unchanged) {
+                if (lineIdx + 1 < diff.Lines.Count && diff.Lines[lineIdx + 1].Type == ChangeType.Inserted) {
+                    var deletedLine = currentLine.Text;
+                    var insertedLine = diff.Lines[lineIdx + 1].Text;
+                    var isWildcardChange = WildcardMatcher.Matches(deletedLine, insertedLine);
+                    if (isWildcardChange) {
+                        lineIdx += 1;
+                        currentLine = diff.Lines[lineIdx + 1];
+                        currentLine.Type = ChangeType.Unchanged;
+                    }
+                }
+            }
+
+            WriteThisLine:
+            switch (currentLine.Type) {
                 case ChangeType.Inserted:
-                    result.Append("+ ");
+                    result.Append("\x1b[32m");
+                    result.Append(currentLine.Text);
+                    result.AppendLine("\x1b[0m");
                     break;
                 case ChangeType.Deleted:
-                    result.Append("- ");
+                    result.Append("\x1b[31m");
+                    result.Append(currentLine.Text);
+                    result.AppendLine("\x1b[0m");
                     break;
                 default:
-                    result.Append("  ");
+                    result.AppendLine(currentLine.Text);
                     break;
             }
 
-            result.AppendLine(line.Text);
+            lineIdx++;
         }
 
         return result.ToString();

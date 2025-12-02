@@ -4,6 +4,7 @@ using System.Text;
 namespace Mumei.CodeGen.Rendering;
 
 internal interface ISyntaxWriter {
+    public void Write(in ReadOnlySpan<char> str);
     public void WriteLine(in ReadOnlySpan<char> line);
 }
 
@@ -132,6 +133,16 @@ internal sealed class SyntaxWriter : ISyntaxWriter {
         while (!remainingLines.IsEmpty) {
             var lineEnd = DetermineLineEnd(remainingLines, out var toSkip);
             var line = remainingLines[..lineEnd];
+            var isLastLine = lineEnd + toSkip >= remainingLines.Length;
+            if (isLastLine && line.Trim().IsEmpty) {
+                break;
+            }
+
+            if (isLastLine) {
+                writer.Write(line);
+                break;
+            }
+
             writer.WriteLine(line);
             remainingLines = remainingLines[(lineEnd + toSkip)..];
         }

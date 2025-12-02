@@ -2,7 +2,8 @@
 
 namespace Mumei.CodeGen.Components;
 
-public interface ISyntheticClassBuilder<T> : ISyntheticClass, ISyntheticTypeInfo<T> {
+// ReSharper disable once PossibleInterfaceMemberAmbiguity
+public interface ISyntheticClassBuilder<T> : ISyntheticClass, ISyntheticDeclaration, ISyntheticTypeInfo<T> {
     public IΦInternalClassBuilderCompilerApi ΦCompilerApi { get; }
 
     public ISyntheticClassBuilder<T> WithName(SyntheticIdentifier name);
