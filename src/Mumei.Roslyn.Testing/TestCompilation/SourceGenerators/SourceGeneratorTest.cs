@@ -11,4 +11,10 @@ public static class SourceGeneratorTest {
 
         return new IncrementalSourceGeneratorTest<TGenerator>(compilation);
     }
+
+    public static IncrementalSourceGeneratorTest<TGenerator> TestGenerator<TGenerator>(
+        ICompilationReference compilationReference
+    ) where TGenerator : IIncrementalGenerator, new() {
+        return TestGenerator<TGenerator>(b => b.AddReference(compilationReference));
+    }
 }

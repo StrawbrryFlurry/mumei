@@ -92,6 +92,37 @@ public static class SyntaxNodeFilter {
 
         return false;
     }
+
+    public static bool IsClassDeclarationImplementing(
+        SyntaxNode node,
+        string baseClassOrInterfaceName,
+        [NotNullWhen(true)] out ClassDeclarationSyntax? classDeclaration,
+        [NotNullWhen(true)] out TypeSyntax? baseClassOrInterfaceType
+    ) {
+        if (node is not ClassDeclarationSyntax classDecl) {
+            classDeclaration = null!;
+            baseClassOrInterfaceType = null!;
+            return false;
+        }
+
+        classDeclaration = classDecl;
+        if (classDecl.BaseList is null) {
+            baseClassOrInterfaceType = null!;
+            return false;
+        }
+
+        foreach (var baseType in classDecl.BaseList.Types) {
+            if (baseType.Type is SimpleNameSyntax { Identifier.Text: var baseTypeName }) {
+                if (baseTypeName == baseClassOrInterfaceName) {
+                    baseClassOrInterfaceType = baseType.Type;
+                    return true;
+                }
+            }
+        }
+
+        baseClassOrInterfaceType = null!;
+        return false;
+    }
 }
 
 internal sealed class SyntaxProviderFactory {

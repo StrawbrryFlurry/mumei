@@ -143,6 +143,13 @@ public static class SyntheticSourceProviderExtensions {
                 return new IncrementalCodeGenContext(context);
             });
         }
+
+
+        public IncrementalValuesProvider<IncrementalCodeGenContext> IncrementalGenerate(
+            [Pure] Action<ICodeGenerationContext, T> generateCode
+        ) {
+            return source.IncrementalGenerate((context, value, _) => generateCode(context, value));
+        }
     }
 }
 
