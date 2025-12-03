@@ -13,7 +13,7 @@ public static class CodeGenerationContextExtensions {
 
         public ISyntheticNamespaceBuilder NamespaceFromAssemblyName(params ReadOnlySpan<string> namespaceParts) {
             var nameBuilder = new ArrayBuilder<char>(stackalloc char[ArrayBuilder.InitSize]);
-            var baseName = ctx.Compilation.SourceModule.Name;
+            var baseName = ctx.Compilation.Assembly.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
             nameBuilder.AddRange(baseName);
             if (!namespaceParts.IsEmpty) {
                 foreach (var part in namespaceParts) {

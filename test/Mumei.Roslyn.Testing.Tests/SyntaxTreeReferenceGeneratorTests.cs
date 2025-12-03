@@ -10,6 +10,7 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
     public void Test() {
         TestGenerator<SyntaxTreeReferenceGenerator>(
             b => {
+                b.AllowInterceptorsIn(SyntaxTreeReferenceGenerator.InterceptorsNamespace);
                 b.AddSource(
                     "foo",
                     """
@@ -37,7 +38,7 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
             result.HasFileMatching("*SyntaxTreeReferenceInterceptor__0.g.cs")
                 .WithPartialContent(
                     $$""""""""""
-                      namespace Generated {
+                      namespace TestAssembly.CompilationSourceInterceptor {
                           internal static partial class SyntaxTreeReferenceInterceptor {
                               [global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "*")]
                               public static {{typeof(ICompilationReference):g}} Intercept_Of__0(global::System.Type t) {
@@ -114,7 +115,7 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
             result.HasFileMatching("*SyntaxTreeReferenceInterceptor__2.g.cs")
                 .WithPartialContent(
                     $$""""""""""
-                      namespace Generated {
+                      namespace TestAssembly.CompilationSourceInterceptor {
                           internal static partial class SyntaxTreeReferenceInterceptor {
                               [global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "*")]
                               public static {{typeof(ICompilationReference):g}} Intercept_Of__2() {

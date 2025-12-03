@@ -1,6 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project>
   <PropertyGroup>
-    <InterceptorsNamespaces>$(InterceptorsNamespaces);Generated;Mumei.Roslyn.Testing.Tests.CompilationSourceInterceptor</InterceptorsNamespaces>
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);$(AssemblyName).CompilationSourceInterceptor</InterceptorsNamespaces>
   </PropertyGroup>
 
   <ItemGroup>

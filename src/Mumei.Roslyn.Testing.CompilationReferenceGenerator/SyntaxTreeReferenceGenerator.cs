@@ -16,6 +16,7 @@ namespace Mumei.Roslyn.Testing.CompilationReferenceGenerator;
 [Generator]
 public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
     private const string SyntaxTreeReferenceType = "SyntaxTreeReference";
+    public const string InterceptorsNamespace = "CompilationSourceInterceptor";
 
     private const string SyntaxTreeReferenceCode =
         $$"""
@@ -120,8 +121,7 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
         ).Where(x => x.Value.IsMatch);
 
         var o = p.IncrementalGenerate(static (ctx, expr, ct) => {
-            // var interceptorNamespace = ctx.NamespaceFromAssemblyName("Interceptors");
-            var interceptorNamespace = ctx.Namespace("Generated");
+            var interceptorNamespace = ctx.NamespaceFromAssemblyName(InterceptorsNamespace);
 
             var interceptor = interceptorNamespace.DeclareClass("SyntaxTreeReferenceInterceptor")
                 .WithAccessibility(AccessModifier.Internal + AccessModifier.Partial + AccessModifier.Static);

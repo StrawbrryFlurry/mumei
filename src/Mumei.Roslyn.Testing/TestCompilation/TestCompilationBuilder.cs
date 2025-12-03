@@ -12,9 +12,11 @@ public sealed class TestCompilationBuilder {
 
     private string _assemblyName = DefaultAssemblyName;
 
-    private CSharpParseOptions ParseOptions => new CSharpParseOptions(LanguageVersion.Preview)
+    private readonly List<string> _interceptorsAllowedIn = new();
+
+    private CSharpParseOptions ParseOptions => field ??= new CSharpParseOptions(LanguageVersion.Preview)
         .WithFeatures([
-            new KeyValuePair<string, string>("InterceptorsNamespaces", $"{_assemblyName}.Generated;Generated")
+            MakeInterceptorsNamespacesFeature()
         ]);
 
     public TestCompilationBuilder WithAssemblyName(string assemblyName) {
@@ -108,5 +110,19 @@ public sealed class TestCompilationBuilder {
     public TestCompilationBuilder AddReference(ICompilationReference reference) {
         reference.AddToCompilation(_sources, _metadataReferences);
         return this;
+    }
+
+    public TestCompilationBuilder AllowInterceptorsIn(string name) {
+        _interceptorsAllowedIn.Add(name);
+        return this;
+    }
+
+    private KeyValuePair<string, string> MakeInterceptorsNamespacesFeature() {
+        _interceptorsAllowedIn.Add(_assemblyName);
+        _interceptorsAllowedIn.Add($"{_assemblyName}.Generated");
+        _interceptorsAllowedIn.Add("Generated");
+
+        var namespaces = string.Join(";", _interceptorsAllowedIn);
+        return new KeyValuePair<string, string>("InterceptorsNamespaces", namespaces);
     }
 }
