@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Mumei.Roslyn.Common;
+namespace Mumei.CodeGen.DeclarationGenerator;
 
 public class GloballyQualifyingSyntaxRewriter(
     SemanticModel sm

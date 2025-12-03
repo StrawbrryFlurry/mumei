@@ -181,3 +181,18 @@ public readonly struct CodeGenerationEmitContext(
         Context.Emit(hintName, ns);
     }
 }
+
+public readonly struct SyntaxNodeEquatable<TNode>(TNode node) : IEquatable<SyntaxNodeEquatable<TNode>>
+    where TNode : SyntaxNode {
+    public TNode Node { get; } = node;
+
+    public bool Equals(SyntaxNodeEquatable<TNode> other) {
+        return other.Node.ToFullString() == Node.ToFullString();
+    }
+    public override bool Equals(object? obj) {
+        return obj is SyntaxNodeEquatable<TNode> other && Equals(other);
+    }
+    public override int GetHashCode() {
+        return EqualityComparer<TNode>.Default.GetHashCode(Node);
+    }
+}

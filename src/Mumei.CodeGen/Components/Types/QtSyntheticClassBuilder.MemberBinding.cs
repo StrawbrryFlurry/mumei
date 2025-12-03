@@ -1,7 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
-namespace Mumei.CodeGen.Components;
+﻿namespace Mumei.CodeGen.Components;
 
 internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
     public ISyntheticMethodBuilder<Delegate> DeclareMethod<TMethodDefinition>(
@@ -32,10 +29,6 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
         throw new NotImplementedException();
     }
 
-    public void BindSyntheticImplementation(Type member, ITypeSymbol actualType) {
-        throw new NotImplementedException();
-    }
-
     public ISyntheticClassBuilder<TNew> WithDefinition<TNew>() where TNew : ISyntheticClass {
         throw new NotImplementedException();
     }
@@ -48,19 +41,8 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
         throw new NotImplementedException();
     }
 
-    public ISyntheticField<CompileTimeUnknown> DeclareField(ITypeSymbol type, SyntheticIdentifier name) {
-        throw new NotImplementedException();
-    }
 
     public ISyntheticField<CompileTimeUnknown> DeclareField(ISyntheticType type, SyntheticIdentifier name) {
-        throw new NotImplementedException();
-    }
-
-    public void DeclareProperty(ITypeSymbol type, SyntheticIdentifier name) {
-        throw new NotImplementedException();
-    }
-
-    public ISyntheticClassBuilder<TClassDef> Bind<TTarget>(ITypeSymbol type) {
         throw new NotImplementedException();
     }
 
@@ -76,19 +58,11 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
         throw new NotImplementedException();
     }
 
-    public void Implement(ITypeSymbol baseTyp) {
-        throw new NotImplementedException();
-    }
-
     public void Extend(Type baseType) {
         throw new NotImplementedException();
     }
 
     public void Extend(ISyntheticType baseType) {
-        throw new NotImplementedException();
-    }
-
-    public void Extend(ITypeSymbol baseType) {
         throw new NotImplementedException();
     }
 

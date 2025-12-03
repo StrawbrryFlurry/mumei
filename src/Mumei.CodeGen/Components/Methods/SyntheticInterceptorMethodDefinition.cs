@@ -21,7 +21,6 @@ public abstract class SyntheticInterceptorMethodDefinition {
 
     public readonly struct BindingContext {
         public void Bind<T>(ISyntheticType type) { }
-        public void Bind<T>(ITypeSymbol type) { }
         public void Bind<T>(Type type) { }
     }
 }
@@ -47,7 +46,6 @@ public abstract class SyntheticAsyncInterceptorMethodDefinition {
 
     public readonly struct BindingContext {
         public void Bind<T>(ISyntheticType type) { }
-        public void Bind<T>(ITypeSymbol type) { }
         public void Bind<T>(Type type) { }
     }
 }

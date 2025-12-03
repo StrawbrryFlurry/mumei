@@ -37,8 +37,6 @@ public sealed class SourceFileRenderTreeBuilder : GenericRenderTreeBuilder<strin
         _sourceFile.Dedent();
     }
 
-    protected override void SyntaxNodeCore<TNode>(TNode node) { }
-
     protected override void NodeCore<TNode>(TNode renderable) {
         renderable.Render(this);
     }

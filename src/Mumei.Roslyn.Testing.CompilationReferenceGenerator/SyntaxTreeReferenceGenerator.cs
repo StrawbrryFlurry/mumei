@@ -98,15 +98,15 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
             static (ctx, ct) => {
                 var sourceCodeFactory = ctx.SemanticModel.Compilation.GetTypeByMetadataName($"Mumei.Roslyn.Testing.{SyntaxTreeReferenceType}");
                 if (ctx.SemanticModel.GetOperation(ctx.Node) is not IInvocationOperation invocationOp) {
-                    return (false, null!, null!);
+                    return default;
                 }
 
                 if (invocationOp.TargetMethod.TypeArguments.Length != 1 && invocationOp.Arguments.Length != 1) {
-                    return (false, null!, null!);
+                    return default;
                 }
 
                 if (!SymbolEqualityComparer.Default.Equals(invocationOp.TargetMethod.ContainingType, sourceCodeFactory)) {
-                    return (false, null!, null!);
+                    return default;
                 }
 
                 var targetType = invocationOp.TargetMethod.TypeArguments.Length == 1
@@ -115,7 +115,7 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
                         ITypeOfOperation typeOfOp => typeOfOp.TypeOperand,
                         _ => null
                     };
-                return (IsMatch: true, InvocationNode: (InvocationExpressionSyntax) ctx.Node, TargetType: targetType);
+                return (IsMatch: true, InvocationNode: new SyntaxNodeEquatable<InvocationExpressionSyntax>((InvocationExpressionSyntax) ctx.Node), TargetType: new IgnoreEquality<ITypeSymbol?>(targetType), ctx.Node.GetLocation());
             }
         ).Where(x => x.Value.IsMatch);
 
@@ -127,13 +127,13 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
                 .WithAccessibility(AccessModifier.Internal + AccessModifier.Partial + AccessModifier.Static);
 
             var syntaxTreeRef = CreateSyntaxTreeReferenceExpression(
-                expr.TargetType!,
+                expr.TargetType!.Value,
                 ctx.Compilation
             );
 
             interceptor.DeclareInterceptorMethod(
                     interceptor.MakeUniqueName("Intercept_Of"),
-                    expr.InvocationNode
+                    expr.InvocationNode.Node
                 )
                 .WithBody(ctx.Block(renderTree => {
                     renderTree.Interpolate($"return {syntaxTreeRef};");

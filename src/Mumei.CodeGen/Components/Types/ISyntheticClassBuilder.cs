@@ -32,28 +32,21 @@ public interface ISyntheticClassBuilder<T> : ISyntheticClass, ISyntheticDeclarat
 
     public void BindSyntheticImplementation(ISyntheticType member, ISyntheticType actualType);
     public void BindSyntheticImplementation(Type member, ISyntheticType actualType);
-    public void BindSyntheticImplementation(Type member, ITypeSymbol actualType);
 
     public ISyntheticField<TField> DeclareField<TField>(SyntheticIdentifier name);
 
     public ISyntheticField<CompileTimeUnknown> DeclareField(Type type, SyntheticIdentifier name);
-    public ISyntheticField<CompileTimeUnknown> DeclareField(ITypeSymbol type, SyntheticIdentifier name);
     public ISyntheticField<CompileTimeUnknown> DeclareField(ISyntheticType type, SyntheticIdentifier name);
 
-    void DeclareProperty(ITypeSymbol type, SyntheticIdentifier name);
-
-    public ISyntheticClassBuilder<T> Bind<TTarget>(ITypeSymbol type);
 
     public void DeclareConstructor<TImplementaiton>(Delegate impl);
 
 
     public void Implement(Type baseType);
     public void Implement(ISyntheticType baseType);
-    public void Implement(ITypeSymbol baseTyp);
 
     public void Extend(Type baseType);
     public void Extend(ISyntheticType baseType);
-    public void Extend(ITypeSymbol baseType);
 
     public ISyntheticClassBuilder<TNested> DeclareNestedClass<TNested>(SyntheticIdentifier name, Action<TNested> bindInputs) where TNested : ISyntheticClass;
 }

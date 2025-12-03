@@ -64,21 +64,6 @@ public abstract class GenericRenderTreeBuilder<TResult> : IRenderTreeBuilder {
     protected abstract void EndBlockCore();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void SyntaxNode<TNode>(TNode node) where TNode : SyntaxNode {
-#if !DEBUG
-        SyntaxNodeCore(node);
-#else
-        try {
-            SyntaxNodeCore(node);
-        } catch (Exception e) {
-            throw new InvalidOperationException($"Error while rendering syntax node of type {node.GetType().FullName} at:\n{DebugView()}", e);
-        }
-#endif
-    }
-
-    protected abstract void SyntaxNodeCore<TNode>(TNode node) where TNode : SyntaxNode;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Node<TRenderNode>(TRenderNode node) where TRenderNode : IRenderFragment {
         StartNode(node);
 
@@ -133,8 +118,6 @@ public interface IRenderTreeBuilder {
     public void InterpolateBlock(BlockInterpolatedStringHandler s);
     public void StartBlock();
     public void EndBlock();
-
-    public void SyntaxNode<TNode>(TNode node) where TNode : SyntaxNode;
 
     public void Node<TRenderNode>(TRenderNode node) where TRenderNode : IRenderFragment;
     public void Node(RenderFragment render);

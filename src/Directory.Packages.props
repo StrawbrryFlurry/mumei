@@ -18,6 +18,7 @@
     <PackageVersion Include="PolyfillLib" Version="8.7.3" />
     <PackageVersion Include="PolySharp" Version="1.15.0" />
     <PackageVersion Include="System.Memory" Version="4.6.3" />
+    <PackageVersion Include="System.Collections.Immutable" Version="10.0.0" />
 
     <PackageVersion Include="xunit.v3.assert" Version="3.2.0" />
     <PackageVersion Include="DiffPlex" Version="1.8.0" />

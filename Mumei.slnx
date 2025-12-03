@@ -4,6 +4,7 @@
     <Project Path="src/Mumei.AspNetCore/Mumei.AspNetCore.csproj" />
   </Folder>
   <Folder Name="/CodeGen/">
+    <Project Path="src/Mumei.CodeGen.DeclarationGenerator/Mumei.CodeGen.DeclarationGenerator.csproj" />
     <Project Path="src/Mumei.CodeGen.Roslyn/Mumei.CodeGen.Roslyn.csproj" />
     <Project Path="src/Mumei.CodeGen/Mumei.CodeGen.csproj" />
     <Project Path="src/PolySharpCommon/PolySharpCommon.csproj" />

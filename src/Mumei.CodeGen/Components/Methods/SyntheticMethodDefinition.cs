@@ -1,6 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-
-namespace Mumei.CodeGen.Components;
+﻿namespace Mumei.CodeGen.Components;
 
 public abstract class SyntheticMethodDefinition {
     public virtual void BindDynamicComponents(BindingContext ctx) { }
@@ -9,7 +7,6 @@ public abstract class SyntheticMethodDefinition {
 
     public readonly struct BindingContext {
         public void Bind<T>(ISyntheticType type) { }
-        public void Bind<T>(ITypeSymbol type) { }
         public void Bind<T>(Type type) { }
     }
 }

@@ -1,6 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Immutable;
-using Microsoft.CodeAnalysis.CSharp;
 using Mumei.Roslyn;
 
 namespace Mumei.CodeGen.Rendering.CSharp;
@@ -13,17 +11,6 @@ public readonly struct AttributeFragment(TypeInfoFragment type, AttributeArgumen
         AttributeArgumentListFragment argumentList = default
     ) {
         return new AttributeFragment(type, argumentList);
-    }
-
-    public static AttributeFragment Intercept(
-        InterceptableLocation location
-    ) {
-        var interceptableLocationType = new TypeInfoFragment("global::System.Runtime.CompilerServices.InterceptsLocationAttribute");
-        AttributeArgumentListFragment.Builder builder = [
-            new PositionalArgumentFragment(location.Version.ToString()),
-            new PositionalArgumentFragment("\"" + location.Data + "\"")
-        ];
-        return new AttributeFragment(interceptableLocationType, builder);
     }
 
     public static AttributeFragment Create(
