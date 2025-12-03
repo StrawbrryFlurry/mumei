@@ -8,7 +8,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="$(SolutionDir)/src/Mumei.Common.Internal/**/*.cs" Visible="false"/>
+    <Compile Include="$(SolutionDir)/src/Mumei.Common.Internal/Common/*.cs" Visible="false"/>
 
     <!-- Exclude auto-generated assembly info files which would be included with **/*.cs -->
     <Compile Remove="$(SolutionDir)/src/Mumei.Roslyn.Common/**/*.AssemblyInfo.cs"/>

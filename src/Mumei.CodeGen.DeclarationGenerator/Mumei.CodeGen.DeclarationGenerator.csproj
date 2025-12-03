@@ -1,5 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <MumeiInternalApiDiagnostic>MOOM9999</MumeiInternalApiDiagnostic>
+    <NoWarn>RS2008,$(MumeiInternalApiDiagnostic)</NoWarn>
+
     <TargetFramework>netstandard2.0</TargetFramework>
     <IsPackable>true</IsPackable>
     <LangVersion>latest</LangVersion>
@@ -19,6 +22,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Mumei.CodeGen.Roslyn\Mumei.CodeGen.Roslyn.csproj"/>
   </ItemGroup>
-
-  <Import Project="../Mumei.Roslyn.Common/Mumei.Roslyn.Common.props"/>
 </Project>

@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Mumei.CodeGen.Components;
 using Mumei.CodeGen.Rendering.CSharp;
-using Mumei.CodeGen.Roslyn.RendererExtensions;
 
 namespace Mumei.CodeGen.Roslyn.Components;
 

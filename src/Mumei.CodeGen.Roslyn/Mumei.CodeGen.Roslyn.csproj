@@ -20,4 +20,8 @@
     <ProjectReference Include="..\Mumei.CodeGen\Mumei.CodeGen.csproj"/>
     <ProjectReference Include="..\PolySharpCommon\PolySharpCommon.csproj"/>
   </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Mumei.CodeGen.DeclarationGenerator"/>
+  </ItemGroup>
 </Project>

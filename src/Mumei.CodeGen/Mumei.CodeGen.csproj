@@ -1,13 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <MumeiInternalApiDiagnostic>MOOM9999</MumeiInternalApiDiagnostic>
+    <NoWarn>RS2008,$(MumeiInternalApiDiagnostic)</NoWarn>
 
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>Latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-
-    <NoWarn>RS2008,$(MumeiInternalApiDiagnostic)</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,14 +15,11 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Mumei.CodeGen.Roslyn"/>
+    <InternalsVisibleTo Include="Mumei.CodeGen.DeclarationGenerator"/>
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="System.Collections.Immutable"/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Components\Generators\"/>
   </ItemGroup>
 
   <Import Project="../Mumei.Roslyn.Common/Mumei.Roslyn.Common.props"/>

@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Mumei.CodeGen.Rendering.CSharp;
 
-namespace Mumei.CodeGen.Roslyn.RendererExtensions;
+namespace Mumei.CodeGen.Roslyn;
 
 internal static class TypeInfoFragmentExtensions {
     extension(ITypeSymbol type) {

@@ -6,7 +6,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Mumei.CodeGen.DeclarationGenerator;
 
-public class GloballyQualifyingSyntaxRewriter(
+internal abstract class GloballyQualifyingSyntaxRewriter(
     SemanticModel sm
 ) : CSharpSyntaxRewriter {
     protected SemanticModel SemanticModel = sm;
@@ -46,7 +46,7 @@ public class GloballyQualifyingSyntaxRewriter(
         return InvocationExpression(
             MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
-                IdentifierName(targetMethod!.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)),
+                IdentifierName(targetMethod.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)),
                 methodName
             ),
             ArgumentList(SeparatedList([
@@ -74,7 +74,7 @@ public class GloballyQualifyingSyntaxRewriter(
         return InvocationExpression(
             MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
-                IdentifierName(targetMethod!.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)),
+                IdentifierName(targetMethod.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)),
                 methodName
             ),
             node.ArgumentList
@@ -91,13 +91,13 @@ public class GloballyQualifyingSyntaxRewriter(
             // Ignore the right side of a qualified name e.g. `Class.SomeMember` since
             // fully expanding `Class` will already result in the fully qualified name
             if (qualifiedNameSyntax.Right == node) {
-                return false!;
+                return false;
             }
 
             // We're part of a nested qualified name, e.g. `Namespace.Class.Member`
             // only fully qualify the leftmost part of the qualified name
             if (qualifiedNameSyntax.Parent is QualifiedNameSyntax) {
-                return false!;
+                return false;
             }
         }
 
