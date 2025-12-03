@@ -1,4 +1,5 @@
 ﻿using Mumei.CodeGen.Rendering;
+using Mumei.Common.Internal;
 using Mumei.Roslyn;
 
 namespace Mumei.CodeGen.Components;

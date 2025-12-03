@@ -1,4 +1,5 @@
-﻿// reSharper disable All
+﻿#if NETSTANDARD2_0
+// reSharper disable All
 
 using Roslyn.Utilities;
 using System.Collections.Immutable;
@@ -483,3 +484,5 @@ namespace Roslyn.Utilities {
         }
     }
 }
+
+#endif

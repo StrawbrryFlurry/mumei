@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using Mumei.Common.Internal;
 using Mumei.Roslyn;
 
 namespace Mumei.CodeGen.Rendering.CSharp;

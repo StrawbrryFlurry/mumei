@@ -7,7 +7,5 @@
     <Using Include="Xunit"/>
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="../../src/Mumei.Roslyn.Common/Mumei.Roslyn.Common.csproj"/>
-  </ItemGroup>
+  <Import Project="../../src/Mumei.Common.Internal/Mumei.Common.Internal.props"/>
 </Project>

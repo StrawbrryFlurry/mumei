@@ -1,10 +1,10 @@
-﻿using System.Buffers;
+﻿#if !IS_COMMON_DECLARATION_PROJECT
+using System.Buffers;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
-namespace Mumei.Roslyn;
+namespace Mumei.Common.Internal;
 
 internal static class ArrayBuilder {
     public const int LargeElementInitSize = 64;
@@ -220,3 +220,4 @@ internal static class ArrayBuilderExtensions {
         return str;
     }
 }
+#endif

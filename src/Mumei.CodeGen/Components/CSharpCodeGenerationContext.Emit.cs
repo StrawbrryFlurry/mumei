@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using Mumei.Common.Internal;
 using Mumei.Roslyn;
 
 namespace Mumei.CodeGen.Components;

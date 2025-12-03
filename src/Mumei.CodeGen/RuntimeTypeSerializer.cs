@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Mumei.CodeGen.Rendering;
-using Mumei.Roslyn;
+using Mumei.Common.Internal;
 
 namespace Mumei.CodeGen;
 

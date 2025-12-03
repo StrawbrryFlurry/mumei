@@ -17,10 +17,11 @@
     <Project Path="src/Mumei.DependencyInjection/Mumei.DependencyInjection.csproj" />
   </Folder>
   <Folder Name="/Roslyn/">
+    <Project Path="src/Mumei.Common.Internal/Mumei.Common.Internal.csproj" />
     <Project Path="src/Mumei.Roslyn.Common/Mumei.Roslyn.Common.csproj" />
     <Project Path="src/Mumei.Roslyn.Testing.CompilationReferenceGenerator/Mumei.Roslyn.Testing.CompilationReferenceGenerator.csproj" />
     <Project Path="src/Mumei.Roslyn.Testing/Mumei.Roslyn.Testing.csproj" />
-    <Project Path="test/Mumei.Roslyn.Common.Tests/Mumei.Roslyn.Common.Tests.csproj" />
+    <Project Path="test/Mumei.Common.Internal.Tests/Mumei.Common.Internal.Tests.csproj" />
     <Project Path="test/Mumei.Roslyn.Testing.Tests/Mumei.Roslyn.Testing.Tests.csproj" />
   </Folder>
   <Folder Name="/_Playground/">

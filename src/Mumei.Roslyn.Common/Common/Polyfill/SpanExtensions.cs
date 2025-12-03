@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿#if NETSTANDARD2_0
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Mumei.Roslyn.Common.Polyfill;
@@ -78,3 +79,4 @@ internal static class SpanExtensions {
         return (uint) c - (uint) '0' <= (uint) '9' - (uint) '0';
     }
 }
+#endif

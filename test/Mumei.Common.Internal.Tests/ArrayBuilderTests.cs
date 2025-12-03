@@ -1,4 +1,6 @@
-﻿namespace Mumei.Roslyn.Common.Tests;
+﻿using Mumei.Common.Internal;
+
+namespace Mumei.Roslyn.Common.Tests;
 
 public sealed class ArrayBuilderTests {
     [Fact]

@@ -17,13 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="GlobalQualificationSyntaxRewriter.cs">
-      <Link>Common\GlobalQualificationSyntaxRewriter.cs</Link>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Mumei.CodeGen.Roslyn\Mumei.CodeGen.Roslyn.csproj" />
+    <ProjectReference Include="..\Mumei.CodeGen.Roslyn\Mumei.CodeGen.Roslyn.csproj"/>
   </ItemGroup>
 
   <Import Project="../Mumei.Roslyn.Common/Mumei.Roslyn.Common.props"/>

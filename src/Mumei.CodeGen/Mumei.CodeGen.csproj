@@ -27,6 +27,7 @@
   </ItemGroup>
 
   <Import Project="../Mumei.Roslyn.Common/Mumei.Roslyn.Common.props"/>
+  <Import Project="../Mumei.Common.Internal/Mumei.Common.Internal.props"/>
 
   <PropertyGroup>
     <GetTargetPathDependsOn>$(GetTargetPathDependsOn);GetDependencyTargetPaths</GetTargetPathDependsOn>

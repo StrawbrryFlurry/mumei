@@ -1,6 +1,7 @@
-﻿using System.Runtime.CompilerServices;
+﻿#if !IS_COMMON_DECLARATION_PROJECT
+using System.Runtime.CompilerServices;
 
-namespace Mumei.Roslyn;
+namespace Mumei.Common.Internal;
 
 internal ref partial struct ArrayBuilder<TElement> {
     public Enumerator GetEnumerator() {
@@ -36,3 +37,4 @@ internal ref partial struct ArrayBuilder<TElement> {
         }
     }
 }
+#endif

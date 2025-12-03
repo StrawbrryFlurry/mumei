@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Components;
 using Mumei.CodeGen.Rendering.CSharp;
-using Mumei.Roslyn;
+using Mumei.Common.Internal;
 
 namespace Mumei.CodeGen.Roslyn.Components;
 

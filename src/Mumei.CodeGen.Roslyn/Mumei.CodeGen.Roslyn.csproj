@@ -14,6 +14,8 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
   </ItemGroup>
 
+  <Import Project="../Mumei.Common.Internal/Mumei.Common.Internal.props"/>
+
   <ItemGroup>
     <ProjectReference Include="..\Mumei.CodeGen\Mumei.CodeGen.csproj"/>
     <ProjectReference Include="..\PolySharpCommon\PolySharpCommon.csproj"/>
