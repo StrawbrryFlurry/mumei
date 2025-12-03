@@ -26,6 +26,42 @@ public static class CodeGenerationContextExtensions {
             return ctx.Namespace(name);
         }
 
+        public ISyntheticNamespaceBuilder Namespace(INamespaceSymbol namespaceSymbol) {
+            return ctx.Namespace(NamespaceFullNameFast(namespaceSymbol));
+        }
+
+        private static string NamespaceFullNameFast(INamespaceSymbol namespaceSymbol) {
+            const int averageNamespacePartLength = 4;
+
+            if (namespaceSymbol.IsGlobalNamespace) {
+                return string.Empty;
+            }
+
+            if (namespaceSymbol.ContainingNamespace?.IsGlobalNamespace ?? true) {
+                return namespaceSymbol.Name;
+            }
+
+            var namespacePartBuilder = new ArrayBuilder<string>(averageNamespacePartLength);
+            var currentNamespace = namespaceSymbol;
+            while (currentNamespace is not null && !currentNamespace.IsGlobalNamespace) {
+                namespacePartBuilder.Add(currentNamespace.Name);
+                currentNamespace = currentNamespace.ContainingNamespace;
+            }
+
+            namespacePartBuilder.Elements.Reverse();
+            var namespaceBuilder = new ArrayBuilder<char>(stackalloc char[ArrayBuilder.InitSize]);
+
+            for (var i = 0; i < namespacePartBuilder.Count; i++) {
+                if (i > 0) {
+                    namespaceBuilder.Add('.');
+                }
+
+                namespaceBuilder.AddRange(namespacePartBuilder.Elements[i]);
+            }
+
+            return namespaceBuilder.ToStringAndFree();
+        }
+
         public ITypeSymbol TypeFromCompilation<T>() {
             return ctx.GetContextProvider<CompilationCodeGenerationContextProvider>().Compilation.GetTypeByMetadataName(typeof(T).FullName);
         }

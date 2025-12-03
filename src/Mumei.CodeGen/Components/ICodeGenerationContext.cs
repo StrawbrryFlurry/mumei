@@ -15,6 +15,7 @@ public interface ICodeGenerationContext : IEquatable<ICodeGenerationContext> {
 
     public void Emit(string hintName, ISyntheticDeclaration toEmit);
     public void EmitIncremental(string hintName, ISyntheticDeclaration toEmit);
+    public void EmitUnique(string hintName, ISyntheticDeclaration toEmit);
 
     public void RegisterContextProvider<TProvider>(TProvider provider) where TProvider : ICodeGenerationContextProvider;
     public TProvider GetContextProvider<TProvider>() where TProvider : ICodeGenerationContextProvider;

@@ -16,6 +16,8 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
                     """
                     using Mumei.Roslyn.Testing;
 
+                    namespace TestAssembly;
+
                     public sealed class Test {
                         public void TestMethod() {
                             _ = SyntaxTreeReference.Of(typeof(CompilationTestSource)); 
@@ -49,6 +51,7 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
                                               SourceCode = """""""""
                                               using global::System;
                                               
+                                              namespace TestAssembly;
                                               public class Foo
                                               {
                                                   public Func<string> DoS { get; set; } = null !;
@@ -66,6 +69,7 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
                                               SourceCode = """""""""
                                               using global::System;
                                               
+                                              namespace TestAssembly;
                                               public class Bar
                                               {
                                                   public string S { get; set; } = null !;
@@ -92,6 +96,8 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
                 "foo",
                 """
                 using Mumei.Roslyn.Testing;
+
+                namespace TestAssembly;
 
                 public sealed class Test {
                     public void TestMethod() {
@@ -126,6 +132,7 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
                                               SourceCode = """""""""
                                               using global::System;
                                               
+                                              namespace TestAssembly;
                                               public class Foo
                                               {
                                                   public Func<string> DoS { get; set; } = null !;
@@ -143,6 +150,7 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
                                               SourceCode = """""""""
                                               using global::System;
                                               
+                                              namespace TestAssembly;
                                               public class Bar
                                               {
                                                   public string S { get; set; } = null !;

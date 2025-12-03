@@ -30,6 +30,11 @@ internal ref partial struct ArrayBuilder<TElement> {
         get => _elements[.._count];
     }
 
+    public int Count {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _count;
+    }
+
     public Span<TElement> UnsafeBuffer {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => _elements;

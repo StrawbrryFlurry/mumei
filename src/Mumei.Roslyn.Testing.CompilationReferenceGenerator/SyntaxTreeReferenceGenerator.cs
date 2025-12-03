@@ -299,7 +299,11 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
 
         var compilationUnit = SyntaxFactory.CompilationUnit()
             .WithUsings(SyntaxFactory.List(usingDirectives))
-            .WithMembers(SyntaxFactory.SingletonList<MemberDeclarationSyntax>(type.WithoutTrivia()))
+            .WithMembers(
+                SyntaxFactory.List<MemberDeclarationSyntax>([
+                    SyntaxFactory.FileScopedNamespaceDeclaration(SyntaxFactory.IdentifierName(typeSymbol.ContainingNamespace.ToDisplayString(new SymbolDisplayFormat(SymbolDisplayGlobalNamespaceStyle.Omitted, SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces)))),
+                    type.WithoutTrivia()
+                ]))
             .NormalizeWhitespace();
 
         var sourceCode = compilationUnit.ToFullString();

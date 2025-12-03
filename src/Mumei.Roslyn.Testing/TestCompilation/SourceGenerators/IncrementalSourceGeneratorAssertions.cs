@@ -4,7 +4,7 @@ using Xunit.Sdk;
 namespace Mumei.Roslyn.Testing;
 
 public static class IncrementalSourceGeneratorAssertions {
-    extension<TGenerator>(IncrementalSourceGeneratorTest<TGenerator>.Result result) where TGenerator : IIncrementalGenerator, new() {
+    extension<TGenerator>(IncrementalSourceGeneratorTest<TGenerator>.Result result) where TGenerator : IIncrementalGenerator {
         public SyntaxTreeAssertion HasFileMatching(
             string fileRegex
         ) {

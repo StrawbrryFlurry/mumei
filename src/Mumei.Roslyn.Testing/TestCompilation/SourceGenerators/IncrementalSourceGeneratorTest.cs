@@ -6,8 +6,11 @@ using Xunit;
 
 namespace Mumei.Roslyn.Testing;
 
-public sealed class IncrementalSourceGeneratorTest<TGenerator>(Compilation compilation) where TGenerator : IIncrementalGenerator, new() {
-    private GeneratorDriver _driver = CreateDriver(compilation);
+public sealed class IncrementalSourceGeneratorTest<TGenerator>(
+    Compilation compilation,
+    TGenerator generator
+) where TGenerator : IIncrementalGenerator {
+    private GeneratorDriver _driver = CreateDriver(compilation, generator);
     private Compilation _currentCompilation = compilation;
 
     public IncrementalSourceGeneratorTest<TGenerator> RunWithAssert(Action<Result> assertResult) {
@@ -25,8 +28,11 @@ public sealed class IncrementalSourceGeneratorTest<TGenerator>(Compilation compi
         Assert.Empty(diagnostics);
         Assert.Empty(runResult.Diagnostics);
 
+        const string duplicateGlobalUsingDirectiveId = "CS8933";
         const string unnecessaryUsingDirectiveId = "CS8019";
-        var compilationDiagnostics = updatedCompilation.GetDiagnostics().Where(x => x.Id != unnecessaryUsingDirectiveId).ToArray();
+        var compilationDiagnostics = updatedCompilation.GetDiagnostics().Where(
+            x => x.Id is not (unnecessaryUsingDirectiveId or duplicateGlobalUsingDirectiveId)
+        ).ToArray();
 
         // Debug References
         var firstGeneratedTree = runResult.GeneratedTrees.FirstOrDefault();
@@ -62,9 +68,9 @@ public sealed class IncrementalSourceGeneratorTest<TGenerator>(Compilation compi
         }
     }
 
-    private static CSharpGeneratorDriver CreateDriver(Compilation compilation) {
+    private static CSharpGeneratorDriver CreateDriver(Compilation compilation, TGenerator generator) {
         return (CSharpGeneratorDriver) CSharpGeneratorDriver.Create(
-                [new TGenerator().AsSourceGenerator()],
+                [generator.AsSourceGenerator()],
                 driverOptions: new GeneratorDriverOptions(IncrementalGeneratorOutputKind.None, true))
             .WithUpdatedParseOptions((CSharpParseOptions) compilation.SyntaxTrees.First().Options!);
     }

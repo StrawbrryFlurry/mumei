@@ -20,15 +20,18 @@ public static class SyntheticSourceProviderExtensions {
     extension(IncrementalGeneratorInitializationContext ctx) {
         public IncrementalValuesProvider<UserValueWithCompilation<T>> CreateQtProvider<T>(
             [Pure] Func<SyntaxNode, CancellationToken, bool> predicate,
-            [Pure] Func<GeneratorSyntaxContext, CancellationToken, T> transform,
+            [Pure] Func<GeneratorSyntaxContext, CancellationToken, T?> transform,
             string? trackingName = null,
             IEqualityComparer<T>? comparer = null,
             Func<T, bool>? valueFilterPredicate = null
         ) {
-            var sourceProvider = ctx.SyntaxProvider.CreateSyntaxProvider(predicate, (ctx, ct) => {
-                var userResult = transform(ctx, ct);
-                return new UserValueWithCompilation<T>(userResult, ctx.SemanticModel.Compilation);
-            });
+            var sourceProvider = ctx.SyntaxProvider.CreateSyntaxProvider(
+                predicate,
+                (ctx, ct) => {
+                    var userResult = transform(ctx, ct);
+                    return new UserValueWithCompilation<T>(userResult!, ctx.SemanticModel.Compilation);
+                }
+            ).Where(valueWithCompilation => valueWithCompilation.Value is not null);
 
             if (trackingName is not null) {
                 sourceProvider = sourceProvider.WithTrackingName(trackingName);

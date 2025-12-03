@@ -15,6 +15,10 @@ internal sealed partial class CSharpCodeGenerationContext {
         _emitGraph.Track(SyntheticIdentifier.Unique(EmitDeclarationScope.Instance, hintName), decl);
     }
 
+    public void EmitUnique(string hintName, ISyntheticDeclaration decl) {
+        _emitGraph.Track(SyntheticIdentifier.Unique(EmitDeclarationScope.Instance, hintName), decl);
+    }
+
     private sealed class CodeGenerationEmitGraph {
         private readonly ConcurrentDictionary<SyntheticIdentifier, EmitNode> _nodes = new();
 

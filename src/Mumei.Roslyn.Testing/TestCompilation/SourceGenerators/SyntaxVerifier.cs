@@ -18,18 +18,21 @@ public static class SyntaxVerifier {
                 ignoreLineEndingDifferences: true
             );
         } catch (EqualException e) {
-            var diff = Diff(actual, expectedStr, false);
+            var (fullDiff, minimalDiff) = Diff(actual, expectedStr, true);
+
             throw new XunitException(
                 $"""
                  Syntax verification failed.
-                 Actual:
-                 {actual}
+                 {minimalDiff}
 
                  Expected:
                  {expectedStr}
 
-                 Diff:
-                 {diff}
+                 Actual:
+                 {actual}
+
+                 Full Diff:
+                 {fullDiff}
 
                  Inner Exception:
                  {e}
@@ -40,38 +43,42 @@ public static class SyntaxVerifier {
 
     public static void VerifyRegex(string actual, CommonSyntaxStringInterpolationHandler expected) {
         actual = actual.TrimEnd();
-        var expectedString = expected.ToString();
+        var expectedStr = expected.ToString();
 
         var doesMatch = WildcardMatcher.Matches(
             actual,
-            expectedString
+            expectedStr
         );
         if (!doesMatch) {
-            var result = Diff(actual, expectedString, true);
+            var (fullDiff, minimalDiff) = Diff(actual, expectedStr, true);
 
             throw new XunitException(
                 $"""
                  Syntax verification failed.
+                 {minimalDiff}
+
                  Expected:
-                 {expectedString}
+                 {expectedStr}
 
                  Actual:
                  {actual}
 
-                 Diff:
-                 {result}
+                 Full Diff:
+                 {fullDiff}
                  """
             );
         }
     }
 
-    private static string Diff(string actual, string expected, bool ignoreRegex) {
-        var diff = InlineDiffBuilder.Diff(actual, expected, true, true);
-        var result = new StringBuilder();
+    private static (string FullDiff, string MinimalDiff) Diff(string actual, string expected, bool ignoreRegex) {
+        var diff = InlineDiffBuilder.Diff(actual, expected, false, false);
+        var minimalDiff = new StringBuilder();
+        var fullDiff = new StringBuilder();
 
         var lineIdx = 0;
-        while (lineIdx < diff.Lines.Count) {
-            var currentLine = diff.Lines[lineIdx];
+        var lines = diff.Lines;
+        while (lineIdx < lines.Count) {
+            var currentLine = lines[lineIdx];
             if (currentLine.Type == ChangeType.Unchanged) {
                 goto WriteThisLine;
             }
@@ -81,14 +88,14 @@ public static class SyntaxVerifier {
                 goto WriteThisLine;
             }
 
-            if (currentLine.Type == ChangeType.Deleted && lineIdx > 0 && diff.Lines[lineIdx - 1].Type == ChangeType.Unchanged) {
-                if (lineIdx + 1 < diff.Lines.Count && diff.Lines[lineIdx + 1].Type == ChangeType.Inserted) {
+            if (currentLine.Type == ChangeType.Deleted && lineIdx > 0 && lines[lineIdx - 1].Type == ChangeType.Unchanged) {
+                if (lineIdx + 1 < lines.Count && lines[lineIdx + 1].Type == ChangeType.Inserted) {
                     var deletedLine = currentLine.Text;
-                    var insertedLine = diff.Lines[lineIdx + 1].Text;
+                    var insertedLine = lines[lineIdx + 1].Text;
                     var isWildcardChange = WildcardMatcher.Matches(deletedLine, insertedLine);
                     if (isWildcardChange) {
                         lineIdx += 1;
-                        currentLine = diff.Lines[lineIdx + 1];
+                        currentLine = lines[lineIdx + 1];
                         currentLine.Type = ChangeType.Unchanged;
                     }
                 }
@@ -97,23 +104,44 @@ public static class SyntaxVerifier {
             WriteThisLine:
             switch (currentLine.Type) {
                 case ChangeType.Inserted:
-                    result.Append("\x1b[32m");
-                    result.Append(currentLine.Text);
-                    result.AppendLine("\x1b[0m");
+                    AppendCurrentDiffLine("\x1b[32m", "\x1b[0m");
                     break;
                 case ChangeType.Deleted:
-                    result.Append("\x1b[31m");
-                    result.Append(currentLine.Text);
-                    result.AppendLine("\x1b[0m");
+                    AppendCurrentDiffLine("\x1b[31m", "\x1b[0m");
                     break;
                 default:
-                    result.AppendLine(currentLine.Text);
+                    fullDiff.AppendLine(currentLine.Text);
                     break;
             }
 
             lineIdx++;
+
+            void AppendCurrentDiffLine(string prefix, string suffix) {
+                var isStartOfNewDiffBlock = lineIdx == 0 || lineIdx > 0 && lines[lineIdx - 1].Type == ChangeType.Unchanged;
+                if (isStartOfNewDiffBlock && minimalDiff.Length > 0) {
+                    minimalDiff.AppendLine("...");
+                }
+
+                var appendContext = lineIdx > 0 && isStartOfNewDiffBlock;
+                if (appendContext) {
+                    minimalDiff.Append(lines[lineIdx - 1]);
+                }
+
+                minimalDiff.Append(prefix);
+                minimalDiff.Append(currentLine.Text);
+                minimalDiff.AppendLine(suffix);
+
+                var appendFollowingContext = lineIdx + 1 < lines.Count && lines[lineIdx + 1].Type == ChangeType.Unchanged;
+                if (appendFollowingContext) {
+                    minimalDiff.Append(lines[lineIdx + 1]);
+                }
+
+                fullDiff.Append(prefix);
+                fullDiff.Append(currentLine.Text);
+                fullDiff.AppendLine(suffix);
+            }
         }
 
-        return result.ToString();
+        return (fullDiff.ToString(), minimalDiff.ToString());
     }
 }

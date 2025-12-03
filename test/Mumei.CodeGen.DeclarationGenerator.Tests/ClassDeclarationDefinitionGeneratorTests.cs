@@ -9,7 +9,9 @@ public sealed class ClassDeclarationDefinitionGeneratorTests {
     public void Test1() {
         SourceGeneratorTest.TestGenerator<ClassDeclarationDefinitionGenerator>(
             SyntaxTreeReference.Of(typeof(TestScope))
-        ).RunWithAssert(result => { });
+        ).RunWithAssert(result => {
+            result.HasFileMatching($"{nameof(TestScope.TestClassDefinition)}.g.cs").WithContent($"");
+        });
     }
 }
 
