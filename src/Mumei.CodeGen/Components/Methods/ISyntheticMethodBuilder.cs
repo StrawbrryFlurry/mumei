@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Mumei.CodeGen.Components;
 
@@ -16,6 +17,7 @@ public interface ISyntheticMethodBuilder<TSignature> : ISyntheticMethod<TSignatu
     public ISyntheticMethodBuilder<TSignature> WithAccessibility(AccessModifierList modifiers);
     public ISyntheticMethodBuilder<TSignature> WithParameters(params ReadOnlySpan<ISyntheticParameter> parameterList);
     public ISyntheticMethodBuilder<TSignature> WithParameters(ISyntheticParameterList parameterList);
+    [OverloadResolutionPriority(1)]
     public ISyntheticMethodBuilder<TSignature> WithTypeParameters(ISyntheticTypeParameterList typeParameterList);
     public ISyntheticMethodBuilder<TSignature> WithTypeParameters(params ReadOnlySpan<ISyntheticTypeParameter> typeParameterList);
 

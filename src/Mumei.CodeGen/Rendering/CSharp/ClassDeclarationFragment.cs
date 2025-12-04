@@ -148,7 +148,26 @@ public readonly struct MethodDeclarationFragment(
         renderTree.Interpolate($"{accessModifier.List} {returnType.FullName} {name}{typeParameters.List}");
 
         renderTree.Text("(");
-        renderTree.SeparatedList(parameters.AsSpan());
+        if (!parameters.IsEmpty) {
+            renderTree.NewLine();
+            renderTree.StartBlock();
+        }
+
+        for (var i = 0; i < parameters.Length; i++) {
+            var parameter = parameters[i];
+            renderTree.Node(parameter);
+            if (i < parameters.Length - 1) {
+                renderTree.Text(",");
+                renderTree.NewLine();
+            } else {
+                renderTree.NewLine();
+            }
+        }
+
+        if (!parameters.IsEmpty) {
+            renderTree.EndBlock();
+        }
+
         renderTree.Text(")");
 
         renderTree.Node(typeParameters.Constraints);
@@ -178,29 +197,39 @@ public readonly struct MethodDeclarationFragment(
     }
 }
 
-public readonly struct FieldDeclarationFragment : IRenderFragment {
-    public void Render(IRenderTreeBuilder renderTree) { }
+public readonly struct FieldDeclarationFragment(
+    AttributeListFragment attributes,
+    AccessModifierList accessModifier,
+    TypeInfoFragment type,
+    string name
+) : IRenderFragment {
+    public readonly AttributeListFragment Attributes = attributes;
+    public readonly AccessModifierList AccessModifier = accessModifier;
+    public readonly TypeInfoFragment Type = type;
+    public readonly string Name = name;
+
+    public void Render(IRenderTreeBuilder renderTree) {
+        renderTree.Node(Attributes);
+        renderTree.Interpolate($"{AccessModifier.List} {Type.FullName} {Name};");
+    }
 }
 
 public readonly struct PropertyDeclarationFragment(
-    ImmutableArray<AttributeFragment> attributes,
+    AttributeListFragment attributes,
     AccessModifierList accessModifier,
     TypeInfoFragment type,
     string name,
     PropertyDeclarationFragment.AccessorFragment? getAccessor,
     PropertyDeclarationFragment.AccessorFragment? setOrInitAccessor
 ) : IRenderFragment {
-    public readonly ImmutableArray<AttributeFragment> Attributes = attributes.EnsureInitialized();
+    public readonly AttributeListFragment Attributes = attributes;
     public readonly TypeInfoFragment Type = type;
     public readonly string Name = name;
     public readonly AccessorFragment? GetAccessor = getAccessor;
     public readonly AccessorFragment? SetOrInitAccessor = setOrInitAccessor;
 
     public void Render(IRenderTreeBuilder renderTree) {
-        if (!Attributes.IsEmpty) {
-            renderTree.List(attributes.AsSpan());
-            renderTree.NewLine();
-        }
+        renderTree.Node(Attributes);
 
         renderTree.Interpolate($"{accessModifier.List} {Type.FullName} {Name} ");
         renderTree.StartCodeBlock();

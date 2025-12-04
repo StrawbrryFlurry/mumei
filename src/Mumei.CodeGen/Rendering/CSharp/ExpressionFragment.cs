@@ -1,12 +1,13 @@
 ﻿using System.Runtime.CompilerServices;
 using Mumei.Common.Internal;
-using Mumei.Roslyn;
 
 namespace Mumei.CodeGen.Rendering.CSharp;
 
 public readonly struct ExpressionFragment(string value) : IRenderFragment {
     public static ExpressionFragment Null { get; } = new("null");
     public static ExpressionFragment Default { get; } = new("default");
+
+    public string Value => value;
 
     public static implicit operator ExpressionFragment(string value) {
         return new ExpressionFragment(value);

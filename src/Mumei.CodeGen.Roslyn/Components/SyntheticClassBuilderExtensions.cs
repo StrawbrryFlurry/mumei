@@ -8,6 +8,13 @@ namespace Mumei.CodeGen.Roslyn.Components;
 
 public static class SyntheticClassBuilderExtensions {
     extension<TClass>(ISyntheticClassBuilder<TClass> classBuilder) {
+        public ISyntheticClassBuilder<TClass> WithTypeParametersFrom(INamedTypeSymbol typeSymbol) {
+            var ctx = classBuilder.ΦCompilerApi.Context;
+            var typeParameters = ctx.TypeParameterListFrom(typeSymbol);
+            classBuilder.WithTypeParameters(typeParameters);
+            return classBuilder;
+        }
+
         public ISyntheticInterceptorMethodBuilder<Delegate> DeclareUnconstructedInterceptorMethod(
             SyntheticIdentifier name,
             InvocationExpressionSyntax invocationToIntercept

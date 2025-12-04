@@ -1,6 +1,8 @@
 ﻿namespace Mumei.CodeGen.Components;
 
 internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
+    private Dictionary<string, ISyntheticType>? _dynamicallyBoundTypeInfos;
+
     public ISyntheticMethodBuilder<Delegate> DeclareMethod<TMethodDefinition>(
         SyntheticIdentifier name,
         Func<TMethodDefinition, Delegate> methodSelector,
@@ -18,7 +20,13 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
     }
 
     public ISyntheticMethodBuilder<TSignature> DeclareMethod<TSignature>(SyntheticIdentifier name) where TSignature : Delegate {
-        throw new NotImplementedException();
+        var method = new SyntheticMethodBuilder<TSignature>(
+            name,
+            ΦCompilerApi
+        );
+
+        DeclareMethod(method);
+        return method;
     }
 
     public void BindSyntheticImplementation(ISyntheticType member, ISyntheticType actualType) {
@@ -27,6 +35,41 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
 
     public void BindSyntheticImplementation(Type member, ISyntheticType actualType) {
         throw new NotImplementedException();
+    }
+
+    public ISyntheticField<TField> DeclareField<TField>(ISyntheticField<TField> field) {
+        var fields = _fields ??= [];
+        fields.Add(field);
+        return field;
+    }
+
+    public ISyntheticField<TField> DeclareField<TField>(ISyntheticType type, SyntheticIdentifier name) {
+        return DeclareField(new SyntheticField<TField>(
+            null,
+            AccessModifier.Private,
+            type,
+            name
+        ));
+    }
+
+    public ISyntheticProperty<TProperty> DeclareProperty<TProperty>(ISyntheticProperty<TProperty> property) {
+        var properties = _properties ??= [];
+        properties.Add(property);
+        return property;
+    }
+
+    public ISyntheticProperty<TProperty> DeclareProperty<TProperty>(
+        ISyntheticType type,
+        SyntheticIdentifier name,
+        SyntheticPropertyAccessorList accessors
+    ) {
+        return DeclareProperty(new SyntheticProperty<TProperty>(
+            null,
+            accessors,
+            AccessModifier.Private,
+            type,
+            name
+        ));
     }
 
     public ISyntheticClassBuilder<TNew> WithDefinition<TNew>() where TNew : ISyntheticClass {
@@ -68,5 +111,10 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
 
     public ISyntheticClassBuilder<TNested> DeclareNestedClass<TNested>(SyntheticIdentifier name, Action<TNested> bindInputs) where TNested : ISyntheticClass {
         throw new NotImplementedException();
+    }
+
+    public void Bind(Type t, ISyntheticType actualType, string bindingTargetExpression = "") {
+        _dynamicallyBoundTypeInfos ??= new Dictionary<string, ISyntheticType>();
+        _dynamicallyBoundTypeInfos[t.FullName!] = actualType;
     }
 }

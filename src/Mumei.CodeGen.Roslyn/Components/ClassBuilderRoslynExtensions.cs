@@ -1,20 +1,24 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Runtime.CompilerServices;
+using Microsoft.CodeAnalysis;
 using Mumei.CodeGen.Components;
 
 namespace Mumei.CodeGen.Roslyn.Components;
 
 public static class ClassBuilderRoslynExtensions {
+    extension(ISimpleClassBuilder builder) {
+        public void Bind(Type toBind, ITypeSymbol typeSymbol, [CallerArgumentExpression(nameof(toBind))] string bindingTargetExpression = "") {
+            builder.ΦCompilerApi.Context.Type(typeSymbol);
+            builder.Bind(toBind, typeSymbol, bindingTargetExpression);
+        }
+    }
+
     extension<TClass>(ISyntheticClassBuilder<TClass> builder) {
-        public ISyntheticClassBuilder<TClass> Bind<T>(ITypeSymbol typeSymbol) {
-            return builder;
-        }
-
         public ISyntheticField<CompileTimeUnknown> DeclareField(ITypeSymbol typeSymbol, SyntheticIdentifier name) {
-            return builder.DeclareField<CompileTimeUnknown>(typeSymbol.ToDisplayString());
+            return null!;
         }
 
-        public ISyntheticField<CompileTimeUnknown> DeclareProperty(ITypeSymbol typeSymbol, SyntheticIdentifier name) {
-            return builder.DeclareField<CompileTimeUnknown>(typeSymbol.ToDisplayString());
+        public ISyntheticProperty<CompileTimeUnknown> DeclareProperty(ITypeSymbol typeSymbol, SyntheticIdentifier name) {
+            return null!;
         }
     }
 }

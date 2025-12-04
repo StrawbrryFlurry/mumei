@@ -1,6 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-
-namespace Mumei.CodeGen.Rendering.CSharp;
+﻿namespace Mumei.CodeGen.Rendering.CSharp;
 
 public readonly struct ParameterFragment : IRenderFragment {
     public required ExpressionFragment Name { get; init; }

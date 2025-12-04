@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.Text;
 using Mumei.CodeGen;
 using Mumei.CodeGen.Rendering;
 using Mumei.CodeGen.Rendering.CSharp;
+using Mumei.CodeGen.Roslyn;
 using Mumei.CodeGen.Roslyn.Components;
 using Mumei.CodeGen.Roslyn.RoslynCodeProviders;
 
@@ -45,6 +46,9 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
                   }
               }
           }
+
+          [global::Microsoft.CodeAnalysis.EmbeddedAttribute]
+          internal sealed class OmitInReferenceAttribute : global::System.Attribute;
 
           [global::Microsoft.CodeAnalysis.EmbeddedAttribute]
           internal sealed class SyntaxTreeCompilationReference : global::Mumei.Roslyn.Testing.ICompilationReference {
@@ -198,6 +202,11 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
     ) {
         seenTypes ??= new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
         if (!seenTypes.Add(typeSymbol)) {
+            return;
+        }
+
+        var omitInReferenceAttributeSymbol = compilation.GetTypeByMetadataName("Mumei.Roslyn.Testing.OmitInReferenceAttribute");
+        if (typeSymbol.HasAttribute(omitInReferenceAttributeSymbol!)) {
             return;
         }
 

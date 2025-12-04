@@ -13,6 +13,8 @@ public interface ICodeGenerationContext : IEquatable<ICodeGenerationContext> {
     public ISyntheticClassBuilder<CompileTimeUnknown> DeclareClass(SyntheticIdentifier name);
     public ISyntheticNamespaceBuilder Namespace(params ReadOnlySpan<string> namespaceSegments);
 
+    public ISyntheticType Type(Type type);
+
     public void Emit(string hintName, ISyntheticDeclaration toEmit);
     public void EmitIncremental(string hintName, ISyntheticDeclaration toEmit);
     public void EmitUnique(string hintName, ISyntheticDeclaration toEmit);

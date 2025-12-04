@@ -40,4 +40,8 @@ internal sealed partial class CSharpCodeGenerationContext {
         _globalNamespaceBuilder.WithMember(ns);
         return ns;
     }
+
+    public ISyntheticType Type(Type type) {
+        return new RuntimeSyntheticType(type);
+    }
 }

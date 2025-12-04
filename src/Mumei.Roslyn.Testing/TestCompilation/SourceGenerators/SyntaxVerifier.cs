@@ -22,7 +22,7 @@ public static class SyntaxVerifier {
 
             throw new XunitException(
                 $"""
-                 Syntax verification failed.
+                 Syntax verification failed. ({Green("Expected")}, {Red("Actual")})
                  {minimalDiff}
 
                  Expected:
@@ -54,7 +54,7 @@ public static class SyntaxVerifier {
 
             throw new XunitException(
                 $"""
-                 Syntax verification failed.
+                 Syntax verification failed. ({Green("Expected")}, {Red("Actual")})
                  {minimalDiff}
 
                  Expected:
@@ -75,6 +75,10 @@ public static class SyntaxVerifier {
         var minimalDiff = new StringBuilder();
         var fullDiff = new StringBuilder();
 
+        if (!diff.HasDifferences) {
+            return ("<No Diff Available>", "<No Diff Available>");
+        }
+
         var lineIdx = 0;
         var lines = diff.Lines;
         while (lineIdx < lines.Count) {
@@ -88,26 +92,26 @@ public static class SyntaxVerifier {
                 goto WriteThisLine;
             }
 
-            if (currentLine.Type == ChangeType.Deleted && lineIdx > 0 && lines[lineIdx - 1].Type == ChangeType.Unchanged) {
-                if (lineIdx + 1 < lines.Count && lines[lineIdx + 1].Type == ChangeType.Inserted) {
-                    var deletedLine = currentLine.Text;
-                    var insertedLine = lines[lineIdx + 1].Text;
-                    var isWildcardChange = WildcardMatcher.Matches(deletedLine, insertedLine);
-                    if (isWildcardChange) {
-                        lineIdx += 1;
-                        currentLine = lines[lineIdx + 1];
-                        currentLine.Type = ChangeType.Unchanged;
-                    }
-                }
-            }
+            // if (currentLine.Type == ChangeType.Deleted && lineIdx > 0 && lines[lineIdx - 1].Type == ChangeType.Unchanged) {
+            //     if (lineIdx + 1 < lines.Count && lines[lineIdx + 1].Type == ChangeType.Inserted) {
+            //         var deletedLine = currentLine.Text;
+            //         var insertedLine = lines[lineIdx + 1].Text;
+            //         var isWildcardChange = WildcardMatcher.Matches(deletedLine, insertedLine);
+            //         if (isWildcardChange) {
+            //             lineIdx += 1;
+            //             currentLine = lines[lineIdx + 1];
+            //             currentLine.Type = ChangeType.Unchanged;
+            //         }
+            //     }
+            // }
 
             WriteThisLine:
             switch (currentLine.Type) {
                 case ChangeType.Inserted:
-                    AppendCurrentDiffLine("\x1b[32m", "\x1b[0m");
+                    AppendCurrentDiffLine(Green);
                     break;
                 case ChangeType.Deleted:
-                    AppendCurrentDiffLine("\x1b[31m", "\x1b[0m");
+                    AppendCurrentDiffLine(Red);
                     break;
                 default:
                     fullDiff.AppendLine(currentLine.Text);
@@ -116,7 +120,7 @@ public static class SyntaxVerifier {
 
             lineIdx++;
 
-            void AppendCurrentDiffLine(string prefix, string suffix) {
+            void AppendCurrentDiffLine(Func<string, string> color) {
                 var isStartOfNewDiffBlock = lineIdx == 0 || lineIdx > 0 && lines[lineIdx - 1].Type == ChangeType.Unchanged;
                 if (isStartOfNewDiffBlock && minimalDiff.Length > 0) {
                     minimalDiff.AppendLine("...");
@@ -124,24 +128,28 @@ public static class SyntaxVerifier {
 
                 var appendContext = lineIdx > 0 && isStartOfNewDiffBlock;
                 if (appendContext) {
-                    minimalDiff.Append(lines[lineIdx - 1]);
+                    minimalDiff.AppendLine(lines[lineIdx - 1].Text);
                 }
 
-                minimalDiff.Append(prefix);
-                minimalDiff.Append(currentLine.Text);
-                minimalDiff.AppendLine(suffix);
+                minimalDiff.AppendLine(color(currentLine.Text));
 
                 var appendFollowingContext = lineIdx + 1 < lines.Count && lines[lineIdx + 1].Type == ChangeType.Unchanged;
                 if (appendFollowingContext) {
-                    minimalDiff.Append(lines[lineIdx + 1]);
+                    minimalDiff.AppendLine(lines[lineIdx + 1].Text);
                 }
 
-                fullDiff.Append(prefix);
-                fullDiff.Append(currentLine.Text);
-                fullDiff.AppendLine(suffix);
+                fullDiff.AppendLine(color(currentLine.Text));
             }
         }
 
         return (fullDiff.ToString(), minimalDiff.ToString());
+    }
+
+    public static string Green(string text) {
+        return $"\x1b[32m{text}\x1b[0m";
+    }
+
+    public static string Red(string text) {
+        return $"\x1b[31m{text}\x1b[0m";
     }
 }

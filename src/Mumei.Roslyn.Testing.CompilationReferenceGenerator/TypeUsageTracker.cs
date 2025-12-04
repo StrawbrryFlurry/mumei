@@ -52,7 +52,7 @@ internal sealed class TypeUsageTracker : CSharpSyntaxWalker {
 
     public override void VisitInvocationExpression(InvocationExpressionSyntax node) {
         var targetMethod = _sm.GetSymbolInfo(node).Symbol as IMethodSymbol;
-        if (targetMethod?.IsExtensionMethod ?? false) {
+        if ((targetMethod?.IsExtensionMethod ?? false) || (targetMethod?.ContainingType.IsExtension ?? false)) {
             _typeReferences.Add(targetMethod.ContainingType);
         }
 

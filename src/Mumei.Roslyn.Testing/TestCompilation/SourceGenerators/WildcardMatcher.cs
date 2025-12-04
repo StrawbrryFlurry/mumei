@@ -18,7 +18,7 @@ internal static class WildcardMatcher {
     private static string TrimEachLine(string text) {
         var lines = text.Split('\n');
         for (var i = 0; i < lines.Length; i++) {
-            lines[i] = lines[i].TrimEnd();
+            lines[i] = lines[i].Trim();
         }
 
         return string.Join("\n", lines);

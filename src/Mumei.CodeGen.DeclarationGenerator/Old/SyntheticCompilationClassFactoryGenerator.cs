@@ -39,7 +39,7 @@ public sealed class SyntheticCompilationClassFactoryGenerator : IIncrementalGene
 // We also use this as a container for generating all the method implementations
 [CompilerGenerated]
 file sealed partial class SyntheticClassDynamicMemberBinder<TClassDefinition> {
-    public override void InternalBindCompilerOutputMembers(ISyntheticClassBuilder<SyntheticClassDynamicMemberBinder<TClassDefinition>> classBuilder, SyntheticClassDynamicMemberBinder<TClassDefinition> target) {
+    public override void InternalBindCompilerOutputMembers(ISyntheticClassBuilder<SyntheticClassDynamicMemberBinder<TClassDefinition>> classBuilder) {
         // classBuilder.λCompilerApi.BindMethodSlot();
         classBuilder.ΦCompilerApi.DeclareMethod(
             [],
@@ -48,7 +48,7 @@ file sealed partial class SyntheticClassDynamicMemberBinder<TClassDefinition> {
             "BindCompilerOutputMembers",
             [],
             [],
-            new SyntheticClassDynamicMemberBinder__MethodDeclaration_BindCompilerOutputMembers__0(target)
+            new SyntheticClassDynamicMemberBinder__MethodDeclaration_BindCompilerOutputMembers__0(this)
         );
     }
 
@@ -123,7 +123,7 @@ file sealed partial class SyntheticClassDynamicMemberBinder<[Bindable] TClassDef
     private readonly List<ISyntheticMethod<Action<ISyntheticClassBuilder<TClassDefinition>>>> _outputBinderMethods;
 
     public override void Setup(ISyntheticClassBuilder<SyntheticClassDynamicMemberBinder<TClassDefinition>> classBuilder) {
-        classBuilder.Bind<SyntheticClassDynamicMemberBinder<TClassDefinition>, TClassDefinition>(DefinitionClass);
+        // classBuilder.Bind<SyntheticClassDynamicMemberBinder<TClassDefinition>, TClassDefinition>(DefinitionClass);
 
         // var outputAttribute = Compilation.TypeFromCompilation<OutputAttribute>();
         var outputMembers = DefinitionClass.GetMembers().Where(x => x.GetAttributes().Any(a => a.AttributeClass?.Equals(null!, SymbolEqualityComparer.Default) ?? false));

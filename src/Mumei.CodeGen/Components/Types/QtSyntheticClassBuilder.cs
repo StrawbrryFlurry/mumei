@@ -17,9 +17,12 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
     public ISyntheticDeclaration Parent { get; } = parent;
 
     private ISyntheticAttributeList? _attributes;
-    private List<ISyntheticMethod>? _methods;
     private List<ISyntheticClass>? _nestedClasses;
     private ISyntheticTypeParameterList? _typeParameters;
+
+    private List<ISyntheticMethod>? _methods;
+    private List<ISyntheticProperty>? _properties;
+    private List<ISyntheticField>? _fields;
 
     private AccessModifierList _modifiers = AccessModifier.Internal;
 
@@ -52,8 +55,25 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
         return SyntheticIdentifier.Unique(this, name);
     }
 
+    public ISyntheticClassBuilder<TClassDef> WithTypeParameters(ISyntheticTypeParameterList typeParameters) {
+        _typeParameters = typeParameters;
+        return this;
+    }
+
     private sealed class CompilerApi(ICodeGenerationContext context, QtSyntheticClassBuilder<TClassDef> builder) : IΦInternalClassBuilderCompilerApi {
         public ICodeGenerationContext Context => context;
+
+        public ISyntheticType DynamicallyBoundType(string type) {
+            if (builder._dynamicallyBoundTypeInfos is null) {
+                throw new InvalidOperationException("No dynamically bound type infos exist on this class builder.");
+            }
+
+            if (!builder._dynamicallyBoundTypeInfos.TryGetValue(type, out var syntheticType)) {
+                throw new KeyNotFoundException($"No dynamically bound type info found for type '{type}'.");
+            }
+
+            return syntheticType;
+        }
 
         public void DeclareMethod(
             ISyntheticAttribute[] attributes,
@@ -88,6 +108,16 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
         foreach (var synMethod in _methods ?? []) {
             var fragment = compilationUnit.Synthesize<MethodDeclarationFragment>(synMethod);
             methods.Add(fragment);
+        }
+
+        foreach (var synField in _fields ?? []) {
+            var fragment = compilationUnit.Synthesize<FieldDeclarationFragment>(synField);
+            fields.Add(fragment);
+        }
+
+        foreach (var synProperty in _properties ?? []) {
+            var fragment = compilationUnit.Synthesize<PropertyDeclarationFragment>(synProperty);
+            properties.Add(fragment);
         }
 
         return new ClassDeclarationFragment(

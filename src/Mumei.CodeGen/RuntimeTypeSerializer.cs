@@ -12,7 +12,7 @@ internal static class RuntimeTypeSerializer {
         }
 
         var buffer = new ArrayBuilder<char>(stackalloc char[ArrayBuilder.InitSize]);
-        GetTypeFullName(type, ref buffer);
+        GetTypeFullName(type, ref buffer, true);
         tree.Text(buffer.Elements);
         buffer.Dispose();
     }
@@ -32,8 +32,12 @@ internal static class RuntimeTypeSerializer {
                 not null when type == typeof(double) => "double",
                 not null when type == typeof(bool) => "bool",
                 not null when type == typeof(char) => "char",
+                not null when type == typeof(decimal) => "decimal",
+                not null when type == typeof(nint) => "nint",
+                not null when type == typeof(nuint) => "nuint",
                 _ => throw new NotSupportedException($"Unsupported primitive type: {type}")
             };
+
             return true;
         }
 
@@ -42,23 +46,35 @@ internal static class RuntimeTypeSerializer {
             return true;
         }
 
+        if (type == typeof(object)) {
+            keyword = "object";
+            return true;
+        }
+
+        if (type == typeof(void)) {
+            keyword = "void";
+            return true;
+        }
+
         keyword = null!;
         return false;
     }
 
-    internal static string GetTypeFullName(Type type) {
+    internal static string GetTypeFullName(Type type, bool global = true) {
         // Do this here to not re-allocate keyword strings
         if (TryGetKeywordType(type, out var keywordType)) {
             return keywordType;
         }
 
         var buffer = new ArrayBuilder<char>(stackalloc char[ArrayBuilder.InitSize]);
-        GetTypeFullName(type, ref buffer);
+        GetTypeFullName(type, ref buffer, global);
         return buffer.ToStringAndFree();
     }
 
-    internal static void GetTypeFullName(Type type, ref ArrayBuilder<char> buffer) {
-        buffer.AddRange("global::");
+    internal static void GetTypeFullName(Type type, ref ArrayBuilder<char> buffer, bool global) {
+        if (global) {
+            buffer.AddRange("global::");
+        }
 
         if (type.Namespace is not null) {
             buffer.AddRange(type.Namespace);
@@ -83,7 +99,7 @@ internal static class RuntimeTypeSerializer {
                 buffer.AddRange(", ");
             }
 
-            GetTypeFullName(genericArguments[i], ref buffer);
+            GetTypeFullName(genericArguments[i], ref buffer, global);
         }
 
         buffer.Add('>');

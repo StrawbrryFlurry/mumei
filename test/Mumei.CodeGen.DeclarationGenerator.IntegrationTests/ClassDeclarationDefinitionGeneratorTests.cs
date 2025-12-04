@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Mumei.CodeGen.Components;
+using Mumei.CodeGen.Roslyn.Components;
 using Mumei.CodeGen.Roslyn.RoslynCodeProviders;
 using Mumei.Roslyn.Testing;
 
@@ -16,7 +17,11 @@ public sealed class ClassDeclarationDefinitionGeneratorTests {
                     (a, b) => { return ""; }
                 );
 
-                var o = x.IncrementalGenerate((generationContext, s) => { });
+                var o = x.IncrementalGenerate((generationContext, s) => {
+                    generationContext.DeclareClass<TestClassDefinition<CompileTimeUnknown>>(
+                        "",
+                        (cls) => { });
+                });
 
                 context.RegisterCodeGenerationOutput(o);
             }
@@ -26,7 +31,7 @@ public sealed class ClassDeclarationDefinitionGeneratorTests {
     }
 }
 
-public sealed partial class TestClassDefinition : SyntheticClassDefinition<TestClassDefinition> {
+public sealed partial class TestClassDefinition<TState> : SyntheticClassDefinition<TestClassDefinition<TState>> {
     [Input]
     public string InputA { get; }
 
@@ -39,12 +44,17 @@ public sealed partial class TestClassDefinition : SyntheticClassDefinition<TestC
     [Output]
     public Type OutputB { get; }
 
-    public override void Setup(ISyntheticClassBuilder<TestClassDefinition> classBuilder) {
+    [Output]
+    private TState _state;
+
+    public override void Setup(ISyntheticClassBuilder<TestClassDefinition<TState>> classBuilder) {
+        classBuilder.Bind(typeof(TState), InputB);
         // classBuilder.WithBaseClass(InputB);
     }
 
     [Output]
-    public Task DoWorkAsync() {
+    public Task DoWorkAsync(TState state) {
+        _state = state;
         Console.WriteLine("Doing work...");
         return Task.CompletedTask;
     }

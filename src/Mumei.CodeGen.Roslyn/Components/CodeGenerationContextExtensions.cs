@@ -62,8 +62,12 @@ public static class CodeGenerationContextExtensions {
             return namespaceBuilder.ToStringAndFree();
         }
 
-        public ITypeSymbol TypeFromCompilation<T>() {
-            return ctx.GetContextProvider<CompilationCodeGenerationContextProvider>().Compilation.GetTypeByMetadataName(typeof(T).FullName);
+        public INamedTypeSymbol TypeFromCompilation<T>() {
+            return ctx.TypeFromCompilation(typeof(T));
+        }
+
+        public INamedTypeSymbol TypeFromCompilation(Type t) {
+            return ctx.GetContextProvider<CompilationCodeGenerationContextProvider>().Compilation.GetTypeByMetadataName(t.FullName ?? t.Name) ?? throw new InvalidOperationException($"Could not resolve type symbol for type '{t.FullName ?? t.Name}' from compilation.");
         }
 
         public ISyntheticType Type(ITypeSymbol typeSymbol) {
@@ -93,6 +97,27 @@ public static class CodeGenerationContextExtensions {
         public ISyntheticParameter Parameter(string name, ITypeSymbol type, ParameterAttributes attributes = ParameterAttributes.None) {
             var parameterType = ctx.Type(type);
             return new SyntheticParameter(name, parameterType, attributes: attributes);
+        }
+
+        public ISyntheticParameter Parameter(string name, ITypeSymbol type, out ExpressionFragment parameter) {
+            var parameterType = ctx.Type(type);
+            var p = new SyntheticParameter(name, parameterType, attributes: ParameterAttributes.None);
+            parameter = new ExpressionFragment(name);
+            return p;
+        }
+
+        public ISyntheticTypeParameter TypeParameter(string name) {
+            return new QtSyntheticTypeParameter(name);
+        }
+
+        public ISyntheticTypeParameterList TypeParameterListFrom(INamedTypeSymbol typeSymbol) {
+            var typeParameters = new ISyntheticTypeParameter[typeSymbol.TypeParameters.Length];
+            for (var i = 0; i < typeSymbol.TypeParameters.Length; i++) {
+                var typeParameter = typeSymbol.TypeParameters[i];
+                typeParameters[i] = new RoslynSyntheticTypeParameter(typeParameter);
+            }
+
+            return new QtSyntheticTypeParameterList(typeParameters);
         }
 
         public ISyntheticTypeParameterList TypeParameterListFrom(IMethodSymbol methodSymbol) {
