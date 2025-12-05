@@ -6,12 +6,21 @@ public readonly struct NamespaceOrGlobalScopeFragment(
     string? parentNamespace,
     string? name,
     ImmutableArray<ClassDeclarationFragment> classDeclarations,
+    ImmutableArray<NamespaceOrGlobalScopeFragment> namespaceDeclarations,
     TriviaFragment leadingTrivia,
     TriviaFragment trailingTrivia
 ) : IRenderFragment {
-    public static NamespaceOrGlobalScopeFragment GlobalScope => new(null, null, ImmutableArray<ClassDeclarationFragment>.Empty, TriviaFragment.Empty, TriviaFragment.Empty);
+    public static NamespaceOrGlobalScopeFragment GlobalScope => new(
+        null,
+        null,
+        ImmutableArray<ClassDeclarationFragment>.Empty,
+        ImmutableArray<NamespaceOrGlobalScopeFragment>.Empty,
+        TriviaFragment.Empty,
+        TriviaFragment.Empty
+    );
 
     public ImmutableArray<ClassDeclarationFragment> ClassDeclarations { get; } = classDeclarations;
+    public ImmutableArray<NamespaceOrGlobalScopeFragment> NamespaceDeclarations { get; } = namespaceDeclarations;
     public string? Name { get; } = name;
     public string? ParentNamespace { get; } = parentNamespace;
 
@@ -22,13 +31,21 @@ public readonly struct NamespaceOrGlobalScopeFragment(
             ParentNamespace,
             Name,
             classDeclarations,
+            NamespaceDeclarations,
             leadingTrivia,
             trailingTrivia
         );
     }
 
     public static NamespaceOrGlobalScopeFragment Create(string name, ImmutableArray<ClassDeclarationFragment> classDeclarations) {
-        return new NamespaceOrGlobalScopeFragment(null, name, classDeclarations, TriviaFragment.Empty, TriviaFragment.Empty);
+        return new NamespaceOrGlobalScopeFragment(
+            null,
+            name,
+            classDeclarations,
+            ImmutableArray<NamespaceOrGlobalScopeFragment>.Empty,
+            TriviaFragment.Empty,
+            TriviaFragment.Empty
+        );
     }
 
     public NamespaceOrGlobalScopeFragment WithLeadingTrivia(TriviaFragment trivia) {
@@ -36,6 +53,7 @@ public readonly struct NamespaceOrGlobalScopeFragment(
             ParentNamespace,
             Name,
             ClassDeclarations,
+            NamespaceDeclarations,
             trivia,
             trailingTrivia
         );
@@ -46,6 +64,7 @@ public readonly struct NamespaceOrGlobalScopeFragment(
             ParentNamespace,
             Name,
             ClassDeclarations,
+            NamespaceDeclarations,
             leadingTrivia,
             trivia
         );
@@ -83,5 +102,6 @@ public readonly struct NamespaceOrGlobalScopeFragment(
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void RenderMembers(IRenderTreeBuilder renderTree) {
         renderTree.List(ClassDeclarations.AsSpan());
+        renderTree.List(NamespaceDeclarations.AsSpan());
     }
 }

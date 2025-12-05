@@ -76,8 +76,17 @@ public readonly struct ClassDeclarationFragment(
         }
 
         renderTree.List(properties.AsSpan());
+        if (!properties.IsEmpty) {
+            renderTree.NewLine();
+        }
         renderTree.List(fields.AsSpan());
+        if (!fields.IsEmpty) {
+            renderTree.NewLine();
+        }
         renderTree.List(methods.AsSpan());
+        if (!methods.IsEmpty) {
+            renderTree.NewLine();
+        }
         renderTree.List(nestedClassDeclarations.AsSpan());
 
         renderTree.EndCodeBlock();
@@ -232,19 +241,23 @@ public readonly struct PropertyDeclarationFragment(
         renderTree.Node(Attributes);
 
         renderTree.Interpolate($"{accessModifier.List} {Type.FullName} {Name} ");
-        renderTree.StartCodeBlock();
+        renderTree.StartBlock();
+        renderTree.Text("{");
 
         if (GetAccessor is { } getAcc) {
+            renderTree.Text(" ");
             renderTree.Node(getAcc);
-            renderTree.NewLine();
         }
 
         if (SetOrInitAccessor is { } setAcc) {
+            renderTree.Text(" ");
             renderTree.Node(setAcc);
-            renderTree.NewLine();
+        } else {
+            renderTree.Text(" ");
         }
 
-        renderTree.EndCodeBlock();
+        renderTree.Text("}");
+        renderTree.EndBlock();
     }
 
     public readonly struct AccessorFragment(
@@ -280,7 +293,7 @@ public readonly struct PropertyDeclarationFragment(
                 renderTree.NewLine();
             }
 
-            if (accessModifier is { } propertyAccessModifier) {
+            if (accessModifier is { IsEmpty: false } propertyAccessModifier) {
                 renderTree.Interpolate($"{propertyAccessModifier.List} ");
             }
 

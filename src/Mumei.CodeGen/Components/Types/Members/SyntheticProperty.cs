@@ -8,12 +8,17 @@ internal sealed class SyntheticProperty<TProperty>(
     AccessModifierList modifiers,
     ISyntheticType type,
     SyntheticIdentifier name
-) : ISyntheticProperty<TProperty>, ISyntheticConstructable<PropertyDeclarationFragment> {
+) : ISyntheticPropertyBuilder<TProperty>, ISyntheticConstructable<PropertyDeclarationFragment> {
     public ISyntheticAttributeList? Attributes { get; } = attributes;
     public SyntheticPropertyAccessorList Accessors { get; } = accessors;
-    public AccessModifierList Modifiers { get; } = modifiers;
+    public AccessModifierList Modifiers { get; private set; } = modifiers;
     public ISyntheticType Type { get; } = type;
     public SyntheticIdentifier Name { get; } = name;
+
+    public ISyntheticPropertyBuilder<TProperty> WithAccessibility(AccessModifierList modifiers) {
+        Modifiers = modifiers;
+        return this;
+    }
 
     public PropertyDeclarationFragment Construct(ICompilationUnitContext compilationUnit) {
         return new PropertyDeclarationFragment(

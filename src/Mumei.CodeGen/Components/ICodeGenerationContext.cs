@@ -6,7 +6,7 @@ namespace Mumei.CodeGen.Components;
 public interface ICodeGenerationContext : IEquatable<ICodeGenerationContext> {
     public IΦInternalCompilerApi ΦCompilerApi { get; }
 
-    public ISyntheticNamespace GlobalNamespace { get; }
+    public ISyntheticNamespaceBuilder GlobalNamespace { get; }
 
     public ISyntheticCodeBlock Block(RenderFragment renderBlock);
     public ISyntheticCodeBlock Block<TInput>(TInput input, Action<IRenderTreeBuilder, TInput> renderBlock);

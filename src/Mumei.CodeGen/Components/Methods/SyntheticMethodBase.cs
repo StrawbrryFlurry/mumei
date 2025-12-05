@@ -8,9 +8,15 @@ using Mumei.CodeGen.Rendering.CSharp;
 
 namespace Mumei.CodeGen.Components;
 
-internal abstract class SyntheticMethodBase<TBuilder>(SyntheticIdentifier name, IΦInternalClassBuilderCompilerApi classApi) : ISyntheticConstructable<MethodDeclarationFragment> where TBuilder : class {
-    protected IΦInternalMethodBuilderCompilerApi CompilerApi => field ??= new CompilerApiImpl(classApi.Context);
+internal abstract class SyntheticMethodBase<TBuilder>(
+    SyntheticIdentifier name,
+    ISyntheticDeclaration containingType,
+    ICodeGenerationContext context
+) : ISyntheticConstructable<MethodDeclarationFragment> where TBuilder : class {
+    protected IΦInternalMethodBuilderCompilerApi CompilerApi => field ??= new CompilerApiImpl(context);
     public IΦInternalMethodBuilderCompilerApi ΦCompilerApi => CompilerApi;
+
+    public ISyntheticDeclaration ContainingType { get; } = containingType;
 
     public SyntheticIdentifier Name { get; protected set; } = name;
 

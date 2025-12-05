@@ -5,6 +5,6 @@ public static class MethodDeclarationExtensions {
         this ISyntheticClassBuilder<ISyntheticClass> classBuilder,
         Delegate implementationRef
     ) where TSignature : Delegate {
-        return new SyntheticMethodBuilder<TSignature>(implementationRef.Method.Name, classBuilder.ΦCompilerApi);
+        return new SyntheticMethodBuilder<TSignature>(implementationRef.Method.Name, classBuilder, classBuilder.ΦCompilerApi.Context);
     }
 }

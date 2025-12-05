@@ -8,9 +8,7 @@ public interface ISyntheticClassBuilder<T> : ISimpleClassBuilder, ISyntheticClas
 
     public ISyntheticClassBuilder<T> WithAccessibility(AccessModifierList accessModifiers);
 
-    public ISyntheticClassBuilder<T> DeclareMethod(ISyntheticMethod method);
-
-    public SyntheticIdentifier MakeUniqueName(string name);
+    public ISyntheticClassBuilder<T> WithDeclaration(ISyntheticDeclaration declaration);
 
     public ISyntheticMethodBuilder<Delegate> DeclareMethod<TMethodDefinition>(
         SyntheticIdentifier name,
@@ -31,22 +29,6 @@ public interface ISyntheticClassBuilder<T> : ISimpleClassBuilder, ISyntheticClas
     // public void BindSyntheticImplementation(ISyntheticType member, ISyntheticType actualType);
 
     public ISyntheticClassBuilder<T> WithTypeParameters(ISyntheticTypeParameterList typeParameters);
-
-    public ISyntheticField<TField> DeclareField<TField>(ISyntheticField<TField> field);
-    public ISyntheticField<TField> DeclareField<TField>(ISyntheticType type, SyntheticIdentifier name);
-
-    public ISyntheticProperty<TProperty> DeclareProperty<TProperty>(ISyntheticProperty<TProperty> property);
-    public ISyntheticProperty<TProperty> DeclareProperty<TProperty>(ISyntheticType type, SyntheticIdentifier name, SyntheticPropertyAccessorList accessors);
-
-    public void DeclareConstructor<TImplementaiton>(Delegate impl);
-
-    public void Implement(Type baseType);
-    public void Implement(ISyntheticType baseType);
-
-    public void Extend(Type baseType);
-    public void Extend(ISyntheticType baseType);
-
-    public ISyntheticClassBuilder<TNested> DeclareNestedClass<TNested>(SyntheticIdentifier name, Action<TNested> bindInputs) where TNested : ISyntheticClass;
 }
 
 // ReSharper disable once InconsistentNaming

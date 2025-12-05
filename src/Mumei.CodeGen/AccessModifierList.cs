@@ -72,6 +72,10 @@ public readonly struct AccessModifierList {
     }
 
     public override string ToString() {
+        if (IsEmpty) {
+            return "";
+        }
+
         return string.Join(" ", _modifiers);
     }
 }

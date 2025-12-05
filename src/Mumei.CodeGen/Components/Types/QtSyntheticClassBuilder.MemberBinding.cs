@@ -22,7 +22,8 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
     public ISyntheticMethodBuilder<TSignature> DeclareMethod<TSignature>(SyntheticIdentifier name) where TSignature : Delegate {
         var method = new SyntheticMethodBuilder<TSignature>(
             name,
-            ΦCompilerApi
+            this,
+            ΦCompilerApi.Context
         );
 
         DeclareMethod(method);
@@ -52,13 +53,13 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
         ));
     }
 
-    public ISyntheticProperty<TProperty> DeclareProperty<TProperty>(ISyntheticProperty<TProperty> property) {
+    public TProperty DeclareProperty<TProperty>(TProperty property) where TProperty : ISyntheticProperty {
         var properties = _properties ??= [];
         properties.Add(property);
         return property;
     }
 
-    public ISyntheticProperty<TProperty> DeclareProperty<TProperty>(
+    public ISyntheticPropertyBuilder<TProperty> DeclareProperty<TProperty>(
         ISyntheticType type,
         SyntheticIdentifier name,
         SyntheticPropertyAccessorList accessors
@@ -109,8 +110,10 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
         throw new NotImplementedException();
     }
 
-    public ISyntheticClassBuilder<TNested> DeclareNestedClass<TNested>(SyntheticIdentifier name, Action<TNested> bindInputs) where TNested : ISyntheticClass {
-        throw new NotImplementedException();
+    public ISyntheticClassBuilder<TNested> DeclareNestedClass<TNested>(SyntheticIdentifier name) {
+        var cls = new QtSyntheticClassBuilder<TNested>(name, this, context);
+        WithNestedClass(cls);
+        return cls;
     }
 
     public void Bind(Type t, ISyntheticType actualType, string bindingTargetExpression = "") {

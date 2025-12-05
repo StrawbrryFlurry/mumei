@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Mumei.CodeGen.Components;
+using Mumei.CodeGen.Rendering;
 using Mumei.CodeGen.Roslyn.Components;
 using Mumei.Roslyn.Testing;
 
@@ -13,7 +14,7 @@ public sealed class ClassDeclarationDefinitionGeneratorTests {
         ).RunWithAssert(result => {
             result.HasFileMatching($"{nameof(TestScope.TestClassDefinition<>)}__0.g.cs")
                 .WithPartialContent(
-                    $$"""
+                    $$"""""""""""""
                       namespace Mumei.CodeGen.DeclarationGenerator.Tests {
                           public partial class TestClassDefinition<TState> {
                               public override void InternalBindCompilerOutputMembers(
@@ -41,10 +42,36 @@ public sealed class ClassDeclarationDefinitionGeneratorTests {
                                       φbuilder.ΦCompilerApi.DynamicallyBoundType(nameof(TState)),
                                       "_state"
                                   );
+                                  
+                                  φbuilder.DeclareMethod<global::System.Delegate>("DoWorkAsync")
+                                      .WithAccessibility(global::Mumei.CodeGen.AccessModifier.Public)
+                                      .WithReturnType(φbuilder.ΦCompilerApi.Context.Type(typeof(global::System.Threading.Tasks.Task)))
+                                      .WithParameters(
+                                          φbuilder.ΦCompilerApi.Context.Parameter(φbuilder.ΦCompilerApi.DynamicallyBoundType(nameof(TState)),
+                                              "state"
+                                          )
+                                      )
+                                      .WithBody(
+                                          φbuilder.ΦCompilerApi.Context.Block(
+                                              this,
+                                              static (φrenderTree, φctx) => {
+                                                  φrenderTree.Text(""""""""""""
+                                                      _state = state;
+                                                      global::System.Console.WriteLine($"Doing work... {
+                                                  """""""""""");
+                                                  global::Mumei.CodeGen.Components.DefaultRenderExpressionExtensions.RenderExpression(φctx.InputA, φrenderTree);
+                                                  φrenderTree.Text(""""""""""""
+                                                  }");
+                                                      return global::System.Threading.Tasks.Task.CompletedTask;
+                                                  
+                                                  """""""""""");
+                                              }
+                                          )
+                                      );
                               }
                           }
                       }
-                      """
+                      """""""""""""
                 );
         });
     }
@@ -75,13 +102,16 @@ file static class TestScope {
         [Output]
         public Task DoWorkAsync(TState state) {
             _state = state;
-            Console.WriteLine("Doing work...");
+            Console.WriteLine($"Doing work... {InputA}");
             return Task.CompletedTask;
         }
     }
 
     [OmitInReference]
     public sealed class TestClassDefinitionBinder<TState> {
+        [Input]
+        public string InputA { get; }
+
         public void InternalBindCompilerOutputMembers(ISyntheticClassBuilder<TestClassDefinition<TState>> classBuilder) {
             classBuilder.DeclareProperty<string>(
                 classBuilder.ΦCompilerApi.Context.Type(typeof(string)),
@@ -105,6 +135,24 @@ file static class TestScope {
                 classBuilder.ΦCompilerApi.DynamicallyBoundType(nameof(TState)),
                 "_state"
             );
+
+            classBuilder.DeclareMethod<Func<TState, Task>>("DoWorkAsync")
+                .WithAccessibility(AccessModifier.Public)
+                .WithReturnType(typeof(Task))
+                .WithParameters(
+                    classBuilder.ΦCompilerApi.Context.Parameter(
+                        classBuilder.ΦCompilerApi.DynamicallyBoundType(
+                            nameof(TState)),
+                        "state"
+                    )
+                ).WithTypeParameters()
+                .WithBody(classBuilder.ΦCompilerApi.Context.Block(this, static (renderTree, ctx) => {
+                    renderTree.Line("_state = state;");
+                    renderTree.Text("Console.WriteLine(\"Doing work... {\"");
+                    renderTree.Text(ctx.InputA);
+                    renderTree.Text("});");
+                    renderTree.Line("return global::System.Threading.Tasks.Task.CompletedTask;");
+                }));
         }
     }
 }

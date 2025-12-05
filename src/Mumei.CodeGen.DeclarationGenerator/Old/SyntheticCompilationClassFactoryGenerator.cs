@@ -16,12 +16,12 @@ public sealed class SyntheticCompilationClassFactoryGenerator : IIncrementalGene
         ITypeSymbol classDecl,
         InvocationExpressionSyntax invocationExpressionSyntax
     ) {
-        var binderClass = classBuilder.DeclareNestedClass<SyntheticClassDynamicMemberBinder<CompileTimeUnknown>>(
-            $"DeclareClass__MemberBinder_{classDecl.Name}",
-            binder => {
-                binder.DefinitionClass = classDecl;
-            }
-        ).WithAccessibility(AccessModifier.Private + AccessModifier.Sealed);
+        // var binderClass = classBuilder.DeclareNestedClass<SyntheticClassDynamicMemberBinder<CompileTimeUnknown>>(
+        //     $"DeclareClass__MemberBinder_{classDecl.Name}",
+        //     binder => {
+        //         binder.DefinitionClass = classDecl;
+        //     }
+        // ).WithAccessibility(AccessModifier.Private + AccessModifier.Sealed);
 
         var interceptMethod = classBuilder.DeclareInterceptorMethod(
             classBuilder.MakeUniqueName($"Intercept_DeclareClass__{classDecl.Name}}}"),

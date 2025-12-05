@@ -53,7 +53,7 @@ public sealed class SyntheticPropertyAccessor {
             [],
             new AccessModifierList(),
             keyword,
-            ctx.SynthesizeOptional<CodeBlockFragment>(Body)
+            ctx.SynthesizeOptional<CodeBlockFragment?>(Body)
         );
     }
 }

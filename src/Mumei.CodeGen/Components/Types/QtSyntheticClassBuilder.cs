@@ -8,13 +8,16 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
     SyntheticIdentifier name,
     ISyntheticDeclaration parent,
     ICodeGenerationContext context
-) : ISyntheticClassBuilder<TClassDef>, ISyntheticConstructable<ClassDeclarationFragment>, ISyntheticConstructable<NamespaceOrGlobalScopeFragment> {
+) : ISyntheticClassBuilder<TClassDef>,
+    ISyntheticConstructable<ClassDeclarationFragment>,
+    ISyntheticConstructable<NamespaceOrGlobalScopeFragment>,
+    ISyntheticConstructable<TypeInfoFragment> {
     private CompilerApi? _compilerApi;
 
     public SyntheticIdentifier Name => _name;
     private SyntheticIdentifier _name = name;
 
-    public ISyntheticDeclaration Parent { get; } = parent;
+    public ISyntheticDeclaration Parent { get; private set; } = parent;
 
     private ISyntheticAttributeList? _attributes;
     private List<ISyntheticClass>? _nestedClasses;
@@ -46,9 +49,23 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
         return this;
     }
 
-    public ISyntheticClassBuilder<TClassDef> DeclareMethod(ISyntheticMethod method) {
-        (_methods ??= []).Add(method);
+    public ISyntheticClassBuilder<TClassDef> WithDeclaration(ISyntheticDeclaration declaration) {
+        Parent = declaration;
         return this;
+    }
+
+    public void WithNestedClass(ISyntheticClass nestedClass) {
+        _nestedClasses ??= [];
+        _nestedClasses.Add(nestedClass);
+    }
+
+    public void WithMethod(ISyntheticMethod method) {
+        (_methods ??= []).Add(method);
+    }
+
+    public TMethod DeclareMethod<TMethod>(TMethod method) where TMethod : ISyntheticMethod {
+        WithMethod(method);
+        return method;
     }
 
     public SyntheticIdentifier MakeUniqueName(string name) {
@@ -105,6 +122,8 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
         var constructors = new ArrayBuilder<ConstructorDeclarationFragment>();
         var baseTypes = new ArrayBuilder<TypeInfoFragment>();
 
+        var nestedClasses = new ArrayBuilder<ClassDeclarationFragment>();
+
         foreach (var synMethod in _methods ?? []) {
             var fragment = compilationUnit.Synthesize<MethodDeclarationFragment>(synMethod);
             methods.Add(fragment);
@@ -120,6 +139,11 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
             properties.Add(fragment);
         }
 
+        foreach (var synNestedClass in _nestedClasses ?? []) {
+            var fragment = compilationUnit.Synthesize<ClassDeclarationFragment>(synNestedClass);
+            nestedClasses.Add(fragment);
+        }
+
         return new ClassDeclarationFragment(
             compilationUnit.Synthesize(_attributes, AttributeListFragment.Empty),
             _modifiers,
@@ -131,7 +155,7 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
             fields.ToImmutableArrayAndFree(),
             properties.ToImmutableArrayAndFree(),
             methods.ToImmutableArrayAndFree(),
-            []
+            nestedClasses.ToImmutableArrayAndFree()
         );
     }
 
@@ -152,6 +176,15 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
         }
 
         throw new NotImplementedException("Nested classes are not yet supported in QtSyntheticClassBuilder.");
+    }
+
+    TypeInfoFragment ISyntheticConstructable<TypeInfoFragment>.Construct(ICompilationUnitContext compilationUnit) {
+        var name = Name.Resolve(compilationUnit);
+        if (Parent is ISyntheticNamespace parentNamespace) {
+            name = $"{parentNamespace.FullyQualifiedName}.{name}";
+        }
+
+        return new TypeInfoFragment(name);
     }
 
     public ref SyntheticFieldRef<T> Field<T>(string name) {

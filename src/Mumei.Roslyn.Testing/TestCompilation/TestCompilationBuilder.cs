@@ -14,6 +14,9 @@ public sealed class TestCompilationBuilder {
 
     private readonly List<string> _interceptorsAllowedIn = new();
 
+    private string? _sourceNamespace;
+    public string? SourceNamespace => _sourceNamespace;
+
     private CSharpParseOptions ParseOptions => field ??= new CSharpParseOptions(LanguageVersion.Preview)
         .WithFeatures([
             MakeInterceptorsNamespacesFeature()
@@ -108,6 +111,10 @@ public sealed class TestCompilationBuilder {
     }
 
     public TestCompilationBuilder AddReference(ICompilationReference reference) {
+        if (reference is IRootCompilationReference rootReference) {
+            _sourceNamespace = rootReference.SourceNamespace;
+        }
+
         reference.AddToCompilation(_sources, _metadataReferences);
         return this;
     }

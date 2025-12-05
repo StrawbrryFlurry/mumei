@@ -47,6 +47,7 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
                                   global::System.Type t
                               ) {
                                   return new {{typeof(RootCompilationReference):g}} {
+                                      SourceNamespace = "TestAssembly",
                                       References = [
                                           new global::Mumei.Roslyn.Testing.SyntaxTreeCompilationReference {
                                               TypeName = "Foo",
@@ -128,6 +129,7 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
                               [global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "*")]
                               public static {{typeof(ICompilationReference):g}} Intercept_Of__2() {
                                   return new {{typeof(RootCompilationReference):g}} {
+                                      SourceNamespace = "TestAssembly",
                                       References = [
                                           new global::Mumei.Roslyn.Testing.SyntaxTreeCompilationReference {
                                               TypeName = "Foo",

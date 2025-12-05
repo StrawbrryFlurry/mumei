@@ -37,8 +37,12 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
           }
 
           [global::Microsoft.CodeAnalysis.EmbeddedAttribute]
-          internal sealed class RootCompilationReference : global::Mumei.Roslyn.Testing.ICompilationReference {
+          internal sealed class OmitInReferenceAttribute : global::System.Attribute;
+
+          [global::Microsoft.CodeAnalysis.EmbeddedAttribute]
+          internal sealed class RootCompilationReference : global::Mumei.Roslyn.Testing.ICompilationReference, global::Mumei.Roslyn.Testing.IRootCompilationReference {
               public required global::System.Collections.Immutable.ImmutableArray<global::Mumei.Roslyn.Testing.ICompilationReference> References { get; init; }
+              public required string SourceNamespace { get; init; }
 
               public void AddToCompilation(global::System.Collections.Generic.List<global::Microsoft.CodeAnalysis.SyntaxTree> syntaxTreesRef, global::Mumei.Roslyn.Testing.MetadataReferenceCollection metadataRef) {
                   foreach (var compilationReference in References) {
@@ -46,9 +50,6 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
                   }
               }
           }
-
-          [global::Microsoft.CodeAnalysis.EmbeddedAttribute]
-          internal sealed class OmitInReferenceAttribute : global::System.Attribute;
 
           [global::Microsoft.CodeAnalysis.EmbeddedAttribute]
           internal sealed class SyntaxTreeCompilationReference : global::Mumei.Roslyn.Testing.ICompilationReference {
@@ -166,6 +167,7 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
         renderTree.Line("new global::Mumei.Roslyn.Testing.RootCompilationReference {");
         renderTree.StartBlock();
 
+        renderTree.InterpolatedLine($"SourceNamespace = {targetType.ContainingNamespace.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", ""):q},");
         renderTree.Line("References = [");
         renderTree.StartBlock();
 
@@ -290,6 +292,7 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
         var usingDirectives = referencedTypes
             .Distinct(SymbolEqualityComparer.Default)
             .Where(x => x?.ContainingNamespace is not null && !SymbolEqualityComparer.Default.Equals(x.ContainingNamespace, typeSymbol.ContainingNamespace)) // Skip our own namespace
+            .Where(x => !x.ContainingNamespace.IsGlobalNamespace) // Skip global namespace
             .Select(t => t!.ContainingNamespace.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat))
             .Where(x => !typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
                 .StartsWith(x)) // Skip namespaces we're implicitly part of

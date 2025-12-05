@@ -14,6 +14,20 @@ internal sealed class RoslynSyntheticParameter(IParameterSymbol parameterSymbol)
         : null;
 
     public ParameterFragment Construct(ICompilationUnitContext compilationUnit) {
+        var paramAttributes = GetParameterAttributes(parameterSymbol);
+
+        var attributesList = compilationUnit.Synthesize(AttributesList, AttributeListFragment.Empty);
+        var defaultValue = compilationUnit.SynthesizeOptional<ExpressionFragment?>(DefaultValue);
+        return new ParameterFragment {
+            Name = parameterSymbol.Name,
+            Type = parameterSymbol.Type.ToRenderFragment(),
+            ParameterAttributes = paramAttributes,
+            AttributesList = attributesList,
+            DefaultValue = defaultValue
+        };
+    }
+
+    public static ParameterAttributes GetParameterAttributes(IParameterSymbol parameterSymbol) {
         var paramAttributes = ParameterAttributes.None;
         if (parameterSymbol.RefKind == RefKind.Ref) {
             paramAttributes |= ParameterAttributes.Ref;
@@ -31,14 +45,6 @@ internal sealed class RoslynSyntheticParameter(IParameterSymbol parameterSymbol)
             paramAttributes |= ParameterAttributes.This;
         }
 
-        var attributesList = compilationUnit.Synthesize(AttributesList, AttributeListFragment.Empty);
-        var defaultValue = compilationUnit.SynthesizeOptional<ExpressionFragment?>(DefaultValue);
-        return new ParameterFragment {
-            Name = parameterSymbol.Name,
-            Type = parameterSymbol.Type.ToRenderFragment(),
-            ParameterAttributes = paramAttributes,
-            AttributesList = attributesList,
-            DefaultValue = defaultValue
-        };
+        return paramAttributes;
     }
 }

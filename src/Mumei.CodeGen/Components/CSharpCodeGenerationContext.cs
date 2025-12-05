@@ -1,8 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
-using Mumei.CodeGen.Rendering;
+﻿using Mumei.CodeGen.Rendering;
 using Mumei.CodeGen.Rendering.CSharp;
 using Mumei.Common.Internal;
-using Mumei.Roslyn;
 
 namespace Mumei.CodeGen.Components;
 
@@ -10,7 +8,7 @@ internal sealed partial class CSharpCodeGenerationContext : ICodeGenerationConte
     private readonly Dictionary<Type, object> _synthesisProviders = new();
 
     private ISyntheticNamespaceBuilder _globalNamespaceBuilder;
-    public ISyntheticNamespace GlobalNamespace => _globalNamespaceBuilder;
+    public ISyntheticNamespaceBuilder GlobalNamespace => _globalNamespaceBuilder;
 
     public CSharpCodeGenerationContext() {
         ΦCompilerApi = new CompilerApiImpl(this);
@@ -19,12 +17,12 @@ internal sealed partial class CSharpCodeGenerationContext : ICodeGenerationConte
 
     public CompilationUnitFragment SynthesizeCompilationUnit(
         ImmutableArray<ISyntheticDeclaration> declarations,
-        ISyntheticIdentifierScopeProvider identifierScopeProvider
+        ISyntheticIdentifierScopeProvider? identifierScopeProvider
     ) {
         var constructedNamespaces = new ArrayBuilder<NamespaceOrGlobalScopeFragment>();
         var ctx = new CSharpCompilationUnitContext(
             this,
-            identifierScopeProvider
+            identifierScopeProvider ?? NoOpSyntheticIdentifierScopeProvider.Instance
         );
 
         foreach (var declaration in declarations) {

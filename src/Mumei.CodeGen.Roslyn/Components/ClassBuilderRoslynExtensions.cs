@@ -17,7 +17,7 @@ public static class ClassBuilderRoslynExtensions {
             return null!;
         }
 
-        public ISyntheticProperty<CompileTimeUnknown> DeclareProperty(ITypeSymbol typeSymbol, SyntheticIdentifier name) {
+        public ISyntheticPropertyBuilder<CompileTimeUnknown> DeclareProperty(ITypeSymbol typeSymbol, SyntheticIdentifier name) {
             return null!;
         }
     }

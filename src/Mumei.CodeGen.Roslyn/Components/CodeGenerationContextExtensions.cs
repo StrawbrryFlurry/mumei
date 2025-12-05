@@ -94,12 +94,12 @@ public static class CodeGenerationContextExtensions {
             return new SyntheticParameterList(parameters);
         }
 
-        public ISyntheticParameter Parameter(string name, ITypeSymbol type, ParameterAttributes attributes = ParameterAttributes.None) {
+        public ISyntheticParameter Parameter(ITypeSymbol type, string name, ParameterAttributes attributes = ParameterAttributes.None) {
             var parameterType = ctx.Type(type);
             return new SyntheticParameter(name, parameterType, attributes: attributes);
         }
 
-        public ISyntheticParameter Parameter(string name, ITypeSymbol type, out ExpressionFragment parameter) {
+        public ISyntheticParameter Parameter(ITypeSymbol type, string name, out ExpressionFragment parameter) {
             var parameterType = ctx.Type(type);
             var p = new SyntheticParameter(name, parameterType, attributes: ParameterAttributes.None);
             parameter = new ExpressionFragment(name);

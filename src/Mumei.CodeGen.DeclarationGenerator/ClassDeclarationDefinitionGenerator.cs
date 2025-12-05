@@ -81,8 +81,8 @@ public sealed class ClassDeclarationDefinitionGenerator : IIncrementalGenerator 
             .WithReturnType(typeof(void))
             .WithParameters(
                 ctx.Parameter(
-                    $"{Strings.PrivateLocal}builder",
                     ctx.TypeFromCompilation(typeof(ISyntheticClassBuilder<>)).Construct(classDefinitionSymbol),
+                    $"{Strings.PrivateLocal}builder",
                     out var builderParameter
                 )
             );
