@@ -91,7 +91,7 @@ public static class CodeGenerationContextExtensions {
                 parameters[i] = new RoslynSyntheticParameter(parameter);
             }
 
-            return new QtSyntheticParameterList(parameters);
+            return new SyntheticParameterList(parameters);
         }
 
         public ISyntheticParameter Parameter(string name, ITypeSymbol type, ParameterAttributes attributes = ParameterAttributes.None) {

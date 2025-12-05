@@ -1,8 +1,12 @@
-﻿namespace Mumei.CodeGen;
+﻿using System.Runtime.InteropServices;
+
+namespace Mumei.CodeGen;
 
 public readonly struct AccessModifierList {
     public static AccessModifierList Empty => new([]);
-    private readonly AccessModifier[] _modifiers;
+    private readonly ImmutableArray<AccessModifier> _modifiers;
+
+    public ImmutableArray<AccessModifier> Modifiers => _modifiers;
 
     public static AccessModifierList operator +(AccessModifierList left, AccessModifierList right) {
         if (left.IsEmpty) {
@@ -36,8 +40,9 @@ public readonly struct AccessModifierList {
 
     internal AccessModifierList(ReadOnlySpan<AccessModifier> modifiers) {
         // TODO: Cache all common combinations
-        _modifiers = modifiers.ToArray();
-        Array.Sort(_modifiers);
+        _modifiers = modifiers.ToImmutableArray();
+        var arr = ImmutableCollectionsMarshal.AsArray(_modifiers);
+        Array.Sort(arr);
     }
 
     public AccessModifierList Extend(AccessModifier modifier) {
@@ -56,7 +61,11 @@ public readonly struct AccessModifierList {
         return _modifiers.Length == 1 && modifier._modifiers.Length == 1 && _modifiers[0] == modifier._modifiers[0];
     }
 
-    public bool IsEmpty => _modifiers.Length == 0;
+    public bool IsEmpty => _modifiers.IsDefaultOrEmpty;
+
+    public ImmutableArray<AccessModifier>.Enumerator GetEnumerator() {
+        return _modifiers.GetEnumerator();
+    }
 
     public string AsCSharpString() {
         return ToString();
@@ -80,6 +89,7 @@ public readonly struct AccessModifier(string value) : IEquatable<AccessModifier>
     public static readonly AccessModifier Partial = new("partial");
     public static readonly AccessModifier Virtual = new("virtual");
     public static readonly AccessModifier Override = new("override");
+    public static readonly AccessModifier Async = new("async");
 
     public readonly string Value = value;
 

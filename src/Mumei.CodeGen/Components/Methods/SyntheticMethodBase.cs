@@ -14,7 +14,7 @@ internal abstract class SyntheticMethodBase<TBuilder>(SyntheticIdentifier name, 
 
     public SyntheticIdentifier Name { get; protected set; } = name;
 
-    public ISyntheticParameterList Parameters => _parameters ??= new QtSyntheticParameterList([]);
+    public ISyntheticParameterList Parameters => _parameters ??= new SyntheticParameterList([]);
 
     // ReSharper disable InconsistentNaming
     protected ISyntheticAttributeList? _attributes;
@@ -38,7 +38,7 @@ internal abstract class SyntheticMethodBase<TBuilder>(SyntheticIdentifier name, 
     }
 
     public TBuilder WithParameters(params ReadOnlySpan<ISyntheticParameter> parameters) {
-        _parameters = new QtSyntheticParameterList(parameters.ToArray());
+        _parameters = new SyntheticParameterList(parameters.ToArray());
         return Builder;
     }
 

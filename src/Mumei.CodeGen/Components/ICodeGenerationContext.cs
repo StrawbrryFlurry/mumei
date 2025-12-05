@@ -1,4 +1,5 @@
 ﻿using Mumei.CodeGen.Rendering;
+using Mumei.CodeGen.Rendering.CSharp;
 
 namespace Mumei.CodeGen.Components;
 
@@ -14,6 +15,16 @@ public interface ICodeGenerationContext : IEquatable<ICodeGenerationContext> {
     public ISyntheticNamespaceBuilder Namespace(params ReadOnlySpan<string> namespaceSegments);
 
     public ISyntheticType Type(Type type);
+
+    public ISyntheticParameter Parameter(
+        ISyntheticType type,
+        SyntheticIdentifier name,
+        ParameterAttributes attributes = ParameterAttributes.None
+    );
+
+    public ISyntheticTypeParameter TypeParameter(SyntheticIdentifier name);
+
+    public ISyntheticParameterList ParameterList(ReadOnlySpan<ISyntheticParameter> parameters);
 
     public void Emit(string hintName, ISyntheticDeclaration toEmit);
     public void EmitIncremental(string hintName, ISyntheticDeclaration toEmit);

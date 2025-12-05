@@ -55,7 +55,7 @@ public sealed partial class TestClassDefinition<TState> : SyntheticClassDefiniti
     [Output]
     public Task DoWorkAsync(TState state) {
         _state = state;
-        Console.WriteLine("Doing work...");
+        Console.WriteLine($"Doing work... {InputA}");
         return Task.CompletedTask;
     }
 }

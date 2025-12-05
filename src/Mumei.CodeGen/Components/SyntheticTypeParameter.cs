@@ -1,10 +1,8 @@
-﻿using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
-using Mumei.CodeGen.Rendering.CSharp;
+﻿using Mumei.CodeGen.Rendering.CSharp;
 
 namespace Mumei.CodeGen.Components;
 
-internal sealed class QtSyntheticTypeParameter(string name) : ISyntheticTypeParameter, ISyntheticConstructable<TypeParameterFragment> {
+internal sealed class QtSyntheticTypeParameter(SyntheticIdentifier name) : ISyntheticTypeParameter, ISyntheticConstructable<TypeParameterFragment> {
     public SyntheticIdentifier Name { get; init; } = name;
 
     public sealed class Constraint(ISyntheticType typeConstraint) : ISyntheticTypeParameter.IConstraint {
@@ -12,7 +10,7 @@ internal sealed class QtSyntheticTypeParameter(string name) : ISyntheticTypePara
     }
 
     public TypeParameterFragment Construct(ICompilationUnitContext compilationUnit) {
-        throw new NotImplementedException();
+        return new TypeParameterFragment(Name.Resolve(compilationUnit), []);
     }
 }
 

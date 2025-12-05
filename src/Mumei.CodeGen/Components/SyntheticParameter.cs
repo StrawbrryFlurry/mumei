@@ -6,13 +6,13 @@ using ParameterAttributes = Mumei.CodeGen.Rendering.CSharp.ParameterAttributes;
 namespace Mumei.CodeGen.Components;
 
 internal sealed class SyntheticParameter(
-    string name,
+    SyntheticIdentifier name,
     ISyntheticType type,
     ISyntheticAttributeList? attributesList = null,
     ISyntheticExpression? defaultValue = null,
     ParameterAttributes attributes = ParameterAttributes.None
 ) : ISyntheticParameter, ISyntheticConstructable<ParameterFragment> {
-    public string Name { get; private init; } = name;
+    public SyntheticIdentifier Name { get; private init; } = name;
     public ISyntheticType Type { get; private init; } = type;
     public ISyntheticAttributeList? AttributesList { get; private init; } = attributesList;
     public ISyntheticExpression? DefaultValue { get; private init; } = defaultValue;
@@ -23,7 +23,7 @@ internal sealed class SyntheticParameter(
         var type = compilationUnit.Synthesize<TypeInfoFragment>(Type);
 
         return new ParameterFragment {
-            Name = Name,
+            Name = Name.Resolve(compilationUnit),
             DefaultValue = defaultValue,
             ParameterAttributes = Attributes,
             Type = type

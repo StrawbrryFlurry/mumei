@@ -1,4 +1,5 @@
 ﻿using Mumei.CodeGen.Rendering;
+using Mumei.CodeGen.Rendering.CSharp;
 using Mumei.Common.Internal;
 using Mumei.Roslyn;
 
@@ -43,5 +44,17 @@ internal sealed partial class CSharpCodeGenerationContext {
 
     public ISyntheticType Type(Type type) {
         return new RuntimeSyntheticType(type);
+    }
+
+    public ISyntheticParameter Parameter(ISyntheticType type, SyntheticIdentifier name, ParameterAttributes attributes) {
+        return new SyntheticParameter(name, type, null, null, attributes);
+    }
+
+    public ISyntheticParameterList ParameterList(ReadOnlySpan<ISyntheticParameter> parameters) {
+        return new SyntheticParameterList(parameters);
+    }
+
+    public ISyntheticTypeParameter TypeParameter(SyntheticIdentifier name) {
+        return new QtSyntheticTypeParameter(name);
     }
 }

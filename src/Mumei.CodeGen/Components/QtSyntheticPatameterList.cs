@@ -5,10 +5,10 @@ using Mumei.CodeGen.Rendering.CSharp;
 
 namespace Mumei.CodeGen.Components;
 
-internal sealed class QtSyntheticParameterList(ReadOnlySpan<ISyntheticParameter> parameters) : ISyntheticParameterList, ISyntheticConstructable<ImmutableArray<ParameterFragment>> {
+internal sealed class SyntheticParameterList(ReadOnlySpan<ISyntheticParameter> parameters) : ISyntheticParameterList, ISyntheticConstructable<ImmutableArray<ParameterFragment>> {
     private ISyntheticParameter[]? _parameters = parameters.Length > 0 ? [..parameters] : null;
 
-    public static QtSyntheticParameterList FromMethodInfo(MethodInfo method) {
+    public static SyntheticParameterList FromMethodInfo(MethodInfo method) {
         var methodParameters = method.GetParameters();
         var parameters = new ISyntheticParameter[methodParameters.Length];
 
@@ -17,7 +17,7 @@ internal sealed class QtSyntheticParameterList(ReadOnlySpan<ISyntheticParameter>
             parameters[i] = new RuntimeSyntheticParameter(parameter);
         }
 
-        return new QtSyntheticParameterList(parameters);
+        return new SyntheticParameterList(parameters);
     }
 
     public ImmutableArray<ParameterFragment> Construct(ICompilationUnitContext compilationUnit) {

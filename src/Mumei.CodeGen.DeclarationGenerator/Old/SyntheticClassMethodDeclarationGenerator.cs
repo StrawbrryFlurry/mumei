@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
 using Mumei.CodeGen.Components;
-using Mumei.CodeGen.DeclarationGenerator.CodeGen.SyntheticClass;
 using Mumei.CodeGen.Rendering;
 using Mumei.CodeGen.Rendering.CSharp;
 using Mumei.CodeGen.Roslyn;
@@ -130,7 +129,7 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
                 ParameterFragment.Create(tInput, "λ__input"),
                 ParameterFragment.Create(TypeInfoFragment.ConstructGenericType(typeof(Func<>), tInput, tMethodSignature), "λ__codeBlockDeclaration")
             ],
-            CodeBlockFragment.Create((codeBlock as ISyntheticConstructable<CodeBlockFragment>)!.Construct(null!), (builder, fragment) => {
+            CodeBlockFragment.Create(codeBlock, (builder, fragment) => {
                 builder.Interpolate($"{LocalFragment.Var("λ__normalizedInputs", out var normalizedInput)} = {normalizedInputExpression};");
                 builder.NewLine();
                 builder.Line($"#pragma warning disable {Diagnostics.InternalFeatureId}");
@@ -139,7 +138,7 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
                     $"{thisParm}.{nameof(ISyntheticMethodBuilder<>.ΦCompilerApi)}.{nameof(ISyntheticMethodBuilder<>.ΦCompilerApi.Context)}<{normalizedInputType}>(new {typeof(RenderFragment<>)}<{normalizedInputType}>(\n{normalizedInput},\nstatic ({RenderTreeArg}, {RenderFragmentInputsArg}) => {{");
                 builder.NewLine();
                 builder.StartBlock();
-                builder.Node(fragment);
+                builder.Text(fragment);
                 builder.EndBlock();
                 builder.Line("}));");
                 builder.Line($"#pragma warning enable {Diagnostics.InternalFeatureId}");
@@ -179,10 +178,10 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
             lambda.Symbol.ReturnType.ToRenderFragment(),
             methodName,
             [],
-            CodeBlockFragment.Create((codeBlock as ISyntheticConstructable<CodeBlockFragment>)!.Construct(null!), (builder, fragment) => {
+            CodeBlockFragment.Create(codeBlock, (builder, fragment) => {
                 builder.Text("var λ__bodyDeclaration = ");
                 builder.Interpolate($"{nameof(ISyntheticMethodBuilder<>.ΦCompilerApi)}.{nameof(ISyntheticMethodBuilder<>.ΦCompilerApi.Context.Block)}((renderTree) => {{");
-                builder.Node(fragment);
+                builder.Block(fragment);
                 builder.Text("}));");
                 builder.Text($"this.{nameof(ISyntheticMethodBuilder<>.WithBody)}(λ__bodyDeclaration);");
                 builder.Text("return this;");

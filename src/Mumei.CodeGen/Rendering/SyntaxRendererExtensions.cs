@@ -6,36 +6,66 @@ namespace Mumei.CodeGen.Rendering;
 public static class SyntaxRendererExtensions {
     extension(AccessModifierList modifiers) {
         public string List => modifiers.AsCSharpString();
+        public RenderFragment<AccessModifierList> RenderAsExpression => new(modifiers, (renderTree, accessModifiers) => {
+            for (var i = 0; i < accessModifiers.Modifiers.Length; i++) {
+                var accessModifiersModifier = accessModifiers.Modifiers[i];
+                if (!accessModifiersModifier.HasValue) {
+                    continue;
+                }
+
+                var factoryName = accessModifiersModifier.Value switch {
+                    "public" => "Public",
+                    "private" => "Private",
+                    "abstract" => "Abstract",
+                    "protected" => "Protected",
+                    "internal" => "Internal",
+                    "file" => "File",
+                    "sealed" => "Sealed",
+                    "readonly" => "Readonly",
+                    "static" => "Static",
+                    "partial" => "Partial",
+                    "virtual" => "Virtual",
+                    "override" => "Override",
+                    "async" => "Async",
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+
+                renderTree.Interpolate($"{typeof(AccessModifier)}.{factoryName}");
+                if (i < accessModifiers.Modifiers.Length - 1) {
+                    renderTree.Text(" + ");
+                }
+            }
+        });
     }
 
     extension(ParameterAttributes attributes) {
-        public RenderFragment<ParameterAttributes> List => new(attributes, (tree, parameterAttributes) => {
+        public RenderFragment<ParameterAttributes> List => new(attributes, (renderTree, parameterAttributes) => {
             if (parameterAttributes == ParameterAttributes.None) {
                 return;
             }
 
             if (parameterAttributes.HasFlag(ParameterAttributes.This)) {
-                tree.Text("this ");
+                renderTree.Text("this ");
             }
 
             if (parameterAttributes.HasFlag(ParameterAttributes.Ref)) {
-                tree.Text("ref ");
+                renderTree.Text("ref ");
             }
 
             if (parameterAttributes.HasFlag(ParameterAttributes.Out)) {
-                tree.Text("out ");
+                renderTree.Text("out ");
             }
 
             if (parameterAttributes.HasFlag(ParameterAttributes.In)) {
-                tree.Text("in ");
+                renderTree.Text("in ");
             }
 
             if (parameterAttributes.HasFlag(ParameterAttributes.Params)) {
-                tree.Text("params ");
+                renderTree.Text("params ");
             }
 
             if (parameterAttributes.HasFlag(ParameterAttributes.Readonly)) {
-                tree.Text("readonly ");
+                renderTree.Text("readonly ");
             }
         });
     }

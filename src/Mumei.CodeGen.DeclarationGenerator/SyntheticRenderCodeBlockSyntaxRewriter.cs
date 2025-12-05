@@ -11,7 +11,7 @@ using Mumei.CodeGen.Rendering;
 using Mumei.CodeGen.Rendering.CSharp;
 using Mumei.Roslyn.Common.Polyfill;
 
-namespace Mumei.CodeGen.DeclarationGenerator.CodeGen.SyntheticClass;
+namespace Mumei.CodeGen.DeclarationGenerator;
 
 /// <summary>
 /// Rewrites any block syntax and generates a code block that can render
@@ -46,7 +46,7 @@ internal sealed class SyntheticRenderCodeBlockSyntaxRewriter(
 ) : GloballyQualifyingSyntaxRewriter(sm) {
     private MacroRenderTreeBuilder _renderTree = new(resolutionContext);
 
-    public static ISyntheticCodeBlock CreateSyntheticRenderBlock(
+    public static string CreateSyntheticRenderBlock(
         SyntaxNode blockOrExpression,
         ITypeSymbol returnType,
         SemanticModel sm,
@@ -63,7 +63,7 @@ internal sealed class SyntheticRenderCodeBlockSyntaxRewriter(
         throw new InvalidOperationException("Expected either a BlockSyntax or an ExpressionSyntax");
     }
 
-    private static ISyntheticCodeBlock CreateSyntheticRenderBlockForExpressionBody(
+    private static string CreateSyntheticRenderBlockForExpressionBody(
         ExpressionSyntax expressionBody,
         ITypeSymbol returnType,
         SemanticModel sm,
@@ -76,11 +76,10 @@ internal sealed class SyntheticRenderCodeBlockSyntaxRewriter(
 
         visitor._renderTree.EmitRenderSegment(isVoidExpression ? $"{body};" : $"return {body};");
 
-        var syntheticCodeBlock = new QtSyntheticCodeBlock(visitor._renderTree.GetSourceText());
-        return syntheticCodeBlock;
+        return visitor._renderTree.GetSourceText();
     }
 
-    private static ISyntheticCodeBlock CreateSyntheticRenderBlockForBlock(
+    private static string CreateSyntheticRenderBlockForBlock(
         SyntaxNode blockLikeSyntaxNode,
         SemanticModel sm,
         ISyntheticCodeBlockResolutionContext resolutionContext
@@ -96,8 +95,7 @@ internal sealed class SyntheticRenderCodeBlockSyntaxRewriter(
         }
 
         visitor._renderTree.EmitRenderSegment(resolvedBlockLike);
-        var syntheticCodeBlock = new QtSyntheticCodeBlock(visitor._renderTree.GetSourceText());
-        return syntheticCodeBlock;
+        return visitor._renderTree.GetSourceText();
     }
 
     public override SyntaxNode? VisitIfStatement(IfStatementSyntax node) {

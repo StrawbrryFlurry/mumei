@@ -5,5 +5,6 @@ internal static class Strings {
 
     public const string RawStringLiteral12 = "\"\"\"\"\"\"\"\"\"\"\"\"";
 
-    public const string Marker = "λ";
+    public const string PrivateIdentifier = "Φ";
+    public const string PrivateLocal = "φ";
 }
