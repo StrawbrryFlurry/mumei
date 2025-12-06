@@ -9,7 +9,7 @@ public readonly struct CompilationUnitFragment(
 
     public void Render(IRenderTreeBuilder renderTree) {
         renderTree.Node(leadingTrivia);
-        renderTree.List(Namespaces.AsSpan());
+        renderTree.MemberList(Namespaces.AsSpan());
         renderTree.Node(trailingTrivia);
     }
 

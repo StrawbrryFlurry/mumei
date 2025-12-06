@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using DiffPlex;
 using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
 using Xunit;
@@ -42,7 +43,6 @@ public static class SyntaxVerifier {
     }
 
     public static void VerifyRegex(string actual, CommonSyntaxStringInterpolationHandler expected) {
-        actual = actual.TrimEnd();
         var expectedStr = expected.ToString();
 
         var doesMatch = WildcardMatcher.Matches(
@@ -71,7 +71,7 @@ public static class SyntaxVerifier {
     }
 
     private static (string FullDiff, string MinimalDiff) Diff(string actual, string expected, bool ignoreRegex) {
-        var diff = InlineDiffBuilder.Diff(actual, expected, false, false);
+        var diff = InlineDiffBuilder.Diff(actual, expected, false);
         var minimalDiff = new StringBuilder();
         var fullDiff = new StringBuilder();
 
@@ -113,8 +113,11 @@ public static class SyntaxVerifier {
                 case ChangeType.Deleted:
                     AppendCurrentDiffLine(Red);
                     break;
-                default:
+                case ChangeType.Unchanged:
                     fullDiff.AppendLine(currentLine.Text);
+                    break;
+                default:
+                    fullDiff.AppendLine($"????????{currentLine.Text}????????");
                     break;
             }
 

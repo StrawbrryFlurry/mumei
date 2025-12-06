@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Mumei.CodeGen.Roslyn.Components;
+﻿using Mumei.CodeGen.Roslyn.Components;
 using Mumei.Roslyn.Testing;
 using Mumei.Roslyn.Testing.Extensions;
 
@@ -42,6 +41,8 @@ public sealed class InterceptMethodEdgeCaseTests {
                               public int Value { get; }
                           }
                       }
+
+                      {{InterceptsLocationAttributeSource.Generated}}
                       """
                 );
             });

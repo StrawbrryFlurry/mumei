@@ -101,7 +101,8 @@ public readonly struct NamespaceOrGlobalScopeFragment(
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void RenderMembers(IRenderTreeBuilder renderTree) {
-        renderTree.List(ClassDeclarations.AsSpan());
-        renderTree.List(NamespaceDeclarations.AsSpan());
+        var hadPreviousMember = false;
+        renderTree.MemberList(ClassDeclarations.AsSpan(), ref hadPreviousMember);
+        renderTree.MemberList(NamespaceDeclarations.AsSpan(), ref hadPreviousMember);
     }
 }

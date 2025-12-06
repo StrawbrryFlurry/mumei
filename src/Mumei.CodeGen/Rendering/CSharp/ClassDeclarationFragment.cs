@@ -70,24 +70,18 @@ public readonly struct ClassDeclarationFragment(
         renderTree.Text(" ");
         renderTree.StartCodeBlock();
 
-        foreach (var field in fields) {
-            // field.WriteSyntax(ref writer);
-            // writer.WriteLine();
-        }
+        var hadPreviousMember = false;
 
-        renderTree.List(properties.AsSpan());
-        if (!properties.IsEmpty) {
+        renderTree.MemberList(properties.AsSpan(), ref hadPreviousMember);
+        if (!properties.IsDefaultOrEmpty) { // Special case since properties and fields don't have separating new lines
             renderTree.NewLine();
         }
-        renderTree.List(fields.AsSpan());
-        if (!fields.IsEmpty) {
+        renderTree.MemberList(fields.AsSpan(), ref hadPreviousMember);
+        if (!fields.IsDefaultOrEmpty) {
             renderTree.NewLine();
         }
-        renderTree.List(methods.AsSpan());
-        if (!methods.IsEmpty) {
-            renderTree.NewLine();
-        }
-        renderTree.List(nestedClassDeclarations.AsSpan());
+        renderTree.MemberList(methods.AsSpan(), ref hadPreviousMember);
+        renderTree.MemberList(nestedClassDeclarations.AsSpan(), ref hadPreviousMember);
 
         renderTree.EndCodeBlock();
     }
@@ -252,11 +246,9 @@ public readonly struct PropertyDeclarationFragment(
         if (SetOrInitAccessor is { } setAcc) {
             renderTree.Text(" ");
             renderTree.Node(setAcc);
-        } else {
-            renderTree.Text(" ");
         }
 
-        renderTree.Text("}");
+        renderTree.Text(" }");
         renderTree.EndBlock();
     }
 

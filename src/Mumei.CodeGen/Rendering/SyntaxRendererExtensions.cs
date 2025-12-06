@@ -100,11 +100,33 @@ public static class SyntaxRendererExtensions {
         }
 
         public void List<TItem>(ReadOnlySpan<TItem> items) where TItem : IRenderFragment {
-            for (var i = 0; i < items.Length; i++) {
-                var t = items[i];
+            foreach (var t in items) {
                 renderTree.Node(t);
-                var isLast = i == items.Length - 1;
-                if (!isLast) {
+            }
+        }
+
+        public void MemberList<TItem>(ReadOnlySpan<TItem> items) where TItem : IRenderFragment {
+            for (var i = 0; i < items.Length; i++) {
+                renderTree.Node(items[i]);
+                if (i < items.Length - 1) {
+                    renderTree.NewLine();
+                }
+            }
+        }
+
+        public void MemberList<TItem>(ReadOnlySpan<TItem> items, ref bool hadPreviousMember) where TItem : IRenderFragment {
+            if (items.IsEmpty) {
+                return;
+            }
+
+            if (hadPreviousMember) {
+                renderTree.NewLine();
+            }
+
+            hadPreviousMember = true;
+            for (var i = 0; i < items.Length; i++) {
+                renderTree.Node(items[i]);
+                if (i < items.Length - 1) {
                     renderTree.NewLine();
                 }
             }

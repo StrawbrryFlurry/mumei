@@ -43,7 +43,7 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
                       namespace TestAssembly.CompilationSourceInterceptor {
                           internal static partial class SyntaxTreeReferenceInterceptor {
                               [global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "*")]
-                              public static {{typeof(ICompilationReference):g}} Intercept_Of__0(
+                              internal static {{typeof(ICompilationReference):g}} Intercept_Of__0(
                                   global::System.Type t
                               ) {
                                   return new {{typeof(RootCompilationReference):g}} {
@@ -127,7 +127,7 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
                       namespace TestAssembly.CompilationSourceInterceptor {
                           internal static partial class SyntaxTreeReferenceInterceptor {
                               [global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "*")]
-                              public static {{typeof(ICompilationReference):g}} Intercept_Of__2() {
+                              internal static {{typeof(ICompilationReference):g}} Intercept_Of__2() {
                                   return new {{typeof(RootCompilationReference):g}} {
                                       SourceNamespace = "TestAssembly",
                                       References = [
