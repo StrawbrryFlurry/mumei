@@ -81,6 +81,13 @@ internal static class RuntimeTypeSerializer {
             buffer.Add('.');
         }
 
+        var nestedType = type;
+        while (nestedType.IsNested && nestedType.DeclaringType is not null) {
+            buffer.AddRange(nestedType.DeclaringType.Name);
+            buffer.Add('.');
+            nestedType = nestedType.DeclaringType;
+        }
+
         ReadOnlySpan<char> name = type.Name;
         if (type.IsGenericType) {
             name = name[..name.LastIndexOf('`')];

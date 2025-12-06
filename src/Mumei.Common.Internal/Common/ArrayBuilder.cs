@@ -185,6 +185,21 @@ internal ref partial struct ArrayBuilder<TElement> {
 
         this = default;
     }
+
+    public void EnsureCapacity(int capacity) {
+        var requiredCapacity = _count + capacity;
+        var buffer = _elements;
+        if ((uint) requiredCapacity < (uint) buffer.Length) {
+            return;
+        }
+
+        Grow(requiredCapacity);
+    }
+
+    public void Advance(int written) {
+        Debug.Assert(_count + written <= _elements.Length);
+        _count += written;
+    }
 }
 
 internal static class ArrayBuilderExtensions {

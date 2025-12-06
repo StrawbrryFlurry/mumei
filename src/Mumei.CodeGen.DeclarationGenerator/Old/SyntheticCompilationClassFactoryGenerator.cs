@@ -183,7 +183,7 @@ file sealed partial class DeclareClassDefinitionMethod<[Bindable] TClassDefiniti
     public ITypeSymbol ClassDefinitionType { get; set; }
 
     public override void BindDynamicComponents(BindingContext ctx) {
-        ctx.Bind<TClassDefinition>(ClassDefinitionType);
+        ctx.Bind(typeof(TClassDefinition), ClassDefinitionType);
     }
 
     public ISyntheticClassBuilder<TClassDefinition> InterceptDeclareClass(

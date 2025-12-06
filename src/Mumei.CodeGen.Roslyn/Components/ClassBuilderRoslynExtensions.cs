@@ -5,7 +5,7 @@ using Mumei.CodeGen.Components;
 namespace Mumei.CodeGen.Roslyn.Components;
 
 public static class ClassBuilderRoslynExtensions {
-    extension(ISimpleClassBuilder builder) {
+    extension(ISimpleSyntheticClassBuilder builder) {
         public void Bind(Type toBind, ITypeSymbol typeSymbol, [CallerArgumentExpression(nameof(toBind))] string bindingTargetExpression = "") {
             builder.ΦCompilerApi.Context.Type(typeSymbol);
             builder.Bind(toBind, typeSymbol, bindingTargetExpression);

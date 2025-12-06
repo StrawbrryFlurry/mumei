@@ -82,7 +82,7 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
 
         public ISyntheticType DynamicallyBoundType(string type) {
             if (builder._dynamicallyBoundTypeInfos is null) {
-                throw new InvalidOperationException("No dynamically bound type infos exist on this class builder.");
+                throw new InvalidOperationException($"No dynamically bound type infos exist on this class builder for {type}.");
             }
 
             if (!builder._dynamicallyBoundTypeInfos.TryGetValue(type, out var syntheticType)) {

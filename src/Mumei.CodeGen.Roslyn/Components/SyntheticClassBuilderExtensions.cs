@@ -18,7 +18,7 @@ public static class SyntheticClassBuilderExtensions {
         }
     }
 
-    extension(ISimpleClassBuilder classBuilder) {
+    extension(ISimpleSyntheticClassBuilder classBuilder) {
         public ISyntheticInterceptorMethodBuilder<Delegate> DeclareUnconstructedInterceptorMethod(
             SyntheticIdentifier name,
             InvocationExpressionSyntax invocationToIntercept
@@ -60,7 +60,7 @@ public static class SyntheticClassBuilderExtensions {
     private static (ICodeGenerationContext ctx, SyntheticInterceptorMethodBuilder<Delegate> builder, IMethodSymbol methodSymbol) MakeInterceptorMethodBuilder(
         SyntheticIdentifier name,
         InvocationExpressionSyntax invocationToIntercept,
-        ISimpleClassBuilder classBuilder
+        ISimpleSyntheticClassBuilder classBuilder
     ) {
         var context = classBuilder.ΦCompilerApi.Context;
         var builder = new SyntheticInterceptorMethodBuilder<Delegate>(name, classBuilder, classBuilder.ΦCompilerApi.Context);
@@ -154,7 +154,7 @@ public static class SyntheticClassBuilderExtensions {
         ISyntheticInterceptorMethodBuilder<TSignature> builder,
         IParameterSymbol parameter
     ) where TSignature : Delegate {
-        if (builder.ContainingType is not ISimpleClassBuilder classBuilder) {
+        if (builder.ContainingType is not ISimpleSyntheticClassBuilder classBuilder) {
             throw new NotSupportedException("Interceptor methods can only be declared in classes.");
         }
 

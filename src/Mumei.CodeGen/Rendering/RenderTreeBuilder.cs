@@ -156,6 +156,10 @@ public interface IRenderTreeBuilder {
         public void AppendFormatted(ReadOnlySpan<char> s) {
             tree.Text(s);
         }
+
+        public void AppendFormatted(int value) {
+            tree.Value(value);
+        }
     }
 
     [InterpolatedStringHandler]

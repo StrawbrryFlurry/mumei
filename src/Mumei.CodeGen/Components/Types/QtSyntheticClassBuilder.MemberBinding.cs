@@ -8,7 +8,13 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
         Func<TMethodDefinition, Delegate> methodSelector,
         Action<TMethodDefinition> inputBinder
     ) where TMethodDefinition : SyntheticMethodDefinition, new() {
-        throw new NotImplementedException();
+        var methodDef = new TMethodDefinition();
+        inputBinder(methodDef);
+        var bindingContext = new SyntheticMethodDefinition.BindingContext();
+        methodDef.BindDynamicComponents(bindingContext);
+        var methodToBind = methodSelector(methodDef);
+        methodDef.InternalBindCompilerMethod(this, bindingContext, methodToBind);
+        return null!;
     }
 
     public ISyntheticMethodBuilder<TSignature> DeclareMethod<TMethodDefinition, TSignature>(

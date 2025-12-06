@@ -2,7 +2,7 @@
 
 namespace Mumei.CodeGen.Components;
 
-public interface ISimpleClassBuilder : ISyntheticDeclaration {
+public interface ISimpleSyntheticClassBuilder : ISyntheticDeclaration {
     public IΦInternalClassBuilderCompilerApi ΦCompilerApi { get; }
 
     public void Bind(Type t, ISyntheticType actualType, [CallerArgumentExpression(nameof(t))] string bindingTargetExpression = "");
@@ -10,6 +10,7 @@ public interface ISimpleClassBuilder : ISyntheticDeclaration {
     public SyntheticIdentifier MakeUniqueName(string name);
 
     public TMethod DeclareMethod<TMethod>(TMethod method) where TMethod : ISyntheticMethod;
+    public ISyntheticMethodBuilder<TSignature> DeclareMethod<TSignature>(SyntheticIdentifier name) where TSignature : Delegate;
 
     public ISyntheticField<TField> DeclareField<TField>(ISyntheticField<TField> field);
     public ISyntheticField<TField> DeclareField<TField>(ISyntheticType type, SyntheticIdentifier name);

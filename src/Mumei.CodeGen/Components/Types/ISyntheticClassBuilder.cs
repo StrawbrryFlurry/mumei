@@ -1,7 +1,7 @@
 ﻿namespace Mumei.CodeGen.Components;
 
 // ReSharper disable once PossibleInterfaceMemberAmbiguity
-public interface ISyntheticClassBuilder<T> : ISimpleClassBuilder, ISyntheticClass, ISyntheticDeclaration, ISyntheticTypeInfo<T> {
+public interface ISyntheticClassBuilder<T> : ISimpleSyntheticClassBuilder, ISyntheticClass, ISyntheticTypeInfo<T> {
     public IΦInternalClassBuilderCompilerApi ΦCompilerApi { get; }
 
     public ISyntheticClassBuilder<T> WithName(SyntheticIdentifier name);
@@ -21,10 +21,6 @@ public interface ISyntheticClassBuilder<T> : ISimpleClassBuilder, ISyntheticClas
         Func<TMethodDefinition, TSignature> methodSelector,
         Action<TMethodDefinition> inputBinder
     ) where TMethodDefinition : SyntheticMethodDefinition, new() where TSignature : Delegate;
-
-    public ISyntheticMethodBuilder<TSignature> DeclareMethod<TSignature>(
-        SyntheticIdentifier name
-    ) where TSignature : Delegate;
 
     // public void BindSyntheticImplementation(ISyntheticType member, ISyntheticType actualType);
 

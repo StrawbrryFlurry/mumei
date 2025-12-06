@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Runtime.CompilerServices;
+using Microsoft.CodeAnalysis;
 using Mumei.CodeGen.Components;
 
 namespace Mumei.CodeGen.Roslyn.Components;
@@ -11,14 +12,12 @@ public static class MethodDeclarationRoslynExtensions {
     }
 
     extension(SyntheticMethodDefinition.BindingContext ctx) {
-        public void Bind<T>(ITypeSymbol typeSymbol) {
-            ctx.Bind<T>(Type.GetType(typeSymbol.ToDisplayString())!);
+        public void Bind(Type targetType, ITypeSymbol typeSymbol, [CallerArgumentExpression(nameof(targetType))] string targetTypeExpression = "") {
+            ctx.Bind(targetType, new RoslynSyntheticType(typeSymbol), targetTypeExpression);
         }
     }
 
     extension(SyntheticInterceptorMethodDefinition.BindingContext ctx) {
-        public void Bind<T>(ITypeSymbol typeSymbol) {
-            ctx.Bind<T>(Type.GetType(typeSymbol.ToDisplayString())!);
-        }
+        public void Bind(Type targetType, ITypeSymbol typeSymbol, [CallerArgumentExpression(nameof(targetType))] string targetTypeExpression = "") { }
     }
 }
