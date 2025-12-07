@@ -1,11 +1,12 @@
 ﻿namespace Mumei.CodeGen.Rendering;
 
-internal sealed class DebugRenderTreeBuilder : GenericRenderTreeBuilder<string> {
+internal sealed class DebugRenderer : GenericRenderTreeBuilder<string> {
     private SourceFileRenderTreeBuilder _innerBuilder = new();
 
     public static string Render<TFragment>(TFragment node) where TFragment : IRenderFragment {
-        var builder = new DebugRenderTreeBuilder();
-        return builder.RenderRootNode(node);
+        var builder = new DebugRenderer();
+        var result = builder.RenderRootNode(node);
+        return result;
     }
 
     protected override void TextCore(ReadOnlySpan<char> s) {

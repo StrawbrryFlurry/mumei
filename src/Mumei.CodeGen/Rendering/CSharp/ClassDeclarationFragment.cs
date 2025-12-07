@@ -85,6 +85,10 @@ public readonly struct ClassDeclarationFragment(
 
         renderTree.EndCodeBlock();
     }
+
+    public override string ToString() {
+        return DebugRenderer.Render(this);
+    }
 }
 
 public readonly struct MethodDeclarationFragment(
@@ -198,6 +202,10 @@ public readonly struct MethodDeclarationFragment(
             body
         );
     }
+
+    public override string ToString() {
+        return DebugRenderer.Render(this);
+    }
 }
 
 public readonly struct FieldDeclarationFragment(
@@ -214,6 +222,10 @@ public readonly struct FieldDeclarationFragment(
     public void Render(IRenderTreeBuilder renderTree) {
         renderTree.Node(Attributes);
         renderTree.Interpolate($"{AccessModifier.List} {Type.FullName} {Name};");
+    }
+
+    public override string ToString() {
+        return DebugRenderer.Render(this);
     }
 }
 
@@ -300,6 +312,10 @@ public readonly struct PropertyDeclarationFragment(
                 renderTree.Text(";");
             }
         }
+
+        public override string ToString() {
+            return DebugRenderer.Render(this);
+        }
     }
 
     public static PropertyDeclarationFragment Create(
@@ -317,6 +333,10 @@ public readonly struct PropertyDeclarationFragment(
             null
         );
     }
+
+    public override string ToString() {
+        return DebugRenderer.Render(this);
+    }
 }
 
 public readonly struct ConstructorDeclarationFragment(
@@ -326,4 +346,8 @@ public readonly struct ConstructorDeclarationFragment(
     CodeBlockFragment body
 ) : IRenderFragment {
     public void Render(IRenderTreeBuilder renderTree) { }
+
+    public override string ToString() {
+        return DebugRenderer.Render(this);
+    }
 }

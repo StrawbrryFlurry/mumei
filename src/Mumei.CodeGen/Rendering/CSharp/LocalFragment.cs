@@ -47,4 +47,8 @@ public readonly struct LocalFragment(TypeInfoFragment? type, ExpressionFragment 
     ) {
         return new LocalFragment(new TypeInfoFragment(typeof(T)), name);
     }
+
+    public override string ToString() {
+        return DebugRenderer.Render(this);
+    }
 }

@@ -105,4 +105,8 @@ public readonly struct NamespaceOrGlobalScopeFragment(
         renderTree.MemberList(ClassDeclarations.AsSpan(), ref hadPreviousMember);
         renderTree.MemberList(NamespaceDeclarations.AsSpan(), ref hadPreviousMember);
     }
+
+    public override string ToString() {
+        return DebugRenderer.Render(this);
+    }
 }

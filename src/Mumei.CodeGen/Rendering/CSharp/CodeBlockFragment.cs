@@ -18,4 +18,8 @@ public readonly struct CodeBlockFragment(string content) : IRenderFragment {
     public void Render(IRenderTreeBuilder renderTree) {
         renderTree.Block(content);
     }
+
+    public override string ToString() {
+        return DebugRenderer.Render(this);
+    }
 }

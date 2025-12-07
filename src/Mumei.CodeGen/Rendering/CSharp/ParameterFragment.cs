@@ -67,6 +67,10 @@ public readonly struct ParameterFragment : IRenderFragment {
             renderTree.Interpolate($" = {defaultValueExpression}");
         }
     }
+
+    public override string ToString() {
+        return DebugRenderer.Render(this);
+    }
 }
 
 [Flags]

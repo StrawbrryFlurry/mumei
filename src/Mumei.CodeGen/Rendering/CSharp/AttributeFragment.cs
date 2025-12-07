@@ -30,6 +30,10 @@ public readonly struct AttributeFragment(TypeInfoFragment type, AttributeArgumen
 
         renderTree.Interpolate($"{type.FullName}{ArgumentList}]");
     }
+
+    public override string ToString() {
+        return DebugRenderer.Render(this);
+    }
 }
 
 public readonly struct AttributeArgumentListFragment(
@@ -111,6 +115,10 @@ public readonly struct AttributeArgumentListFragment(
             return builder.ToAttributeArgumentList();
         }
     }
+
+    public override string ToString() {
+        return DebugRenderer.Render(this);
+    }
 }
 
 public readonly struct AttributePropertyArgumentFragment(ExpressionFragment name, ExpressionFragment value) : IRenderFragment {
@@ -128,5 +136,9 @@ public readonly struct AttributePropertyArgumentFragment(ExpressionFragment name
 
     public void Render(IRenderTreeBuilder renderTree) {
         renderTree.Interpolate($"{name} = {value}");
+    }
+
+    public override string ToString() {
+        return DebugRenderer.Render(this);
     }
 }

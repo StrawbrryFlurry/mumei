@@ -53,4 +53,8 @@ public readonly struct ExpressionFragment(string value) : IRenderFragment {
     public void Render(IRenderTreeBuilder renderTree) {
         renderTree.Text(value);
     }
+
+    public override string ToString() {
+        return DebugRenderer.Render(this);
+    }
 }

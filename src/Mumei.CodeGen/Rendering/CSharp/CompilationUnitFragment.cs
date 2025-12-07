@@ -35,4 +35,8 @@ public readonly struct CompilationUnitFragment(
             trivia
         );
     }
+
+    public override string ToString() {
+        return DebugRenderer.Render(this);
+    }
 }

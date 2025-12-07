@@ -28,11 +28,19 @@ public readonly struct LiteralFragment<T>(T value) : IRenderFragment {
         renderTree.Value(value);
         renderTree.Text(value?.ToString() ?? "null");
     }
+
+    public override string ToString() {
+        return DebugRenderer.Render(this);
+    }
 }
 
 public readonly struct StringLiteralFragment(string value) : IRenderFragment {
     public void Render(IRenderTreeBuilder renderTree) {
         renderTree.Interpolate($"\"{value}\"");
+    }
+
+    public override string ToString() {
+        return DebugRenderer.Render(this);
     }
 }
 
@@ -45,5 +53,9 @@ public readonly struct RawStringLiteralFragment(string value, string quotes) : I
              {quotes}
              """
         );
+    }
+
+    public override string ToString() {
+        return DebugRenderer.Render(this);
     }
 }

@@ -50,6 +50,10 @@ public readonly struct TypeParameterListFragment(
     IEnumerator IEnumerable.GetEnumerator() {
         return ((IEnumerable<TypeParameterFragment>) TypeParameters).GetEnumerator();
     }
+
+    public override string ToString() {
+        return DebugRenderer.Render(List);
+    }
 }
 
 public readonly struct TypeParameterFragment(string name, ImmutableArray<TypeParameterFragment.Constraint> constraints) : IRenderFragment {
@@ -78,6 +82,10 @@ public readonly struct TypeParameterFragment(string name, ImmutableArray<TypePar
 
     public void Render(IRenderTreeBuilder renderTree) {
         renderTree.Text(Name);
+    }
+
+    public override string ToString() {
+        return DebugRenderer.Render(this);
     }
 
     public readonly struct Constraint(TypeInfoFragment typeInfo) : IRenderFragment, IEquatable<Constraint>, IComparable<Constraint> {
@@ -118,6 +126,9 @@ public readonly struct TypeParameterFragment(string name, ImmutableArray<TypePar
 
             return 0;
         }
-    }
 
+        public override string ToString() {
+            return DebugRenderer.Render(this);
+        }
+    }
 }

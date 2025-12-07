@@ -87,6 +87,10 @@ public readonly struct TypeInfoFragment : IEquatable<TypeInfoFragment> {
         return type.IsValueType && type.IsConstructedGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
     }
 
+    public override string ToString() {
+        return DebugRenderer.Render(FullName);
+    }
+
     private readonly struct GenericTypeInfoFragment {
         public static TypeInfoFragment Construct(TypeInfoFragment constructableType, ReadOnlySpan<TypeInfoFragment> typeArguments) {
             var nameBuilder = new ArrayBuilder<char>(stackalloc char[ArrayBuilder.InitSize]);

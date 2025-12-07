@@ -14,4 +14,8 @@ public readonly struct TriviaFragment(string? trivia) : IRenderFragment {
     public static implicit operator TriviaFragment(string trivia) {
         return new TriviaFragment(trivia);
     }
+
+    public override string ToString() {
+        return DebugRenderer.Render(this);
+    }
 }

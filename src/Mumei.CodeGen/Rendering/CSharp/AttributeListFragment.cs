@@ -35,4 +35,8 @@ public readonly struct AttributeListFragment(ImmutableArray<AttributeFragment> a
 
         return new AttributeListFragment([..items]);
     }
+
+    public override string ToString() {
+        return DebugRenderer.Render(this);
+    }
 }

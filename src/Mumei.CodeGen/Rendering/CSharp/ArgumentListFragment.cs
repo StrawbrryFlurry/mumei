@@ -31,6 +31,10 @@ public readonly struct ArgumentListFragment(
 
         renderTree.Text(")");
     }
+
+    public override string ToString() {
+        return DebugRenderer.Render(this);
+    }
 }
 
 public readonly struct PositionalArgumentFragment(ExpressionFragment value) : IRenderFragment {
@@ -44,6 +48,10 @@ public readonly struct PositionalArgumentFragment(ExpressionFragment value) : IR
 
     public void Render(IRenderTreeBuilder renderTree) {
         renderTree.Node(value);
+    }
+
+    public override string ToString() {
+        return DebugRenderer.Render(this);
     }
 }
 
@@ -62,5 +70,9 @@ public readonly struct NamedArgumentFragment(ExpressionFragment name, Expression
 
     public void Render(IRenderTreeBuilder renderTree) {
         renderTree.Interpolate($"{name}: {value}");
+    }
+
+    public override string ToString() {
+        return DebugRenderer.Render(this);
     }
 }
