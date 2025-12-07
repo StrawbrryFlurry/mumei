@@ -182,7 +182,7 @@ file sealed partial class DeclareClassDefinitionMethod<[Bindable] TClassDefiniti
     [Input]
     public ITypeSymbol ClassDefinitionType { get; set; }
 
-    public override void BindDynamicComponents(BindingContext ctx) {
+    public override void BindDynamicComponents(MethodDefinitionBindingContext ctx) {
         ctx.Bind(typeof(TClassDefinition), ClassDefinitionType);
     }
 
@@ -192,9 +192,5 @@ file sealed partial class DeclareClassDefinitionMethod<[Bindable] TClassDefiniti
         Action<TClassDefinition> bindInputs
     ) {
         return null!;
-    }
-
-    public override ISyntheticCodeBlock GenerateMethodBody() {
-        throw new NotImplementedException();
     }
 }

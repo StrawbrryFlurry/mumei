@@ -3,10 +3,19 @@ using Microsoft.CodeAnalysis;
 
 namespace Mumei.CodeGen.Components;
 
-public abstract class SyntheticInterceptorMethodDefinition {
-    public virtual void BindDynamicComponents(BindingContext ctx) { }
+public abstract class SyntheticInterceptorMethodDefinition : ISyntheticMethodDefinition {
+    public object[] InvocationArguments { get; } = null!;
+    public MethodInfo Method { get; } = null!;
 
-    public abstract ISyntheticCodeBlock GenerateMethodBody();
+    public virtual void BindDynamicComponents(MethodDefinitionBindingContext ctx) { }
+
+    public virtual ISyntheticMethodBuilder<Delegate> InternalBindCompilerMethod(
+        ISimpleSyntheticClassBuilder builder,
+        MethodDefinitionBindingContext bindingContext,
+        Delegate targetMethod
+    ) {
+        throw new InvalidOperationException("Method body generation not implemented.");
+    }
 
     public TResult Invoke<TResult>() {
         throw new CompileTimeComponentUsedAtRuntimeException();
@@ -15,18 +24,10 @@ public abstract class SyntheticInterceptorMethodDefinition {
     public void Invoke() {
         throw new CompileTimeComponentUsedAtRuntimeException();
     }
-
-    public object[] InvocationArguments { get; } = null!;
-    public MethodInfo Method { get; } = null!;
-
-    public readonly struct BindingContext {
-        public void Bind<T>(ISyntheticType type) { }
-        public void Bind<T>(Type type) { }
-    }
 }
 
 public abstract class SyntheticAsyncInterceptorMethodDefinition {
-    public virtual void BindDynamicComponents(BindingContext ctx) { }
+    public virtual void BindDynamicComponents(MethodDefinitionBindingContext ctx) { }
 
     public abstract ISyntheticCodeBlock GenerateMethodBody();
 
@@ -43,9 +44,4 @@ public abstract class SyntheticAsyncInterceptorMethodDefinition {
     public CancellationTokenSource CancellationTokenSource { get; } = new();
 
     public bool InvocationCanBeCancelled { get; }
-
-    public readonly struct BindingContext {
-        public void Bind<T>(ISyntheticType type) { }
-        public void Bind<T>(Type type) { }
-    }
 }

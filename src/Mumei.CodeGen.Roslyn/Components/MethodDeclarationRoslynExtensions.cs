@@ -11,13 +11,9 @@ public static class MethodDeclarationRoslynExtensions {
         }
     }
 
-    extension(SyntheticMethodDefinition.BindingContext ctx) {
+    extension(MethodDefinitionBindingContext ctx) {
         public void Bind(Type targetType, ITypeSymbol typeSymbol, [CallerArgumentExpression(nameof(targetType))] string targetTypeExpression = "") {
             ctx.Bind(targetType, new RoslynSyntheticType(typeSymbol), targetTypeExpression);
         }
-    }
-
-    extension(SyntheticInterceptorMethodDefinition.BindingContext ctx) {
-        public void Bind(Type targetType, ITypeSymbol typeSymbol, [CallerArgumentExpression(nameof(targetType))] string targetTypeExpression = "") { }
     }
 }

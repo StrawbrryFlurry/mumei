@@ -17,23 +17,22 @@ public sealed class MethodDeclarationDefinitionGeneratorTests {
                     $$"""""""""""""
                       namespace Mumei.CodeGen.DeclarationGenerator.Tests {
                           public partial class TestMethodDefinition<TState> {
-                              public override void InternalBindCompilerMethod(
+                              public override global::Mumei.CodeGen.Components.ISyntheticMethodBuilder<global::System.Delegate> InternalBindCompilerMethod(
                                   global::Mumei.CodeGen.Components.ISimpleSyntheticClassBuilder φbuilder,
-                                  global::Mumei.CodeGen.Components.SyntheticMethodDefinition.BindingContext φbindingContext,
+                                  global::Mumei.CodeGen.Components.MethodDefinitionBindingContext φbindingContext,
                                   global::System.Delegate φtargetMethod
                               ) {
                                   if (φtargetMethod.Method == ((Delegate) DoWorkAsync).Method) {
-                                      ΦBindMethod__DoWorkAsync_T0_state(φbuilder, φbindingContext);
-                                      return;
+                                      return ΦBindMethod__DoWorkAsync_T0_state(φbuilder, φbindingContext);
                                   }
                                   throw new InvalidOperationException("Unsupported method");
                               }
                               
-                              private void ΦBindMethod__DoWorkAsync_T0_state(
+                              private global::Mumei.CodeGen.Components.ISyntheticMethodBuilder<global::System.Delegate> ΦBindMethod__DoWorkAsync_T0_state(
                                   global::Mumei.CodeGen.Components.ISimpleSyntheticClassBuilder φbuilder,
-                                  global::Mumei.CodeGen.Components.SyntheticMethodDefinition.BindingContext φbindingContext
+                                  global::Mumei.CodeGen.Components.MethodDefinitionBindingContext φbindingContext
                               ) {
-                                  φbuilder.DeclareMethod<global::System.Delegate>("DoWorkAsync")
+                                  return φbuilder.DeclareMethod<global::System.Delegate>("DoWorkAsync")
                                       .WithAccessibility(global::Mumei.CodeGen.AccessModifier.Public)
                                       .WithReturnType(φbuilder.ΦCompilerApi.Context.Type(typeof(global::System.Threading.Tasks.Task)))
                                       .WithParameters(
@@ -78,7 +77,7 @@ file static class TestScope {
 
         private TState _state;
 
-        public override void BindDynamicComponents(BindingContext ctx) {
+        public override void BindDynamicComponents(MethodDefinitionBindingContext ctx) {
             ctx.Bind(typeof(TState), InputB);
         }
 

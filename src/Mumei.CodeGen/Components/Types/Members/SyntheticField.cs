@@ -7,9 +7,9 @@ internal sealed class SyntheticField<TField>(
     AccessModifierList modifiers,
     ISyntheticType type,
     SyntheticIdentifier name
-) : ISyntheticField<TField>, ISyntheticConstructable<FieldDeclarationFragment> {
+) : ISyntheticFieldBuilder<TField>, ISyntheticConstructable<FieldDeclarationFragment> {
     public ISyntheticAttributeList? Attributes { get; } = attributes;
-    public AccessModifierList Modifiers { get; } = modifiers;
+    public AccessModifierList Modifiers { get; private set; } = modifiers;
     public ISyntheticType Type { get; } = type;
     public SyntheticIdentifier Name { get; } = name;
 
@@ -20,5 +20,10 @@ internal sealed class SyntheticField<TField>(
             compilationUnit.Synthesize<TypeInfoFragment>(Type),
             Name.Resolve(compilationUnit)
         );
+    }
+
+    public ISyntheticFieldBuilder<TField> WithAccessibility(AccessModifierList modifiers) {
+        Modifiers = modifiers;
+        return this;
     }
 }

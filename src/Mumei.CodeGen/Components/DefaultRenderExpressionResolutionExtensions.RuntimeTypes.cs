@@ -8,7 +8,9 @@ public static partial class DefaultRenderExpressionExtensions {
     }
 
     public static void RenderExpression(this string str, IRenderTreeBuilder renderTree) {
+        renderTree.Text(Strings.RawStringLiteral9);
         renderTree.Text(str);
+        renderTree.Text(Strings.RawStringLiteral9);
     }
 
     public static void RenderExpression(this int integer, IRenderTreeBuilder renderTree) {

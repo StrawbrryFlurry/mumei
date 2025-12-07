@@ -10,7 +10,7 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
     ) where TMethodDefinition : SyntheticMethodDefinition, new() {
         var methodDef = new TMethodDefinition();
         inputBinder(methodDef);
-        var bindingContext = new SyntheticMethodDefinition.BindingContext();
+        var bindingContext = new MethodDefinitionBindingContext();
         methodDef.BindDynamicComponents(bindingContext);
         var methodToBind = methodSelector(methodDef);
         methodDef.InternalBindCompilerMethod(this, bindingContext, methodToBind);
@@ -44,13 +44,13 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
         throw new NotImplementedException();
     }
 
-    public ISyntheticField<TField> DeclareField<TField>(ISyntheticField<TField> field) {
+    public TField DeclareField<TField>(TField field) where TField : ISyntheticField {
         var fields = _fields ??= [];
         fields.Add(field);
         return field;
     }
 
-    public ISyntheticField<TField> DeclareField<TField>(ISyntheticType type, SyntheticIdentifier name) {
+    public ISyntheticFieldBuilder<TField> DeclareField<TField>(ISyntheticType type, SyntheticIdentifier name) {
         return DeclareField(new SyntheticField<TField>(
             null,
             AccessModifier.Private,

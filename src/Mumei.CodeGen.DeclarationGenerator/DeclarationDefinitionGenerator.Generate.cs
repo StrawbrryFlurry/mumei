@@ -77,7 +77,7 @@ public sealed partial class DeclarationDefinitionGenerator {
                 nameof(SyntheticMethodDefinition.InternalBindCompilerMethod)
             )
             .WithAccessibility(AccessModifier.Public + AccessModifier.Override)
-            .WithReturnType(typeof(void))
+            .WithReturnType(typeof(ISyntheticMethodBuilder<Delegate>))
             .WithParameters(
                 ctx.Parameter(
                     ctx.TypeFromCompilation(typeof(ISimpleSyntheticClassBuilder)),
@@ -85,7 +85,7 @@ public sealed partial class DeclarationDefinitionGenerator {
                     out var builderParameter
                 ),
                 ctx.Parameter(
-                    ctx.TypeFromCompilation(typeof(SyntheticMethodDefinition.BindingContext)),
+                    ctx.TypeFromCompilation(typeof(MethodDefinitionBindingContext)),
                     $"{Strings.PrivateLocal}bindingContext",
                     out var bindingContextParameter
                 ),
@@ -129,24 +129,27 @@ public sealed partial class DeclarationDefinitionGenerator {
             var renderExpression = MakeMethodOutputMemberBindingExpression(
                 method,
                 builderParameter,
-                $"{bindingContextParameter.Value}.{nameof(SyntheticMethodDefinition.BindingContext.ResolveDynamicallyBoundType)}",
+                $"{bindingContextParameter.Value}.{nameof(MethodDefinitionBindingContext.ResolveDynamicallyBoundType)}",
                 ctx.Compilation.GetSemanticModel(method.DeclaringSyntaxReferences[0].GetSyntax().SyntaxTree),
                 inputMemberNames
             );
 
             var impl = definitionCodeGenClass.DeclareMethod<Delegate>(uniqueNameBuilder.ToStringAndFree())
                 .WithAccessibility(AccessModifier.Private)
-                .WithReturnType(typeof(void))
+                .WithReturnType(typeof(ISyntheticMethodBuilder<Delegate>))
                 .WithParameters(
                     ctx.Parameter(
                         ctx.Type(typeof(ISimpleSyntheticClassBuilder)),
                         builderParameter.Value
                     ),
                     ctx.Parameter(
-                        ctx.Type(typeof(SyntheticMethodDefinition.BindingContext)),
+                        ctx.Type(typeof(MethodDefinitionBindingContext)),
                         bindingContextParameter.Value
                     )
-                ).WithBody(ctx.Block(renderExpression, static (renderTree, bindingExpressions) => { renderTree.Node(bindingExpressions); }));
+                ).WithBody(ctx.Block(renderExpression, static (renderTree, bindingExpressions) => {
+                    renderTree.Text("return ");
+                    renderTree.Node(bindingExpressions);
+                }));
 
             createdOutputMethods.Add((method, impl));
         }
@@ -156,8 +159,7 @@ public sealed partial class DeclarationDefinitionGenerator {
             foreach (var outputMember in outputMembers) {
                 renderTree.InterpolatedLine($$"""if ({{targetMethodParameter}}.Method == ((Delegate) {{outputMember.Source.Name}}).Method) {""");
                 renderTree.StartBlock();
-                renderTree.InterpolatedLine($$"""{{outputMember.BinderImpl.Name.ConstantValue}}({{builderParameter}}, {{bindingContextParameter}});""");
-                renderTree.Line("return;");
+                renderTree.InterpolatedLine($$"""return {{outputMember.BinderImpl.Name.ConstantValue}}({{builderParameter}}, {{bindingContextParameter}});""");
                 renderTree.EndBlock();
                 renderTree.Line("}");
             }

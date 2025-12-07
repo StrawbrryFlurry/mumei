@@ -2,7 +2,7 @@
 using Mumei.Roslyn.Testing;
 using Mumei.Roslyn.Testing.Extensions;
 
-namespace Mumei.CodeGen.DeclarationGenerator.IntegrationTests;
+namespace Mumei.CodeGen.DeclarationGenerator.Tests;
 
 public sealed class InterceptMethodEdgeCaseTests {
     [Fact]
@@ -30,7 +30,7 @@ public sealed class InterceptMethodEdgeCaseTests {
                       file static class Test {
                           [global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "*")]
                           internal static void TestIntercept<T>(
-                              this global::Mumei.CodeGen.DeclarationGenerator.IntegrationTests.TestClass φthis,
+                              this global::Mumei.CodeGen.DeclarationGenerator.Tests.TestClass φthis,
                               T φAnonymousType__input
                           ) {
                               Console.WriteLine($"Intercepted {input}!");

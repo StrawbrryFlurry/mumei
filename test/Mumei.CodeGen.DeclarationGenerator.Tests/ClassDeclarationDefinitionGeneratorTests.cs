@@ -27,7 +27,7 @@ public sealed class ClassDeclarationDefinitionGeneratorTests {
                                           {{typeof(SyntheticPropertyAccessor):g}}.SimpleGetter,
                                           null
                                       )
-                                  );
+                                  ).WithAccessibility(global::Mumei.CodeGen.AccessModifier.Public);
                                   
                                   φbuilder.DeclareProperty<global::System.Type>(
                                       φbuilder.ΦCompilerApi.Context.Type(typeof(global::System.Type)),
@@ -36,12 +36,12 @@ public sealed class ClassDeclarationDefinitionGeneratorTests {
                                           {{typeof(SyntheticPropertyAccessor):g}}.SimpleGetter,
                                           null
                                       )
-                                  );
+                                  ).WithAccessibility(global::Mumei.CodeGen.AccessModifier.Public);
                                   
                                   φbuilder.DeclareField<{{typeof(CompileTimeUnknown):g}}>(
                                       φbuilder.ΦCompilerApi.DynamicallyBoundType(nameof(TState)),
                                       "_state"
-                                  );
+                                  ).WithAccessibility(global::Mumei.CodeGen.AccessModifier.Private);
                                   
                                   φbuilder.DeclareMethod<global::System.Delegate>("DoWorkAsync")
                                       .WithAccessibility(global::Mumei.CodeGen.AccessModifier.Public)

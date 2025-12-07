@@ -47,7 +47,7 @@ public sealed class MethodDeclarationDefinitionGeneratorTests {
                 context.RegisterCodeGenerationOutput(o);
             }
         ).RunWithAssert(result => {
-            result.HasFileMatching($"A.g.cs").WithContent($"");
+            result.HasFileMatching($"A").WithContent($"");
         });
     }
 }
@@ -61,7 +61,7 @@ public sealed partial class TestMethodDefinition<TState> : SyntheticMethodDefini
 
     private TState _state;
 
-    public override void BindDynamicComponents(BindingContext ctx) {
+    public override void BindDynamicComponents(MethodDefinitionBindingContext ctx) {
         ctx.Bind(typeof(TState), InputB);
     }
 
@@ -69,7 +69,7 @@ public sealed partial class TestMethodDefinition<TState> : SyntheticMethodDefini
     public Task DoWorkAsync(TState state) {
         _state = state;
         SomeOtherMethod();
-        Console.WriteLine($"Doing work... " + InputA);
+        Console.WriteLine($"Doing work... {InputA}");
         return Task.CompletedTask;
     }
 

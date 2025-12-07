@@ -95,7 +95,9 @@ public sealed partial class DeclarationDefinitionGenerator {
             renderTree.EndBlock();
             renderTree.Line(")");
             renderTree.EndBlock();
-            renderTree.Line(");");
+            renderTree.Text(")");
+            var accessibility = property.DeclaredAccessibility.ToAccessModifiers();
+            renderTree.InterpolatedLine($".{nameof(ISyntheticPropertyBuilder<>.WithAccessibility)}({accessibility.RenderAsExpression});");
         };
     }
 
@@ -113,7 +115,10 @@ public sealed partial class DeclarationDefinitionGenerator {
             renderTree.Line(",");
             renderTree.InterpolatedLine($"{field.Name:q}");
             renderTree.EndBlock();
-            renderTree.Line(");");
+            renderTree.Text(")");
+
+            var accessibility = field.DeclaredAccessibility.ToAccessModifiers();
+            renderTree.InterpolatedLine($".{nameof(ISyntheticFieldBuilder<>.WithAccessibility)}({accessibility.RenderAsExpression});");
         };
     }
 
@@ -132,7 +137,6 @@ public sealed partial class DeclarationDefinitionGenerator {
             throw new NotSupportedException();
         }
 
-        var accessibility = methodDeclarationSyntax.Modifiers.ToAccessModifiers();
 
         return renderTree => {
             renderTree.Interpolate($"{classBuilder}.{nameof(ISyntheticClassBuilder<>.DeclareMethod)}");
@@ -140,6 +144,7 @@ public sealed partial class DeclarationDefinitionGenerator {
             renderTree.InterpolatedLine($"({method.Name:q})");
             renderTree.StartBlock();
 
+            var accessibility = methodDeclarationSyntax.Modifiers.ToAccessModifiers();
             renderTree.InterpolatedLine($".{nameof(ISyntheticMethodBuilder<>.WithAccessibility)}({accessibility.RenderAsExpression})");
             renderTree.Interpolate($".{nameof(ISyntheticMethodBuilder<>.WithReturnType)}(");
             WritePossiblyLateBoundGetTypeExpression(method.ReturnType, classBuilder, resolveDynamicallyBoundType, renderTree);
