@@ -1,17 +1,15 @@
 ﻿using System.Reflection;
-using Microsoft.CodeAnalysis;
 
 namespace Mumei.CodeGen.Components;
 
-public abstract class SyntheticInterceptorMethodDefinition : ISyntheticMethodDefinition {
+public abstract class SyntheticInterceptorMethodDefinition : SyntheticDeclarationDefinition {
     public object[] InvocationArguments { get; } = null!;
     public MethodInfo Method { get; } = null!;
 
-    public virtual void BindDynamicComponents(MethodDefinitionBindingContext ctx) { }
+    public virtual void BindDynamicComponents() { }
 
     public virtual ISyntheticMethodBuilder<Delegate> InternalBindCompilerMethod(
         ISimpleSyntheticClassBuilder builder,
-        MethodDefinitionBindingContext bindingContext,
         Delegate targetMethod
     ) {
         throw new InvalidOperationException("Method body generation not implemented.");
@@ -26,8 +24,8 @@ public abstract class SyntheticInterceptorMethodDefinition : ISyntheticMethodDef
     }
 }
 
-public abstract class SyntheticAsyncInterceptorMethodDefinition {
-    public virtual void BindDynamicComponents(MethodDefinitionBindingContext ctx) { }
+public abstract class SyntheticAsyncInterceptorMethodDefinition : SyntheticDeclarationDefinition {
+    public virtual void BindDynamicComponents() { }
 
     public abstract ISyntheticCodeBlock GenerateMethodBody();
 

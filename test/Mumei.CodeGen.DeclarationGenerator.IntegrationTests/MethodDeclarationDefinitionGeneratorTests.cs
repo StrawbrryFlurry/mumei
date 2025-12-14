@@ -41,13 +41,51 @@ public sealed class MethodDeclarationDefinitionGeneratorTests {
                         }
                     );
 
+                    cls.DeclareMethod<Func<string>>("GetState")
+                        .WithReturnType(stringType)
+                        .WithAccessibility(AccessModifier.Public)
+                        .WithBody(ctx.Block(renderTree => {
+                            renderTree.Text("return _state;");
+                        }));
+
                     ctx.EmitIncremental("A", cls);
                 });
 
                 context.RegisterCodeGenerationOutput(o);
             }
         ).RunWithAssert(result => {
-            result.HasFileMatching($"A").WithContent($"");
+            result.HasFileMatching("A").WithContent(
+                $$""""""""""
+                  internal class TestClass {
+                      private string _state;
+
+                       void SomeOtherMethod() {
+
+                      }
+
+                      public global::System.Threading.Tasks.Task DoWorkAsync(
+                          string state
+                      ) {
+                              _state = state;
+                              SomeOtherMethod();
+                              global::System.Console.WriteLine($"Doing work... {"""""""""Hello!"""""""""}");
+                              return global::System.Threading.Tasks.Task.CompletedTask;
+                      }
+
+                      public string GetState() {
+                          return _state;
+                      }
+                  }
+
+                  """"""""""
+            );
+
+            result.Compilation.PassesAssemblyAction(c => {
+                var testClass = c.CreateUnsafeInstance<TestMethodDefinition<string>>("TestClass");
+                c.Invoke(testClass, definition => definition.DoWorkAsync("TestState")).GetAwaiter().GetResult();
+                var state = c.Invoke(testClass, definition => definition.GetState());
+                Assert.Equal("TestState", state);
+            });
         });
     }
 }
@@ -61,8 +99,8 @@ public sealed partial class TestMethodDefinition<TState> : SyntheticMethodDefini
 
     private TState _state;
 
-    public override void BindDynamicComponents(MethodDefinitionBindingContext ctx) {
-        ctx.Bind(typeof(TState), InputB);
+    public override void BindDynamicComponents() {
+        this.Bind(typeof(TState), InputB);
     }
 
     [Output]
@@ -74,6 +112,10 @@ public sealed partial class TestMethodDefinition<TState> : SyntheticMethodDefini
     }
 
     private void SomeOtherMethod() { }
+
+    public TState GetState() {
+        return _state;
+    }
 }
 
 file static class TestScope { }

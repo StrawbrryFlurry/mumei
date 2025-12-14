@@ -12,6 +12,7 @@ public static class SyntheticMethodBuilderExtensions {
         }
 
         public ISyntheticMethodBuilder<TSignature> WithReturnType(ITypeSymbol returnType) {
+            builder.WithReturnType(builder.ΦCompilerApi.Context.Type(returnType));
             return builder;
         }
     }

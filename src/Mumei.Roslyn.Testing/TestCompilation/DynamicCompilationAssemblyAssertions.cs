@@ -27,6 +27,10 @@ public static class DynamicCompilationAssemblyAssertions {
         public Assembly Assembly { get; } = assembly;
         public GeneratedAssemblyInstance<T> CreateInstance<T>(params object[] args) {
             var name = GetTypeNameWithoutFileScope(typeof(T));
+            return CreateUnsafeInstance<T>(name, args);
+        }
+
+        public GeneratedAssemblyInstance<T> CreateUnsafeInstance<T>(string name, params object[] args) {
             var instance = Activator.CreateInstance(Assembly.GetTypes().First(x => x.FullName == name), args)
                            ?? throw new InvalidOperationException("Could not create instance of type " + name);
             // We can't cast here since the type is from a different assembly load context.

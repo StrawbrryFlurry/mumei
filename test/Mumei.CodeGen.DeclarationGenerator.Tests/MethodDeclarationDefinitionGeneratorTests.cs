@@ -19,24 +19,22 @@ public sealed class MethodDeclarationDefinitionGeneratorTests {
                           public partial class TestMethodDefinition<TState> {
                               public override global::Mumei.CodeGen.Components.ISyntheticMethodBuilder<global::System.Delegate> InternalBindCompilerMethod(
                                   global::Mumei.CodeGen.Components.ISimpleSyntheticClassBuilder φbuilder,
-                                  global::Mumei.CodeGen.Components.MethodDefinitionBindingContext φbindingContext,
                                   global::System.Delegate φtargetMethod
                               ) {
                                   if (φtargetMethod.Method == ((Delegate) DoWorkAsync).Method) {
-                                      return ΦBindMethod__DoWorkAsync_T0_state(φbuilder, φbindingContext);
+                                      return ΦBindMethod__DoWorkAsync_T0_state(φbuilder);
                                   }
                                   throw new InvalidOperationException("Unsupported method");
                               }
                               
                               private global::Mumei.CodeGen.Components.ISyntheticMethodBuilder<global::System.Delegate> ΦBindMethod__DoWorkAsync_T0_state(
-                                  global::Mumei.CodeGen.Components.ISimpleSyntheticClassBuilder φbuilder,
-                                  global::Mumei.CodeGen.Components.MethodDefinitionBindingContext φbindingContext
+                                  global::Mumei.CodeGen.Components.ISimpleSyntheticClassBuilder φbuilder
                               ) {
                                   return φbuilder.DeclareMethod<global::System.Delegate>("DoWorkAsync")
                                       .WithAccessibility(global::Mumei.CodeGen.AccessModifier.Public)
                                       .WithReturnType(φbuilder.ΦCompilerApi.Context.Type(typeof(global::System.Threading.Tasks.Task)))
                                       .WithParameters(
-                                          φbuilder.ΦCompilerApi.Context.Parameter(φbindingContext.ResolveDynamicallyBoundType(nameof(TState)),
+                                          φbuilder.ΦCompilerApi.Context.Parameter(this.InternalResolveLateBoundType(nameof(TState)),
                                               "state"
                                           )
                                       )
@@ -77,8 +75,8 @@ file static class TestScope {
 
         private TState _state;
 
-        public override void BindDynamicComponents(MethodDefinitionBindingContext ctx) {
-            ctx.Bind(typeof(TState), InputB);
+        public override void BindDynamicComponents() {
+            this.Bind(typeof(TState), InputB);
         }
 
         [Output]

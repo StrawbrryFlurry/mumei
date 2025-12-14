@@ -108,7 +108,7 @@ internal abstract class SyntheticMethodBase<TBuilder>(
     private void EnsureValid() {
         // TODO: We should report these in the compilation as diagnostics rather than throwing exceptions.
         if (_returnType is null) {
-            throw new InvalidOperationException("Method must have a return type.");
+            throw new InvalidOperationException($"Method {Name} must have a return type.");
         }
 
         if (_body is null && !_accessModifiers.Contains(AccessModifier.Abstract)) {
