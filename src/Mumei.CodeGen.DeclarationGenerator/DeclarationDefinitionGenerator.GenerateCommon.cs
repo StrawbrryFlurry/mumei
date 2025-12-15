@@ -36,7 +36,7 @@ public sealed partial class DeclarationDefinitionGenerator {
     private static void CollectOutputAndInputMembers(
         ICodeGenerationContext ctx,
         INamedTypeSymbol classDefinitionSymbol,
-        ref ArrayBuilder<string> inputMemberNames,
+        HashSet<string> inputMemberNames,
         ref ArrayBuilder<ISymbol> outputMembers
     ) {
         var outputAttribute = ctx.TypeFromCompilation<OutputAttribute>();

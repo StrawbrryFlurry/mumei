@@ -171,7 +171,7 @@ file sealed partial class SyntheticClassDynamicMemberBinder<[Bindable] TClassDef
 
     [Output(Name = nameof(SyntheticClassDefinition<>.InternalBindCompilerOutputMembers))]
     public void BindCompilerOutputMembers(ISyntheticClassBuilder<TClassDefinition> classBuilder) {
-        foreach (var bindOutputMethod in CompileTimeForEach(_outputBinderMethods)) {
+        foreach (var bindOutputMethod in EmitForEach(_outputBinderMethods)) {
             bindOutputMethod.Bind(this)(classBuilder);
         }
     }

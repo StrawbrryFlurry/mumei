@@ -2,10 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Components;
-using Mumei.CodeGen.Rendering;
 using Mumei.CodeGen.Roslyn.Components;
-using Mumei.Common.Internal;
-using Mumei.Roslyn.Common.Polyfill;
 using Eq = Microsoft.CodeAnalysis.SymbolEqualityComparer;
 
 namespace Mumei.CodeGen.DeclarationGenerator;
@@ -28,9 +25,9 @@ public sealed partial class DeclarationDefinitionGenerator {
             .WithAccessibility(definitionType.DeclaredAccessibility.ToAccessModifiers() + AccessModifier.Partial);
 
         if (Eq.Default.Equals(definitionType.BaseType, syntheticClassDefinitionType.Construct(definitionType))) {
-            EmitBindCompilerOutputMembersMethodForClass(ctx, definitionCodeGenClass, definitionType);
+            EmitBindCompilerOutputMembersMethodForClass(ctx, definitionCodeGenClass, definitionDeclaration, definitionType);
         } else if (Eq.Default.Equals(definitionType.BaseType, syntheticMethodDefinitionType)) {
-            EmitInternalBindCompilerMethodForMethod(ctx, definitionCodeGenClass, definitionType);
+            EmitInternalBindCompilerMethodForMethod(ctx, definitionCodeGenClass, definitionDeclaration, definitionType);
         } else if (Eq.Default.Equals(definitionType.BaseType, syntheticInterceptorMethodDefinitionType)) {
             EmitInternalBindCompilerMethodForInterceptorMethod(ctx, definitionCodeGenClass, definitionType);
         }

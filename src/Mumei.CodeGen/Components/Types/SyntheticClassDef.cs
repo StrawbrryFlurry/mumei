@@ -1,6 +1,6 @@
 ﻿namespace Mumei.CodeGen.Components;
 
-public abstract class SyntheticClassDefinition<TSelf> : ISyntheticClass<TSelf> where TSelf : new() {
+public abstract class SyntheticClassDefinition<TSelf> : SyntheticDeclarationDefinition, ISyntheticClass<TSelf> where TSelf : new() {
     public SyntheticIdentifier Name { get; private set; }
 
     // Add an analyzer that ensures Synthetic Classes are never instantiated by user code!
@@ -10,10 +10,6 @@ public abstract class SyntheticClassDefinition<TSelf> : ISyntheticClass<TSelf> w
     }
 
     public virtual void Setup(ISyntheticClassBuilder<TSelf> classBuilder) { }
-
-    protected IEnumerable<T> CompileTimeForEach<T>(IEnumerable<T> items) {
-        throw new CompileTimeComponentUsedAtRuntimeException();
-    }
 
     public virtual void InternalBindCompilerOutputMembers(ISyntheticClassBuilder<TSelf> classBuilder) { }
 

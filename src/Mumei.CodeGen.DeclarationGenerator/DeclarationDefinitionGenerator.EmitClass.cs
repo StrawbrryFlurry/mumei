@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Components;
 using Mumei.CodeGen.Rendering;
 using Mumei.CodeGen.Rendering.CSharp;
@@ -11,6 +12,7 @@ public sealed partial class DeclarationDefinitionGenerator {
     public static void EmitBindCompilerOutputMembersMethodForClass(
         ICodeGenerationContext ctx,
         ISimpleSyntheticClassBuilder definitionCodeGenClass,
+        ClassDeclarationSyntax definitionClassDeclaration,
         INamedTypeSymbol definitionType
     ) {
         var bindingMethod = definitionCodeGenClass.DeclareMethod<Action<ISyntheticClassBuilder<CompileTimeUnknown>>>(
@@ -26,12 +28,17 @@ public sealed partial class DeclarationDefinitionGenerator {
                 )
             );
 
-        var inputMemberNames = new ArrayBuilder<string>();
+        var inputMemberNames = new HashSet<string>();
         var outputMembers = new ArrayBuilder<ISymbol>();
 
-        CollectOutputAndInputMembers(ctx, definitionType, ref inputMemberNames, ref outputMembers);
+        CollectOutputAndInputMembers(ctx, definitionType, inputMemberNames, ref outputMembers);
 
-        var memberBindingStatements = new ArrayBuilder<StatementBuilder>(outputMembers.Count);
+        var memberBindingStatements = new ArrayBuilder<RendererExpressionFragment>(outputMembers.Count);
+
+        var classMethodBodyResolutionContext = new SyntheticClassDefinitionMethodCodeBlockResolutionContext(
+            ctx.Compilation.GetSemanticModel(definitionClassDeclaration.SyntaxTree),
+            inputMemberNames
+        );
 
         foreach (var member in outputMembers) {
             if (member is IFieldSymbol field) {
@@ -45,13 +52,15 @@ public sealed partial class DeclarationDefinitionGenerator {
             }
 
             if (member is IMethodSymbol method) {
-                var sm = ctx.Compilation.GetSemanticModel(method.DeclaringSyntaxReferences[0].SyntaxTree);
-                var bindingExpression = DeclarationBuilderFactory.DeclareMethodFromDefinition(method, classBuilder, sm, inputMemberNames);
+                var bindingExpression = DeclarationBuilderFactory.DeclareMethodFromDefinition(
+                    classBuilder,
+                    method,
+                    classMethodBodyResolutionContext
+                );
                 memberBindingStatements.Add(bindingExpression);
             }
         }
 
-        inputMemberNames.Dispose();
         outputMembers.Dispose();
 
         bindingMethod.WithBody(ctx.Block(memberBindingStatements.ToArrayAndFree(), static (renderTree, bindingExpressions) => {

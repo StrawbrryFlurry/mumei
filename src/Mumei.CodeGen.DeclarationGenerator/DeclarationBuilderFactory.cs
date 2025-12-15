@@ -11,7 +11,7 @@ using Mumei.CodeGen.Roslyn.Components;
 namespace Mumei.CodeGen.DeclarationGenerator;
 
 internal sealed class DeclarationBuilderFactory {
-    public static StatementBuilder DeclareFieldFromDefinitionMember(
+    public static RendererExpressionFragment DeclareFieldFromDefinitionMember(
         ExpressionFragment classBuilder,
         IFieldSymbol field
     ) {
@@ -27,14 +27,14 @@ internal sealed class DeclarationBuilderFactory {
         );
     }
 
-    public static StatementBuilder DeclareField(
+    public static RendererExpressionFragment DeclareField(
         ExpressionFragment classBuilder,
         TypeInfoFragment type,
         InvocationExpressionFragment getTypeExpression,
         string name,
         AccessModifierList accessibility
     ) {
-        return StatementBuilder.ForRenderExpression(renderTree => {
+        return RendererExpressionFragment.For(renderTree => {
             renderTree.InterpolatedLine($"{classBuilder}.{nameof(ISyntheticClassBuilder<>.DeclareField)}<{type.FullName}>(");
             renderTree.StartBlock();
             renderTree.Node(getTypeExpression);
@@ -46,7 +46,7 @@ internal sealed class DeclarationBuilderFactory {
         });
     }
 
-    public static StatementBuilder DeclarePropertyFromDefinitionMember(
+    public static RendererExpressionFragment DeclarePropertyFromDefinitionMember(
         ExpressionFragment classBuilder,
         IPropertySymbol property
     ) {
@@ -62,14 +62,14 @@ internal sealed class DeclarationBuilderFactory {
         );
     }
 
-    public static StatementBuilder DeclareProperty(
+    public static RendererExpressionFragment DeclareProperty(
         ExpressionFragment classBuilder,
         TypeInfoFragment type,
         InvocationExpressionFragment getTypeExpression,
         string name,
         AccessModifierList accessibility
     ) {
-        return StatementBuilder.ForRenderExpression(renderTree => {
+        return RendererExpressionFragment.For(renderTree => {
             renderTree.InterpolatedLine($"{classBuilder}.{nameof(ISyntheticClassBuilder<>.DeclareProperty)}<{type.FullName}>(");
             renderTree.StartBlock();
             renderTree.Node(getTypeExpression);
@@ -88,7 +88,7 @@ internal sealed class DeclarationBuilderFactory {
         });
     }
 
-    public static StatementBuilder DeclareMethodFromDefinition(
+    public static RendererExpressionFragment DeclareMethodFromDefinition(
         ExpressionFragment classBuilder,
         IMethodSymbol method,
         ISyntheticCodeBlockResolutionContext resolutionContext
@@ -105,7 +105,14 @@ internal sealed class DeclarationBuilderFactory {
         var declareTypeParameterList = MakeTypeParameterListFromDefinition(classBuilder, method.TypeParameters);
         var returnType = MakeSyntheticTypeExpressionForType(method.ReturnType);
 
-        var declareBody = MakeCodeBlockFromMethodDeclaration(methodDeclarationSyntax);
+        var declareBody = method.IsAbstract
+            ? null
+            : MakeCodeBlockFromMethodDeclaration(
+                classBuilder,
+                methodDeclarationSyntax,
+                method.ReturnType,
+                resolutionContext
+            );
 
         return DeclareMethod(
             classBuilder,
@@ -114,11 +121,11 @@ internal sealed class DeclarationBuilderFactory {
             method.DeclaredAccessibility.ToAccessModifiers(),
             declareTypeParameterList,
             declareParameterList,
-            MakeCodeBlockFromMethodDeclaration()
+            declareBody
         );
     }
 
-    public static StatementBuilder DeclareMethod(
+    public static RendererExpressionFragment DeclareMethod(
         ExpressionFragment classBuilder,
         InvocationExpressionFragment getReturnTypeExpression,
         string name,
@@ -127,7 +134,7 @@ internal sealed class DeclarationBuilderFactory {
         RendererExpressionFragment? declareParameterList,
         RendererExpressionFragment? declareBody
     ) {
-        return StatementBuilder.ForRenderExpression(renderTree => {
+        return RendererExpressionFragment.For(renderTree => {
             renderTree.Interpolate($"{classBuilder}.{nameof(ISyntheticClassBuilder<>.DeclareMethod)}");
             renderTree.Interpolate($"<global::System.Delegate>");
             renderTree.InterpolatedLine($"({name:q})");
@@ -156,7 +163,7 @@ internal sealed class DeclarationBuilderFactory {
         });
     }
 
-    private static RendererExpressionFragment? MakeCodeBlockFromMethodDeclaration(
+    public static RendererExpressionFragment? MakeCodeBlockFromMethodDeclaration(
         ExpressionFragment classBuilder,
         MethodDeclarationSyntax methodDeclarationSyntax,
         ITypeSymbol returnType,
@@ -173,8 +180,6 @@ internal sealed class DeclarationBuilderFactory {
         );
 
         return RendererExpressionFragment.For(renderTree => {
-            renderTree.Block(renderBody);
-
             renderTree.InterpolatedLine($".{nameof(ISyntheticMethodBuilder<>.WithBody)}(");
             renderTree.StartBlock();
             renderTree.InterpolatedLine($"{classBuilder.Value}.{nameof(ISyntheticClassBuilder<>.ΦCompilerApi)}.{nameof(ISyntheticClassBuilder<>.ΦCompilerApi.Context)}.{nameof(ICodeGenerationContext.Block)}(");
@@ -182,6 +187,8 @@ internal sealed class DeclarationBuilderFactory {
             renderTree.Line("this,");
             renderTree.InterpolatedLine($"static ({SyntheticDefinitionMethodCodeBlockResolutionContext.RenderTreeParameter}, {SyntheticDefinitionMethodCodeBlockResolutionContext.InputArgumentName}) => {{");
             renderTree.StartBlock();
+
+            renderTree.Block(renderBody);
 
             renderTree.NewLine();
             renderTree.EndBlock();
@@ -194,7 +201,7 @@ internal sealed class DeclarationBuilderFactory {
         });
     }
 
-    private static RendererExpressionFragment? MakeParameterListFromDefinition(
+    public static RendererExpressionFragment? MakeParameterListFromDefinition(
         ExpressionFragment classBuilder,
         ImmutableArray<IParameterSymbol> parameters
     ) {
@@ -226,7 +233,7 @@ internal sealed class DeclarationBuilderFactory {
         });
     }
 
-    private static RendererExpressionFragment? MakeTypeParameterListFromDefinition(
+    public static RendererExpressionFragment? MakeTypeParameterListFromDefinition(
         ExpressionFragment classBuilder,
         ImmutableArray<ITypeParameterSymbol> typeParameters
     ) {
@@ -267,13 +274,13 @@ internal sealed class DeclarationBuilderFactory {
         return type.ToRenderFragment();
     }
 
-    private static InvocationExpressionFragment MakeSyntheticTypeExpressionForType(
+    public static InvocationExpressionFragment MakeSyntheticTypeExpressionForType(
         ITypeSymbol type
     ) {
         if (type is not ITypeParameterSymbol { DeclaringMethod: null } lateBoundType) {
             return new InvocationExpressionFragment(
                 "this",
-                nameof(SyntheticDeclarationDefinition.CodeGenContext),
+                $"{nameof(SyntheticDeclarationDefinition.CodeGenContext)}.{nameof(SyntheticDeclarationDefinition.CodeGenContext.Type)}",
                 [$"typeof({type.ToRenderFragment().QualifiedTypeName})"]
             );
         }

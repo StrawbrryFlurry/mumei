@@ -21,7 +21,7 @@ public sealed class ClassDeclarationDefinitionGeneratorTests {
                                   {{typeof(ISyntheticClassBuilder<>):g}}<global::Mumei.CodeGen.DeclarationGenerator.Tests.TestClassDefinition<TState>> φbuilder
                               ) {
                                   φbuilder.DeclareProperty<string>(
-                                      φbuilder.ΦCompilerApi.Context.Type(typeof(string)),
+                                      this.CodeGenContext.Type(typeof(string)),
                                       "OutputA",
                                       new {{typeof(SyntheticPropertyAccessorList):g}}(
                                           {{typeof(SyntheticPropertyAccessor):g}}.SimpleGetter,
@@ -30,7 +30,7 @@ public sealed class ClassDeclarationDefinitionGeneratorTests {
                                   ).WithAccessibility(global::Mumei.CodeGen.AccessModifier.Public);
                                   
                                   φbuilder.DeclareProperty<global::System.Type>(
-                                      φbuilder.ΦCompilerApi.Context.Type(typeof(global::System.Type)),
+                                      this.CodeGenContext.Type(typeof(global::System.Type)),
                                       "OutputB",
                                       new {{typeof(SyntheticPropertyAccessorList):g}}(
                                           {{typeof(SyntheticPropertyAccessor):g}}.SimpleGetter,
@@ -39,15 +39,15 @@ public sealed class ClassDeclarationDefinitionGeneratorTests {
                                   ).WithAccessibility(global::Mumei.CodeGen.AccessModifier.Public);
                                   
                                   φbuilder.DeclareField<{{typeof(CompileTimeUnknown):g}}>(
-                                      φbuilder.ΦCompilerApi.DynamicallyBoundType(nameof(TState)),
+                                      this.InternalResolveLateBoundType(nameof(TState)),
                                       "_state"
                                   ).WithAccessibility(global::Mumei.CodeGen.AccessModifier.Private);
                                   
                                   φbuilder.DeclareMethod<global::System.Delegate>("DoWorkAsync")
                                       .WithAccessibility(global::Mumei.CodeGen.AccessModifier.Public)
-                                      .WithReturnType(φbuilder.ΦCompilerApi.Context.Type(typeof(global::System.Threading.Tasks.Task)))
+                                      .WithReturnType(this.CodeGenContext.Type(typeof(global::System.Threading.Tasks.Task)))
                                       .WithParameters(
-                                          φbuilder.ΦCompilerApi.Context.Parameter(φbuilder.ΦCompilerApi.DynamicallyBoundType(nameof(TState)),
+                                          φbuilder.ΦCompilerApi.Context.Parameter(this.InternalResolveLateBoundType(nameof(TState)),
                                               "state"
                                           )
                                       )
@@ -104,55 +104,6 @@ file static class TestScope {
             _state = state;
             Console.WriteLine($"Doing work... {InputA}");
             return Task.CompletedTask;
-        }
-    }
-
-    [OmitInReference]
-    public sealed class TestClassDefinitionBinder<TState> {
-        [Input]
-        public string InputA { get; }
-
-        public void InternalBindCompilerOutputMembers(ISyntheticClassBuilder<TestClassDefinition<TState>> classBuilder) {
-            classBuilder.DeclareProperty<string>(
-                classBuilder.ΦCompilerApi.Context.Type(typeof(string)),
-                "OutputA",
-                new SyntheticPropertyAccessorList {
-                    Getter = SyntheticPropertyAccessor.SimpleGetter,
-                    Setter = null
-                }
-            );
-
-            classBuilder.DeclareProperty<Type>(
-                classBuilder.ΦCompilerApi.Context.Type(typeof(Type)),
-                "OutputB",
-                new SyntheticPropertyAccessorList {
-                    Getter = SyntheticPropertyAccessor.SimpleGetter,
-                    Setter = null
-                }
-            );
-
-            classBuilder.DeclareField<CompileTimeUnknown>(
-                classBuilder.ΦCompilerApi.DynamicallyBoundType(nameof(TState)),
-                "_state"
-            );
-
-            classBuilder.DeclareMethod<Func<TState, Task>>("DoWorkAsync")
-                .WithAccessibility(AccessModifier.Public)
-                .WithReturnType(typeof(Task))
-                .WithParameters(
-                    classBuilder.ΦCompilerApi.Context.Parameter(
-                        classBuilder.ΦCompilerApi.DynamicallyBoundType(
-                            nameof(TState)),
-                        "state"
-                    )
-                ).WithTypeParameters()
-                .WithBody(classBuilder.ΦCompilerApi.Context.Block(this, static (renderTree, ctx) => {
-                    renderTree.Line("_state = state;");
-                    renderTree.Text("Console.WriteLine(\"Doing work... {\"");
-                    renderTree.Text(ctx.InputA);
-                    renderTree.Text("});");
-                    renderTree.Line("return global::System.Threading.Tasks.Task.CompletedTask;");
-                }));
         }
     }
 }

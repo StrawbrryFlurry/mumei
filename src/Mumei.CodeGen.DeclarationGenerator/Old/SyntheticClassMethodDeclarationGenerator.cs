@@ -107,17 +107,17 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
 
         var bodyDeclarationOperation = invocation.SemanticModel.GetOperation(bodyDeclaration) as IAnonymousFunctionOperation;
 
-        var codeBlock = SyntheticRenderCodeBlockSyntaxRewriter.CreateSyntheticRenderBlock(
-            bodyDeclaration.Body,
-            bodyDeclarationOperation.Symbol.ReturnType,
-            invocation.SemanticModel,
-            new SyntheticCodeBlockFromLambdaWithInputsResolutionContext(
-                invocation.SemanticModel,
-                inputDeclarationFunc.Symbol.Parameters[0].Name,
-                RenderFragmentInputsArg,
-                RenderTreeArg
-            )
-        );
+        // var codeBlock = SyntheticRenderCodeBlockSyntaxRewriter.CreateSyntheticRenderBlock(
+        //     bodyDeclaration.Body,
+        //     bodyDeclarationOperation.Symbol.ReturnType,
+        //     invocation.SemanticModel,
+        //     new SyntheticCodeBlockFromLambdaWithInputsResolutionContext(
+        //         invocation.SemanticModel,
+        //         inputDeclarationFunc.Symbol.Parameters[0].Name,
+        //         RenderFragmentInputsArg,
+        //         RenderTreeArg
+        //     )
+        // );
         var methodDecl = MethodDeclarationFragment.Create(
             [AttributeFragment.Intercept(invocation.Location)],
             AccessModifier.Internal + AccessModifier.Static,
@@ -129,7 +129,7 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
                 ParameterFragment.Create(tInput, "λ__input"),
                 ParameterFragment.Create(TypeInfoFragment.ConstructGenericType(typeof(Func<>), tInput, tMethodSignature), "λ__codeBlockDeclaration")
             ],
-            CodeBlockFragment.Create(codeBlock, (builder, fragment) => {
+            CodeBlockFragment.Create("codeBlock", (builder, fragment) => {
                 builder.Interpolate($"{LocalFragment.Var("λ__normalizedInputs", out var normalizedInput)} = {normalizedInputExpression};");
                 builder.NewLine();
                 builder.Line($"#pragma warning disable {Diagnostics.InternalFeatureId}");
@@ -165,12 +165,12 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
         var lambda = invocation.SemanticModel.GetOperation(bodyDeclaration) as IAnonymousFunctionOperation;
 
         var methodName = $"Synthetic_WithBody_Interceptor_{Guid.NewGuid():N}";
-        var codeBlock = SyntheticRenderCodeBlockSyntaxRewriter.CreateSyntheticRenderBlock(
-            bodyDeclaration.Body,
-            lambda.Symbol.ReturnType,
-            invocation.SemanticModel,
-            new SyntheticCodeBlockFromLambdaResolutionContext(invocation.SemanticModel)
-        );
+        // var codeBlock = SyntheticRenderCodeBlockSyntaxRewriter.CreateSyntheticRenderBlock(
+        //     bodyDeclaration.Body,
+        //     lambda.Symbol.ReturnType,
+        //     invocation.SemanticModel,
+        //     new SyntheticCodeBlockFromLambdaResolutionContext(invocation.SemanticModel)
+        // );
         var methodDecl = MethodDeclarationFragment.Create(
             [AttributeFragment.Intercept(invocation.Location)],
             AccessModifier.Private + AccessModifier.Static,
@@ -178,7 +178,7 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
             lambda.Symbol.ReturnType.ToRenderFragment(),
             methodName,
             [],
-            CodeBlockFragment.Create(codeBlock, (builder, fragment) => {
+            CodeBlockFragment.Create("codeBlock", (builder, fragment) => {
                 builder.Text("var λ__bodyDeclaration = ");
                 builder.Interpolate($"{nameof(ISyntheticMethodBuilder<>.ΦCompilerApi)}.{nameof(ISyntheticMethodBuilder<>.ΦCompilerApi.Context.Block)}((renderTree) => {{");
                 builder.Block(fragment);

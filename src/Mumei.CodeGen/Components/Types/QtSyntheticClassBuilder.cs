@@ -80,18 +80,6 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
     private sealed class CompilerApi(ICodeGenerationContext context, QtSyntheticClassBuilder<TClassDef> builder) : IΦInternalClassBuilderCompilerApi {
         public ICodeGenerationContext Context => context;
 
-        public ISyntheticType DynamicallyBoundType(string type) {
-            if (builder._dynamicallyBoundTypeInfos is null) {
-                throw new InvalidOperationException($"No dynamically bound type infos exist on this class builder for {type}.");
-            }
-
-            if (!builder._dynamicallyBoundTypeInfos.TryGetValue(type, out var syntheticType)) {
-                throw new KeyNotFoundException($"No dynamically bound type info found for type '{type}'.");
-            }
-
-            return syntheticType;
-        }
-
         public void DeclareMethod(
             ISyntheticAttribute[] attributes,
             AccessModifierList modifiers,

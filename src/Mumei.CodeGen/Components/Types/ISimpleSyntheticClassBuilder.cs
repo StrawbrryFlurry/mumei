@@ -1,11 +1,7 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace Mumei.CodeGen.Components;
+﻿namespace Mumei.CodeGen.Components;
 
 public interface ISimpleSyntheticClassBuilder : ISyntheticDeclaration {
     public IΦInternalClassBuilderCompilerApi ΦCompilerApi { get; }
-
-    public void Bind(Type t, ISyntheticType actualType, [CallerArgumentExpression(nameof(t))] string bindingTargetExpression = "");
 
     public SyntheticIdentifier MakeUniqueName(string name);
 

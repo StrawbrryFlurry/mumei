@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mumei.CodeGen.Components;
 using Mumei.CodeGen.Rendering;
 using Mumei.CodeGen.Roslyn.Components;
@@ -12,6 +13,7 @@ public sealed partial class DeclarationDefinitionGenerator {
     public static void EmitInternalBindCompilerMethodForMethod(
         ICodeGenerationContext ctx,
         ISimpleSyntheticClassBuilder definitionCodeGenClass,
+        ClassDeclarationSyntax definitionDeclaration,
         INamedTypeSymbol definitionType
     ) {
         var bindingMethod = definitionCodeGenClass.DeclareMethod<Action<ISyntheticClassBuilder<CompileTimeUnknown>>>(
@@ -23,7 +25,7 @@ public sealed partial class DeclarationDefinitionGenerator {
                 ctx.Parameter(
                     ctx.TypeFromCompilation(typeof(ISimpleSyntheticClassBuilder)),
                     $"{Strings.PrivateLocal}builder",
-                    out var builderParameter
+                    out var classBuilder
                 ),
                 ctx.Parameter(
                     ctx.TypeFromCompilation(typeof(Delegate)),
@@ -33,14 +35,14 @@ public sealed partial class DeclarationDefinitionGenerator {
             );
 
         var outputMembers = new ArrayBuilder<ISymbol>();
-        var inputMembers = new ArrayBuilder<ISymbol>();
+        var inputMembers = new HashSet<string>();
 
-        CollectOutputAndInputMembers(ctx, definitionType, ref outputMembers, ref inputMembers);
+        CollectOutputAndInputMembers(ctx, definitionType, inputMembers, ref outputMembers);
 
-        var inputMemberNames = new HashSet<string>();
-        foreach (var inputMember in inputMembers) {
-            inputMemberNames.Add(inputMember.Name);
-        }
+        var resolutionContext = new SyntheticMethodDefinitionMethodCodeBlockResolutionContext(
+            ctx.Compilation.GetSemanticModel(definitionDeclaration.SyntaxTree),
+            inputMembers
+        );
 
         var createdOutputMethods = new ArrayBuilder<(IMethodSymbol Source, ISyntheticMethod BinderImpl)>();
         Span<char> uniqueNameBuffer = stackalloc char[ArrayBuilder.InitSize];
@@ -62,12 +64,10 @@ public sealed partial class DeclarationDefinitionGenerator {
                 uniqueNameBuilder.AddRange(param.Name);
             }
 
-            var renderExpression = MakeMethodOutputMemberBindingExpression(
+            var declareMethodOnBuilderExpression = DeclarationBuilderFactory.DeclareMethodFromDefinition(
+                classBuilder,
                 method,
-                builderParameter,
-                $"this.{nameof(SyntheticDeclarationDefinition.InternalResolveLateBoundType)}",
-                ctx.Compilation.GetSemanticModel(method.DeclaringSyntaxReferences[0].GetSyntax().SyntaxTree),
-                inputMemberNames
+                resolutionContext
             );
 
             var impl = definitionCodeGenClass.DeclareMethod<Delegate>(uniqueNameBuilder.ToStringAndFree())
@@ -76,9 +76,9 @@ public sealed partial class DeclarationDefinitionGenerator {
                 .WithParameters(
                     ctx.Parameter(
                         ctx.Type(typeof(ISimpleSyntheticClassBuilder)),
-                        builderParameter.Value
+                        classBuilder.Value
                     )
-                ).WithBody(ctx.Block(renderExpression, static (renderTree, bindingExpressions) => {
+                ).WithBody(ctx.Block(declareMethodOnBuilderExpression, static (renderTree, bindingExpressions) => {
                     renderTree.Text("return ");
                     renderTree.Node(bindingExpressions);
                 }));
@@ -86,7 +86,7 @@ public sealed partial class DeclarationDefinitionGenerator {
             createdOutputMethods.Add((method, impl));
         }
 
-        bindingMethod.WithBody(ctx.Block((targetMethodParameter, builderParameter, createdOutputMethods.ToArrayAndFree()), static (renderTree, inputs) => {
+        bindingMethod.WithBody(ctx.Block((targetMethodParameter, builderParameter: classBuilder, createdOutputMethods.ToArrayAndFree()), static (renderTree, inputs) => {
             var (targetMethodParameter, builderParameter, outputMembers) = inputs;
             foreach (var outputMember in outputMembers) {
                 renderTree.InterpolatedLine($$"""if ({{targetMethodParameter}}.Method == ((Delegate) {{outputMember.Source.Name}}).Method) {""");

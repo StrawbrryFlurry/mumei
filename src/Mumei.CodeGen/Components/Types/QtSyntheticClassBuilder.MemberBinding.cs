@@ -1,27 +1,17 @@
 ﻿namespace Mumei.CodeGen.Components;
 
 internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
-    private Dictionary<string, ISyntheticType>? _dynamicallyBoundTypeInfos;
-
     public ISyntheticMethodBuilder<Delegate> DeclareMethod<TMethodDefinition>(
         SyntheticIdentifier name,
         Func<TMethodDefinition, Delegate> methodSelector,
         Action<TMethodDefinition> inputBinder
     ) where TMethodDefinition : SyntheticMethodDefinition, new() {
         var methodDef = new TMethodDefinition();
+        methodDef.CodeGenContext = ΦCompilerApi.Context;
         inputBinder(methodDef);
         methodDef.BindDynamicComponents();
         var methodToBind = methodSelector(methodDef);
-        methodDef.InternalBindCompilerMethod(this, methodToBind);
-        return null!;
-    }
-
-    public ISyntheticMethodBuilder<TSignature> DeclareMethod<TMethodDefinition, TSignature>(
-        SyntheticIdentifier name,
-        Func<TMethodDefinition, TSignature> methodSelector,
-        Action<TMethodDefinition> inputBinder
-    ) where TMethodDefinition : SyntheticMethodDefinition, new() where TSignature : Delegate {
-        throw new NotImplementedException();
+        return methodDef.InternalBindCompilerMethod(this, methodToBind);
     }
 
     public ISyntheticMethodBuilder<TSignature> DeclareMethod<TSignature>(SyntheticIdentifier name) where TSignature : Delegate {
@@ -119,10 +109,5 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef> {
         var cls = new QtSyntheticClassBuilder<TNested>(name, this, context);
         WithNestedClass(cls);
         return cls;
-    }
-
-    public void Bind(Type t, ISyntheticType actualType, string bindingTargetExpression = "") {
-        _dynamicallyBoundTypeInfos ??= new Dictionary<string, ISyntheticType>();
-        _dynamicallyBoundTypeInfos[t.FullName!] = actualType;
     }
 }
