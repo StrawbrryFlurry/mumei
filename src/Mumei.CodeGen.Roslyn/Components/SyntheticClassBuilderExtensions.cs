@@ -18,6 +18,17 @@ public static class SyntheticClassBuilderExtensions {
         }
     }
 
+    extension(IΦInternalClassBuilderCompilerApi classBuilder) {
+        public ISyntheticInterceptorMethodBuilder<Delegate> DeclareInterceptorMethodBuilder(
+            SyntheticIdentifier name,
+            ISimpleSyntheticClassBuilder containingDeclaration
+        ) {
+            var method = new SyntheticInterceptorMethodBuilder<Delegate>(name, containingDeclaration, classBuilder.Context);
+            containingDeclaration.DeclareMethod(method);
+            return method;
+        }
+    }
+
     extension(ISimpleSyntheticClassBuilder classBuilder) {
         public ISyntheticInterceptorMethodBuilder<Delegate> DeclareUnconstructedInterceptorMethod(
             SyntheticIdentifier name,
@@ -45,15 +56,6 @@ public static class SyntheticClassBuilderExtensions {
             classBuilder.DeclareMethod(builder);
 
             return builder;
-        }
-
-        public ISyntheticInterceptorMethodBuilder<Delegate> DeclareInterceptorMethod<TMethodDefinition>(
-            SyntheticIdentifier name,
-            InvocationExpressionSyntax invocationToIntercept,
-            Func<TMethodDefinition, Delegate> methodSelector,
-            Action<TMethodDefinition>? inputBinder = null
-        ) where TMethodDefinition : SyntheticInterceptorMethodDefinition, new() {
-            throw new NotImplementedException();
         }
     }
 

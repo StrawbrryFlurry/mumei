@@ -190,4 +190,8 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
     public SyntheticMethodRef<TSignature> Method<TSignature>(string name) where TSignature : Delegate {
         throw new NotImplementedException();
     }
+
+    public bool Equals(ISyntheticType other) {
+        return ReferenceEquals(this, other);
+    }
 }

@@ -8,6 +8,8 @@ namespace Mumei.CodeGen.Components;
 /// </summary>
 public interface ISyntheticType {
     public SyntheticIdentifier Name { get; }
+
+    public bool Equals(ISyntheticType other);
 }
 
 /// <summary>
@@ -24,12 +26,30 @@ public interface ISyntheticTypeInfo<T> {
 
 internal sealed class ErrorSyntheticType(string? typeName, string errorReason, object declarationSite) : ISyntheticType {
     public SyntheticIdentifier Name { get; } = typeName ?? $"<error: {errorReason}>";
-    public ISyntheticNamespace? Namespace { get; }
+
+    public object UnderlyingType { get; }
+
+    public bool Equals(ISyntheticType other) {
+        if (other is ErrorSyntheticType otherErrorType) {
+            return Name.Equals(otherErrorType.Name);
+        }
+
+        return false;
+    }
 }
 
 internal sealed class RuntimeSyntheticType(Type t) : ISyntheticType, ISyntheticConstructable<TypeInfoFragment> {
+    public Type UnderlyingType => t;
+
     public SyntheticIdentifier Name => t.Name;
-    public ISyntheticNamespace? Namespace => throw new NotImplementedException();
+
+    public bool Equals(ISyntheticType other) {
+        if (other is RuntimeSyntheticType otherRuntimeType) {
+            return otherRuntimeType.UnderlyingType == t;
+        }
+
+        return other.Equals(this); // Delegate to the other type's equality implementation
+    }
 
     public TypeInfoFragment Construct(ICompilationUnitContext compilationUnit) {
         return new TypeInfoFragment(t);

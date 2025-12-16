@@ -12,6 +12,10 @@ internal sealed class QtSyntheticTypeParameter(SyntheticIdentifier name) : ISynt
     public TypeParameterFragment Construct(ICompilationUnitContext compilationUnit) {
         return new TypeParameterFragment(Name.Resolve(compilationUnit), []);
     }
+
+    public bool Equals(ISyntheticType other) {
+        return Name.Equals(other.Name);
+    }
 }
 
 internal sealed class RuntimeSyntheticTypeParameter(Type typeParameterType) : ISyntheticTypeParameter, ISyntheticConstructable<TypeParameterFragment> {
@@ -22,5 +26,9 @@ internal sealed class RuntimeSyntheticTypeParameter(Type typeParameterType) : IS
 
     public TypeParameterFragment Construct(ICompilationUnitContext compilationUnit) {
         return new TypeParameterFragment();
+    }
+
+    public bool Equals(ISyntheticType other) {
+        return Name.Equals(other.Name);
     }
 }

@@ -32,4 +32,8 @@ public abstract class SyntheticClassDefinition<TSelf> : SyntheticDeclarationDefi
     public SyntheticMethodRef<TSignature> Method<TSignature>(string name) where TSignature : Delegate {
         throw new NotImplementedException();
     }
+
+    public bool Equals(ISyntheticType other) {
+        return ReferenceEquals(this, other);
+    }
 }
