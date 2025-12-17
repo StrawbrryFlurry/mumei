@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Operations;
 using Mumei.CodeGen.Components;
 using Mumei.CodeGen.Rendering;
 using Mumei.CodeGen.Rendering.CSharp;
@@ -101,8 +102,8 @@ internal sealed class DeclarationBuilderFactory {
             throw new NotSupportedException();
         }
 
-        var declareParameterList = MakeParameterListFromDefinition(classBuilder, method.Parameters);
-        var declareTypeParameterList = MakeTypeParameterListFromDefinition(classBuilder, method.TypeParameters);
+        var declareParameterList = MakeParameterListFromDefinition(method.Parameters);
+        var declareTypeParameterList = MakeTypeParameterListFromDefinition(method.TypeParameters);
         var returnType = MakeSyntheticTypeExpressionForType(method.ReturnType);
 
         var declareBody = method.IsAbstract
@@ -182,7 +183,7 @@ internal sealed class DeclarationBuilderFactory {
         return RendererExpressionFragment.For(renderTree => {
             renderTree.InterpolatedLine($".{nameof(ISyntheticMethodBuilder<>.WithBody)}(");
             renderTree.StartBlock();
-            renderTree.InterpolatedLine($"{classBuilder.Value}.{nameof(ISyntheticClassBuilder<>.ΦCompilerApi)}.{nameof(ISyntheticClassBuilder<>.ΦCompilerApi.Context)}.{nameof(ICodeGenerationContext.Block)}(");
+            renderTree.InterpolatedLine($"this.{nameof(SyntheticDeclarationDefinition.CodeGenContext)}.{nameof(ICodeGenerationContext.Block)}(");
             renderTree.StartBlock();
             renderTree.Line("this,");
             renderTree.InterpolatedLine($"static ({SyntheticDefinitionMethodCodeBlockResolutionContext.RenderTreeParameter}, {SyntheticDefinitionMethodCodeBlockResolutionContext.InputArgumentName}) => {{");
@@ -202,7 +203,6 @@ internal sealed class DeclarationBuilderFactory {
     }
 
     public static RendererExpressionFragment? MakeParameterListFromDefinition(
-        ExpressionFragment classBuilder,
         ImmutableArray<IParameterSymbol> parameters
     ) {
         if (parameters.Length == 0) {
@@ -215,26 +215,25 @@ internal sealed class DeclarationBuilderFactory {
 
             for (var i = 0; i < parameters.Length; i++) {
                 var parameter = parameters[i];
-                renderTree.Interpolate($"{classBuilder.Value}.{nameof(ISyntheticClassBuilder<>.ΦCompilerApi)}.{nameof(ISyntheticClassBuilder<>.ΦCompilerApi.Context)}.{nameof(ICodeGenerationContext.Parameter)}(");
+                renderTree.Interpolate($"this.{nameof(SyntheticDeclarationDefinition.CodeGenContext)}.{nameof(ICodeGenerationContext.Parameter)}(");
                 renderTree.StartBlock();
                 renderTree.Node(MakeSyntheticTypeExpressionForType(parameter.Type)); // TODO: This only works when used in synthetic definitions
                 renderTree.Line(",");
                 renderTree.InterpolatedLine($"{parameter.Name:q}");
                 renderTree.EndBlock();
-                renderTree.Line(")");
+                renderTree.Text(")");
 
                 if (i < parameters.Length - 1) {
                     renderTree.Line(",");
                 }
             }
-
+            renderTree.NewLine();
             renderTree.EndBlock();
             renderTree.Line(")");
         });
     }
 
     public static RendererExpressionFragment? MakeTypeParameterListFromDefinition(
-        ExpressionFragment classBuilder,
         ImmutableArray<ITypeParameterSymbol> typeParameters
     ) {
         if (typeParameters.Length == 0) {
@@ -247,7 +246,7 @@ internal sealed class DeclarationBuilderFactory {
 
             for (var i = 0; i < typeParameters.Length; i++) {
                 var typeParameter = typeParameters[i];
-                renderTree.Interpolate($"{classBuilder.Value}.{nameof(ISyntheticClassBuilder<>.ΦCompilerApi)}.{nameof(ISyntheticClassBuilder<>.ΦCompilerApi.Context)}.{nameof(ICodeGenerationContext.TypeParameter)}(");
+                renderTree.Interpolate($"this.{nameof(SyntheticDeclarationDefinition.CodeGenContext)}.{nameof(ICodeGenerationContext.TypeParameter)}(");
                 renderTree.StartBlock();
                 renderTree.InterpolatedLine($"{typeParameter.Name:q}");
                 renderTree.EndBlock();
@@ -277,8 +276,8 @@ internal sealed class DeclarationBuilderFactory {
             throw new NotSupportedException();
         }
 
-        var declareParameterList = MakeParameterListFromDefinition(classBuilder, method.Parameters)!;
-        var declareTypeParameterList = MakeTypeParameterListFromDefinition(classBuilder, method.TypeParameters);
+        var declareParameterList = MakeParameterListFromDefinition(method.Parameters)!;
+        var declareTypeParameterList = MakeTypeParameterListFromDefinition(method.TypeParameters);
         var returnType = MakeSyntheticTypeExpressionForType(method.ReturnType);
 
         var declareBody = method.IsAbstract
@@ -307,15 +306,13 @@ internal sealed class DeclarationBuilderFactory {
         InvocationExpressionFragment getReturnTypeExpression,
         string name,
         AccessModifierList accessibility,
-        ExpressionFragment locationIdentifierExpression,
-        RendererExpressionFragment? declareTypeParameterList,
-        RendererExpressionFragment declareParameterList,
+        ExpressionFragment invocationToInterceptExpression,
         RendererExpressionFragment declareBody
     ) {
         return RendererExpressionFragment.For(renderTree => {
-            renderTree.Interpolate($"{typeof(SyntheticClassBuilderExtensions)}.{nameof(SyntheticClassBuilderExtensions.DeclareInterceptorMethodBuilder)}");
+            renderTree.Interpolate($"{typeof(SyntheticClassBuilderExtensions)}.{nameof(SyntheticClassBuilderExtensions.DeclareInterceptorMethod)}");
             renderTree.InterpolatedLine(
-                $"({classBuilder}.{nameof(ISimpleSyntheticClassBuilder.ΦCompilerApi)}, {name:q}, {classBuilder})"
+                $"({classBuilder}, {name:q}, {invocationToInterceptExpression})"
             );
 
             renderTree.StartBlock();
@@ -327,14 +324,6 @@ internal sealed class DeclarationBuilderFactory {
             renderTree.Interpolate($".{nameof(ISyntheticInterceptorMethodBuilder<>.WithReturnType)}(");
             renderTree.Node(getReturnTypeExpression);
             renderTree.Line(")");
-
-            if (declareTypeParameterList is not null) {
-                renderTree.Node(declareTypeParameterList);
-            }
-
-            if (declareParameterList is not null) {
-                renderTree.Node(declareParameterList);
-            }
 
             renderTree.Node(declareBody);
         });

@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
 using Mumei.CodeGen.Components;
 
@@ -21,9 +22,8 @@ public abstract class SyntheticInterceptorMethodDefinition : SyntheticDeclaratio
 
     public virtual ISyntheticInterceptorMethodBuilder<Delegate> InternalBindCompilerMethod(
         ISimpleSyntheticClassBuilder φbuilder,
-        IInvocationOperation invocationToBind,
-        InterceptableLocation locationToIntercept,
-        Delegate φtargetMethod
+        InvocationExpressionSyntax invocationToIntercept,
+        Delegate methodToBind
     ) {
         throw new InvalidOperationException("Method body generation not implemented.");
     }

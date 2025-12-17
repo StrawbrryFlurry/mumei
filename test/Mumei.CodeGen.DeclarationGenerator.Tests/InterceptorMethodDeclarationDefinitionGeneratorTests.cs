@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
 using Mumei.CodeGen.Components;
 using Mumei.CodeGen.Rendering.CSharp;
@@ -27,35 +28,40 @@ public sealed class InterceptorMethodDeclarationDefinitionGeneratorTests {
                                   global::System.Delegate φtargetMethod
                               ) {
                                   if (φtargetMethod.Method == ((Delegate) DoWorkAsync).Method) {
-                                      return ΦBindMethod__DoWorkAsync_T0_state(φbuilder);
+                                      return ΦBindMethod__DoWorkAsync_T0_target_arg1_arg2(φbuilder, φlocationToIntercept);
                                   }
                                   throw new InvalidOperationException("Unsupported method");
                               }
                               
-                              private global::Mumei.CodeGen.Components.ISyntheticInterceptorMethodBuilder<global::System.Delegate> ΦBindMethod__DoWorkAsync_T0_state(
-                                  global::Mumei.CodeGen.Components.ISimpleSyntheticClassBuilder φbuilder
+                              private global::Mumei.CodeGen.Components.ISyntheticInterceptorMethodBuilder<global::System.Delegate> ΦBindMethod__DoWorkAsync_T0_target_arg1_arg2(
+                                  global::Mumei.CodeGen.Components.ISimpleSyntheticClassBuilder φbuilder,
+                                  global::Microsoft.CodeAnalysis.CSharp.InterceptableLocation φlocationToIntercept
                               ) {
-                                  return φbuilder.DeclareMethod<global::System.Delegate>("DoWorkAsync")
+                                  return global::Mumei.CodeGen.Roslyn.Components.SyntheticClassBuilderExtensions.DeclareInterceptorMethodBuilder(φbuilder.ΦCompilerApi, "DoWorkAsync", φbuilder)
+                                      .WithAttributes(global::Mumei.CodeGen.Roslyn.Components.CodeGenerationContextExtensions.InterceptLocationAttribute(this.CodeGenContext, φlocationToIntercept))
                                       .WithAccessibility(global::Mumei.CodeGen.AccessModifier.Public)
-                                      .WithReturnType(this.CodeGenContext.Type(typeof(global::System.Threading.Tasks.Task)))
-                                      .WithParameters(
-                                          φbuilder.ΦCompilerApi.Context.Parameter(this.InternalResolveLateBoundType(nameof(TTarget)),
-                                              "state"
-                                          )
-                                      )
+                                      .WithReturnType(this.CodeGenContext.Type(typeof(bool)))
                                       .WithBody(
-                                          φbuilder.ΦCompilerApi.Context.Block(
+                                          this.CodeGenContext.Block(
                                               this,
                                               static (φrenderTree, φctx) => {
                                                   φrenderTree.Text(""""""""""""
-                                                      _state = state;
-                                                      SomeOtherMethod();
-                                                      global::System.Console.WriteLine($"Doing work... {
-                                                  """""""""""");
-                                                  global::Mumei.CodeGen.Components.DefaultRenderExpressionExtensions.RenderExpression(φctx.InputA, φrenderTree);
-                                                  φrenderTree.Text(""""""""""""
-                                                  }");
-                                                      return global::System.Threading.Tasks.Task.CompletedTask;
+                                                      try
+                                                      {
+                                                          bool result = Invoke<bool>();
+                                                          if (!global::Mumei.CodeGen.Components.SyntheticDeclarationDefinition.EmitExpression<bool>(DoCompare.WithArguments(nameof(result))))
+                                                          {
+                                                              throw new global::System.InvalidOperationException("Work already done");
+                                                          }
+                                                  
+                                                          return result;
+                                                      }
+                                                      catch
+                                                      {
+                                                          global::System.Console.WriteLine($"Caught exception while invoking method {Method.Name} with {InvocationArguments.Length} arguments.");
+                                                      }
+                                                  
+                                                      return true;
                                                   
                                                   """""""""""");
                                               }
@@ -120,64 +126,68 @@ file static class TestScope {
 
         public override ISyntheticInterceptorMethodBuilder<Delegate> InternalBindCompilerMethod(
             ISimpleSyntheticClassBuilder φbuilder,
-            IInvocationOperation invocationToBind,
-            InterceptableLocation locationToIntercept,
+            InvocationExpressionSyntax invocationToIntercept,
             Delegate φtargetMethod
         ) {
             if (φtargetMethod.Method == ((Delegate) DoWorkAsync).Method) {
                 return ΦBindInterceptorMethod__DoWorkAsync_T0_state(
                     φbuilder,
-                    locationToIntercept
+                    invocationToIntercept
                 );
             }
             throw new InvalidOperationException("Unsupported method");
         }
 
+        private static readonly string[] DoWorkAsync_T0_state__Parameters = new[] { "target", "arg1", "arg2" };
         private ISyntheticInterceptorMethodBuilder<Delegate> ΦBindInterceptorMethod__DoWorkAsync_T0_state(
             ISimpleSyntheticClassBuilder φbuilder,
-            InterceptableLocation location
+            InvocationExpressionSyntax invocationToIntercept
         ) {
-            var methodBuilder = φbuilder.ΦCompilerApi.DeclareInterceptorMethodBuilder("DoWorkAsync", φbuilder);
+            var parameters = new [] { "target", "arg1", "arg2" };
 
-            return methodBuilder
-                .WithAttributes(CodeGenContext.InterceptLocationAttribute(location))
-                .WithAccessibility(AccessModifier.Public + AccessModifier.Static)
-                .WithReturnType(CodeGenContext.Type(typeof(bool)))
-                .WithParameters(
-                    CodeGenContext.Parameter(
-                        InternalResolveLateBoundType(nameof(TTarget)),
-                        "target",
-                        ParameterAttributes.This
-                    ),
-                    CodeGenContext.Parameter(
-                        CodeGenContext.Type(typeof(string)),
-                        "arg1"
-                    ),
-                    CodeGenContext.Parameter(
-                        CodeGenContext.Type(typeof(int)),
-                        "arg2"
-                    )
-                )
-                .WithBody(
-                    CodeGenContext.Block(
-                        this,
-                        static (φrenderTree, φctx) => {
-                            φrenderTree.Text(
-                                """"""""""""
+            var method = φbuilder.DeclareInterceptorMethod("DoWorkAsync", invocationToIntercept);
+            method.WithBody(
+                CodeGenContext.Block(
+                    (method, ctx: this),
+                    static (φrenderTree, inputs) => {
+                        var φctx = inputs.ctx;
+                        var method = inputs.method;
 
-                                """"""""""""
-                            );
-
-                            φrenderTree.Node(φctx.DoCompare.WithArguments("result"));
-
-                            φrenderTree.Text(""""""""""""
-                                             }");
-                                                 return global::System.Threading.Tasks.Task.CompletedTask;
-
-                                             """""""""""");
+                        var parametersToMap = method.Parameters.AsSpan();
+                        // Ignore the optional this parameter
+                        if (
+                            parametersToMap.Length > DoWorkAsync_T0_state__Parameters.Length
+                            && parametersToMap[0].ParameterAttributes.HasFlag(ParameterAttributes.This)
+                        ) {
+                            parametersToMap = parametersToMap.Slice(1);
                         }
-                    )
-                );
+
+                        foreach (var parameter in parametersToMap) {
+                            φrenderTree.Text("var ");
+                            φrenderTree.Text(parameter.Name);
+                            φrenderTree.NewLine();
+                        }
+
+                        φrenderTree.Text(
+                            """"""""""""
+                            var target = φthis;
+                            var arg1 = s;
+                            var arg2 = i;
+                            """"""""""""
+                        );
+
+                        φrenderTree.Node(φctx.DoCompare.WithArguments("result"));
+
+                        φrenderTree.Text(""""""""""""
+                                         }");
+                                             return global::System.Threading.Tasks.Task.CompletedTask;
+
+                                         """""""""""");
+                    }
+                )
+            );
+
+            return method;
         }
     }
 }

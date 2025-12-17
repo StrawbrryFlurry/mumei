@@ -1,3 +1,9 @@
-﻿namespace Mumei.CodeGen.Components;
+﻿using Mumei.CodeGen.Rendering.CSharp;
 
-public interface ISyntheticParameter { }
+namespace Mumei.CodeGen.Components;
+
+public interface ISyntheticParameter {
+    public string Name { get; }
+    public ISyntheticType Type { get; }
+    public ParameterAttributes ParameterAttributes { get; }
+}
