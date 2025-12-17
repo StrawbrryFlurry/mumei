@@ -8,6 +8,8 @@ namespace Mumei.CodeGen.Roslyn.Components;
 internal sealed class RoslynSyntheticTypeParameter(ITypeParameterSymbol parameter) : ISyntheticTypeParameter, ISyntheticConstructable<TypeParameterFragment> {
     public SyntheticIdentifier Name { get; init; } = parameter.Name;
 
+    public ITypeParameterSymbol UnderlyingType => parameter;
+
     public sealed class Constraint(ISyntheticType typeConstraint) : ISyntheticTypeParameter.IConstraint {
         public ISyntheticType TypeConstraint { get; init; } = typeConstraint;
     }
@@ -47,5 +49,13 @@ internal sealed class RoslynSyntheticTypeParameter(ITypeParameterSymbol paramete
             Name.Resolve(compilationUnit),
             constraints.ToImmutable()
         );
+    }
+
+    public bool Equals(ISyntheticType other) {
+        if (other is not RoslynSyntheticTypeParameter roslynParameter) {
+            return false;
+        }
+
+        return SymbolEqualityComparer.Default.Equals(UnderlyingType, roslynParameter.UnderlyingType);
     }
 }

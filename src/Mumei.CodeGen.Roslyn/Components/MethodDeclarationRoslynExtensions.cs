@@ -13,7 +13,7 @@ public static class MethodDeclarationRoslynExtensions {
 
     extension(SyntheticDeclarationDefinition declaration) {
         public void Bind(Type targetType, ITypeSymbol typeSymbol, [CallerArgumentExpression(nameof(targetType))] string targetTypeExpression = "") {
-            declaration.Bind(targetType, new RoslynSyntheticType(typeSymbol), targetTypeExpression);
+            declaration.Bind(targetType, declaration.CodeGenContext.Type(typeSymbol), targetTypeExpression);
         }
     }
 }

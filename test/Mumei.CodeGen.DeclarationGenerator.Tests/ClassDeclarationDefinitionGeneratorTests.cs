@@ -95,7 +95,7 @@ file static class TestScope {
         private TState _state;
 
         public override void Setup(ISyntheticClassBuilder<TestClassDefinition<TState>> classBuilder) {
-            classBuilder.Bind(typeof(TState), InputB);
+            this.Bind(typeof(TState), InputB);
             // classBuilder.WithBaseClass(InputB);
         }
 

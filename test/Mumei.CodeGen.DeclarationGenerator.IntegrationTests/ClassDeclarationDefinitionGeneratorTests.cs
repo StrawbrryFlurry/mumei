@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Runtime.InteropServices.ComTypes;
+using Microsoft.CodeAnalysis;
 using Mumei.CodeGen.Components;
 using Mumei.CodeGen.Roslyn.Components;
 using Mumei.CodeGen.Roslyn.RoslynCodeProviders;
@@ -12,15 +13,21 @@ public sealed class ClassDeclarationDefinitionGeneratorTests {
         SourceGeneratorTest.MetaGeneratorTest(
             SyntaxTreeReference.Of(typeof(TestScope)),
             context => {
+                var firstNode = true;
                 var x = context.CreateQtProvider(
-                    (a, b) => true,
+                    (a, b) => { return firstNode || (firstNode = false); },
                     (a, b) => { return ""; }
                 );
 
-                var o = x.IncrementalGenerate((generationContext, s) => {
-                    generationContext.DeclareClass<TestClassDefinition<CompileTimeUnknown>>(
-                        "",
-                        (cls) => { });
+                var o = x.IncrementalGenerate((ctx, s) => {
+                    var cls = ctx.DeclareClass<TestClassDefinition<CompileTimeUnknown>>(
+                        SyntheticIdentifier.Unique(ctx.GlobalNamespace, "A"),
+                        (cls) => {
+                            cls.InputB = ctx.TypeFromCompilation(typeof(string));
+                            cls.InputA = "Ello";
+                        });
+
+                    ctx.EmitIncremental("A", cls);
                 });
 
                 context.RegisterCodeGenerationOutput(o);
@@ -33,13 +40,13 @@ public sealed class ClassDeclarationDefinitionGeneratorTests {
 
 public sealed partial class TestClassDefinition<TState> : SyntheticClassDefinition<TestClassDefinition<TState>> {
     [Input]
-    public string InputA { get; }
+    public string InputA { get; set; }
 
     [Input]
-    public ITypeSymbol InputB { get; }
+    public ITypeSymbol InputB { get; set; }
 
     [Output]
-    public string OutputA { get; }
+    public string OutputA { get; set; }
 
     [Output]
     public Type OutputB { get; }
@@ -48,7 +55,7 @@ public sealed partial class TestClassDefinition<TState> : SyntheticClassDefiniti
     private TState _state;
 
     public override void Setup(ISyntheticClassBuilder<TestClassDefinition<TState>> classBuilder) {
-        classBuilder.Bind(typeof(TState), InputB);
+        this.Bind(typeof(TState), InputB);
         // classBuilder.WithBaseClass(InputB);
     }
 

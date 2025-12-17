@@ -136,7 +136,7 @@ internal sealed class DeclarationBuilderFactory {
     ) {
         return RendererExpressionFragment.For(renderTree => {
             renderTree.Interpolate($"{classBuilder}.{nameof(ISyntheticClassBuilder<>.DeclareMethod)}");
-            renderTree.Interpolate($"<global::System.Delegate>");
+            renderTree.Interpolate($"<{typeof(Delegate)}>");
             renderTree.InterpolatedLine($"({name:q})");
 
             renderTree.StartBlock();
@@ -263,6 +263,82 @@ internal sealed class DeclarationBuilderFactory {
         });
     }
 
+    public static RendererExpressionFragment DeclareInterceptorMethodFromDefinition(
+        ExpressionFragment classBuilder,
+        IMethodSymbol method,
+        ExpressionFragment locationIdentifierExpression,
+        ISyntheticCodeBlockResolutionContext resolutionContext
+    ) {
+        if (method.DeclaringSyntaxReferences is not [var declarationRef]) {
+            throw new InvalidOperationException($"The method {method.ContainingType.Name}.{method.Name} was not declared in this compilation.");
+        }
+
+        if (declarationRef.GetSyntax() is not MethodDeclarationSyntax methodDeclarationSyntax) {
+            throw new NotSupportedException();
+        }
+
+        var declareParameterList = MakeParameterListFromDefinition(classBuilder, method.Parameters)!;
+        var declareTypeParameterList = MakeTypeParameterListFromDefinition(classBuilder, method.TypeParameters);
+        var returnType = MakeSyntheticTypeExpressionForType(method.ReturnType);
+
+        var declareBody = method.IsAbstract
+            ? throw new NotSupportedException("")
+            : MakeCodeBlockFromMethodDeclaration(
+                classBuilder,
+                methodDeclarationSyntax,
+                method.ReturnType,
+                resolutionContext
+            );
+
+        return DeclareInterceptorMethod(
+            classBuilder,
+            returnType,
+            method.Name,
+            method.DeclaredAccessibility.ToAccessModifiers(),
+            locationIdentifierExpression,
+            declareTypeParameterList,
+            declareParameterList,
+            declareBody
+        );
+    }
+
+    public static RendererExpressionFragment DeclareInterceptorMethod(
+        ExpressionFragment classBuilder,
+        InvocationExpressionFragment getReturnTypeExpression,
+        string name,
+        AccessModifierList accessibility,
+        ExpressionFragment locationIdentifierExpression,
+        RendererExpressionFragment? declareTypeParameterList,
+        RendererExpressionFragment declareParameterList,
+        RendererExpressionFragment declareBody
+    ) {
+        return RendererExpressionFragment.For(renderTree => {
+            renderTree.Interpolate($"{typeof(SyntheticClassBuilderExtensions)}.{nameof(SyntheticClassBuilderExtensions.DeclareInterceptorMethodBuilder)}");
+            renderTree.InterpolatedLine(
+                $"({classBuilder}.{nameof(ISimpleSyntheticClassBuilder.ΦCompilerApi)}, {name:q}, {classBuilder})"
+            );
+
+            renderTree.StartBlock();
+            renderTree.InterpolatedLine(
+                $".{nameof(ISyntheticInterceptorMethodBuilder<>.WithAttributes)}("
+                + $"{typeof(CodeGenerationContextExtensions)}.{nameof(CodeGenerationContextExtensions.InterceptLocationAttribute)}(this.{nameof(SyntheticDeclarationDefinition.CodeGenContext)}, {locationIdentifierExpression})"
+                + $")");
+            renderTree.InterpolatedLine($".{nameof(ISyntheticInterceptorMethodBuilder<>.WithAccessibility)}({accessibility.RenderAsExpression})");
+            renderTree.Interpolate($".{nameof(ISyntheticInterceptorMethodBuilder<>.WithReturnType)}(");
+            renderTree.Node(getReturnTypeExpression);
+            renderTree.Line(")");
+
+            if (declareTypeParameterList is not null) {
+                renderTree.Node(declareTypeParameterList);
+            }
+
+            if (declareParameterList is not null) {
+                renderTree.Node(declareParameterList);
+            }
+
+            renderTree.Node(declareBody);
+        });
+    }
 
     private static TypeInfoFragment GetTypeKnownAtCompileTime(
         ITypeSymbol type
@@ -278,17 +354,24 @@ internal sealed class DeclarationBuilderFactory {
         ITypeSymbol type
     ) {
         if (type is not ITypeParameterSymbol { DeclaringMethod: null } lateBoundType) {
-            return new InvocationExpressionFragment(
-                "this",
-                $"{nameof(SyntheticDeclarationDefinition.CodeGenContext)}.{nameof(SyntheticDeclarationDefinition.CodeGenContext.Type)}",
-                [$"typeof({type.ToRenderFragment().QualifiedTypeName})"]
-            );
+            return MakeCodeGenContextInvocation(nameof(SyntheticDeclarationDefinition.CodeGenContext.Type), $"typeof({type.ToRenderFragment().QualifiedTypeName})");
         }
 
         return new InvocationExpressionFragment(
             "this",
             nameof(SyntheticDeclarationDefinition.InternalResolveLateBoundType),
             [$"nameof({lateBoundType.Name})"]
+        );
+    }
+
+    private static InvocationExpressionFragment MakeCodeGenContextInvocation(
+        string methodName,
+        params ImmutableArray<ExpressionFragment> arguments
+    ) {
+        return new InvocationExpressionFragment(
+            "this",
+            $"{nameof(SyntheticDeclarationDefinition.CodeGenContext)}.{methodName}",
+            arguments
         );
     }
 }

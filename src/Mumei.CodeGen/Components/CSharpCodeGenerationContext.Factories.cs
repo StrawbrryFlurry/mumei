@@ -14,8 +14,17 @@ internal sealed partial class CSharpCodeGenerationContext {
         return new QtSyntheticRenderCodeBlock<TInput>(new RenderFragment<TInput>(input, renderBlock));
     }
 
-    public ISyntheticClassBuilder<TClassDefinition> DeclareClass<TClassDefinition>(SyntheticIdentifier name, Action<TClassDefinition> inputBinder) where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new() {
-        throw new NotImplementedException();
+    public ISyntheticClassBuilder<TClassDefinition> DeclareClass<TClassDefinition>(
+        SyntheticIdentifier name,
+        Action<TClassDefinition> inputBinder
+    ) where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new() {
+        var classBuilder = ΦCompilerApi.DeclareClassBuilder<TClassDefinition>(name, null);
+        var definition = new TClassDefinition();
+        definition.CodeGenContext = this;
+        inputBinder(definition);
+        definition.Setup(classBuilder);
+        definition.InternalBindCompilerOutputMembers(classBuilder);
+        return classBuilder;
     }
 
     public ISyntheticClassBuilder<CompileTimeUnknown> DeclareClass(SyntheticIdentifier name) {

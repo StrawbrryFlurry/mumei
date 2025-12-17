@@ -9,7 +9,6 @@ using Mumei.Roslyn.Common.Polyfill;
 namespace Mumei.CodeGen.DeclarationGenerator;
 
 public sealed partial class DeclarationDefinitionGenerator {
-
     public static void EmitInternalBindCompilerMethodForMethod(
         ICodeGenerationContext ctx,
         ISimpleSyntheticClassBuilder definitionCodeGenClass,
@@ -99,5 +98,4 @@ public sealed partial class DeclarationDefinitionGenerator {
             renderTree.InterpolatedLine($$"""throw new InvalidOperationException("Unsupported method");""");
         }));
     }
-
 }
