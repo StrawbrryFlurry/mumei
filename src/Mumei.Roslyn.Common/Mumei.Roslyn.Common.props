@@ -1,17 +1,13 @@
 ﻿<Project>
-  <PropertyGroup>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
+    <PropertyGroup>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.Collections.Immutable"/>
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Include="$(SolutionDir)/src/Mumei.Roslyn.Common/**/*.cs"/>
 
-  <ItemGroup>
-    <Compile Include="$(SolutionDir)/src/Mumei.Roslyn.Common/**/*.cs"/>
-
-    <!-- Exclude auto-generated assembly info files which would be included with **/*.cs -->
-    <Compile Remove="$(SolutionDir)/src/Mumei.Roslyn.Common/**/*.AssemblyInfo.cs"/>
-    <Compile Remove="$(SolutionDir)/src/Mumei.Roslyn.Common/**/*.AssemblyAttributes.cs"/>
-  </ItemGroup>
+        <!-- Exclude auto-generated assembly info files which would be included with **/*.cs -->
+        <Compile Remove="$(SolutionDir)/src/Mumei.Roslyn.Common/**/*.AssemblyInfo.cs"/>
+        <Compile Remove="$(SolutionDir)/src/Mumei.Roslyn.Common/**/*.AssemblyAttributes.cs"/>
+    </ItemGroup>
 </Project>

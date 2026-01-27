@@ -5,6 +5,10 @@ using Mumei.CodeGen.Rendering.CSharp;
 namespace Mumei.CodeGen.Roslyn.Components;
 
 internal sealed class RoslynSyntheticParameter(IParameterSymbol parameterSymbol) : ISyntheticParameter, ISyntheticConstructable<ParameterFragment> {
+    public string Name => parameterSymbol.Name;
+    public ISyntheticType Type => new RoslynSyntheticType(parameterSymbol.Type);
+    public ParameterAttributes ParameterAttributes => GetParameterAttributes(parameterSymbol);
+
     public ISyntheticAttributeList? AttributesList { get; private init; } = parameterSymbol.GetAttributes().Length > 0
         ? ISyntheticAttributeList.From(parameterSymbol.GetAttributes())
         : null;

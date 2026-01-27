@@ -1,19 +1,21 @@
 ﻿using System.Reflection;
-using Microsoft.CodeAnalysis;
 using Mumei.CodeGen.Rendering.CSharp;
 using ParameterAttributes = Mumei.CodeGen.Rendering.CSharp.ParameterAttributes;
 
 namespace Mumei.CodeGen.Components;
 
 internal sealed class SyntheticParameter(
-    SyntheticIdentifier name,
+    string name,
     ISyntheticType type,
     ISyntheticAttributeList? attributesList = null,
     ISyntheticExpression? defaultValue = null,
     ParameterAttributes attributes = ParameterAttributes.None
 ) : ISyntheticParameter, ISyntheticConstructable<ParameterFragment> {
-    public SyntheticIdentifier Name { get; private init; } = name;
+    private string _name;
+    public string Name { get; private init; } = name;
+
     public ISyntheticType Type { get; private init; } = type;
+    public ParameterAttributes ParameterAttributes { get; }
     public ISyntheticAttributeList? AttributesList { get; private init; } = attributesList;
     public ISyntheticExpression? DefaultValue { get; private init; } = defaultValue;
     public ParameterAttributes Attributes { get; private init; } = attributes;
@@ -23,7 +25,7 @@ internal sealed class SyntheticParameter(
         var type = compilationUnit.Synthesize<TypeInfoFragment>(Type);
 
         return new ParameterFragment {
-            Name = Name.Resolve(compilationUnit),
+            Name = Name,
             DefaultValue = defaultValue,
             ParameterAttributes = Attributes,
             Type = type
@@ -35,4 +37,7 @@ internal sealed class RuntimeSyntheticParameter(ParameterInfo parameterInfo) : I
     public ParameterFragment Construct(ICompilationUnitContext compilationUnit) {
         throw new NotImplementedException();
     }
+    public string Name { get; }
+    public ISyntheticType Type { get; }
+    public ParameterAttributes ParameterAttributes { get; }
 }

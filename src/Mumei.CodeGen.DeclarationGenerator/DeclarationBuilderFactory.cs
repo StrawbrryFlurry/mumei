@@ -36,14 +36,16 @@ internal sealed class DeclarationBuilderFactory {
         AccessModifierList accessibility
     ) {
         return RendererExpressionFragment.For(renderTree => {
-            renderTree.InterpolatedLine($"{classBuilder}.{nameof(ISyntheticClassBuilder<>.DeclareField)}<{type.FullName}>(");
+            renderTree.InterpolatedLine(
+                $"{classBuilder}.{nameof(ISyntheticClassBuilder<>.DeclareField)}<{type.FullName}>(");
             renderTree.StartBlock();
             renderTree.Node(getTypeExpression);
             renderTree.Line(",");
             renderTree.InterpolatedLine($"{name:q}");
             renderTree.EndBlock();
             renderTree.Text(")");
-            renderTree.InterpolatedLine($".{nameof(ISyntheticFieldBuilder<>.WithAccessibility)}({accessibility.RenderAsExpression});");
+            renderTree.InterpolatedLine(
+                $".{nameof(ISyntheticFieldBuilder<>.WithAccessibility)}({accessibility.RenderAsExpression});");
         });
     }
 
@@ -71,7 +73,8 @@ internal sealed class DeclarationBuilderFactory {
         AccessModifierList accessibility
     ) {
         return RendererExpressionFragment.For(renderTree => {
-            renderTree.InterpolatedLine($"{classBuilder}.{nameof(ISyntheticClassBuilder<>.DeclareProperty)}<{type.FullName}>(");
+            renderTree.InterpolatedLine(
+                $"{classBuilder}.{nameof(ISyntheticClassBuilder<>.DeclareProperty)}<{type.FullName}>(");
             renderTree.StartBlock();
             renderTree.Node(getTypeExpression);
             renderTree.Line(",");
@@ -79,13 +82,15 @@ internal sealed class DeclarationBuilderFactory {
             renderTree.InterpolatedLine($"new {typeof(SyntheticPropertyAccessorList)}(");
             renderTree.StartBlock();
             // ToDo: Create these based of the declared syntax of the property.
-            renderTree.InterpolatedLine($"{typeof(SyntheticPropertyAccessor)}.{nameof(SyntheticPropertyAccessor.SimpleGetter)},");
+            renderTree.InterpolatedLine(
+                $"{typeof(SyntheticPropertyAccessor)}.{nameof(SyntheticPropertyAccessor.SimpleGetter)},");
             renderTree.Line("null");
             renderTree.EndBlock();
             renderTree.Line(")");
             renderTree.EndBlock();
             renderTree.Text(")");
-            renderTree.InterpolatedLine($".{nameof(ISyntheticPropertyBuilder<>.WithAccessibility)}({accessibility.RenderAsExpression});");
+            renderTree.InterpolatedLine(
+                $".{nameof(ISyntheticPropertyBuilder<>.WithAccessibility)}({accessibility.RenderAsExpression});");
         });
     }
 
@@ -95,7 +100,8 @@ internal sealed class DeclarationBuilderFactory {
         ISyntheticCodeBlockResolutionContext resolutionContext
     ) {
         if (method.DeclaringSyntaxReferences is not [var declarationRef]) {
-            throw new InvalidOperationException($"The method {method.ContainingType.Name}.{method.Name} was not declared in this compilation.");
+            throw new InvalidOperationException(
+                $"The method {method.ContainingType.Name}.{method.Name} was not declared in this compilation.");
         }
 
         if (declarationRef.GetSyntax() is not MethodDeclarationSyntax methodDeclarationSyntax) {
@@ -141,7 +147,8 @@ internal sealed class DeclarationBuilderFactory {
             renderTree.InterpolatedLine($"({name:q})");
 
             renderTree.StartBlock();
-            renderTree.InterpolatedLine($".{nameof(ISyntheticMethodBuilder<>.WithAccessibility)}({accessibility.RenderAsExpression})");
+            renderTree.InterpolatedLine(
+                $".{nameof(ISyntheticMethodBuilder<>.WithAccessibility)}({accessibility.RenderAsExpression})");
             renderTree.Interpolate($".{nameof(ISyntheticMethodBuilder<>.WithReturnType)}(");
             renderTree.Node(getReturnTypeExpression);
             renderTree.Line(")");
@@ -183,10 +190,12 @@ internal sealed class DeclarationBuilderFactory {
         return RendererExpressionFragment.For(renderTree => {
             renderTree.InterpolatedLine($".{nameof(ISyntheticMethodBuilder<>.WithBody)}(");
             renderTree.StartBlock();
-            renderTree.InterpolatedLine($"this.{nameof(SyntheticDeclarationDefinition.CodeGenContext)}.{nameof(ICodeGenerationContext.Block)}(");
+            renderTree.InterpolatedLine(
+                $"this.{nameof(SyntheticDeclarationDefinition.CodeGenContext)}.{nameof(ICodeGenerationContext.Block)}(");
             renderTree.StartBlock();
             renderTree.Line("this,");
-            renderTree.InterpolatedLine($"static ({SyntheticDefinitionMethodCodeBlockResolutionContext.RenderTreeParameter}, {SyntheticDefinitionMethodCodeBlockResolutionContext.InputArgumentName}) => {{");
+            renderTree.InterpolatedLine(
+                $"static ({SyntheticDefinitionMethodCodeBlockResolutionContext.RenderTreeParameter}, {SyntheticDefinitionMethodCodeBlockResolutionContext.InputArgumentName}) => {{");
             renderTree.StartBlock();
 
             renderTree.Block(renderBody);
@@ -215,9 +224,12 @@ internal sealed class DeclarationBuilderFactory {
 
             for (var i = 0; i < parameters.Length; i++) {
                 var parameter = parameters[i];
-                renderTree.Interpolate($"this.{nameof(SyntheticDeclarationDefinition.CodeGenContext)}.{nameof(ICodeGenerationContext.Parameter)}(");
+                renderTree.Interpolate(
+                    $"this.{nameof(SyntheticDeclarationDefinition.CodeGenContext)}.{nameof(ICodeGenerationContext.Parameter)}(");
                 renderTree.StartBlock();
-                renderTree.Node(MakeSyntheticTypeExpressionForType(parameter.Type)); // TODO: This only works when used in synthetic definitions
+                renderTree.Node(
+                    MakeSyntheticTypeExpressionForType(parameter
+                        .Type)); // TODO: This only works when used in synthetic definitions
                 renderTree.Line(",");
                 renderTree.InterpolatedLine($"{parameter.Name:q}");
                 renderTree.EndBlock();
@@ -227,6 +239,7 @@ internal sealed class DeclarationBuilderFactory {
                     renderTree.Line(",");
                 }
             }
+
             renderTree.NewLine();
             renderTree.EndBlock();
             renderTree.Line(")");
@@ -246,7 +259,8 @@ internal sealed class DeclarationBuilderFactory {
 
             for (var i = 0; i < typeParameters.Length; i++) {
                 var typeParameter = typeParameters[i];
-                renderTree.Interpolate($"this.{nameof(SyntheticDeclarationDefinition.CodeGenContext)}.{nameof(ICodeGenerationContext.TypeParameter)}(");
+                renderTree.Interpolate(
+                    $"this.{nameof(SyntheticDeclarationDefinition.CodeGenContext)}.{nameof(ICodeGenerationContext.TypeParameter)}(");
                 renderTree.StartBlock();
                 renderTree.InterpolatedLine($"{typeParameter.Name:q}");
                 renderTree.EndBlock();
@@ -269,7 +283,8 @@ internal sealed class DeclarationBuilderFactory {
         ISyntheticCodeBlockResolutionContext resolutionContext
     ) {
         if (method.DeclaringSyntaxReferences is not [var declarationRef]) {
-            throw new InvalidOperationException($"The method {method.ContainingType.Name}.{method.Name} was not declared in this compilation.");
+            throw new InvalidOperationException(
+                $"The method {method.ContainingType.Name}.{method.Name} was not declared in this compilation.");
         }
 
         if (declarationRef.GetSyntax() is not MethodDeclarationSyntax methodDeclarationSyntax) {
@@ -278,6 +293,7 @@ internal sealed class DeclarationBuilderFactory {
 
         var declareParameterList = MakeParameterListFromDefinition(method.Parameters)!;
         var declareTypeParameterList = MakeTypeParameterListFromDefinition(method.TypeParameters);
+
         var returnType = MakeSyntheticTypeExpressionForType(method.ReturnType);
 
         var declareBody = method.IsAbstract
@@ -295,8 +311,6 @@ internal sealed class DeclarationBuilderFactory {
             method.Name,
             method.DeclaredAccessibility.ToAccessModifiers(),
             locationIdentifierExpression,
-            declareTypeParameterList,
-            declareParameterList,
             declareBody
         );
     }
@@ -306,21 +320,23 @@ internal sealed class DeclarationBuilderFactory {
         InvocationExpressionFragment getReturnTypeExpression,
         string name,
         AccessModifierList accessibility,
-        ExpressionFragment invocationToInterceptExpression,
+        ExpressionFragment interceptionLocationIdentifierExpression,
         RendererExpressionFragment declareBody
     ) {
         return RendererExpressionFragment.For(renderTree => {
-            renderTree.Interpolate($"{typeof(SyntheticClassBuilderExtensions)}.{nameof(SyntheticClassBuilderExtensions.DeclareInterceptorMethod)}");
+            renderTree.Interpolate(
+                $"{typeof(SyntheticClassBuilderExtensions)}.{nameof(SyntheticClassBuilderExtensions.DeclareInterceptorMethod)}");
             renderTree.InterpolatedLine(
-                $"({classBuilder}, {name:q}, {invocationToInterceptExpression})"
+                $"({classBuilder}, {name:q}, {interceptionLocationIdentifierExpression})"
             );
 
             renderTree.StartBlock();
             renderTree.InterpolatedLine(
                 $".{nameof(ISyntheticInterceptorMethodBuilder<>.WithAttributes)}("
-                + $"{typeof(CodeGenerationContextExtensions)}.{nameof(CodeGenerationContextExtensions.InterceptLocationAttribute)}(this.{nameof(SyntheticDeclarationDefinition.CodeGenContext)}, {locationIdentifierExpression})"
+                + $"{typeof(CodeGenerationContextExtensions)}.{nameof(CodeGenerationContextExtensions.InterceptLocationAttribute)}(this.{nameof(SyntheticDeclarationDefinition.CodeGenContext)}, {interceptionLocationIdentifierExpression})"
                 + $")");
-            renderTree.InterpolatedLine($".{nameof(ISyntheticInterceptorMethodBuilder<>.WithAccessibility)}({accessibility.RenderAsExpression})");
+            renderTree.InterpolatedLine(
+                $".{nameof(ISyntheticInterceptorMethodBuilder<>.WithAccessibility)}({accessibility.RenderAsExpression})");
             renderTree.Interpolate($".{nameof(ISyntheticInterceptorMethodBuilder<>.WithReturnType)}(");
             renderTree.Node(getReturnTypeExpression);
             renderTree.Line(")");
@@ -343,7 +359,8 @@ internal sealed class DeclarationBuilderFactory {
         ITypeSymbol type
     ) {
         if (type is not ITypeParameterSymbol { DeclaringMethod: null } lateBoundType) {
-            return MakeCodeGenContextInvocation(nameof(SyntheticDeclarationDefinition.CodeGenContext.Type), $"typeof({type.ToRenderFragment().QualifiedTypeName})");
+            return MakeCodeGenContextInvocation(nameof(SyntheticDeclarationDefinition.CodeGenContext.Type),
+                $"typeof({type.ToRenderFragment().QualifiedTypeName})");
         }
 
         return new InvocationExpressionFragment(

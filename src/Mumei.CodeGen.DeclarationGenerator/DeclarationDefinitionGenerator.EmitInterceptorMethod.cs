@@ -12,7 +12,7 @@ namespace Mumei.CodeGen.DeclarationGenerator;
 
 public sealed partial class DeclarationDefinitionGenerator {
     private const string ClassBuilderParameter = $"{Strings.PrivateLocal}builder";
-    private const string LocationToInterceptParameter  = $"{Strings.PrivateLocal}locationToIntercept";
+    private const string LocationToInterceptParameter = $"{Strings.PrivateLocal}locationToIntercept";
     private const string TargetMethodParameter = $"{Strings.PrivateLocal}targetMethod";
 
     public static void EmitInternalBindCompilerInterceptorMethodForMethod(
@@ -73,9 +73,11 @@ public sealed partial class DeclarationDefinitionGenerator {
 
         bindingMethod.WithBody(ctx.Block(createdOutputMethods.ToArrayAndFree(), static (renderTree, inputs) => {
             foreach (var outputMember in inputs) {
-                renderTree.InterpolatedLine($$"""if ({{TargetMethodParameter}}.Method == ((Delegate) {{outputMember.Source.Name}}).Method) {""");
+                renderTree.InterpolatedLine(
+                    $$"""if ({{TargetMethodParameter}}.Method == ((Delegate) {{outputMember.Source.Name}}).Method) {""");
                 renderTree.StartBlock();
-                renderTree.InterpolatedLine($$"""return {{outputMember.BinderImpl.Name.ConstantValue}}({{ClassBuilderParameter}}, {{LocationToInterceptParameter}});""");
+                renderTree.InterpolatedLine(
+                    $$"""return {{outputMember.BinderImpl.Name.ConstantValue}}({{ClassBuilderParameter}}, {{LocationToInterceptParameter}});""");
                 renderTree.EndBlock();
                 renderTree.Line("}");
             }
@@ -84,13 +86,14 @@ public sealed partial class DeclarationDefinitionGenerator {
         }));
     }
 
-    private static (IMethodSymbol Source, ISyntheticMethod BinderImpl)? MakeOutputInterceptorMethodDeclarationExpression(
-        ICodeGenerationContext ctx,
-        ISimpleSyntheticClassBuilder definitionCodeGenClass,
-        ISymbol outputMember,
-        Span<char> uniqueNameBuffer,
-        SyntheticInterceptorMethodDefinitionMethodCodeBlockResolutionContext resolutionContext
-    ) {
+    private static (IMethodSymbol Source, ISyntheticMethod BinderImpl)?
+        MakeOutputInterceptorMethodDeclarationExpression(
+            ICodeGenerationContext ctx,
+            ISimpleSyntheticClassBuilder definitionCodeGenClass,
+            ISymbol outputMember,
+            Span<char> uniqueNameBuffer,
+            SyntheticInterceptorMethodDefinitionMethodCodeBlockResolutionContext resolutionContext
+        ) {
         if (outputMember is not IMethodSymbol method) {
             return null;
         }
@@ -101,12 +104,19 @@ public sealed partial class DeclarationDefinitionGenerator {
         uniqueNameBuilder.AddRange(method.Name);
         uniqueNameBuilder.AddRange("_T");
         uniqueNameBuilder.EnsureCapacity(char.MaxAsciiIntLength);
-        uniqueNameBuilder.Advance(char.WriteIntAsAsciiChars((uint) method.Arity, uniqueNameBuilder.UnsafeBuffer[uniqueNameBuilder.Count..]));
+        uniqueNameBuilder.Advance(char.WriteIntAsAsciiChars((uint)method.Arity,
+            uniqueNameBuilder.UnsafeBuffer[uniqueNameBuilder.Count..]));
 
         foreach (var param in method.Parameters) {
             uniqueNameBuilder.Add('_');
             uniqueNameBuilder.AddRange(param.Name);
         }
+
+        var methodName = uniqueNameBuilder.ToStringAndFree();
+
+        var interceptorMethodParameterNameField =
+            definitionCodeGenClass.DeclareField<string[]>($"{methodName}__Parameters",
+                new SyntheticRendererExpression(new RenderFragment<object>()));
 
         var declareMethodOnBuilderExpression = DeclarationBuilderFactory.DeclareInterceptorMethodFromDefinition(
             ClassBuilderParameter,
@@ -115,7 +125,7 @@ public sealed partial class DeclarationDefinitionGenerator {
             resolutionContext
         );
 
-        var impl = definitionCodeGenClass.DeclareMethod<Delegate>(uniqueNameBuilder.ToStringAndFree())
+        var impl = definitionCodeGenClass.DeclareMethod<Delegate>(methodName)
             .WithAccessibility(AccessModifier.Private)
             .WithReturnType(typeof(ISyntheticInterceptorMethodBuilder<Delegate>))
             .WithParameters(

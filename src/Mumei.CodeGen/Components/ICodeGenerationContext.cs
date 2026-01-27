@@ -18,7 +18,7 @@ public interface ICodeGenerationContext : IEquatable<ICodeGenerationContext> {
 
     public ISyntheticParameter Parameter(
         ISyntheticType type,
-        SyntheticIdentifier name,
+        string name,
         ParameterAttributes attributes = ParameterAttributes.None
     );
 
@@ -44,9 +44,11 @@ public interface ICodeGenerationContext : IEquatable<ICodeGenerationContext> {
             ISyntheticDeclaration? parentDeclaration
         );
 
-        public ISyntheticClassBuilder<TClassDefinition> TrackClass<TClassDefinition>(ISyntheticClassBuilder<TClassDefinition> classBuilder)
+        public ISyntheticClassBuilder<TClassDefinition> TrackClass<TClassDefinition>(
+            ISyntheticClassBuilder<TClassDefinition> classBuilder)
             where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new();
 
-        public ImmutableArray<(SyntheticIdentifier TrackingName, ImmutableArray<ISyntheticDeclaration> Declarations)> EnumerateDeclarationsToEmit();
+        public ImmutableArray<(SyntheticIdentifier TrackingName, ImmutableArray<ISyntheticDeclaration> Declarations)>
+            EnumerateDeclarationsToEmit();
     }
 }

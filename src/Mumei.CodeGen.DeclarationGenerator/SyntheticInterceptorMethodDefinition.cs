@@ -23,6 +23,7 @@ public abstract class SyntheticInterceptorMethodDefinition : SyntheticDeclaratio
     public virtual ISyntheticInterceptorMethodBuilder<Delegate> InternalBindCompilerMethod(
         ISimpleSyntheticClassBuilder φbuilder,
         InvocationExpressionSyntax invocationToIntercept,
+        IInvocationOperation invocationOperation,
         Delegate methodToBind
     ) {
         throw new InvalidOperationException("Method body generation not implemented.");

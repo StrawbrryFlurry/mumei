@@ -9,7 +9,9 @@ public interface ISimpleSyntheticClassBuilder : ISyntheticDeclaration {
     public ISyntheticMethodBuilder<TSignature> DeclareMethod<TSignature>(SyntheticIdentifier name) where TSignature : Delegate;
 
     public TField DeclareField<TField>(TField field) where TField : ISyntheticField;
+    public ISyntheticFieldBuilder<CompileTimeUnknown> DeclareField(SyntheticIdentifier name);
     public ISyntheticFieldBuilder<TField> DeclareField<TField>(ISyntheticType type, SyntheticIdentifier name);
+    public ISyntheticFieldBuilder<TField> DeclareField<TField>(SyntheticIdentifier name, ISyntheticExpression initialValue);
 
     public TProperty DeclareProperty<TProperty>(TProperty property) where TProperty : ISyntheticProperty;
     public ISyntheticPropertyBuilder<TProperty> DeclareProperty<TProperty>(ISyntheticType type, SyntheticIdentifier name, SyntheticPropertyAccessorList accessors);

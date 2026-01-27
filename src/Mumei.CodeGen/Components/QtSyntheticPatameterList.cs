@@ -1,7 +1,7 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections;
 using System.Reflection;
-using Microsoft.CodeAnalysis;
 using Mumei.CodeGen.Rendering.CSharp;
+using Mumei.Roslyn;
 
 namespace Mumei.CodeGen.Components;
 
@@ -19,6 +19,9 @@ internal sealed class SyntheticParameterList(ReadOnlySpan<ISyntheticParameter> p
 
         return new SyntheticParameterList(parameters);
     }
+
+    public int Count => _parameters?.Length ?? 0;
+    public ISyntheticParameter this[int index] => _parameters?[index] ?? Array.Empty<ISyntheticParameter>()[index];
 
     public ImmutableArray<ParameterFragment> Construct(ICompilationUnitContext compilationUnit) {
         if (_parameters is null or { Length: 0 }) {
@@ -45,5 +48,17 @@ internal sealed class SyntheticParameterList(ReadOnlySpan<ISyntheticParameter> p
         Array.Copy(_parameters, i, newParameters, i + 1, _parameters.Length);
 
         _parameters = newParameters;
+    }
+
+    public ReadOnlySpan<ISyntheticParameter> AsSpan() {
+        return _parameters is not null ? _parameters.AsSpan() : ReadOnlySpan<ISyntheticParameter>.Empty;
+    }
+
+    public IEnumerator<ISyntheticParameter> GetEnumerator() {
+        return (_parameters ?? []).GetEnumeratorInterfaceImplementation();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() {
+        return GetEnumerator();
     }
 }

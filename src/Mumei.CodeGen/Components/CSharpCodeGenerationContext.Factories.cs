@@ -55,7 +55,7 @@ internal sealed partial class CSharpCodeGenerationContext {
         return new RuntimeSyntheticType(type);
     }
 
-    public ISyntheticParameter Parameter(ISyntheticType type, SyntheticIdentifier name, ParameterAttributes attributes) {
+    public ISyntheticParameter Parameter(ISyntheticType type, string name, ParameterAttributes attributes) {
         return new SyntheticParameter(name, type, null, null, attributes);
     }
 

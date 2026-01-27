@@ -68,6 +68,15 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
         return method;
     }
 
+    public ISyntheticFieldBuilder<CompileTimeUnknown> DeclareField(SyntheticIdentifier name) {
+        throw new NotImplementedException();
+    }
+
+    public ISyntheticFieldBuilder<TField> DeclareField<TField>(SyntheticIdentifier name,
+        ISyntheticExpression initialValue) {
+        throw new NotImplementedException();
+    }
+
     public SyntheticIdentifier MakeUniqueName(string name) {
         return SyntheticIdentifier.Unique(this, name);
     }
@@ -77,7 +86,8 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
         return this;
     }
 
-    private sealed class CompilerApi(ICodeGenerationContext context, QtSyntheticClassBuilder<TClassDef> builder) : IΦInternalClassBuilderCompilerApi {
+    private sealed class CompilerApi(ICodeGenerationContext context, QtSyntheticClassBuilder<TClassDef> builder)
+        : IΦInternalClassBuilderCompilerApi {
         public ICodeGenerationContext Context => context;
 
         public void DeclareMethod(
@@ -147,7 +157,8 @@ internal sealed partial class QtSyntheticClassBuilder<TClassDef>(
         );
     }
 
-    NamespaceOrGlobalScopeFragment ISyntheticConstructable<NamespaceOrGlobalScopeFragment>.Construct(ICompilationUnitContext compilationUnit) {
+    NamespaceOrGlobalScopeFragment ISyntheticConstructable<NamespaceOrGlobalScopeFragment>.Construct(
+        ICompilationUnitContext compilationUnit) {
         // TODO: Figure out how we can recursively create containers e.g. nested classes
         if (Parent is ISyntheticNamespace { IsGlobalNamespace: true }) {
             var globalFragment = NamespaceOrGlobalScopeFragment.GlobalScope;

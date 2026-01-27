@@ -13,8 +13,9 @@ namespace Mumei.CodeGen.DeclarationGenerator.Tests;
 public sealed class InterceptorMethodDeclarationDefinitionGeneratorTests {
     [Fact]
     public void Test1() {
-        SourceGeneratorTest.TestGenerator<DeclarationDefinitionGenerator>(
-            c => c.AddReference(SyntaxTreeReference.Of(typeof(TestScope))).AddTypeReference<CSharpCompilation>().AddTypeReference<CSharpRendererSyntaxTree>()
+        SourceGeneratorTest.TestGenerator<DeclarationDefinitionGenerator>(c =>
+            c.AddReference(SyntaxTreeReference.Of(typeof(TestScope))).AddTypeReference<CSharpCompilation>()
+                .AddTypeReference<CSharpRendererSyntaxTree>()
         ).RunWithAssert(result => {
             result.HasFileMatching($"{nameof(TestScope.TestInterceptorMethodDefinition<>)}__0.g.cs")
                 .WithPartialContent(
@@ -107,8 +108,10 @@ file static class TestScope {
                 }
 
                 return result;
-            } catch {
-                Console.WriteLine($"Caught exception while invoking method {Method.Name} with {InvocationArguments.Length} arguments.");
+            }
+            catch {
+                Console.WriteLine(
+                    $"Caught exception while invoking method {Method.Name} with {InvocationArguments.Length} arguments.");
             }
 
             return true;
@@ -127,31 +130,37 @@ file static class TestScope {
         public override ISyntheticInterceptorMethodBuilder<Delegate> InternalBindCompilerMethod(
             ISimpleSyntheticClassBuilder φbuilder,
             InvocationExpressionSyntax invocationToIntercept,
+            IInvocationOperation invocationOperation,
             Delegate φtargetMethod
         ) {
-            if (φtargetMethod.Method == ((Delegate) DoWorkAsync).Method) {
+            if (φtargetMethod.Method == ((Delegate)DoWorkAsync).Method) {
                 return ΦBindInterceptorMethod__DoWorkAsync_T0_state(
                     φbuilder,
-                    invocationToIntercept
+                    invocationToIntercept,
+                    invocationOperation
                 );
             }
+
             throw new InvalidOperationException("Unsupported method");
         }
 
         private static readonly string[] DoWorkAsync_T0_state__Parameters = new[] { "target", "arg1", "arg2" };
+
         private ISyntheticInterceptorMethodBuilder<Delegate> ΦBindInterceptorMethod__DoWorkAsync_T0_state(
             ISimpleSyntheticClassBuilder φbuilder,
-            InvocationExpressionSyntax invocationToIntercept
+            InvocationExpressionSyntax invocationToIntercept,
+            IInvocationOperation invocationOperation
         ) {
-            var parameters = new [] { "target", "arg1", "arg2" };
+            var parameters = new[] { "target", "arg1", "arg2" };
 
             var method = φbuilder.DeclareInterceptorMethod("DoWorkAsync", invocationToIntercept);
             method.WithBody(
                 CodeGenContext.Block(
-                    (method, ctx: this),
+                    (method, invocationOperation, ctx: this),
                     static (φrenderTree, inputs) => {
                         var φctx = inputs.ctx;
                         var method = inputs.method;
+                        var invocationOperation = inputs.invocationOperation;
 
                         var parametersToMap = method.Parameters.AsSpan();
                         // Ignore the optional this parameter
@@ -175,6 +184,16 @@ file static class TestScope {
                             var arg2 = i;
                             """"""""""""
                         );
+
+                        // Invoke<bool>()
+                        // φrenderTree.Node(CompilerInterceptionReflector.InvokeMethodOperation(
+                        //     method,
+                        //     "Invoke",
+                        //     method.ReturnType,
+                        //     Array.Empty<ITypeSymbol>(),
+                        //     Array.Empty<IOperation>(),
+                        //     isGeneric: true
+                        // ));
 
                         φrenderTree.Node(φctx.DoCompare.WithArguments("result"));
 

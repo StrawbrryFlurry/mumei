@@ -12,12 +12,6 @@
     <Project Path="test/Mumei.CodeGen.DeclarationGenerator.Tests/Mumei.CodeGen.DeclarationGenerator.Tests.csproj" />
     <Project Path="test/Mumei.CodeGen.Tests/Mumei.CodeGen.Tests.csproj" />
   </Folder>
-  <Folder Name="/DependencyInjection/">
-    <Project Path="src/Mumei.DependencyInjection.Roslyn/Mumei.DependencyInjection.Roslyn.csproj" />
-    <Project Path="src/Mumei.DependencyInjection.ServiceCollectionInterOpt/Mumei.DependencyInjection.ServiceCollectionInterOpt.csproj" />
-    <Project Path="src/Mumei.DependencyInjection.Testing/Mumei.DependencyInjection.Testing.csproj" />
-    <Project Path="src/Mumei.DependencyInjection/Mumei.DependencyInjection.csproj" />
-  </Folder>
   <Folder Name="/Roslyn/">
     <Project Path="src/Mumei.Common.Internal/Mumei.Common.Internal.csproj" />
     <Project Path="src/Mumei.Roslyn.Common/Mumei.Roslyn.Common.csproj" />
