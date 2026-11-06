@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using Microsoft.CodeAnalysis;
 using Mumei.CodeGen.Rendering.CSharp;
 
 namespace Mumei.CodeGen.Components;

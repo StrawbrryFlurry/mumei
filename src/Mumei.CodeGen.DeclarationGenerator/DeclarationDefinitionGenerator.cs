@@ -10,6 +10,7 @@ namespace Mumei.CodeGen.DeclarationGenerator;
 [Generator]
 public sealed partial class DeclarationDefinitionGenerator : IIncrementalGenerator {
     public void Initialize(IncrementalGeneratorInitializationContext context) {
+        
         var declareDefinitionInvocations = context.CreateQtProvider(
             (node, token) => {
                 if (

@@ -1,25 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <MumeiInternalApiDiagnostic>MOOM9999</MumeiInternalApiDiagnostic>
-    <NoWarn>RS2008,$(MumeiInternalApiDiagnostic)</NoWarn>
+    <PropertyGroup>
+        <MumeiInternalApiDiagnostic>MOOM9999</MumeiInternalApiDiagnostic>
+        <NoWarn>RS2008,$(MumeiInternalApiDiagnostic)</NoWarn>
 
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <IsPackable>true</IsPackable>
-    <LangVersion>latest</LangVersion>
+        <TargetFramework>net9.0</TargetFramework>
+        <IsPackable>true</IsPackable>
+        <LangVersion>latest</LangVersion>
 
-    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-    <IsRoslynComponent>true</IsRoslynComponent>
-  </PropertyGroup>
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+        <IsRoslynComponent>true</IsRoslynComponent>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Mumei.CodeGen.Roslyn\Mumei.CodeGen.Roslyn.csproj"/>
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Mumei.CodeGen.Roslyn\Mumei.CodeGen.Roslyn.csproj"/>
+    </ItemGroup>
 </Project>

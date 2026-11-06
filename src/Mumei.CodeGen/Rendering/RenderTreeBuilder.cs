@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using Microsoft.CodeAnalysis;
 
 namespace Mumei.CodeGen.Rendering;
 

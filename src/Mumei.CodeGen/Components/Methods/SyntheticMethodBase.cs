@@ -1,9 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using Microsoft.CodeAnalysis;
-using Mumei.CodeGen.Rendering;
+﻿using System.Runtime.CompilerServices;
 using Mumei.CodeGen.Rendering.CSharp;
 
 namespace Mumei.CodeGen.Components;

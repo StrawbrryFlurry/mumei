@@ -1,5 +1,4 @@
-﻿#if NETSTANDARD2_0
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Mumei.Roslyn.Common.Polyfill;
@@ -15,15 +14,15 @@ internal static class SpanExtensions {
             var index = 0;
 
             // > Number Formatting UInt32ToDecChars
-            var intValue = (int) value;
+            var intValue = (int)value;
             while (intValue >= 10) {
                 intValue = Math.DivRem(intValue, 10, out var remainder);
-                var digit = (char) ('0' + remainder);
+                var digit = (char)('0' + remainder);
                 target[index] = digit;
                 index++;
             }
 
-            var finalDigit = (char) ('0' + intValue);
+            var finalDigit = (char)('0' + intValue);
             target[index] = finalDigit;
             var charsWritten = index + 1;
             return charsWritten;
@@ -76,7 +75,6 @@ internal static class SpanExtensions {
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsAsciiDigit(char c) {
-        return (uint) c - (uint) '0' <= (uint) '9' - (uint) '0';
+        return (uint)c - (uint)'0' <= (uint)'9' - (uint)'0';
     }
 }
-#endif
