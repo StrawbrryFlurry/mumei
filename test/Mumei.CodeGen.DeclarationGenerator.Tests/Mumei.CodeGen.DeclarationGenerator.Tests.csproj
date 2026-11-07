@@ -1,4 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <NoWarn>xUnit1051</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Mumei.CodeGen.DeclarationGenerator\Mumei.CodeGen.DeclarationGenerator.csproj"/>
   </ItemGroup>

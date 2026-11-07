@@ -113,6 +113,11 @@ public sealed class InterceptorBuilder {
         return Call.Method.ReturnsVoid ? $"{Proceed()};" : $"return {Proceed()};";
     }
 
+    /// <inheritdoc cref="ReturnProceed()"/>
+    public Code ReturnProceed(params Code[] arguments) {
+        return Call.Method.ReturnsVoid ? $"{Proceed(arguments)};" : $"return {Proceed(arguments)};";
+    }
+
     public InterceptorBuilder Attribute(Code attribute) {
         _method.Attribute(attribute);
         return this;

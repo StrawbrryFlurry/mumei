@@ -35,6 +35,11 @@ public sealed class NamespaceBuilder {
         return Type(name, TypeDeclarationKind.RecordStruct, modifiers);
     }
 
+    /// <summary>Declares the class described by <paramref name="template"/> in this namespace.</summary>
+    public TypeBuilder Add(ClassTemplate template) {
+        return template.Render(this);
+    }
+
     /// <summary>Adds a type or other top-level declaration from verbatim code.</summary>
     public NamespaceBuilder Member(Code declaration) {
         _members.Add(new RawMemberBuilder(declaration));

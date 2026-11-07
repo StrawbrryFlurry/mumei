@@ -49,17 +49,17 @@ internal abstract class GloballyQualifyingSyntaxRewriter(
                 IdentifierName(targetMethod.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)),
                 methodName
             ),
-            ArgumentList(SeparatedList([
-                Argument(targetMemberAccess.Expression),
-                ..invocation.ArgumentList.Arguments
-            ]))
+            ArgumentList(SeparatedList(
+                [Argument(targetMemberAccess.Expression), ..invocation.ArgumentList.Arguments],
+                Enumerable.Repeat(Token(SyntaxKind.CommaToken).WithTrailingTrivia(Space), invocation.ArgumentList.Arguments.Count)
+            ))
         ).WithLeadingTrivia(node.GetLeadingTrivia()).WithTrailingTrivia(node.GetTrailingTrivia());
     }
 
     private SyntaxNode? TryQualifyImplicitTargetMethodCall(InvocationExpressionSyntax node) {
         // If the invocation is a static method imported via `using static ...` we need to qualify it
         var invocationOperation = SemanticModel.GetOperation(node);
-        if (invocationOperation is not IInvocationOperation { TargetMethod: { IsStatic: true } targetMethod }) {
+        if (invocationOperation is not IInvocationOperation { TargetMethod: { IsStatic: true } targetMethod } || !ShouldQualify(targetMethod)) {
             return base.VisitInvocationExpression(node);
         }
 
@@ -79,6 +79,11 @@ internal abstract class GloballyQualifyingSyntaxRewriter(
             ),
             node.ArgumentList
         ).WithLeadingTrivia(node.GetLeadingTrivia()).WithTrailingTrivia(node.GetTrailingTrivia());
+    }
+
+    /// <summary>Whether an unqualified call to the static method <paramref name="target"/> should be qualified with its containing type.</summary>
+    protected virtual bool ShouldQualify(IMethodSymbol target) {
+        return true;
     }
 
     public static bool TryGlobalizeIdentifier(

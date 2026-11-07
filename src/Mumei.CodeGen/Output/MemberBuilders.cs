@@ -286,3 +286,24 @@ internal sealed class RawMemberBuilder(Code code) : MemberBuilder("") {
         tree.Lines(code.ToString());
     }
 }
+
+internal sealed class GeneratedMethodBuilder(string name, Code signature) : MemberBuilder(name) {
+    public Code? Body { get; set; }
+
+    internal override void RenderDeclaration(IRenderTreeBuilder tree) {
+        if (Body is not { } body) {
+            throw new InvalidOperationException(
+                $"The [Generated] method '{Name}' has no body. Supply it in Build through self.Implement(nameof({Name}), body => …)."
+            );
+        }
+
+        tree.Text(signature.ToString());
+        tree.Text(" ");
+        tree.StartCodeBlock();
+        if (!body.IsEmpty) {
+            tree.Lines(body.ToString());
+        }
+
+        tree.EndCodeBlock();
+    }
+}

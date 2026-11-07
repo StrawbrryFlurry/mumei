@@ -119,6 +119,39 @@ public static class SourceExtensions {
         value.Generate((x, output) => generate(x.Left, x.Right, output));
     }
 
+    /// <summary>
+    /// Generates a class per item, e.g. <c>types.Generate(type => new Repository { Entity = type })</c>.
+    /// Returning <c>null</c> skips the item. The template is the cache key: equal templates are rendered once.
+    /// </summary>
+    public static void Generate<T>(this Source<T> source, Func<T, ClassTemplate?> template) {
+        source.Select(template).Generate((t, output) => {
+            if (t is not null) {
+                output.Add(t);
+            }
+        });
+    }
+
+    /// <inheritdoc cref="Generate{T}(Source{T}, Func{T, ClassTemplate})"/>
+    public static void Generate<T>(this Value<T> value, Func<T, ClassTemplate?> template) {
+        value.Select(template).Generate((t, output) => {
+            if (t is not null) {
+                output.Add(t);
+            }
+        });
+    }
+
+    /// <summary>Intercepts each call with a template, e.g. <c>calls.Intercept(call => new LogCall { Message = "Hi" })</c>.</summary>
+    public static void Intercept(this Source<CallSite> calls, Func<CallSite, InterceptorTemplate> template) {
+        calls.Select(call => (Call: call, Template: template(call)))
+             .Generate((x, output) => output.Intercept(x.Call, x.Template));
+    }
+
+    /// <inheritdoc cref="Intercept(Source{CallSite}, Func{CallSite, InterceptorTemplate})"/>
+    public static void Intercept<TOther>(this Source<(CallSite Item, TOther Value)> calls, Func<CallSite, TOther, InterceptorTemplate> template) {
+        calls.Select(x => (Call: x.Item, Template: template(x.Item, x.Value)))
+             .Generate((x, output) => output.Intercept(x.Call, x.Template));
+    }
+
     /// <summary>Generates one interceptor per call.</summary>
     public static void Intercept(this Source<CallSite> calls, Action<InterceptorBuilder> intercept) {
         calls.Generate((call, output) => output.Intercept(call, intercept));

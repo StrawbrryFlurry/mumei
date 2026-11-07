@@ -71,6 +71,20 @@ public sealed class SourceOutput {
     }
 
     /// <summary>
+    /// Declares the class described by <paramref name="template"/> in <see cref="ClassTemplate.Namespace"/>.
+    /// Use <c>output.Namespace(name).Add(template)</c> to declare it in another namespace.
+    /// </summary>
+    public TypeBuilder Add(ClassTemplate template) {
+        var ns = template.Namespace;
+        return (string.IsNullOrEmpty(ns) ? Global : Namespace(ns)).Add(template);
+    }
+
+    /// <summary>Generates an interceptor for the call from <paramref name="template"/>.</summary>
+    public void Intercept(CallSite call, InterceptorTemplate template) {
+        Intercept(call, template.Render);
+    }
+
+    /// <summary>
     /// Generates an interceptor for the call. The interceptor is declared in <see cref="InterceptorBuilder.DefaultNamespace"/>
     /// unless configured otherwise; the namespace must be listed in the <c>InterceptorsNamespaces</c> MSBuild property.
     /// </summary>

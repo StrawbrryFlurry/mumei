@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Mumei.CodeGen.Rendering;
 
 namespace Mumei.CodeGen;
@@ -154,6 +155,35 @@ public sealed class TypeBuilder : MemberBuilder {
 
     public MethodBuilder Implement(MethodModel method, Action<CodeBuilder> body) {
         return Implement(method).Body(body);
+    }
+
+    /// <summary>
+    /// Supplies the body of the <see cref="GeneratedAttribute">[Generated]</see> template method <paramref name="name"/>,
+    /// e.g. <c>self.Implement(nameof(Dispatch), body => body.Line("return null;"))</c>.
+    /// </summary>
+    public TypeBuilder Implement(string name, Action<CodeBuilder> body) {
+        var builder = new CodeBuilder();
+        body(builder);
+        return Implement(name, (Code)builder.ToString());
+    }
+
+    /// <inheritdoc cref="Implement(string, Action{CodeBuilder})"/>
+    public TypeBuilder Implement(string name, Code body) {
+        foreach (var member in _members) {
+            if (member is GeneratedMethodBuilder method && method.Name == name) {
+                method.Body = body;
+                return this;
+            }
+        }
+
+        throw new ArgumentException($"'{Name}' has no [Generated] method named '{name}'.", nameof(name));
+    }
+
+    /// <summary>Declares a method whose body is supplied later through <see cref="Implement(string, Code)"/>. Used by templates.</summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public TypeBuilder GeneratedMethod(string name, Code signature) {
+        AddMember(new GeneratedMethodBuilder(name, signature));
+        return this;
     }
 
     public TypeBuilder Class(string name, Modifiers modifiers = Modifiers.Public) {
