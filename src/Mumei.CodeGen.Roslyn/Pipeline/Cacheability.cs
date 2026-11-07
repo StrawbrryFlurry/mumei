@@ -1,0 +1,132 @@
+using System.Collections;
+using System.Collections.Concurrent;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using Microsoft.CodeAnalysis;
+
+namespace Mumei.CodeGen;
+
+/// <summary>
+/// Verifies that values flowing through the incremental pipeline can be compared by value.
+/// Symbols, syntax nodes or reference-compared collections would silently break caching
+/// (or keep whole compilations alive), so we fail early with a helpful message instead.
+/// </summary>
+internal static class Cacheability {
+    private static readonly ConcurrentDictionary<Type, string?> Problems = new();
+
+    private static readonly (Type Type, string Hint)[] RoslynTypes = [
+        (typeof(ISymbol), "Snapshot it with e.g. symbol.ToTypeRef() / ToTypeModel() / ToMethodModel()"),
+        (typeof(SyntaxNode), "Extract the information you need (e.g. as strings or models)"),
+        (typeof(Compilation), "Extract the information you need from the compilation"),
+        (typeof(SemanticModel), "Extract the information you need from the semantic model"),
+        (typeof(Microsoft.CodeAnalysis.IOperation), "Extract the information you need from the operation"),
+        (typeof(Location), "Use location.ToSourceLocation()"),
+        (typeof(SyntaxTree), "Extract the information you need from the syntax tree"),
+        (typeof(AttributeData), "Use attribute.ToAttributeModel()")
+    ];
+
+    public static void Ensure(Type type, string operation) {
+        var problem = Problems.GetOrAdd(type, t => FindProblem(t, Display(t), []));
+        if (problem is not null) {
+            throw new InvalidOperationException(
+                $"Mumei: The result of '{operation}' ({Display(type)}) can't be cached by the incremental generator: {problem}"
+            );
+        }
+    }
+
+    private static string? FindProblem(Type type, string path, HashSet<Type> visiting) {
+        if (type.IsPrimitive || type.IsEnum || type.IsPointer || type == typeof(string) || type == typeof(decimal)
+            || type == typeof(object) || type.IsGenericParameter) {
+            return null;
+        }
+
+        foreach (var (roslynType, hint) in RoslynTypes) {
+            if (roslynType.IsAssignableFrom(type)) {
+                return $"'{path}' is a {Display(roslynType)}. {hint}.";
+            }
+        }
+
+        if (!visiting.Add(type)) {
+            return null;
+        }
+
+        if (typeof(Delegate).IsAssignableFrom(type)) {
+            return $"'{path}' is a delegate, which is compared by reference.";
+        }
+
+        if (type.IsArray) {
+            return $"'{path}' is an array, which is compared by reference. Use EquatableArray<T> instead.";
+        }
+
+        if (type.IsGenericType) {
+            var definition = type.GetGenericTypeDefinition();
+            var arguments = type.GetGenericArguments();
+            if (definition == typeof(EquatableArray<>)) {
+                return FindProblem(arguments[0], $"{path}[]", visiting);
+            }
+
+            if (definition == typeof(Nullable<>)) {
+                return FindProblem(arguments[0], path, visiting);
+            }
+
+            if (type.FullName?.StartsWith("System.ValueTuple`", StringComparison.Ordinal) == true) {
+                return FindInFields(type, path, visiting);
+            }
+        }
+
+        if (typeof(IEnumerable).IsAssignableFrom(type)) {
+            return $"'{path}' is a collection ({Display(type)}), which is compared by reference. Use EquatableArray<T> instead.";
+        }
+
+        // We can't know the runtime type of interface or abstract members, so give them the benefit of the doubt
+        if (type.IsInterface || type.IsAbstract) {
+            return null;
+        }
+
+        if (type.Namespace == typeof(TypeRef).Namespace && type.Assembly == typeof(TypeRef).Assembly) {
+            return null;
+        }
+
+        var isRecord = type.GetMethod("<Clone>$") is not null
+                       || type.GetMethod("PrintMembers", BindingFlags.NonPublic | BindingFlags.Instance)
+                           ?.GetCustomAttribute<CompilerGeneratedAttribute>() is not null;
+        if (isRecord) {
+            return FindInFields(type, path, visiting);
+        }
+
+        var equals = type.GetMethod("Equals", BindingFlags.Public | BindingFlags.Instance, null, [typeof(object)], null);
+        var hasCustomEquality = equals is not null
+                                && equals.DeclaringType != typeof(object)
+                                && equals.DeclaringType != typeof(ValueType);
+        if (hasCustomEquality) {
+            return null;
+        }
+
+        return type.IsValueType
+            ? FindInFields(type, path, visiting)
+            : $"'{path}' ({Display(type)}) is compared by reference. Make it a record or implement IEquatable<T>.";
+    }
+
+    private static string? FindInFields(Type type, string path, HashSet<Type> visiting) {
+        foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)) {
+            var name = field.Name.StartsWith("<", StringComparison.Ordinal)
+                ? field.Name[1..field.Name.IndexOf('>')]
+                : field.Name;
+            var problem = FindProblem(field.FieldType, $"{path}.{name}", visiting);
+            if (problem is not null) {
+                return problem;
+            }
+        }
+
+        return null;
+    }
+
+    private static string Display(Type type) {
+        if (!type.IsGenericType) {
+            return type.Name;
+        }
+
+        var name = type.Name[..type.Name.IndexOf('`')];
+        return $"{name}<{string.Join(", ", type.GetGenericArguments().Select(Display))}>";
+    }
+}

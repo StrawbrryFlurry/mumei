@@ -21,5 +21,6 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Mumei.CodeGen.DeclarationGenerator"/>
         <InternalsVisibleTo Include="Mumei.Roslyn.Testing"/>
+        <InternalsVisibleTo Include="Mumei.CodeGen.Tests"/>
     </ItemGroup>
 </Project>

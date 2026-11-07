@@ -50,6 +50,21 @@ public static class CSharpLiteral {
         return sb.ToString();
     }
 
+    /// <summary>
+    /// Formats multi-line text as a raw string literal, using enough quotes to never conflict with the content.
+    /// </summary>
+    public static string RawString(string value) {
+        var longestQuoteRun = 0;
+        var currentRun = 0;
+        foreach (var c in value) {
+            currentRun = c == '"' ? currentRun + 1 : 0;
+            longestQuoteRun = Math.Max(longestQuoteRun, currentRun);
+        }
+
+        var quotes = new string('"', Math.Max(3, longestQuoteRun + 1));
+        return $"{quotes}\n{value.Replace("\r\n", "\n")}\n{quotes}";
+    }
+
     public static string Char(char value) {
         var sb = new StringBuilder(4);
         sb.Append('\'');

@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Mumei.CodeGen;
 
 namespace Mumei.Roslyn.Testing;
 
@@ -30,6 +31,28 @@ public static class SourceGeneratorTest {
             compilation,
             new MetaTestGenerator(setup)
         );
+    }
+
+    public static IncrementalSourceGeneratorTest<MumeiTestGenerator> MumeiGeneratorTest(
+        ICompilationReference testCompilationReference,
+        Action<GeneratorContext> setup
+    ) {
+        return MumeiGeneratorTest(b => b.AddReference(testCompilationReference), setup);
+    }
+
+    public static IncrementalSourceGeneratorTest<MumeiTestGenerator> MumeiGeneratorTest(
+        Action<TestCompilationBuilder> setupCompilation,
+        Action<GeneratorContext> setup
+    ) {
+        var builder = new TestCompilationBuilder();
+        setupCompilation(builder);
+        return new IncrementalSourceGeneratorTest<MumeiTestGenerator>(builder.Build(), new MumeiTestGenerator(setup));
+    }
+}
+
+public sealed class MumeiTestGenerator(Action<GeneratorContext> setup) : MumeiGenerator {
+    protected override void Initialize(GeneratorContext gen) {
+        setup(gen);
     }
 }
 

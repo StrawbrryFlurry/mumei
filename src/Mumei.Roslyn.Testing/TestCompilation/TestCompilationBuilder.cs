@@ -128,6 +128,7 @@ public sealed class TestCompilationBuilder {
         _interceptorsAllowedIn.Add(_assemblyName);
         _interceptorsAllowedIn.Add($"{_assemblyName}.Generated");
         _interceptorsAllowedIn.Add("Generated");
+        _interceptorsAllowedIn.Add("Mumei.Generated");
 
         var namespaces = string.Join(";", _interceptorsAllowedIn);
         return new KeyValuePair<string, string>("InterceptorsNamespaces", namespaces);

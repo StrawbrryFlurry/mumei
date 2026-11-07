@@ -37,63 +37,8 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
                 ).WithAssemblyName("TestAssembly").AddTypeReference<CSharpCompilation>();
             }
         ).RunWithAssert(result => {
-            result.HasFileMatching("*SyntaxTreeReferenceInterceptor__0.g.cs")
-                .WithPartialContent(
-                    $$""""""""""
-                      namespace TestAssembly.CompilationSourceInterceptor {
-                          internal static partial class SyntaxTreeReferenceInterceptor {
-                              [global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "*")]
-                              internal static {{typeof(ICompilationReference):g}} Intercept_Of__0(
-                                  global::System.Type t
-                              ) {
-                                  return new {{typeof(RootCompilationReference):g}} {
-                                      SourceNamespace = "TestAssembly",
-                                      References = [
-                                          new global::Mumei.Roslyn.Testing.SyntaxTreeCompilationReference {
-                                              TypeName = "Foo",
-                                              SourceCode = """""""""
-                                              using global::System;
-                                              
-                                              namespace TestAssembly;
-                                              public class Foo
-                                              {
-                                                  public Func<string> DoS { get; set; } = null !;
-                                              }
-                                              """"""""",
-                                              References = [
-                                                  new global::Mumei.Roslyn.Testing.AssemblyCompilationReference {
-                                                      TypeName = "Func<string>",
-                                                      AssemblyName = "System.Private.CoreLib, *",
-                                                  },
-                                              ]
-                                          },
-                                          new global::Mumei.Roslyn.Testing.SyntaxTreeCompilationReference {
-                                              TypeName = "Bar",
-                                              SourceCode = """""""""
-                                              using global::System;
-                                              
-                                              namespace TestAssembly;
-                                              public class Bar
-                                              {
-                                                  public string S { get; set; } = null !;
-                                              }
-                                              """"""""",
-                                              References = [
-                                                  new global::Mumei.Roslyn.Testing.AssemblyCompilationReference {
-                                                      TypeName = "string",
-                                                      AssemblyName = "System.Private.CoreLib, *",
-                                                  },
-                                              ]
-                                          },
-                                      ]
-                                  };
-                              }
-                          }
-                      }
-
-                      {{InterceptsLocationAttributeSource.Generated}}
-                      """"""""""
-                );
+            result.HasFileMatching("*SyntaxTreeReferenceInterceptor.*.g.cs")
+                .WithPartialContent(ExpectedInterceptor("global::System.Type t"));
         }).UpdateCompilation(x => {
             x.UpdateFile(
                 "foo",
@@ -121,64 +66,68 @@ public sealed class SyntaxTreeReferenceGeneratorTests {
                 """
             );
         }).RunWithAssert(result => {
-            result.HasFileMatching("*SyntaxTreeReferenceInterceptor__2.g.cs")
-                .WithPartialContent(
-                    $$""""""""""
-                      namespace TestAssembly.CompilationSourceInterceptor {
-                          internal static partial class SyntaxTreeReferenceInterceptor {
-                              [global::System.Runtime.CompilerServices.InterceptsLocationAttribute(1, "*")]
-                              internal static {{typeof(ICompilationReference):g}} Intercept_Of__2() {
-                                  return new {{typeof(RootCompilationReference):g}} {
-                                      SourceNamespace = "TestAssembly",
-                                      References = [
-                                          new global::Mumei.Roslyn.Testing.SyntaxTreeCompilationReference {
-                                              TypeName = "Foo",
-                                              SourceCode = """""""""
-                                              using global::System;
-                                              
-                                              namespace TestAssembly;
-                                              public class Foo
-                                              {
-                                                  public Func<string> DoS { get; set; } = null !;
-                                              }
-                                              """"""""",
-                                              References = [
-                                                  new global::Mumei.Roslyn.Testing.AssemblyCompilationReference {
-                                                      TypeName = "Func<string>",
-                                                      AssemblyName = "System.Private.CoreLib, *",
-                                                  },
-                                              ]
-                                          },
-                                          new global::Mumei.Roslyn.Testing.SyntaxTreeCompilationReference {
-                                              TypeName = "Bar",
-                                              SourceCode = """""""""
-                                              using global::System;
-                                              
-                                              namespace TestAssembly;
-                                              public class Bar
-                                              {
-                                                  public string S { get; set; } = null !;
-                                              }
-                                              """"""""",
-                                              References = [
-                                                  new global::Mumei.Roslyn.Testing.AssemblyCompilationReference {
-                                                      TypeName = "string",
-                                                      AssemblyName = "System.Private.CoreLib, *",
-                                                  },
-                                              ]
-                                          },
-                                      ]
-                                  };
-                              }
-                          }
-                      }
-
-                      {{InterceptsLocationAttributeSource.Generated}}
-                      """"""""""
-                );
+            var interceptors = result.GeneratedTrees.Where(x => x.FilePath.Contains("SyntaxTreeReferenceInterceptor.")).ToArray();
+            Assert.Equal(2, interceptors.Length);
+            var genericInterceptor = interceptors.Single(x => x.ToString().Contains("Intercept()"));
+            SyntaxVerifier.VerifyRegex(genericInterceptor.ToString(), ExpectedInterceptor(""));
         });
 
         var r = SyntaxTreeReference.Of(typeof(CompilationSource));
+    }
+
+    private static CommonSyntaxStringInterpolationHandler ExpectedInterceptor(string parameters) {
+        return $$""""""""""
+                 namespace TestAssembly.CompilationSourceInterceptor {
+                     file static class SyntaxTreeReferenceInterceptor {
+                         [global::System.Runtime.CompilerServices.InterceptsLocation(1, "*")]
+                         public static {{typeof(ICompilationReference):g}} Intercept({{parameters}}) {
+                             return new {{typeof(RootCompilationReference):g}} {
+                                 SourceNamespace = "TestAssembly",
+                                 References = [
+                                     new global::Mumei.Roslyn.Testing.SyntaxTreeCompilationReference {
+                                         TypeName = "Foo",
+                                         SourceCode = """
+                                         using global::System;
+
+                                         namespace TestAssembly;
+                                         public class Foo
+                                         {
+                                             public Func<string> DoS { get; set; } = null !;
+                                         }
+                                         """,
+                                         References = [
+                                             new global::Mumei.Roslyn.Testing.AssemblyCompilationReference {
+                                                 TypeName = "Func<string>",
+                                                 AssemblyName = "System.Private.CoreLib, *",
+                                             },
+                                         ]
+                                     },
+                                     new global::Mumei.Roslyn.Testing.SyntaxTreeCompilationReference {
+                                         TypeName = "Bar",
+                                         SourceCode = """
+                                         using global::System;
+
+                                         namespace TestAssembly;
+                                         public class Bar
+                                         {
+                                             public string S { get; set; } = null !;
+                                         }
+                                         """,
+                                         References = [
+                                             new global::Mumei.Roslyn.Testing.AssemblyCompilationReference {
+                                                 TypeName = "string",
+                                                 AssemblyName = "System.Private.CoreLib, *",
+                                             },
+                                         ]
+                                     },
+                                 ]
+                             };
+                         }
+                     }
+                 }
+
+                 {{InterceptsLocationAttributeSource.Generated}}
+                 """""""""";
     }
 }
 

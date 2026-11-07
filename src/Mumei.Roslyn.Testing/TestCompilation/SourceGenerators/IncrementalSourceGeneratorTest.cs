@@ -90,6 +90,16 @@ public sealed class IncrementalSourceGeneratorTest<TGenerator>(
 
         public ImmutableArray<Diagnostic> Diagnostics => result.Diagnostics;
         public ImmutableArray<SyntaxTree> GeneratedTrees => result.GeneratedTrees;
+        public GeneratorDriverRunResult RunResult => result;
+
+        /// <summary>Why each source output was produced in this run, e.g. <see cref="IncrementalStepRunReason.Cached"/> if nothing changed.</summary>
+        public ImmutableArray<IncrementalStepRunReason> OutputReasons => [
+            ..result.Results
+                .SelectMany(x => x.TrackedOutputSteps)
+                .SelectMany(x => x.Value)
+                .SelectMany(x => x.Outputs)
+                .Select(x => x.Reason)
+        ];
     }
 
     public sealed class UpdateCompilationContext {

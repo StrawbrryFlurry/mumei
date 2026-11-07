@@ -1,13 +1,13 @@
-﻿namespace Mumei.Roslyn.Testing;
+namespace Mumei.Roslyn.Testing;
 
 public static class InterceptsLocationAttributeSource {
+    /// <summary>The file-local polyfill Mumei emits next to every interceptor.</summary>
     public const string Generated = """
-                                    #pragma warning disable
                                     namespace System.Runtime.CompilerServices {
-                                        [global::System.AttributeUsageAttribute(global::System.AttributeTargets.Method, AllowMultiple = true)]
-                                        file sealed class InterceptsLocationAttribute(int version, string data) : global::System.Attribute {
+                                        [global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = true)]
+                                        file sealed class InterceptsLocationAttribute : global::System.Attribute {
+                                            public InterceptsLocationAttribute(int version, string data) { }
                                         }
                                     }
-                                    #pragma warning restore
                                     """;
 }

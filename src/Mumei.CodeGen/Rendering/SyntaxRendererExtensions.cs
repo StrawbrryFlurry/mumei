@@ -1,80 +1,24 @@
 ﻿using System.Runtime.CompilerServices;
-using Mumei.CodeGen.Rendering.CSharp;
 
 namespace Mumei.CodeGen.Rendering;
 
 public static class SyntaxRendererExtensions {
-    extension(AccessModifierList modifiers) {
-        public string List => modifiers.AsCSharpString();
-        public RenderFragment<AccessModifierList> RenderAsExpression => new(modifiers, (renderTree, accessModifiers) => {
-            for (var i = 0; i < accessModifiers.Modifiers.Length; i++) {
-                var accessModifiersModifier = accessModifiers.Modifiers[i];
-                if (!accessModifiersModifier.HasValue) {
-                    continue;
-                }
-
-                var factoryName = accessModifiersModifier.Value switch {
-                    "public" => "Public",
-                    "private" => "Private",
-                    "abstract" => "Abstract",
-                    "protected" => "Protected",
-                    "internal" => "Internal",
-                    "file" => "File",
-                    "sealed" => "Sealed",
-                    "readonly" => "Readonly",
-                    "static" => "Static",
-                    "partial" => "Partial",
-                    "virtual" => "Virtual",
-                    "override" => "Override",
-                    "async" => "Async",
-                    _ => throw new ArgumentOutOfRangeException()
-                };
-
-                renderTree.Interpolate($"{typeof(AccessModifier)}.{factoryName}");
-                if (i < accessModifiers.Modifiers.Length - 1) {
-                    renderTree.Text(" + ");
-                }
-            }
-        });
-    }
-
-    extension(ParameterAttributes attributes) {
-        public RenderFragment<ParameterAttributes> List => new(attributes, (renderTree, parameterAttributes) => {
-            if (parameterAttributes == ParameterAttributes.None) {
-                return;
-            }
-
-            if (parameterAttributes.HasFlag(ParameterAttributes.This)) {
-                renderTree.Text("this ");
-            }
-
-            if (parameterAttributes.HasFlag(ParameterAttributes.Ref)) {
-                renderTree.Text("ref ");
-            }
-
-            if (parameterAttributes.HasFlag(ParameterAttributes.Out)) {
-                renderTree.Text("out ");
-            }
-
-            if (parameterAttributes.HasFlag(ParameterAttributes.In)) {
-                renderTree.Text("in ");
-            }
-
-            if (parameterAttributes.HasFlag(ParameterAttributes.Params)) {
-                renderTree.Text("params ");
-            }
-
-            if (parameterAttributes.HasFlag(ParameterAttributes.Readonly)) {
-                renderTree.Text("readonly ");
-            }
-        });
-    }
-
     extension(IRenderTreeBuilder renderTree) {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Line(string line) {
             renderTree.Text(line);
             renderTree.NewLine();
+        }
+
+        /// <summary>Writes multi-line text, indenting every non-empty line.</summary>
+        public void Lines(string text) {
+            foreach (var line in CodeBuilder.SplitLines(text)) {
+                if (!string.IsNullOrWhiteSpace(line)) {
+                    renderTree.Text(line);
+                }
+
+                renderTree.NewLine();
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
