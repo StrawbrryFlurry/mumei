@@ -3,8 +3,8 @@
         <MumeiInternalApiDiagnostic>MOOM9999</MumeiInternalApiDiagnostic>
         <NoWarn>RS2008,$(MumeiInternalApiDiagnostic)</NoWarn>
 
-        <TargetFramework>net9.0</TargetFramework>
-        <LangVersion>Latest</LangVersion>
+        <TargetFramework>net10.0</TargetFramework>
+        <LangVersion>15</LangVersion>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     </PropertyGroup>
@@ -12,11 +12,18 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Mumei.CodeGen.Roslyn"/>
         <InternalsVisibleTo Include="Mumei.Roslyn.Testing"/>
+        <InternalsVisibleTo Include="Mumei.CodeGen.Tests"/>
         <InternalsVisibleTo Include="Mumei.CodeGen.DeclarationGenerator"/>
     </ItemGroup>
 
     <ItemGroup>
         <Using Include="System.Collections.Immutable"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Update="..\Mumei.Roslyn.Common\Common\Polyfill\Union.cs">
+            <Link>Common\Polyfill\Union.cs</Link>
+        </Compile>
     </ItemGroup>
 
     <Import Project="../Mumei.Roslyn.Common/Mumei.Roslyn.Common.props"/>

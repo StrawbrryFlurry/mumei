@@ -33,10 +33,13 @@ public abstract class GenericRenderTreeBuilder<TResult> : IRenderTreeBuilder {
     }
     protected abstract void NewLineCore();
 
-    public void Value<T>(in T value) { }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Value<T>(in T value) {
+        ValueCore(value);
+    }
     protected abstract void ValueCore<T>(in T value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    // The handler renders directly into this builder while it is constructed.
     public void Interpolate([InterpolatedStringHandlerArgument("")] IRenderTreeBuilder.InterpolatedStringHandler s) { }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -136,7 +139,7 @@ public interface IRenderTreeBuilder {
 
         public void AppendFormatted(string str, string format = "") {
             if (format == "q") {
-                tree.Text("\"" + str + "\"");
+                tree.Text(CSharpLiteral.String(str));
                 return;
             }
 

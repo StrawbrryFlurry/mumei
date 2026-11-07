@@ -1,114 +1,145 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using Mumei.CodeGen.Rendering;
-using Mumei.Common.Internal;
 
 namespace Mumei.CodeGen;
 
 internal static class RuntimeTypeSerializer {
     public static void RenderInto(IRenderTreeBuilder tree, Type type) {
-        if (TryGetKeywordType(type, out var keywordType)) {
-            tree.Text(keywordType);
-            return;
-        }
-
-        var buffer = new ArrayBuilder<char>(stackalloc char[ArrayBuilder.InitSize]);
-        GetTypeFullName(type, ref buffer, true);
-        tree.Text(buffer.Elements);
-        buffer.Dispose();
+        tree.Text(GetTypeFullName(type));
     }
 
-    private static bool TryGetKeywordType(Type type, [NotNullWhen(true)] out string? keyword) {
-        if (type.IsPrimitive) {
-            keyword = type switch {
-                not null when type == typeof(int) => "int",
-                not null when type == typeof(uint) => "uint",
-                not null when type == typeof(long) => "long",
-                not null when type == typeof(ulong) => "ulong",
-                not null when type == typeof(short) => "short",
-                not null when type == typeof(ushort) => "ushort",
-                not null when type == typeof(byte) => "byte",
-                not null when type == typeof(sbyte) => "sbyte",
-                not null when type == typeof(float) => "float",
-                not null when type == typeof(double) => "double",
-                not null when type == typeof(bool) => "bool",
-                not null when type == typeof(char) => "char",
-                not null when type == typeof(decimal) => "decimal",
-                not null when type == typeof(nint) => "nint",
-                not null when type == typeof(nuint) => "nuint",
-                _ => throw new NotSupportedException($"Unsupported primitive type: {type}")
-            };
+    internal static bool TryGetKeywordType(Type type, [NotNullWhen(true)] out string? keyword) {
+        keyword = type switch {
+            _ when type == typeof(int) => "int",
+            _ when type == typeof(uint) => "uint",
+            _ when type == typeof(long) => "long",
+            _ when type == typeof(ulong) => "ulong",
+            _ when type == typeof(short) => "short",
+            _ when type == typeof(ushort) => "ushort",
+            _ when type == typeof(byte) => "byte",
+            _ when type == typeof(sbyte) => "sbyte",
+            _ when type == typeof(float) => "float",
+            _ when type == typeof(double) => "double",
+            _ when type == typeof(bool) => "bool",
+            _ when type == typeof(char) => "char",
+            _ when type == typeof(decimal) => "decimal",
+            _ when type == typeof(nint) => "nint",
+            _ when type == typeof(nuint) => "nuint",
+            _ when type == typeof(string) => "string",
+            _ when type == typeof(object) => "object",
+            _ when type == typeof(void) => "void",
+            _ => null
+        };
 
-            return true;
-        }
-
-        if (type == typeof(string)) {
-            keyword = "string";
-            return true;
-        }
-
-        if (type == typeof(object)) {
-            keyword = "object";
-            return true;
-        }
-
-        if (type == typeof(void)) {
-            keyword = "void";
-            return true;
-        }
-
-        keyword = null!;
-        return false;
+        return keyword is not null;
     }
 
+    /// <summary>
+    /// Returns the globally qualified C# name of <paramref name="type"/>,
+    /// e.g. <c>global::System.Collections.Generic.Dictionary&lt;string, global::Outer.Inner&gt;</c>.
+    /// </summary>
     internal static string GetTypeFullName(Type type, bool global = true) {
-        // Do this here to not re-allocate keyword strings
-        if (TryGetKeywordType(type, out var keywordType)) {
-            return keywordType;
-        }
-
-        var buffer = new ArrayBuilder<char>(stackalloc char[ArrayBuilder.InitSize]);
-        GetTypeFullName(type, ref buffer, global);
-        return buffer.ToStringAndFree();
+        var sb = new StringBuilder();
+        Append(sb, type, global);
+        return sb.ToString();
     }
 
-    internal static void GetTypeFullName(Type type, ref ArrayBuilder<char> buffer, bool global) {
-        if (global) {
-            buffer.AddRange("global::");
+    /// <summary>
+    /// Returns the metadata name of the type's definition, e.g. <c>System.Collections.Generic.List`1</c> or <c>Outer+Inner</c>.
+    /// </summary>
+    internal static string GetMetadataName(Type type) {
+        if (type.IsConstructedGenericType) {
+            type = type.GetGenericTypeDefinition();
         }
 
-        if (type.Namespace is not null) {
-            buffer.AddRange(type.Namespace);
-            buffer.Add('.');
-        }
+        return type.FullName ?? type.Name;
+    }
 
-        var nestedType = type;
-        while (nestedType.IsNested && nestedType.DeclaringType is not null) {
-            buffer.AddRange(nestedType.DeclaringType.Name);
-            buffer.Add('.');
-            nestedType = nestedType.DeclaringType;
-        }
-
-        ReadOnlySpan<char> name = type.Name;
-        if (type.IsGenericType) {
-            name = name[..name.LastIndexOf('`')];
-        }
-
-        buffer.AddRange(name);
-
-        if (!type.IsConstructedGenericType) {
+    private static void Append(StringBuilder sb, Type type, bool global) {
+        if (TryGetKeywordType(type, out var keyword)) {
+            sb.Append(keyword);
             return;
         }
 
-        buffer.Add('<');
-        var genericArguments = type.GetGenericArguments();
-        for (var i = 0; i < genericArguments.Length; i++) {
+        if (type.IsGenericParameter) {
+            sb.Append(type.Name);
+            return;
+        }
+
+        if (type.IsArray) {
+            Append(sb, type.GetElementType()!, global);
+            sb.Append('[').Append(',', type.GetArrayRank() - 1).Append(']');
+            return;
+        }
+
+        if (type.IsPointer) {
+            Append(sb, type.GetElementType()!, global);
+            sb.Append('*');
+            return;
+        }
+
+        if (type.IsByRef) {
+            Append(sb, type.GetElementType()!, global);
+            return;
+        }
+
+        if (Nullable.GetUnderlyingType(type) is { } nullableOf) {
+            Append(sb, nullableOf, global);
+            sb.Append('?');
+            return;
+        }
+
+        if (global) {
+            sb.Append("global::");
+        }
+
+        if (!string.IsNullOrEmpty(type.Namespace)) {
+            sb.Append(type.Namespace).Append('.');
+        }
+
+        // Nested types share the generic arguments of their containing types:
+        // Outer<T>.Inner<U> is represented as Outer`1+Inner`1 with the arguments [T, U].
+        var chain = new List<Type>();
+        for (var current = type; current is not null; current = current.IsNested ? current.DeclaringType : null) {
+            chain.Add(current);
+        }
+
+        chain.Reverse();
+        var genericArguments = type.IsGenericType ? type.GetGenericArguments() : Type.EmptyTypes;
+        var consumedArguments = 0;
+
+        for (var i = 0; i < chain.Count; i++) {
             if (i > 0) {
-                buffer.AddRange(", ");
+                sb.Append('.');
             }
 
-            GetTypeFullName(genericArguments[i], ref buffer, global);
-        }
+            var name = chain[i].Name;
+            var tickIndex = name.IndexOf('`');
+            sb.Append(tickIndex >= 0 ? name.AsSpan(0, tickIndex) : name);
 
-        buffer.Add('>');
+            var totalArity = chain[i].IsGenericType ? chain[i].GetGenericArguments().Length : 0;
+            var ownArity = totalArity - consumedArguments;
+            if (ownArity <= 0) {
+                continue;
+            }
+
+            sb.Append('<');
+            for (var a = 0; a < ownArity; a++) {
+                if (a > 0) {
+                    sb.Append(", ");
+                }
+
+                var argument = genericArguments[consumedArguments + a];
+                if (type.IsGenericTypeDefinition) {
+                    sb.Append(argument.Name);
+                } else {
+                    Append(sb, argument, global);
+                }
+            }
+
+            sb.Append('>');
+            consumedArguments = totalArity;
+        }
     }
 }

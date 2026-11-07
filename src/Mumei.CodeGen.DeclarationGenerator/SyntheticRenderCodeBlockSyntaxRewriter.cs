@@ -560,11 +560,7 @@ internal sealed class MacroRenderTreeBuilder(ISyntheticCodeBlockResolutionContex
         }
 
         private string MakeMacroIdentifierName() {
-            var sb = new ValueSyntaxWriter(stackalloc char[ValueSyntaxWriter.StackBufferSize]);
-            sb.Write(StartRenderMacroSlot);
-            sb.WriteLiteral(idx);
-            sb.Write(CloseRenderMacroSlot);
-            return sb.ToString();
+            return $"{StartRenderMacroSlot}{idx}{CloseRenderMacroSlot}";
         }
     }
 }

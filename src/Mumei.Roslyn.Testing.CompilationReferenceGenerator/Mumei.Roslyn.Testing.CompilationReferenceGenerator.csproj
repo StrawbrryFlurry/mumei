@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <IsRoslynComponent>true</IsRoslynComponent>
     </PropertyGroup>
@@ -26,7 +26,7 @@
 
     <Target Name="GetDependencyTargetPaths" AfterTargets="ResolvePackageDependenciesForBuild">
         <ItemGroup>
-            <TargetPathWithTargetPlatformMoniker Include="..\..\src\Mumei.CodeGen.Roslyn\bin\$(Configuration)\netstandard2.0\*.dll" IncludeRuntimeDependency="false"/>
+            <TargetPathWithTargetPlatformMoniker Include="..\..\src\Mumei.CodeGen.Roslyn\bin\$(Configuration)\net10.0\*.dll" IncludeRuntimeDependency="false"/>
         </ItemGroup>
     </Target>
 </Project>

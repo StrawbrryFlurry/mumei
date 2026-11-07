@@ -73,11 +73,6 @@ internal sealed class SyntaxWriter : ISyntaxWriter {
         _code.ToString().AsSpan().CopyTo(buffer);
     }
 
-    public void WriteLiteral<T>(T literal) where T : notnull {
-        TryWriteIndent();
-        _code.Append(literal);
-    }
-
     public void WriteLine(in ReadOnlySpan<char> line) {
         Write(line);
         WriteLine();

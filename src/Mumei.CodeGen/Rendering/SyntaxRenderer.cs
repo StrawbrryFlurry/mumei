@@ -15,14 +15,7 @@ public sealed class SourceFileRenderTreeBuilder : GenericRenderTreeBuilder<strin
     }
 
     protected override void ValueCore<T>(in T value) {
-        if (value is null) {
-            _sourceFile.WriteLiteral("null");
-            return;
-        }
-
- #pragma warning disable CS8714 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'notnull' constraint.
-        _sourceFile.WriteLiteral(value);
- #pragma warning restore CS8714 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'notnull' constraint.
+        _sourceFile.Write(CSharpLiteral.Format(value));
     }
 
     protected override void BlockCore(string s) {
