@@ -1,6 +1,4 @@
-﻿using System.Collections.Immutable;
-
-namespace Mumei.CodeGen.Rendering.CSharp;
+﻿namespace Mumei.CodeGen.Rendering.CSharp;
 
 public readonly struct ArgumentListFragment(
     ImmutableArray<PositionalArgumentFragment> positionalArguments,
@@ -27,6 +25,7 @@ public readonly struct ArgumentListFragment(
         if (!positionalArguments.IsEmpty && !namedArguments.IsEmpty) {
             renderTree.Text(", ");
         }
+
         renderTree.SeparatedList(namedArguments.AsSpan());
 
         renderTree.Text(")");
@@ -56,11 +55,13 @@ public readonly struct PositionalArgumentFragment(ExpressionFragment value) : IR
 }
 
 public readonly struct NamedArgumentFragment(ExpressionFragment name, ExpressionFragment value) : IRenderFragment {
-    public static implicit operator NamedArgumentFragment((ExpressionFragment Name, ExpressionFragment Value) keyValuePair) {
+    public static implicit operator NamedArgumentFragment(
+        (ExpressionFragment Name, ExpressionFragment Value) keyValuePair) {
         return new NamedArgumentFragment(keyValuePair.Name, keyValuePair.Value);
     }
 
-    public static implicit operator NamedArgumentFragment(KeyValuePair<ExpressionFragment, ExpressionFragment> keyValuePair) {
+    public static implicit operator NamedArgumentFragment(
+        KeyValuePair<ExpressionFragment, ExpressionFragment> keyValuePair) {
         return new NamedArgumentFragment(keyValuePair.Key, keyValuePair.Value);
     }
 

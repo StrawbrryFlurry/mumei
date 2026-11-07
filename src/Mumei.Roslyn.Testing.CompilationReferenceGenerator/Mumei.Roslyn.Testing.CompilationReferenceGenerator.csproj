@@ -18,6 +18,8 @@
         <ProjectReference Include="..\Mumei.CodeGen.Roslyn\Mumei.CodeGen.Roslyn.csproj"/>
     </ItemGroup>
 
+    <Import Project="../Mumei.Roslyn.Common/Mumei.Roslyn.Common.props"/>
+
     <PropertyGroup>
         <GetTargetPathDependsOn>$(GetTargetPathDependsOn);GetDependencyTargetPaths</GetTargetPathDependsOn>
     </PropertyGroup>

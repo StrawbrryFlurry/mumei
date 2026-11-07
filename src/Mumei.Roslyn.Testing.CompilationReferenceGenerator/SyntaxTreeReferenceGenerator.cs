@@ -98,11 +98,11 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
         });
 
         var p = context.CreateQtProvider(
-            (node, ct) => {
-                return SyntaxNodeFilter.IsInvocationOf(node, "Of", SyntaxTreeReferenceType);
-            },
+            (node, ct) => { return SyntaxNodeFilter.IsInvocationOf(node, "Of", SyntaxTreeReferenceType); },
             static (ctx, ct) => {
-                var sourceCodeFactory = ctx.SemanticModel.Compilation.GetTypeByMetadataName($"Mumei.Roslyn.Testing.{SyntaxTreeReferenceType}");
+                var sourceCodeFactory =
+                    ctx.SemanticModel.Compilation.GetTypeByMetadataName(
+                        $"Mumei.Roslyn.Testing.{SyntaxTreeReferenceType}");
                 if (ctx.SemanticModel.GetOperation(ctx.Node) is not IInvocationOperation invocationOp) {
                     return default;
                 }
@@ -111,7 +111,8 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
                     return default;
                 }
 
-                if (!SymbolEqualityComparer.Default.Equals(invocationOp.TargetMethod.ContainingType, sourceCodeFactory)) {
+                if (!SymbolEqualityComparer.Default.Equals(invocationOp.TargetMethod.ContainingType,
+                        sourceCodeFactory)) {
                     return default;
                 }
 
@@ -121,7 +122,10 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
                         ITypeOfOperation typeOfOp => typeOfOp.TypeOperand,
                         _ => null
                     };
-                return (IsMatch: true, InvocationNode: new SyntaxNodeEquatable<InvocationExpressionSyntax>((InvocationExpressionSyntax) ctx.Node), TargetType: new IgnoreEquality<ITypeSymbol?>(targetType), ctx.Node.GetLocation());
+                return (IsMatch: true,
+                    InvocationNode: new SyntaxNodeEquatable<InvocationExpressionSyntax>(
+                        (InvocationExpressionSyntax)ctx.Node), TargetType: new IgnoreEquality<ITypeSymbol?>(targetType),
+                    ctx.Node.GetLocation());
             }
         ).Where(x => x.Value.IsMatch);
 
@@ -137,12 +141,11 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
             );
 
             interceptor.DeclareInterceptorMethod(
-                    interceptor.MakeUniqueName("Intercept_Of"),
-                    expr.InvocationNode.Node
-                )
-                .WithBody(ctx.Block(renderTree => {
-                    renderTree.Interpolate($"return {syntaxTreeRef};");
-                }));
+                interceptor.MakeUniqueName("Intercept_Of"),
+                expr.InvocationNode.Node
+            ).WithBody(
+                ctx.Block(renderTree => { renderTree.Interpolate($"return {syntaxTreeRef};"); })
+            );
 
             ctx.EmitIncremental("SyntaxTreeReferenceInterceptor", interceptor);
         });
@@ -167,7 +170,8 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
         renderTree.Line("new global::Mumei.Roslyn.Testing.RootCompilationReference {");
         renderTree.StartBlock();
 
-        renderTree.InterpolatedLine($"SourceNamespace = {targetType.ContainingNamespace.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", ""):q},");
+        renderTree.InterpolatedLine(
+            $"SourceNamespace = {targetType.ContainingNamespace.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", ""):q},");
         renderTree.Line("References = [");
         renderTree.StartBlock();
 
@@ -177,7 +181,9 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
             }
 
             var symbol = compilation.GetSemanticModel(typeDeclarationSyntax.SyntaxTree)
-                .GetDeclaredSymbol(typeToEmit) ?? throw new InvalidOperationException("Unable to get type symbol from declaration within referenced type.");
+                             .GetDeclaredSymbol(typeToEmit) ??
+                         throw new InvalidOperationException(
+                             "Unable to get type symbol from declaration within referenced type.");
 
             AppendSyntaxTreeCompilationReference(
                 renderTree,
@@ -207,7 +213,8 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
             return;
         }
 
-        var omitInReferenceAttributeSymbol = compilation.GetTypeByMetadataName("Mumei.Roslyn.Testing.OmitInReferenceAttribute");
+        var omitInReferenceAttributeSymbol =
+            compilation.GetTypeByMetadataName("Mumei.Roslyn.Testing.OmitInReferenceAttribute");
         if (typeSymbol.HasAttribute(omitInReferenceAttributeSymbol!)) {
             return;
         }
@@ -226,7 +233,8 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
         }
 
         var (typeReferences, aliases) = TypeUsageTracker.FindUsedTypes(sm, typeReference);
-        var thisTypeDeclarationSource = GetTypeDeclarationSyntaxTree(typeReference, typeSymbol, typeReferences, aliases);
+        var thisTypeDeclarationSource =
+            GetTypeDeclarationSyntaxTree(typeReference, typeSymbol, typeReferences, aliases);
 
         renderTree.InterpolatedLine($"TypeName = {typeReference.Identifier.Text:q},");
         renderTree.InterpolatedLine($"SourceCode = {thisTypeDeclarationSource},");
@@ -244,8 +252,10 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
 
                 renderTree.Line("new global::Mumei.Roslyn.Testing.AssemblyCompilationReference {");
                 renderTree.StartBlock();
-                renderTree.InterpolatedLine($"TypeName = {reference.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat):q},");
-                renderTree.InterpolatedLine($"AssemblyName = {reference.ContainingAssembly.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat):q},");
+                renderTree.InterpolatedLine(
+                    $"TypeName = {reference.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat):q},");
+                renderTree.InterpolatedLine(
+                    $"AssemblyName = {reference.ContainingAssembly.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat):q},");
                 renderTree.EndBlock();
                 renderTree.Line("},");
             }
@@ -291,7 +301,9 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
 
         var usingDirectives = referencedTypes
             .Distinct(SymbolEqualityComparer.Default)
-            .Where(x => x?.ContainingNamespace is not null && !SymbolEqualityComparer.Default.Equals(x.ContainingNamespace, typeSymbol.ContainingNamespace)) // Skip our own namespace
+            .Where(x => x?.ContainingNamespace is not null &&
+                        !SymbolEqualityComparer.Default.Equals(x.ContainingNamespace,
+                            typeSymbol.ContainingNamespace)) // Skip our own namespace
             .Where(x => !x.ContainingNamespace.IsGlobalNamespace) // Skip global namespace
             .Select(t => t!.ContainingNamespace.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat))
             .Where(x => !typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
@@ -304,7 +316,8 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
             usingDirectives.Add(
                 SyntaxFactory.UsingDirective(
                     SyntaxFactory.NameEquals(alias.Name),
-                    SyntaxFactory.ParseTypeName(alias.Target.Name) // Later we prolly want to spit out all types into their original namespace
+                    SyntaxFactory.ParseTypeName(alias.Target
+                        .Name) // Later we prolly want to spit out all types into their original namespace
                 )
             );
         }
@@ -313,7 +326,10 @@ public sealed class SyntaxTreeReferenceGenerator : IIncrementalGenerator {
             .WithUsings(SyntaxFactory.List(usingDirectives))
             .WithMembers(
                 SyntaxFactory.List<MemberDeclarationSyntax>([
-                    SyntaxFactory.FileScopedNamespaceDeclaration(SyntaxFactory.IdentifierName(typeSymbol.ContainingNamespace.ToDisplayString(new SymbolDisplayFormat(SymbolDisplayGlobalNamespaceStyle.Omitted, SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces)))),
+                    SyntaxFactory.FileScopedNamespaceDeclaration(SyntaxFactory.IdentifierName(
+                        typeSymbol.ContainingNamespace.ToDisplayString(new SymbolDisplayFormat(
+                            SymbolDisplayGlobalNamespaceStyle.Omitted,
+                            SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces)))),
                     type.WithoutTrivia()
                 ]))
             .NormalizeWhitespace();

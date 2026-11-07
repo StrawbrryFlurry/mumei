@@ -1,18 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>latest</LangVersion>
-    <IsPackable>false</IsPackable>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DefineConstants>$(DefineConstants);IS_COMMON_DECLARATION_PROJECT</DefineConstants>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <IsPackable>false</IsPackable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <DefineConstants>$(DefineConstants);IS_COMMON_DECLARATION_PROJECT</DefineConstants>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.Collections.Immutable"/>
-    <PackageReference Include="System.Memory"/>
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="System.Collections.Immutable"/>
+        <PackageReference Include="System.Memory"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <InternalsVisibleTo Include="Mumei.Common.Internal.Tests"/>
-  </ItemGroup>
+    <ItemGroup>
+        <InternalsVisibleTo Include="Mumei.Common.Internal.Tests"/>
+    </ItemGroup>
 </Project>

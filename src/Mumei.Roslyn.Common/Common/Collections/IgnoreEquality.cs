@@ -1,6 +1,6 @@
 ﻿namespace Mumei.Roslyn;
 
-public readonly struct IgnoreEquality<T>(T value) : IEquatable<IgnoreEquality<T>> {
+internal readonly struct IgnoreEquality<T>(T value) : IEquatable<IgnoreEquality<T>> {
     public T Value { get; } = value;
 
     public static implicit operator T(IgnoreEquality<T> wrapper) {
