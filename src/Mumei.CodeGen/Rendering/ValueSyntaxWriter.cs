@@ -7,7 +7,7 @@ namespace Mumei.CodeGen.Rendering;
 
 // If only we had allows ref struct (sigh)
 [DebuggerDisplay("{DebuggerDisplay(),nq}")]
-public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
+public ref struct ValueSyntaxWriter : ISyntaxWriter {
     public const int StackBufferSize = 256;
 
     internal const char IndentChar = SyntaxWriter.IndentChar;
@@ -21,24 +21,18 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
 
     // TODO: for large buffers using the array pool, we can't use this unfixed pointer.
     // Go with two fields instead, one is the pointer to the known stack buffer (that can't move), the other is the backing array (_rentedBuffer)
-    private char* _buffer;
+    private Span<char> _buffer;
     private int _bufferLength;
     private int _bufferPosition;
     private char[]? _rentedBuffer;
 
     private bool _requiresIndent = true;
 
-    internal ReadOnlySpan<char> Buffer => new(_buffer, _bufferPosition);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ValueSyntaxWriter(char* initialBuffer, int initialBufferLength) {
-        _buffer = initialBuffer;
-        _bufferLength = initialBufferLength;
-    }
+    internal ReadOnlySpan<char> Buffer => _buffer[_bufferPosition..];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ValueSyntaxWriter(in Span<char> initialBuffer) {
-        _buffer = (char*) Unsafe.AsPointer(ref initialBuffer.GetPinnableReference());
+        _buffer = initialBuffer;
         _bufferLength = initialBuffer.Length;
     }
 
@@ -83,13 +77,13 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
         }
 
         if (literal is char c) {
-            WriteCore(new ReadOnlySpan<char>(ref c));
+            WriteCore(c);
             return;
         }
 
         if (literal is ISpanFormattable sf) {
             TryWriteIndent(0);
-            var buffer = new Span<char>(_buffer, _bufferLength)[_bufferPosition..];
+            var buffer = _buffer[_bufferPosition..];
 
             TryWriteLiteral:
             var success = sf.TryFormat(buffer, out var written, default, null);
@@ -142,7 +136,8 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
         if (TryWriteIndent(line.Length + NewLine.Length)) {
             WriteCoreUnsafe(line);
             WriteCoreUnsafe(NewLine);
-        } else {
+        }
+        else {
             WriteCore(line, NewLine.Length);
             WriteCoreUnsafe(NewLine);
         }
@@ -162,7 +157,7 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void WriteCore(in ReadOnlySpan<char> text, int requiresAdditionalCapacity = 0) {
+    private void WriteCore(scoped in ReadOnlySpan<char> text, int requiresAdditionalCapacity = 0) {
         if (text.IsEmpty && requiresAdditionalCapacity == 0) {
             return;
         }
@@ -173,22 +168,30 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void WriteCoreUnsafe(in ReadOnlySpan<char> text) {
-        var buffer = new Span<char>(_buffer, _bufferLength)[_bufferPosition..];
+        var buffer = _buffer[_bufferPosition..];
         text.CopyTo(buffer);
         _bufferPosition += text.Length;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void WriteCore(in char c) {
+        EnsureBufferCapacity(1);
+        var buffer = _buffer[_bufferPosition..];
+        buffer[0] = c;
+        _bufferPosition++;
     }
 
     private void EnsureBufferCapacity(int requiredLength) {
         requiredLength = _requiresIndent ? _indentString.Length + requiredLength : requiredLength;
         var currentLength = _bufferLength;
         requiredLength = _bufferPosition + requiredLength;
-        if ((uint) requiredLength < (uint) currentLength) {
+        if ((uint)requiredLength < (uint)currentLength) {
             return;
         }
 
         var newLength = Math.Max(currentLength == 0 ? 4 : currentLength * 2, requiredLength + 1);
         var newBuffer = ArrayPool<char>.Shared.Rent(newLength);
-        var currentBuffer = new Span<char>(_buffer, currentLength);
+        var currentBuffer = _buffer[..currentLength];
         currentBuffer.CopyTo(newBuffer);
         if (_rentedBuffer != null) {
             ArrayPool<char>.Shared.Return(_rentedBuffer);
@@ -196,12 +199,12 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
 
         _rentedBuffer = newBuffer;
         var newBufferSpan = new Span<char>(newBuffer);
-        _buffer = (char*) Unsafe.AsPointer(ref newBufferSpan.GetPinnableReference());
+        _buffer = newBufferSpan;
         _bufferLength = newLength;
     }
 
     public readonly bool TryCopyTo(Span<char> buffer, out int charsWritten) {
-        var thisBuffer = new Span<char>(_buffer, _bufferLength)[.._bufferPosition];
+        var thisBuffer = _buffer[.._bufferPosition];
         if (thisBuffer.Length > buffer.Length) {
             charsWritten = 0;
             return false;
@@ -214,19 +217,19 @@ public unsafe struct ValueSyntaxWriter : ISyntaxWriter {
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly void CopyTo(Span<char> buffer) {
-        var thisBuffer = new Span<char>(_buffer, _bufferLength)[.._bufferPosition];
+        var thisBuffer = _buffer[.._bufferPosition];
         thisBuffer.CopyTo(buffer);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string ToSyntax() {
-        var s = new string(_buffer, 0, _bufferPosition);
+        var s = new string(_buffer[.._bufferPosition]);
         Dispose();
         return s;
     }
 
     private string DebuggerDisplay() {
-        return new string(_buffer, 0, _bufferPosition);
+        return new string(_buffer[.._bufferPosition]);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

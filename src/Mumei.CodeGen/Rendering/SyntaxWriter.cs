@@ -80,8 +80,7 @@ internal sealed class SyntaxWriter : ISyntaxWriter {
 
     public void WriteLine(in ReadOnlySpan<char> line) {
         Write(line);
-        _code.AppendLine();
-        _requiresIndent = true;
+        WriteLine();
     }
 
     private void TryWriteIndent() {
@@ -124,7 +123,7 @@ internal sealed class SyntaxWriter : ISyntaxWriter {
     internal static void WriteBlock<TWriter>(
         ref TWriter writer,
         in ReadOnlySpan<char> block
-    ) where TWriter : ISyntaxWriter {
+    ) where TWriter : ISyntaxWriter, allows ref struct {
         if (block.IsEmpty) {
             return;
         }
