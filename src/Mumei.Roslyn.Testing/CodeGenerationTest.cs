@@ -1,8 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Mumei.CodeGen.Components;
-using Mumei.CodeGen.Rendering;
-using Mumei.CodeGen.Roslyn;
+using Mumei.CodeGen.Legacy.Components;
+using Mumei.CodeGen.Legacy.Rendering;
+using Mumei.CodeGen.Legacy.Roslyn;
 
 namespace Mumei.Roslyn.Testing;
 
@@ -17,12 +17,14 @@ public sealed class CodeGenerationTest(Compilation compilation, string? sourceNa
     }
 
     public CodeGenerationTest AssertFile(string trackingName, Action<SyntaxTree> assert) {
-        var output = Context.ΦCompilerApi.EnumerateDeclarationsToEmit().SingleOrDefault(x => x.TrackingName.ConstantValue == trackingName);
+        var output = Context.ΦCompilerApi.EnumerateDeclarationsToEmit()
+            .SingleOrDefault(x => x.TrackingName.ConstantValue == trackingName);
         if (output.Declarations.IsDefaultOrEmpty) {
             throw new InvalidOperationException($"No generated file with tracking name '{trackingName}' found.");
         }
 
-        var compilationUnit = ((CSharpCodeGenerationContext) Context).SynthesizeCompilationUnit(output.Declarations, null);
+        var compilationUnit =
+            ((CSharpCodeGenerationContext)Context).SynthesizeCompilationUnit(output.Declarations, null);
 
         var renderer = new SourceFileRenderTreeBuilder();
         var syntaxTreeContent = renderer.RenderRootNode(compilationUnit);

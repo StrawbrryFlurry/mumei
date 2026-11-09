@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
-using Mumei.CodeGen.Components;
-using Mumei.CodeGen.Rendering;
-using Mumei.CodeGen.Roslyn.Components;
+using Mumei.CodeGen.Legacy.Components;
+using Mumei.CodeGen.Legacy.Rendering;
+using Mumei.CodeGen.Legacy.Roslyn.Components;
 using Mumei.Roslyn.Testing;
 
 namespace Mumei.CodeGen.DeclarationGenerator.Tests;
@@ -15,10 +15,10 @@ public sealed class ClassDeclarationDefinitionGeneratorTests {
             result.HasFileMatching($"{nameof(TestScope.TestClassDefinition<>)}__0.g.cs")
                 .WithPartialContent(
                     $$"""""""""""""
-                      namespace Mumei.CodeGen.DeclarationGenerator.Tests {
+                      namespace Mumei.CodeGen.Legacy.DeclarationGenerator.Tests {
                           public partial class TestClassDefinition<TState> {
                               public override void InternalBindCompilerOutputMembers(
-                                  {{typeof(ISyntheticClassBuilder<>):g}}<global::Mumei.CodeGen.DeclarationGenerator.Tests.TestClassDefinition<TState>> φbuilder
+                                  {{typeof(ISyntheticClassBuilder<>):g}}<global::Mumei.CodeGen.Legacy.DeclarationGenerator.Tests.TestClassDefinition<TState>> φbuilder
                               ) {
                                   φbuilder.DeclareProperty<string>(
                                       this.CodeGenContext.Type(typeof(string)),
@@ -27,7 +27,7 @@ public sealed class ClassDeclarationDefinitionGeneratorTests {
                                           {{typeof(SyntheticPropertyAccessor):g}}.SimpleGetter,
                                           null
                                       )
-                                  ).WithAccessibility(global::Mumei.CodeGen.AccessModifier.Public);
+                                  ).WithAccessibility(global::Mumei.CodeGen.Legacy.AccessModifier.Public);
                                   
                                   φbuilder.DeclareProperty<global::System.Type>(
                                       this.CodeGenContext.Type(typeof(global::System.Type)),
@@ -36,15 +36,15 @@ public sealed class ClassDeclarationDefinitionGeneratorTests {
                                           {{typeof(SyntheticPropertyAccessor):g}}.SimpleGetter,
                                           null
                                       )
-                                  ).WithAccessibility(global::Mumei.CodeGen.AccessModifier.Public);
+                                  ).WithAccessibility(global::Mumei.CodeGen.Legacy.AccessModifier.Public);
                                   
                                   φbuilder.DeclareField<{{typeof(CompileTimeUnknown):g}}>(
                                       this.InternalResolveLateBoundType(nameof(TState)),
                                       "_state"
-                                  ).WithAccessibility(global::Mumei.CodeGen.AccessModifier.Private);
+                                  ).WithAccessibility(global::Mumei.CodeGen.Legacy.AccessModifier.Private);
                                   
                                   φbuilder.DeclareMethod<global::System.Delegate>("DoWorkAsync")
-                                      .WithAccessibility(global::Mumei.CodeGen.AccessModifier.Public)
+                                      .WithAccessibility(global::Mumei.CodeGen.Legacy.AccessModifier.Public)
                                       .WithReturnType(this.CodeGenContext.Type(typeof(global::System.Threading.Tasks.Task)))
                                       .WithParameters(
                                           φbuilder.ΦCompilerApi.Context.Parameter(this.InternalResolveLateBoundType(nameof(TState)),
@@ -59,7 +59,7 @@ public sealed class ClassDeclarationDefinitionGeneratorTests {
                                                       _state = state;
                                                       global::System.Console.WriteLine($"Doing work... {
                                                   """""""""""");
-                                                  global::Mumei.CodeGen.Components.DefaultRenderExpressionExtensions.RenderExpression(φctx.InputA, φrenderTree);
+                                                  global::Mumei.CodeGen.Legacy.Components.DefaultRenderExpressionExtensions.RenderExpression(φctx.InputA, φrenderTree);
                                                   φrenderTree.Text(""""""""""""
                                                   }");
                                                       return global::System.Threading.Tasks.Task.CompletedTask;

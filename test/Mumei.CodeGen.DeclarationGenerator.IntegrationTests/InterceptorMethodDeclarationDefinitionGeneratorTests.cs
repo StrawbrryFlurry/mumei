@@ -1,10 +1,11 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
-using Mumei.CodeGen.Components;
-using Mumei.CodeGen.Rendering.CSharp;
-using Mumei.CodeGen.Roslyn.Components;
-using Mumei.CodeGen.Roslyn.RoslynCodeProviders;
+using Mumei.CodeGen.Legacy;
+using Mumei.CodeGen.Legacy.Components;
+using Mumei.CodeGen.Legacy.Rendering.CSharp;
+using Mumei.CodeGen.Legacy.Roslyn.Components;
+using Mumei.CodeGen.Legacy.Roslyn.RoslynCodeProviders;
 using Mumei.Roslyn.Testing;
 
 namespace Mumei.CodeGen.DeclarationGenerator.IntegrationTests;
@@ -24,10 +25,13 @@ public sealed class InterceptorMethodDeclarationDefinitionGeneratorTests {
                     var cls = ctx.GlobalNamespace.DeclareClass("TestClass");
 
                     cls.DeclareField<string>(ctx.Type(typeof(string)), "_state");
-                    cls.DeclareMethod<Delegate>("SomeOtherMethod").WithBody(ctx.Block((re) => { })).WithReturnType(typeof(void));
+                    cls.DeclareMethod<Delegate>("SomeOtherMethod").WithBody(ctx.Block((re) => { }))
+                        .WithReturnType(typeof(void));
 
                     var stringType = ctx.TypeFromCompilation<string>();
-                    var targetType = ((IInvocationOperation) ctx.Compilation.GetSemanticModel(s.SyntaxTree).GetOperation(s)).TargetMethod.ReceiverType;
+                    var targetType =
+                        ((IInvocationOperation)ctx.Compilation.GetSemanticModel(s.SyntaxTree).GetOperation(s))
+                        .TargetMethod.ReceiverType;
                     cls.DeclareInterceptorMethod<TestInterceptorMethodDefinition<CompileTimeUnknown>>(
                         "DoWorkAsync",
                         s,
@@ -41,9 +45,7 @@ public sealed class InterceptorMethodDeclarationDefinitionGeneratorTests {
                     cls.DeclareMethod<Func<string>>("GetState")
                         .WithReturnType(stringType)
                         .WithAccessibility(AccessModifier.Public)
-                        .WithBody(ctx.Block(renderTree => {
-                            renderTree.Text("return _state;");
-                        }));
+                        .WithBody(ctx.Block(renderTree => { renderTree.Text("return _state;"); }));
 
                     ctx.EmitIncremental("A", cls);
                 });
@@ -107,8 +109,10 @@ public sealed partial class TestInterceptorMethodDefinition<TTarget> : Synthetic
             }
 
             return result;
-        } catch {
-            Console.WriteLine($"Caught exception while invoking method {Method.Name} with {InvocationArguments.Length} arguments.");
+        }
+        catch {
+            Console.WriteLine(
+                $"Caught exception while invoking method {Method.Name} with {InvocationArguments.Length} arguments.");
         }
 
         return true;

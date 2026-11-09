@@ -1,9 +1,10 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Mumei.CodeGen.Components;
-using Mumei.CodeGen.Rendering;
-using Mumei.CodeGen.Rendering.CSharp;
-using Mumei.CodeGen.Roslyn.Components;
+using Mumei.CodeGen.Legacy;
+using Mumei.CodeGen.Legacy.Components;
+using Mumei.CodeGen.Legacy.Rendering;
+using Mumei.CodeGen.Legacy.Rendering.CSharp;
+using Mumei.CodeGen.Legacy.Roslyn.Components;
 using Mumei.Common.Internal;
 
 namespace Mumei.CodeGen.DeclarationGenerator;
@@ -42,12 +43,14 @@ public sealed partial class DeclarationDefinitionGenerator {
 
         foreach (var member in outputMembers) {
             if (member is IFieldSymbol field) {
-                memberBindingStatements.Add(DeclarationBuilderFactory.DeclareFieldFromDefinitionMember(classBuilder, field));
+                memberBindingStatements.Add(
+                    DeclarationBuilderFactory.DeclareFieldFromDefinitionMember(classBuilder, field));
                 continue;
             }
 
             if (member is IPropertySymbol property) {
-                memberBindingStatements.Add(DeclarationBuilderFactory.DeclarePropertyFromDefinitionMember(classBuilder, property));
+                memberBindingStatements.Add(
+                    DeclarationBuilderFactory.DeclarePropertyFromDefinitionMember(classBuilder, property));
                 continue;
             }
 
@@ -63,15 +66,15 @@ public sealed partial class DeclarationDefinitionGenerator {
 
         outputMembers.Dispose();
 
-        bindingMethod.WithBody(ctx.Block(memberBindingStatements.ToArrayAndFree(), static (renderTree, bindingExpressions) => {
-            for (var i = 0; i < bindingExpressions.Length; i++) {
-                var bindingExpression = bindingExpressions[i];
-                renderTree.Node(bindingExpression);
-                if (i < bindingExpressions.Length - 1) {
-                    renderTree.NewLine();
+        bindingMethod.WithBody(ctx.Block(memberBindingStatements.ToArrayAndFree(),
+            static (renderTree, bindingExpressions) => {
+                for (var i = 0; i < bindingExpressions.Length; i++) {
+                    var bindingExpression = bindingExpressions[i];
+                    renderTree.Node(bindingExpression);
+                    if (i < bindingExpressions.Length - 1) {
+                        renderTree.NewLine();
+                    }
                 }
-            }
-        }));
+            }));
     }
-
 }

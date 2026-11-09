@@ -15,7 +15,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Mumei.CodeGen.Roslyn\Mumei.CodeGen.Roslyn.csproj"/>
+        <ProjectReference Include="..\Mumei.CodeGen.Legacy.Roslyn\Mumei.CodeGen.Legacy.Roslyn.csproj"/>
     </ItemGroup>
 
     <Import Project="../Mumei.Roslyn.Common/Mumei.Roslyn.Common.props"/>
@@ -26,7 +26,7 @@
 
     <Target Name="GetDependencyTargetPaths" AfterTargets="ResolvePackageDependenciesForBuild">
         <ItemGroup>
-            <TargetPathWithTargetPlatformMoniker Include="..\..\src\Mumei.CodeGen.Roslyn\bin\$(Configuration)\netstandard2.0\*.dll" IncludeRuntimeDependency="false"/>
+            <TargetPathWithTargetPlatformMoniker Include="..\..\src\Mumei.CodeGen.Legacy.Roslyn\bin\$(Configuration)\$(TargetFramework)\*.dll" IncludeRuntimeDependency="false"/>
         </ItemGroup>
     </Target>
 </Project>

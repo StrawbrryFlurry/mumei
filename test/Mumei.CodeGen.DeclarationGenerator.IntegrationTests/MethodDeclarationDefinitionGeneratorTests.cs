@@ -1,7 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
-using Mumei.CodeGen.Components;
-using Mumei.CodeGen.Roslyn.Components;
-using Mumei.CodeGen.Roslyn.RoslynCodeProviders;
+using Mumei.CodeGen.Legacy;
+using Mumei.CodeGen.Legacy.Components;
+using Mumei.CodeGen.Legacy.Roslyn.Components;
+using Mumei.CodeGen.Legacy.Roslyn.RoslynCodeProviders;
 using Mumei.Roslyn.Testing;
 
 namespace Mumei.CodeGen.DeclarationGenerator.IntegrationTests;
@@ -29,7 +30,8 @@ public sealed class MethodDeclarationDefinitionGeneratorTests {
                     var cls = ctx.GlobalNamespace.DeclareClass("TestClass");
 
                     cls.DeclareField<string>(ctx.Type(typeof(string)), "_state");
-                    cls.DeclareMethod<Delegate>("SomeOtherMethod").WithBody(ctx.Block((re) => { })).WithReturnType(typeof(void));
+                    cls.DeclareMethod<Delegate>("SomeOtherMethod").WithBody(ctx.Block((re) => { }))
+                        .WithReturnType(typeof(void));
 
                     var stringType = ctx.TypeFromCompilation<string>();
                     cls.DeclareMethod<TestMethodDefinition<CompileTimeUnknown>>(
@@ -44,9 +46,7 @@ public sealed class MethodDeclarationDefinitionGeneratorTests {
                     cls.DeclareMethod<Func<string>>("GetState")
                         .WithReturnType(stringType)
                         .WithAccessibility(AccessModifier.Public)
-                        .WithBody(ctx.Block(renderTree => {
-                            renderTree.Text("return _state;");
-                        }));
+                        .WithBody(ctx.Block(renderTree => { renderTree.Text("return _state;"); }));
 
                     ctx.EmitIncremental("A", cls);
                 });

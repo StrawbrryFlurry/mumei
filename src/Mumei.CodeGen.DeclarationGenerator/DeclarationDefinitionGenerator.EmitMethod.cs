@@ -1,8 +1,9 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Mumei.CodeGen.Components;
-using Mumei.CodeGen.Rendering;
-using Mumei.CodeGen.Roslyn.Components;
+using Mumei.CodeGen.Legacy;
+using Mumei.CodeGen.Legacy.Components;
+using Mumei.CodeGen.Legacy.Rendering;
+using Mumei.CodeGen.Legacy.Roslyn.Components;
 using Mumei.Common.Internal;
 using Mumei.Roslyn.Common.Polyfill;
 
@@ -56,7 +57,8 @@ public sealed partial class DeclarationDefinitionGenerator {
             uniqueNameBuilder.AddRange(method.Name);
             uniqueNameBuilder.AddRange("_T");
             uniqueNameBuilder.EnsureCapacity(char.MaxAsciiIntLength);
-            uniqueNameBuilder.Advance(char.WriteIntAsAsciiChars((uint) method.Arity, uniqueNameBuilder.UnsafeBuffer[uniqueNameBuilder.Count..]));
+            uniqueNameBuilder.Advance(char.WriteIntAsAsciiChars((uint)method.Arity,
+                uniqueNameBuilder.UnsafeBuffer[uniqueNameBuilder.Count..]));
 
             foreach (var param in method.Parameters) {
                 uniqueNameBuilder.Add('_');
@@ -85,17 +87,21 @@ public sealed partial class DeclarationDefinitionGenerator {
             createdOutputMethods.Add((method, impl));
         }
 
-        bindingMethod.WithBody(ctx.Block((targetMethodParameter, builderParameter: classBuilder, createdOutputMethods.ToArrayAndFree()), static (renderTree, inputs) => {
-            var (targetMethodParameter, builderParameter, outputMembers) = inputs;
-            foreach (var outputMember in outputMembers) {
-                renderTree.InterpolatedLine($$"""if ({{targetMethodParameter}}.Method == ((Delegate) {{outputMember.Source.Name}}).Method) {""");
-                renderTree.StartBlock();
-                renderTree.InterpolatedLine($$"""return {{outputMember.BinderImpl.Name.ConstantValue}}({{builderParameter}});""");
-                renderTree.EndBlock();
-                renderTree.Line("}");
-            }
+        bindingMethod.WithBody(ctx.Block(
+            (targetMethodParameter, builderParameter: classBuilder, createdOutputMethods.ToArrayAndFree()),
+            static (renderTree, inputs) => {
+                var (targetMethodParameter, builderParameter, outputMembers) = inputs;
+                foreach (var outputMember in outputMembers) {
+                    renderTree.InterpolatedLine(
+                        $$"""if ({{targetMethodParameter}}.Method == ((Delegate) {{outputMember.Source.Name}}).Method) {""");
+                    renderTree.StartBlock();
+                    renderTree.InterpolatedLine(
+                        $$"""return {{outputMember.BinderImpl.Name.ConstantValue}}({{builderParameter}});""");
+                    renderTree.EndBlock();
+                    renderTree.Line("}");
+                }
 
-            renderTree.InterpolatedLine($$"""throw new InvalidOperationException("Unsupported method");""");
-        }));
+                renderTree.InterpolatedLine($$"""throw new InvalidOperationException("Unsupported method");""");
+            }));
     }
 }

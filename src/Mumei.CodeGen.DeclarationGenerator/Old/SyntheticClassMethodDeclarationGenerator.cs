@@ -4,12 +4,13 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
-using Mumei.CodeGen.Components;
-using Mumei.CodeGen.Rendering;
-using Mumei.CodeGen.Rendering.CSharp;
-using Mumei.CodeGen.Roslyn;
-using Mumei.CodeGen.Roslyn.Components;
-using Mumei.CodeGen.Roslyn.RoslynCodeProviders;
+using Mumei.CodeGen.Legacy;
+using Mumei.CodeGen.Legacy.Components;
+using Mumei.CodeGen.Legacy.Rendering;
+using Mumei.CodeGen.Legacy.Rendering.CSharp;
+using Mumei.CodeGen.Legacy.Roslyn;
+using Mumei.CodeGen.Legacy.Roslyn.Components;
+using Mumei.CodeGen.Legacy.Roslyn.RoslynCodeProviders;
 
 namespace Mumei.CodeGen.DeclarationGenerator;
 
@@ -26,17 +27,20 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
         var withBodyInvocationsWithInput = withBodyInvocations.Where(x => x.State.DependencyExpression is not null);
 
         var simpleInterceptorMethods = simpleWithBodyInvocations.Select(TranslateSimpleWithBodyInvocationProvider);
-        var interceptorMethodsWithInputs = withBodyInvocationsWithInput.Select(TranslateWithBodyWithInputsInvocationProvider);
+        var interceptorMethodsWithInputs =
+            withBodyInvocationsWithInput.Select(TranslateWithBodyWithInputsInvocationProvider);
     }
 
     private static bool IsWithBodyInvocation(SyntaxNode node, CancellationToken _) {
         return SyntaxNodeFilter.IsInvocationOf(node, "WithBody");
     }
 
-    private static InterceptInvocationIntermediateNode<(ExpressionSyntax? DependencyExpression, LambdaExpressionSyntax BodyOrBodyWithInputsDeclaration)> TranslateWithBodyInvocationProvider(
-        GeneratorSyntaxContext context,
-        CancellationToken _
-    ) {
+    private static
+        InterceptInvocationIntermediateNode<(ExpressionSyntax? DependencyExpression, LambdaExpressionSyntax
+            BodyOrBodyWithInputsDeclaration)> TranslateWithBodyInvocationProvider(
+            GeneratorSyntaxContext context,
+            CancellationToken _
+        ) {
         if (!SyntaxProviderFactory.TryCreateInvocation(context, out var invocation)) {
             return IntermediateNode.None;
         }
@@ -48,11 +52,15 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
         var arguments = invocation.Operation.Arguments;
 
         if (arguments is [{ Value: IDelegateCreationOperation { Syntax: LambdaExpressionSyntax bodyDeclaration } }]) {
-            return invocation.AsIntercept().WithState<(ExpressionSyntax?, LambdaExpressionSyntax)>((null, bodyDeclaration));
+            return invocation.AsIntercept()
+                .WithState<(ExpressionSyntax?, LambdaExpressionSyntax)>((null, bodyDeclaration));
         }
 
         // The dependency could be any expression and we need to figure out ad-hoc how to resolve it later.
-        if (arguments is [{ Value.Syntax: ExpressionSyntax inputExpression }, { Value: IDelegateCreationOperation { Syntax: LambdaExpressionSyntax bodyWithInputsDeclaration } }]) {
+        if (arguments is [
+                { Value.Syntax: ExpressionSyntax inputExpression },
+                { Value: IDelegateCreationOperation { Syntax: LambdaExpressionSyntax bodyWithInputsDeclaration } }
+            ]) {
             return invocation.AsIntercept().WithState((inputExpression, bodyWithInputsDeclaration))!;
         }
 
@@ -63,10 +71,12 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
     private const string RenderFragmentInputsArg = "λ__renderTreeInputArg";
     private const string RenderTreeArg = "λ__renderTreeArg";
 
-    private static (MethodDeclarationFragment, ClassDeclarationFragment? InputAccessorClass) TranslateWithBodyWithInputsInvocationProvider(
-        InterceptInvocationIntermediateNode<(ExpressionSyntax? InputExpression, LambdaExpressionSyntax BodyOrBodyWithInputsDeclaration)> invocation,
-        CancellationToken _
-    ) {
+    private static (MethodDeclarationFragment, ClassDeclarationFragment? InputAccessorClass)
+        TranslateWithBodyWithInputsInvocationProvider(
+            InterceptInvocationIntermediateNode<(ExpressionSyntax? InputExpression, LambdaExpressionSyntax
+                BodyOrBodyWithInputsDeclaration)> invocation,
+            CancellationToken _
+        ) {
         var (inputExpression, inputBodyDeclarationExpression) = invocation.State;
         if (!inputBodyDeclarationExpression.Modifiers.Contains(SyntaxFactory.Token(SyntaxKind.StaticKeyword))) {
             // return default!; // Diagnostic: Body lambda must be static
@@ -78,7 +88,8 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
             // return;
         }
 
-        var inputDeclarationFunc = invocation.SemanticModel.GetOperation(inputBodyDeclarationExpression) as IAnonymousFunctionOperation;
+        var inputDeclarationFunc =
+            invocation.SemanticModel.GetOperation(inputBodyDeclarationExpression) as IAnonymousFunctionOperation;
 
         var methodName = $"Synthetic_WithBody_Interceptor_{Guid.NewGuid():N}";
 
@@ -89,7 +100,8 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
         if (inputType.Type.IsAnonymousType) {
             var accessorClassName = $"AnonymousOrInternalInputArgumentAccessor_{methodName}";
 
-            var properties = inputType.Type.GetMembers().Where(x => x is IPropertySymbol).Cast<IPropertySymbol>().ToArray();
+            var properties = inputType.Type.GetMembers().Where(x => x is IPropertySymbol).Cast<IPropertySymbol>()
+                .ToArray();
             var propertyMembers = ImmutableArray.CreateBuilder<PropertyDeclarationFragment>(properties.Length);
             foreach (var inputMemberProperty in properties) {
                 propertyMembers.Add(PropertyDeclarationFragment.Create(
@@ -100,12 +112,16 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
                 ));
             }
 
-            inputAccessorClass = ClassDeclarationFragment.Create(accessorClassName, accessModifier: AccessModifier.Private + AccessModifier.Sealed, properties: propertyMembers.MoveToImmutable());
+            inputAccessorClass = ClassDeclarationFragment.Create(accessorClassName,
+                accessModifier: AccessModifier.Private + AccessModifier.Sealed,
+                properties: propertyMembers.MoveToImmutable());
             normalizedInputType = accessorClassName;
-            normalizedInputExpression = $"System.Runtime.CompilerServices.{nameof(Unsafe)}.{nameof(Unsafe.As)}<Tλ__Input, {accessorClassName}>(ref λ__input)";
+            normalizedInputExpression =
+                $"System.Runtime.CompilerServices.{nameof(Unsafe)}.{nameof(Unsafe.As)}<Tλ__Input, {accessorClassName}>(ref λ__input)";
         }
 
-        var bodyDeclarationOperation = invocation.SemanticModel.GetOperation(bodyDeclaration) as IAnonymousFunctionOperation;
+        var bodyDeclarationOperation =
+            invocation.SemanticModel.GetOperation(bodyDeclaration) as IAnonymousFunctionOperation;
 
         // var codeBlock = SyntheticRenderCodeBlockSyntaxRewriter.CreateSyntheticRenderBlock(
         //     bodyDeclaration.Body,
@@ -121,16 +137,24 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
         var methodDecl = MethodDeclarationFragment.Create(
             [AttributeFragment.Intercept(invocation.Location)],
             AccessModifier.Internal + AccessModifier.Static,
-            [TypeParameterFragment.Create("Tλ__MethodSignature", out var tMethodSignature, typeof(Delegate)), TypeParameterFragment.Create("Tλ__Input", out var tInput)],
+            [
+                TypeParameterFragment.Create("Tλ__MethodSignature", out var tMethodSignature, typeof(Delegate)),
+                TypeParameterFragment.Create("Tλ__Input", out var tInput)
+            ],
             TypeInfoFragment.ConstructGenericType(typeof(ISyntheticMethodBuilder<>), tMethodSignature),
             methodName,
             [
-                ParameterFragment.Create(TypeInfoFragment.ConstructGenericType(typeof(ISyntheticMethodBuilder<>), tMethodSignature), "λ__this", ParameterAttributes.This, out var thisParm),
+                ParameterFragment.Create(
+                    TypeInfoFragment.ConstructGenericType(typeof(ISyntheticMethodBuilder<>), tMethodSignature),
+                    "λ__this", ParameterAttributes.This, out var thisParm),
                 ParameterFragment.Create(tInput, "λ__input"),
-                ParameterFragment.Create(TypeInfoFragment.ConstructGenericType(typeof(Func<>), tInput, tMethodSignature), "λ__codeBlockDeclaration")
+                ParameterFragment.Create(
+                    TypeInfoFragment.ConstructGenericType(typeof(Func<>), tInput, tMethodSignature),
+                    "λ__codeBlockDeclaration")
             ],
             CodeBlockFragment.Create("codeBlock", (builder, fragment) => {
-                builder.Interpolate($"{LocalFragment.Var("λ__normalizedInputs", out var normalizedInput)} = {normalizedInputExpression};");
+                builder.Interpolate(
+                    $"{LocalFragment.Var("λ__normalizedInputs", out var normalizedInput)} = {normalizedInputExpression};");
                 builder.NewLine();
                 builder.Line($"#pragma warning disable {Diagnostics.InternalFeatureId}");
                 builder.Interpolate($"{LocalFragment.Var("λ__bodyDeclaration", out var bodyDeclaration)} = ");
@@ -154,7 +178,8 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
     }
 
     private static MethodDeclarationFragment TranslateSimpleWithBodyInvocationProvider(
-        InterceptInvocationIntermediateNode<(ExpressionSyntax? InputExpression, LambdaExpressionSyntax BodyOrBodyWithInputsDeclaration)> invocation,
+        InterceptInvocationIntermediateNode<(ExpressionSyntax? InputExpression, LambdaExpressionSyntax
+            BodyOrBodyWithInputsDeclaration)> invocation,
         CancellationToken _
     ) {
         var (_, bodyDeclaration) = invocation.State;
@@ -180,7 +205,8 @@ internal sealed class SyntheticClassMethodDeclarationGenerator : IIncrementalGen
             [],
             CodeBlockFragment.Create("codeBlock", (builder, fragment) => {
                 builder.Text("var λ__bodyDeclaration = ");
-                builder.Interpolate($"{nameof(ISyntheticMethodBuilder<>.ΦCompilerApi)}.{nameof(ISyntheticMethodBuilder<>.ΦCompilerApi.Context.Block)}((renderTree) => {{");
+                builder.Interpolate(
+                    $"{nameof(ISyntheticMethodBuilder<>.ΦCompilerApi)}.{nameof(ISyntheticMethodBuilder<>.ΦCompilerApi.Context.Block)}((renderTree) => {{");
                 builder.Block(fragment);
                 builder.Text("}));");
                 builder.Text($"this.{nameof(ISyntheticMethodBuilder<>.WithBody)}(λ__bodyDeclaration);");

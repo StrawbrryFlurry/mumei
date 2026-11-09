@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text;
-using Mumei.CodeGen;
+using Mumei.CodeGen.Legacy;
 
 namespace Mumei.Roslyn.Testing;
 
@@ -38,9 +38,11 @@ public readonly ref struct CommonSyntaxStringInterpolationHandler {
         var options = format.Split("+");
         if (options.Contains("global") || options.Contains("g")) {
             name = RuntimeTypeSerializer.GetTypeFullName(type, true);
-        } else if (format.Contains("nq")) {
+        }
+        else if (format.Contains("nq")) {
             name = RuntimeTypeSerializer.GetTypeFullName(type, false);
-        } else {
+        }
+        else {
             name = RuntimeTypeSerializer.GetTypeFullName(type, false);
         }
 

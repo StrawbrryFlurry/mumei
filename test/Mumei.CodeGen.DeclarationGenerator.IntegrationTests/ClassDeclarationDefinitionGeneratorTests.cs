@@ -1,8 +1,8 @@
 ﻿using System.Runtime.InteropServices.ComTypes;
 using Microsoft.CodeAnalysis;
-using Mumei.CodeGen.Components;
-using Mumei.CodeGen.Roslyn.Components;
-using Mumei.CodeGen.Roslyn.RoslynCodeProviders;
+using Mumei.CodeGen.Legacy.Components;
+using Mumei.CodeGen.Legacy.Roslyn.Components;
+using Mumei.CodeGen.Legacy.Roslyn.RoslynCodeProviders;
 using Mumei.Roslyn.Testing;
 
 namespace Mumei.CodeGen.DeclarationGenerator.IntegrationTests;
@@ -32,9 +32,7 @@ public sealed class ClassDeclarationDefinitionGeneratorTests {
 
                 context.RegisterCodeGenerationOutput(o);
             }
-        ).RunWithAssert(result => {
-            result.HasFileMatching($"A__0.g.cs").WithContent($"");
-        });
+        ).RunWithAssert(result => { result.HasFileMatching($"A__0.g.cs").WithContent($""); });
     }
 }
 

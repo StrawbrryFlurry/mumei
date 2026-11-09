@@ -4,8 +4,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
-using Mumei.CodeGen.Components;
-using Mumei.CodeGen.Rendering;
+using Mumei.CodeGen.Legacy;
+using Mumei.CodeGen.Legacy.Components;
+using Mumei.CodeGen.Legacy.Rendering;
 
 namespace Mumei.CodeGen.DeclarationGenerator;
 
@@ -33,18 +34,21 @@ internal abstract class SyntheticDefinitionMethodCodeBlockResolutionContext(
 
     public SemanticModel SemanticModel => sm;
 
-    public bool TryResolveThisExpression(MacroRenderTreeBuilder macroRenderContext, ThisExpressionSyntax thisExpression, [NotNullWhen(true)] out MacroRenderTreeBuilder.MacroSlot? slot) {
+    public bool TryResolveThisExpression(MacroRenderTreeBuilder macroRenderContext, ThisExpressionSyntax thisExpression,
+        [NotNullWhen(true)] out MacroRenderTreeBuilder.MacroSlot? slot) {
         // If this is not a member access to an input member we don't care about it since `this` will be valid in the generated context.
         slot = null;
         return false;
     }
 
-    public bool TryUpdateThisExpression(ThisExpressionSyntax thisExpression, [NotNullWhen(true)] out SyntaxNode? updatedNode) {
+    public bool TryUpdateThisExpression(ThisExpressionSyntax thisExpression,
+        [NotNullWhen(true)] out SyntaxNode? updatedNode) {
         updatedNode = null;
         return false;
     }
 
-    public bool TryResolveName(MacroRenderTreeBuilder macroRenderContext, SimpleNameSyntax identifier, [NotNullWhen(true)] out MacroRenderTreeBuilder.MacroSlot? slot) {
+    public bool TryResolveName(MacroRenderTreeBuilder macroRenderContext, SimpleNameSyntax identifier,
+        [NotNullWhen(true)] out MacroRenderTreeBuilder.MacroSlot? slot) {
         if (!inputMemberNames.Contains(identifier.Identifier.Text)) {
             goto NotFound;
         }
@@ -60,7 +64,8 @@ internal abstract class SyntheticDefinitionMethodCodeBlockResolutionContext(
             SyntaxFactory.IdentifierName(InputArgumentName),
             identifier
         );
-        EmitInputMemberRenderExpression(macroRenderContext, identifier, synthesizedMemberAccess, memberReference.Member, out slot);
+        EmitInputMemberRenderExpression(macroRenderContext, identifier, synthesizedMemberAccess, memberReference.Member,
+            out slot);
         return true;
 
         NotFound:
@@ -73,9 +78,11 @@ internal abstract class SyntheticDefinitionMethodCodeBlockResolutionContext(
         return false;
     }
 
-    public bool TryResolveMemberAccess(MacroRenderTreeBuilder macroRenderContext, MemberAccessExpressionSyntax memberAccess, [NotNullWhen(true)] out MacroRenderTreeBuilder.MacroSlot? slot) {
+    public bool TryResolveMemberAccess(MacroRenderTreeBuilder macroRenderContext,
+        MemberAccessExpressionSyntax memberAccess, [NotNullWhen(true)] out MacroRenderTreeBuilder.MacroSlot? slot) {
         var targetMemberAccess = GetInnerMostMemberAccess(memberAccess);
-        if (targetMemberAccess.Expression is not ThisExpressionSyntax || !inputMemberNames.Contains(targetMemberAccess.Name.Identifier.Text)) {
+        if (targetMemberAccess.Expression is not ThisExpressionSyntax ||
+            !inputMemberNames.Contains(targetMemberAccess.Name.Identifier.Text)) {
             goto NotFound;
         }
 
@@ -85,8 +92,10 @@ internal abstract class SyntheticDefinitionMethodCodeBlockResolutionContext(
         }
 
         // Replace this.Member with ctx.Member
-        var synthesizedMemberAccess = memberAccess.ReplaceNode(targetMemberAccess.Expression, SyntaxFactory.IdentifierName(InputArgumentName));
-        EmitInputMemberRenderExpression(macroRenderContext, memberAccess, synthesizedMemberAccess, memberReference.Member, out slot);
+        var synthesizedMemberAccess = memberAccess.ReplaceNode(targetMemberAccess.Expression,
+            SyntaxFactory.IdentifierName(InputArgumentName));
+        EmitInputMemberRenderExpression(macroRenderContext, memberAccess, synthesizedMemberAccess,
+            memberReference.Member, out slot);
         return true;
 
         NotFound:
@@ -104,18 +113,23 @@ internal abstract class SyntheticDefinitionMethodCodeBlockResolutionContext(
         ITypeSymbol memberType;
         if (memberSymbol is IPropertySymbol propertySymbol) {
             memberType = propertySymbol.Type;
-        } else if (memberSymbol is IFieldSymbol fieldSymbol) {
+        }
+        else if (memberSymbol is IFieldSymbol fieldSymbol) {
             memberType = fieldSymbol.Type;
-        } else if (memberSymbol is IMethodSymbol methodSymbol) {
+        }
+        else if (memberSymbol is IMethodSymbol methodSymbol) {
             memberType = methodSymbol.ReturnType;
-        } else {
+        }
+        else {
             slot = macroRenderContext.DeclareSlot(renderTree => {
-                renderTree.Text($"#error Failed to generate a render expression for {expression} since {memberSymbol} is not a valid renderable member.");
+                renderTree.Text(
+                    $"#error Failed to generate a render expression for {expression} since {memberSymbol} is not a valid renderable member.");
             });
             return;
         }
 
-        if (TryEmitRenderExpressionForType(macroRenderContext, expression, synthesizedExpression, memberType, out slot)) {
+        if (TryEmitRenderExpressionForType(macroRenderContext, expression, synthesizedExpression, memberType,
+                out slot)) {
             return;
         }
 
@@ -136,7 +150,8 @@ internal abstract class SyntheticDefinitionMethodCodeBlockResolutionContext(
         var renderFragmentType = sm.Compilation.GetTypeByMetadataName(typeof(IRenderFragment).FullName!)!;
         if (typeSymbol.AllInterfaces.Contains(renderFragmentType, SymbolEqualityComparer.Default)) {
             slot = macroRenderContext.DeclareSlot(renderTree => {
-                renderTree.Interpolate($"{synthesizedExpressionToRender.NormalizeWhitespace().ToFullString()}.{nameof(IRenderFragment.Render)}({RenderTreeExpression()});");
+                renderTree.Interpolate(
+                    $"{synthesizedExpressionToRender.NormalizeWhitespace().ToFullString()}.{nameof(IRenderFragment.Render)}({RenderTreeExpression()});");
             });
             return true;
         }
@@ -150,7 +165,9 @@ internal abstract class SyntheticDefinitionMethodCodeBlockResolutionContext(
             SyntaxFactory.ArgumentList(
                 SyntaxFactory.SingletonSeparatedList(
                     SyntaxFactory.Argument(
-                        SyntaxFactory.DefaultExpression(SyntaxFactory.IdentifierName(RuntimeTypeSerializer.GetTypeFullName(typeof(IRenderTreeBuilder)))
+                        SyntaxFactory.DefaultExpression(
+                            SyntaxFactory.IdentifierName(
+                                RuntimeTypeSerializer.GetTypeFullName(typeof(IRenderTreeBuilder)))
                         )
                     )
                 )
@@ -170,13 +187,15 @@ internal abstract class SyntheticDefinitionMethodCodeBlockResolutionContext(
 
         if (!renderToMethodSymbol.IsExtensionMethod) {
             slot = macroRenderContext.DeclareSlot(renderTree => {
-                renderTree.Interpolate($"{synthesizedExpressionToRender.NormalizeWhitespace().ToFullString()}.{renderToMethodSymbol.Name}({RenderTreeExpression()});");
+                renderTree.Interpolate(
+                    $"{synthesizedExpressionToRender.NormalizeWhitespace().ToFullString()}.{renderToMethodSymbol.Name}({RenderTreeExpression()});");
             });
             return true;
         }
 
         slot = macroRenderContext.DeclareSlot(renderTree => {
-            renderTree.Interpolate($"{renderToMethodSymbol.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{renderToMethodSymbol.Name}({synthesizedExpressionToRender.NormalizeWhitespace().ToFullString()}, {RenderTreeExpression()});");
+            renderTree.Interpolate(
+                $"{renderToMethodSymbol.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{renderToMethodSymbol.Name}({synthesizedExpressionToRender.NormalizeWhitespace().ToFullString()}, {RenderTreeExpression()});");
         });
         return true;
     }
@@ -192,26 +211,32 @@ internal abstract class SyntheticDefinitionMethodCodeBlockResolutionContext(
         return innerMostMemberAccess;
     }
 
-    public bool TryUpdateMemberAccess(MemberAccessExpressionSyntax memberAccess, [NotNullWhen(true)] out SyntaxNode? updatedNode) {
+    public bool TryUpdateMemberAccess(MemberAccessExpressionSyntax memberAccess,
+        [NotNullWhen(true)] out SyntaxNode? updatedNode) {
         updatedNode = null;
         return false;
     }
 
-    public bool TryResolveInvocation(MacroRenderTreeBuilder macroRenderContext, InvocationExpressionSyntax invocation, [NotNullWhen(true)] out MacroRenderTreeBuilder.MacroSlot? slot) {
+    public bool TryResolveInvocation(MacroRenderTreeBuilder macroRenderContext, InvocationExpressionSyntax invocation,
+        [NotNullWhen(true)] out MacroRenderTreeBuilder.MacroSlot? slot) {
         ExpressionSyntax synthesizedInvocationExpression;
-        if (invocation.Expression is not MemberAccessExpressionSyntax && invocation.Expression is not SimpleNameSyntax) {
+        if (invocation.Expression is not MemberAccessExpressionSyntax &&
+            invocation.Expression is not SimpleNameSyntax) {
             goto NotFound;
         }
 
         if (invocation.Expression is MemberAccessExpressionSyntax potentialInputAccess) {
             var memberAccess = GetInnerMostMemberAccess(potentialInputAccess);
-            if (memberAccess.Expression is not ThisExpressionSyntax || !inputMemberNames.Contains(memberAccess.Name.Identifier.Text)) {
+            if (memberAccess.Expression is not ThisExpressionSyntax ||
+                !inputMemberNames.Contains(memberAccess.Name.Identifier.Text)) {
                 goto NotFound;
             }
 
-            synthesizedInvocationExpression = invocation.ReplaceNode(memberAccess.Expression, SyntaxFactory.IdentifierName(InputArgumentName));
-        } else {
-            var invocationTarget = (SimpleNameSyntax) invocation.Expression;
+            synthesizedInvocationExpression = invocation.ReplaceNode(memberAccess.Expression,
+                SyntaxFactory.IdentifierName(InputArgumentName));
+        }
+        else {
+            var invocationTarget = (SimpleNameSyntax)invocation.Expression;
             if (!inputMemberNames.Contains(invocationTarget.Identifier.Text)) {
                 goto NotFound;
             }
@@ -229,7 +254,8 @@ internal abstract class SyntheticDefinitionMethodCodeBlockResolutionContext(
             goto NotFound;
         }
 
-        EmitInputMemberRenderExpression(macroRenderContext, invocation, synthesizedInvocationExpression, invocationOperation.TargetMethod, out slot);
+        EmitInputMemberRenderExpression(macroRenderContext, invocation, synthesizedInvocationExpression,
+            invocationOperation.TargetMethod, out slot);
         return true;
 
         NotFound:
@@ -237,7 +263,8 @@ internal abstract class SyntheticDefinitionMethodCodeBlockResolutionContext(
         return false;
     }
 
-    public bool TryUpdateInvocation(InvocationExpressionSyntax invocation, [NotNullWhen(true)] out SyntaxNode? updatedNode) {
+    public bool TryUpdateInvocation(InvocationExpressionSyntax invocation,
+        [NotNullWhen(true)] out SyntaxNode? updatedNode) {
         updatedNode = null;
         return false;
     }

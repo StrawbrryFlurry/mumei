@@ -2,10 +2,10 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
-using Mumei.CodeGen.Components;
-using Mumei.CodeGen.Rendering.CSharp;
-using Mumei.CodeGen.Roslyn;
-using Mumei.CodeGen.Roslyn.Components;
+using Mumei.CodeGen.Legacy.Components;
+using Mumei.CodeGen.Legacy.Rendering.CSharp;
+using Mumei.CodeGen.Legacy.Roslyn;
+using Mumei.CodeGen.Legacy.Roslyn.Components;
 using Mumei.Roslyn.Testing;
 
 namespace Mumei.CodeGen.DeclarationGenerator.Tests;
@@ -20,10 +20,10 @@ public sealed class InterceptorMethodDeclarationDefinitionGeneratorTests {
             result.HasFileMatching($"{nameof(TestScope.TestInterceptorMethodDefinition<>)}__0.g.cs")
                 .WithPartialContent(
                     $$"""""""""""""
-                      namespace Mumei.CodeGen.DeclarationGenerator.Tests {
+                      namespace Mumei.CodeGen.Legacy.DeclarationGenerator.Tests {
                           public partial class TestInterceptorMethodDefinition<TTarget> {
-                              public override global::Mumei.CodeGen.Components.ISyntheticInterceptorMethodBuilder<global::System.Delegate> InternalBindCompilerMethod(
-                                  global::Mumei.CodeGen.Components.ISimpleSyntheticClassBuilder φbuilder,
+                              public override global::Mumei.CodeGen.Legacy.Components.ISyntheticInterceptorMethodBuilder<global::System.Delegate> InternalBindCompilerMethod(
+                                  global::Mumei.CodeGen.Legacy.Components.ISimpleSyntheticClassBuilder φbuilder,
                                   global::Microsoft.CodeAnalysis.Operations.IInvocationOperation φinvocationToBind,
                                   global::Microsoft.CodeAnalysis.CSharp.InterceptableLocation φlocationToIntercept,
                                   global::System.Delegate φtargetMethod
@@ -34,13 +34,13 @@ public sealed class InterceptorMethodDeclarationDefinitionGeneratorTests {
                                   throw new InvalidOperationException("Unsupported method");
                               }
                               
-                              private global::Mumei.CodeGen.Components.ISyntheticInterceptorMethodBuilder<global::System.Delegate> ΦBindMethod__DoWorkAsync_T0_target_arg1_arg2(
-                                  global::Mumei.CodeGen.Components.ISimpleSyntheticClassBuilder φbuilder,
+                              private global::Mumei.CodeGen.Legacy.Components.ISyntheticInterceptorMethodBuilder<global::System.Delegate> ΦBindMethod__DoWorkAsync_T0_target_arg1_arg2(
+                                  global::Mumei.CodeGen.Legacy.Components.ISimpleSyntheticClassBuilder φbuilder,
                                   global::Microsoft.CodeAnalysis.CSharp.InterceptableLocation φlocationToIntercept
                               ) {
-                                  return global::Mumei.CodeGen.Roslyn.Components.SyntheticClassBuilderExtensions.DeclareInterceptorMethodBuilder(φbuilder.ΦCompilerApi, "DoWorkAsync", φbuilder)
-                                      .WithAttributes(global::Mumei.CodeGen.Roslyn.Components.CodeGenerationContextExtensions.InterceptLocationAttribute(this.CodeGenContext, φlocationToIntercept))
-                                      .WithAccessibility(global::Mumei.CodeGen.AccessModifier.Public)
+                                  return global::Mumei.CodeGen.Legacy.Roslyn.Components.SyntheticClassBuilderExtensions.DeclareInterceptorMethodBuilder(φbuilder.ΦCompilerApi, "DoWorkAsync", φbuilder)
+                                      .WithAttributes(global::Mumei.CodeGen.Legacy.Roslyn.Components.CodeGenerationContextExtensions.InterceptLocationAttribute(this.CodeGenContext, φlocationToIntercept))
+                                      .WithAccessibility(global::Mumei.CodeGen.Legacy.AccessModifier.Public)
                                       .WithReturnType(this.CodeGenContext.Type(typeof(bool)))
                                       .WithBody(
                                           this.CodeGenContext.Block(
@@ -50,7 +50,7 @@ public sealed class InterceptorMethodDeclarationDefinitionGeneratorTests {
                                                       try
                                                       {
                                                           bool result = Invoke<bool>();
-                                                          if (!global::Mumei.CodeGen.Components.SyntheticDeclarationDefinition.EmitExpression<bool>(DoCompare.WithArguments(nameof(result))))
+                                                          if (!global::Mumei.CodeGen.Legacy.Components.SyntheticDeclarationDefinition.EmitExpression<bool>(DoCompare.WithArguments(nameof(result))))
                                                           {
                                                               throw new global::System.InvalidOperationException("Work already done");
                                                           }

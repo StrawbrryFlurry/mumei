@@ -20,6 +20,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Mumei.CodeGen.Roslyn\Mumei.CodeGen.Roslyn.csproj"/>
+        <ProjectReference Include="..\Mumei.CodeGen.Legacy.Roslyn\Mumei.CodeGen.Legacy.Roslyn.csproj"/>
     </ItemGroup>
 </Project>

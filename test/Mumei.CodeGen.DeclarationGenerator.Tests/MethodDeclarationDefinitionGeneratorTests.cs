@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
-using Mumei.CodeGen.Components;
-using Mumei.CodeGen.Rendering;
-using Mumei.CodeGen.Roslyn.Components;
+using Mumei.CodeGen.Legacy.Components;
+using Mumei.CodeGen.Legacy.Rendering;
+using Mumei.CodeGen.Legacy.Roslyn.Components;
 using Mumei.Roslyn.Testing;
 
 namespace Mumei.CodeGen.DeclarationGenerator.Tests;
@@ -15,10 +15,10 @@ public sealed class MethodDeclarationDefinitionGeneratorTests {
             result.HasFileMatching($"{nameof(TestScope.TestMethodDefinition<>)}__0.g.cs")
                 .WithPartialContent(
                     $$"""""""""""""
-                      namespace Mumei.CodeGen.DeclarationGenerator.Tests {
+                      namespace Mumei.CodeGen.Legacy.DeclarationGenerator.Tests {
                           public partial class TestMethodDefinition<TState> {
-                              public override global::Mumei.CodeGen.Components.ISyntheticMethodBuilder<global::System.Delegate> InternalBindCompilerMethod(
-                                  global::Mumei.CodeGen.Components.ISimpleSyntheticClassBuilder φbuilder,
+                              public override global::Mumei.CodeGen.Legacy.Components.ISyntheticMethodBuilder<global::System.Delegate> InternalBindCompilerMethod(
+                                  global::Mumei.CodeGen.Legacy.Components.ISimpleSyntheticClassBuilder φbuilder,
                                   global::System.Delegate φtargetMethod
                               ) {
                                   if (φtargetMethod.Method == ((Delegate) DoWorkAsync).Method) {
@@ -27,11 +27,11 @@ public sealed class MethodDeclarationDefinitionGeneratorTests {
                                   throw new InvalidOperationException("Unsupported method");
                               }
                               
-                              private global::Mumei.CodeGen.Components.ISyntheticMethodBuilder<global::System.Delegate> ΦBindMethod__DoWorkAsync_T0_state(
-                                  global::Mumei.CodeGen.Components.ISimpleSyntheticClassBuilder φbuilder
+                              private global::Mumei.CodeGen.Legacy.Components.ISyntheticMethodBuilder<global::System.Delegate> ΦBindMethod__DoWorkAsync_T0_state(
+                                  global::Mumei.CodeGen.Legacy.Components.ISimpleSyntheticClassBuilder φbuilder
                               ) {
                                   return φbuilder.DeclareMethod<global::System.Delegate>("DoWorkAsync")
-                                      .WithAccessibility(global::Mumei.CodeGen.AccessModifier.Public)
+                                      .WithAccessibility(global::Mumei.CodeGen.Legacy.AccessModifier.Public)
                                       .WithReturnType(this.CodeGenContext.Type(typeof(global::System.Threading.Tasks.Task)))
                                       .WithParameters(
                                           φbuilder.ΦCompilerApi.Context.Parameter(this.InternalResolveLateBoundType(nameof(TState)),
@@ -47,7 +47,7 @@ public sealed class MethodDeclarationDefinitionGeneratorTests {
                                                       SomeOtherMethod();
                                                       global::System.Console.WriteLine($"Doing work... {
                                                   """""""""""");
-                                                  global::Mumei.CodeGen.Components.DefaultRenderExpressionExtensions.RenderExpression(φctx.InputA, φrenderTree);
+                                                  global::Mumei.CodeGen.Legacy.Components.DefaultRenderExpressionExtensions.RenderExpression(φctx.InputA, φrenderTree);
                                                   φrenderTree.Text(""""""""""""
                                                   }");
                                                       return global::System.Threading.Tasks.Task.CompletedTask;

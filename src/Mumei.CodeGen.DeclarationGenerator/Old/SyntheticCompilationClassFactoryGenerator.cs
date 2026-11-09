@@ -1,10 +1,11 @@
 ﻿using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Mumei.CodeGen.Components;
-using Mumei.CodeGen.Rendering;
-using Mumei.CodeGen.Rendering.CSharp;
-using Mumei.CodeGen.Roslyn.Components;
+using Mumei.CodeGen.Legacy;
+using Mumei.CodeGen.Legacy.Components;
+using Mumei.CodeGen.Legacy.Rendering;
+using Mumei.CodeGen.Legacy.Rendering.CSharp;
+using Mumei.CodeGen.Legacy.Roslyn.Components;
 
 namespace Mumei.CodeGen.DeclarationGenerator;
 
@@ -28,9 +29,7 @@ public sealed class SyntheticCompilationClassFactoryGenerator : IIncrementalGene
             invocationExpressionSyntax
         ).WithAccessibility(AccessModifier.Private + AccessModifier.Static);
 
-        interceptMethod.WithBody(new QtSyntheticRenderCodeBlock(renderTree => {
-            renderTree.Line("");
-        }));
+        interceptMethod.WithBody(new QtSyntheticRenderCodeBlock(renderTree => { renderTree.Line(""); }));
     }
 }
 
@@ -39,7 +38,8 @@ public sealed class SyntheticCompilationClassFactoryGenerator : IIncrementalGene
 // We also use this as a container for generating all the method implementations
 [CompilerGenerated]
 file sealed partial class SyntheticClassDynamicMemberBinder<TClassDefinition> {
-    public override void InternalBindCompilerOutputMembers(ISyntheticClassBuilder<SyntheticClassDynamicMemberBinder<TClassDefinition>> classBuilder) {
+    public override void InternalBindCompilerOutputMembers(
+        ISyntheticClassBuilder<SyntheticClassDynamicMemberBinder<TClassDefinition>> classBuilder) {
         // classBuilder.λCompilerApi.BindMethodSlot();
         classBuilder.ΦCompilerApi.DeclareMethod(
             [],
@@ -115,18 +115,22 @@ file sealed partial class SyntheticClassDynamicMemberBinder<TClassDefinition> {
     }
 }
 
-file sealed partial class SyntheticClassDynamicMemberBinder<[Bindable] TClassDefinition> : SyntheticClassDefinition<SyntheticClassDynamicMemberBinder<TClassDefinition>> {
+file sealed partial class
+    SyntheticClassDynamicMemberBinder<[Bindable] TClassDefinition> : SyntheticClassDefinition<
+    SyntheticClassDynamicMemberBinder<TClassDefinition>> {
     [Input]
     public ITypeSymbol DefinitionClass { get; set; }
 
 
     private readonly List<ISyntheticMethod<Action<ISyntheticClassBuilder<TClassDefinition>>>> _outputBinderMethods;
 
-    public override void Setup(ISyntheticClassBuilder<SyntheticClassDynamicMemberBinder<TClassDefinition>> classBuilder) {
+    public override void
+        Setup(ISyntheticClassBuilder<SyntheticClassDynamicMemberBinder<TClassDefinition>> classBuilder) {
         // classBuilder.Bind<SyntheticClassDynamicMemberBinder<TClassDefinition>, TClassDefinition>(DefinitionClass);
 
         // var outputAttribute = Compilation.TypeFromCompilation<OutputAttribute>();
-        var outputMembers = DefinitionClass.GetMembers().Where(x => x.GetAttributes().Any(a => a.AttributeClass?.Equals(null!, SymbolEqualityComparer.Default) ?? false));
+        var outputMembers = DefinitionClass.GetMembers().Where(x =>
+            x.GetAttributes().Any(a => a.AttributeClass?.Equals(null!, SymbolEqualityComparer.Default) ?? false));
 
         foreach (var outputMember in outputMembers) {
             if (outputMember is IFieldSymbol outputField) {
@@ -143,16 +147,22 @@ file sealed partial class SyntheticClassDynamicMemberBinder<[Bindable] TClassDef
         }
     }
 
-    private void DeclareBindOutputField(ISyntheticClassBuilder<SyntheticClassDynamicMemberBinder<TClassDefinition>> classBuilder, IFieldSymbol field) {
-        var bindMethod = classBuilder.DeclareMethod<Action<ISyntheticClassBuilder<TClassDefinition>>>($"BindOutput__field_{field.Name}");
-        bindMethod.WithBody(new { Field = field }, static state => defBuilder => {
-            defBuilder.DeclareField(state.Field.Type, state.Field.Name);
-        });
+    private void DeclareBindOutputField(
+        ISyntheticClassBuilder<SyntheticClassDynamicMemberBinder<TClassDefinition>> classBuilder, IFieldSymbol field) {
+        var bindMethod =
+            classBuilder.DeclareMethod<Action<ISyntheticClassBuilder<TClassDefinition>>>(
+                $"BindOutput__field_{field.Name}");
+        bindMethod.WithBody(new { Field = field },
+            static state => defBuilder => { defBuilder.DeclareField(state.Field.Type, state.Field.Name); });
         _outputBinderMethods.Add(bindMethod);
     }
 
-    private void DeclareBindOutputProperty(ISyntheticClassBuilder<SyntheticClassDynamicMemberBinder<TClassDefinition>> classBuilder, IPropertySymbol property) {
-        var bindMethod = classBuilder.DeclareMethod<Action<ISyntheticClassBuilder<TClassDefinition>>>($"BindOutput__property_{property.Name}");
+    private void DeclareBindOutputProperty(
+        ISyntheticClassBuilder<SyntheticClassDynamicMemberBinder<TClassDefinition>> classBuilder,
+        IPropertySymbol property) {
+        var bindMethod =
+            classBuilder.DeclareMethod<Action<ISyntheticClassBuilder<TClassDefinition>>>(
+                $"BindOutput__property_{property.Name}");
         bindMethod.WithBody(new { Property = property }, static state => defBuilder => {
             defBuilder.DeclareProperty(state.Property.Type, state.Property.Name);
             // Handle getters and setters if needed
@@ -160,11 +170,14 @@ file sealed partial class SyntheticClassDynamicMemberBinder<[Bindable] TClassDef
         _outputBinderMethods.Add(bindMethod);
     }
 
-    private void DeclareBindOutputMethod(ISyntheticClassBuilder<SyntheticClassDynamicMemberBinder<TClassDefinition>> classBuilder, IMethodSymbol method) {
-        var bindMethod = classBuilder.DeclareMethod<Action<ISyntheticClassBuilder<TClassDefinition>>>($"BindOutput__method_{method.Name}");
-        bindMethod.WithBody(new { Method = method }, static state => defBuilder => {
-            defBuilder.DeclareMethod<Delegate>(state.Method.Name);
-        });
+    private void DeclareBindOutputMethod(
+        ISyntheticClassBuilder<SyntheticClassDynamicMemberBinder<TClassDefinition>> classBuilder,
+        IMethodSymbol method) {
+        var bindMethod =
+            classBuilder.DeclareMethod<Action<ISyntheticClassBuilder<TClassDefinition>>>(
+                $"BindOutput__method_{method.Name}");
+        bindMethod.WithBody(new { Method = method },
+            static state => defBuilder => { defBuilder.DeclareMethod<Delegate>(state.Method.Name); });
 
         _outputBinderMethods.Add(bindMethod);
     }
@@ -178,7 +191,9 @@ file sealed partial class SyntheticClassDynamicMemberBinder<[Bindable] TClassDef
 }
 
 // Since we now generate the dynamic part of the class binder in a partial class we don't need to intercept the declare class method anymore.
-file sealed partial class DeclareClassDefinitionMethod<[Bindable] TClassDefinition> : SyntheticInterceptorMethodDefinition where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new() {
+file sealed partial class
+    DeclareClassDefinitionMethod<[Bindable] TClassDefinition> : SyntheticInterceptorMethodDefinition
+    where TClassDefinition : SyntheticClassDefinition<TClassDefinition>, new() {
     [Input]
     public ITypeSymbol ClassDefinitionType { get; set; }
 

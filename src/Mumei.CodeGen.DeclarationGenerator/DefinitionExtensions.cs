@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
-using Mumei.CodeGen.Components;
-using Mumei.CodeGen.Roslyn.Components;
+using Mumei.CodeGen.Legacy.Components;
+using Mumei.CodeGen.Legacy.Roslyn.Components;
 
 namespace Mumei.CodeGen.DeclarationGenerator;
 
