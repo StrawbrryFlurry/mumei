@@ -2,6 +2,7 @@
     <!-- Framework and Language config -->
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
+        <AnalyzerTargetFramework>net9.0</AnalyzerTargetFramework>
         <LangVersion>Preview</LangVersion>
     </PropertyGroup>
 
