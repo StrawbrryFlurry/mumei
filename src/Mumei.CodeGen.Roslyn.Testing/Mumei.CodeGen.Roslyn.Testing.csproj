@@ -2,7 +2,6 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
         <PackageReference Include="xunit.v3.assert"/>
-        <PackageReference Include="DiffPlex"/>
     </ItemGroup>
 
     <ItemGroup>

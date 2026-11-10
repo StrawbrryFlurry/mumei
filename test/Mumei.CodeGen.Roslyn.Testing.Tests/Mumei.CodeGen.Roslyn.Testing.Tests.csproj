@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Mumei.CodeGen.Roslyn.Testing\Mumei.CodeGen.Roslyn.Testing.csproj"/>
+    </ItemGroup>
+</Project>
