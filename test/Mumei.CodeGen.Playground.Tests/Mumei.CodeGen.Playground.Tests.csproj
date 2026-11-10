@@ -4,9 +4,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-    </ItemGroup>
-
-    <ItemGroup>
+        <ProjectReference Include="../../src/Mumei.CodeGen.Playground\Mumei.CodeGen.Playground.csproj"/>
         <ProjectReference Include="../../src/Mumei.CodeGen.Playground.Generator\Mumei.CodeGen.Playground.Generator.csproj"/>
+        <ProjectReference Include="..\..\src\Mumei.CodeGen.Roslyn.Testing\Mumei.CodeGen.Roslyn.Testing.csproj"/>
     </ItemGroup>
 </Project>

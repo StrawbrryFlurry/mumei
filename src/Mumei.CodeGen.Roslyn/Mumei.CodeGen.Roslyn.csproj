@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>$(AnalyzerTargetFramework)</TargetFramework>
+        
+        <IsRoslynComponent>true</IsRoslynComponent>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Mumei.CodeGen\Mumei.CodeGen.csproj"/>
+    </ItemGroup>
+</Project>

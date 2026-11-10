@@ -21,6 +21,7 @@
 
     <!-- Global package references -->
     <ItemGroup>
+        <Using Include="System.Collections.Immutable"/>
     </ItemGroup>
 
     <!-- Misc config -->

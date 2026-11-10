@@ -4,7 +4,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Mumei.CodeGen.Playground\Mumei.CodeGen.Playground.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\Mumei.CodeGen.Playground.Generator\Mumei.CodeGen.Playground.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     </ItemGroup>
 
     <ItemGroup>

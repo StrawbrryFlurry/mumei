@@ -1,5 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>$(AnalyzerTargetFramework)</TargetFramework>
+
+        <IsRoslynComponent>true</IsRoslynComponent>
     </PropertyGroup>
 </Project>

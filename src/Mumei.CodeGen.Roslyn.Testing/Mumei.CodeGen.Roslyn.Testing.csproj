@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
+        <PackageReference Include="xunit.v3.assert"/>
+        <PackageReference Include="DiffPlex"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Mumei.CodeGen.Roslyn\Mumei.CodeGen.Roslyn.csproj"/>
+    </ItemGroup>
+</Project>
