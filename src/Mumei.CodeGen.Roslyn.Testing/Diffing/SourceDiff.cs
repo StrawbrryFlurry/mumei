@@ -1,4 +1,4 @@
-namespace Mumei.CodeGen.Roslyn.Testing;
+namespace Mumei.CodeGen.Roslyn.Testing.Diffing;
 
 /// <summary>
 /// Compares source texts line by line and reports differences with line numbers and the exact changed text within

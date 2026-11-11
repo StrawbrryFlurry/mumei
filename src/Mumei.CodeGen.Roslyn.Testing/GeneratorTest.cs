@@ -9,14 +9,23 @@ public sealed class GeneratorTest(
     TestCompilationBuilder builder,
     IIncrementalGenerator[] generators
 ) {
-    private TestCompilationBuilder CompilationBuilder => builder;
-    private GeneratorDriver _driver = CreateDriver(builder.ParseOptions, generators);
-
     private Compilation _compilation = builder.Build();
+    private GeneratorDriver _driver = CreateDriver(builder.ParseOptions, generators);
+    private TestCompilationBuilder CompilationBuilder => builder;
 
     public static GeneratorTest For<TGenerator>()
         where TGenerator : IIncrementalGenerator, new() {
         return new GeneratorTest(new TestCompilationBuilder(), [new TGenerator()]);
+    }
+
+    public static GeneratorTest For<TGenerator>(params DeclarationSourceComponent[] files)
+        where TGenerator : IIncrementalGenerator, new() {
+        var builder = new TestCompilationBuilder();
+        foreach (var file in files) {
+            builder.AddSource(file);
+        }
+
+        return new GeneratorTest(builder, [new TGenerator()]);
     }
 
     public static GeneratorTest For<TGenerator>(params CodeFragment[] sourceFiles)
@@ -51,18 +60,14 @@ public sealed class GeneratorTest(
         Assert.Empty(diagnostics);
         Assert.Empty(runResult.Diagnostics);
 
-        const string duplicateGlobalUsingDirectiveId = "CS8933";
-        const string unnecessaryUsingDirectiveId = "CS8019";
-        var compilationDiagnostics = updatedCompilation.GetDiagnostics().Where(x =>
-            x.Id is not (unnecessaryUsingDirectiveId or duplicateGlobalUsingDirectiveId)
-        ).ToArray();
+        diagnostics = updatedCompilation.GetDiagnostics();
 
         // Debug References
         var firstGeneratedTree = runResult.GeneratedTrees.FirstOrDefault();
-        var firstDiagnostic = compilationDiagnostics.FirstOrDefault();
+        var firstDiagnostic = diagnostics.FirstOrDefault();
 
-        if (compilationDiagnostics.Any()) {
-            Assert.Multiple(compilationDiagnostics.Select<Diagnostic, Action>(diagnostic => {
+        if (diagnostics.Any()) {
+            Assert.Multiple(diagnostics.Select<Diagnostic, Action>(diagnostic => {
                     var source = diagnostic.Location.SourceTree;
                     return () => Assert.Fail(
                         $"Diagnostic: {diagnostic.Id}:\n{diagnostic.GetMessage()}\nat: {GetSourceTextLocationWithContext(source, diagnostic.Location)}\nof: {source.GetText()}"
@@ -119,7 +124,10 @@ public sealed class GeneratorTest(
         public ImmutableArray<SyntaxTree> GeneratedTrees => result.GeneratedTrees;
         public GeneratorDriverRunResult RunResult => result;
 
-        /// <summary>Why each source output was produced in this run, e.g. <see cref="IncrementalStepRunReason.Cached"/> if nothing changed.</summary>
+        /// <summary>
+        ///     Why each source output was produced in this run, e.g. <see cref="IncrementalStepRunReason.Cached" /> if
+        ///     nothing changed.
+        /// </summary>
         public ImmutableArray<IncrementalStepRunReason> OutputReasons => [
             .. result.Results
                 .SelectMany(x => x.TrackedOutputSteps)

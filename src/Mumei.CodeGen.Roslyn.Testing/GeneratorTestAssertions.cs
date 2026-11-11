@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using Mumei.CodeGen.Roslyn.Testing.Diffing;
 using Xunit.Sdk;
 
 namespace Mumei.CodeGen.Roslyn.Testing;

@@ -1,7 +1,7 @@
-namespace Mumei.CodeGen.Roslyn.Testing;
+namespace Mumei.CodeGen.Roslyn.Testing.Diffing;
 
 /// <summary>
-/// Controls how two source texts are compared. Line endings are always normalized.
+///     Controls how two source texts are compared. Line endings are always normalized.
 /// </summary>
 public sealed record SourceComparisonOptions {
     public static readonly SourceComparisonOptions Default = new();
@@ -10,8 +10,8 @@ public sealed record SourceComparisonOptions {
     public WhitespaceHandling Whitespace { get; init; } = WhitespaceHandling.Normalize;
 
     /// <summary>
-    /// Ignore lines that only contain whitespace. Blank lines at the start and end of a text are
-    /// always ignored unless <see cref="Whitespace"/> is <see cref="WhitespaceHandling.Exact"/>.
+    ///     Ignore lines that only contain whitespace. Blank lines at the start and end of a text are
+    ///     always ignored unless <see cref="Whitespace" /> is <see cref="WhitespaceHandling.Exact" />.
     /// </summary>
     public bool IgnoreBlankLines { get; init; }
 
@@ -29,6 +29,6 @@ public enum WhitespaceHandling {
     /// <summary>Leading and trailing whitespace of each line (e.g. indentation) is ignored.</summary>
     IgnoreIndentation,
 
-    /// <summary>Like <see cref="IgnoreIndentation"/>, and any run of whitespace within a line equals a single space.</summary>
+    /// <summary>Like <see cref="IgnoreIndentation" />, and any run of whitespace within a line equals a single space.</summary>
     Normalize
 }

@@ -1,4 +1,4 @@
-namespace Mumei.CodeGen.Roslyn.Testing;
+namespace Mumei.CodeGen.Roslyn.Testing.Diffing;
 
 internal enum AlignmentOp : byte {
     None,

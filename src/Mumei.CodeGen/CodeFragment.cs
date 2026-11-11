@@ -31,6 +31,9 @@ public readonly record struct CodeFragment {
         else if (options.Contains("qualified") || options.Contains("q")) {
             name = RuntimeTypeSerializer.GetTypeFullName(type, false);
         }
+        else if (options.Contains("namespace") || options.Contains("ns")) {
+            name = type.Namespace ?? "";
+        }
         else {
             name = type.Name;
         }

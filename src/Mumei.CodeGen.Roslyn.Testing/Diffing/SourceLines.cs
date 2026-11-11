@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Mumei.CodeGen.Roslyn.Testing;
+namespace Mumei.CodeGen.Roslyn.Testing.Diffing;
 
 /// <summary>The lines of a text along with the normalized keys of the lines that take part in a comparison.</summary>
 internal sealed class SourceLines {
@@ -13,7 +13,7 @@ internal sealed class SourceLines {
     /// <summary>All lines of the original text.</summary>
     public string[] All { get; }
 
-    /// <summary>Indices into <see cref="All"/> of the lines that are compared.</summary>
+    /// <summary>Indices into <see cref="All" /> of the lines that are compared.</summary>
     public int[] Compared { get; }
 
     /// <summary>The normalized comparison key of each compared line.</summary>
@@ -71,18 +71,18 @@ internal sealed class SourceLines {
 }
 
 /// <summary>
-/// A single expected line which may contain placeholders.
-/// <list type="bullet">
-/// <item><c>/*...*/</c> within a line matches any text in that line.</item>
-/// <item>A line consisting only of <c>// ...</c> or <c>/*...*/</c> matches any number of lines (including none).</item>
-/// </list>
+///     A single expected line which may contain placeholders.
+///     <list type="bullet">
+///         <item><c>/*...*/</c> within a line matches any text in that line.</item>
+///         <item>A line consisting only of <c>// ...</c> or <c>/*...*/</c> matches any number of lines (including none).</item>
+///     </list>
 /// </summary>
 internal sealed class LinePattern {
     public const string AnyText = "/*...*/";
     public const string AnyLines = "// ...";
+    private readonly string[]? _parts;
 
     private readonly string _text;
-    private readonly string[]? _parts;
 
     private LinePattern(string text, string[]? parts, bool isAnyLines) {
         _text = text;

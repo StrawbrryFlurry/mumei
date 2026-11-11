@@ -1,4 +1,4 @@
-namespace Mumei.CodeGen.Roslyn.Testing;
+namespace Mumei.CodeGen.Roslyn.Testing.Diffing;
 
 /// <summary>A range of characters within a single line.</summary>
 public readonly record struct SourceTextRange(int Start, int Length) {
@@ -6,13 +6,11 @@ public readonly record struct SourceTextRange(int Start, int Length) {
 }
 
 /// <summary>
-/// Determines which parts of a changed line differ. Lines are split into identifiers / numbers, whitespace runs and
-/// single punctuation characters, which reads much better for code than a character based diff
-/// (<c>int</c> → <c>long</c> is reported as a whole instead of <c>i[n]t</c> → <c>lo[n]g</c>).
+///     Determines which parts of a changed line differ. Lines are split into identifiers / numbers, whitespace runs and
+///     single punctuation characters, which reads much better for code than a character based diff
+///     (<c>int</c> → <c>long</c> is reported as a whole instead of <c>i[n]t</c> → <c>lo[n]g</c>).
 /// </summary>
 internal static class TokenDiff {
-    public readonly record struct Result(double Similarity, SourceTextRange[] Expected, SourceTextRange[] Actual);
-
     public static Result Compute(
         string expected,
         string actual,
@@ -20,15 +18,15 @@ internal static class TokenDiff {
         bool matchAnyPrefix = false,
         bool matchAnySuffix = false
     ) {
-        var expectedTokens = Tokenize(expected, whitespace, parsePlaceholders: true, matchAnyPrefix, matchAnySuffix);
-        var actualTokens = Tokenize(actual, whitespace, parsePlaceholders: false, false, false);
+        var expectedTokens = Tokenize(expected, whitespace, true, matchAnyPrefix, matchAnySuffix);
+        var actualTokens = Tokenize(actual, whitespace, false, false, false);
 
         var steps = SequenceAligner.Align(
             expectedTokens.Count,
             actualTokens.Count,
             (e, a) => TokensEqual(expected, expectedTokens[e], actual, actualTokens[a], whitespace),
             e => expectedTokens[e].Kind == TokenKind.Placeholder,
-            partial: false
+            false
         );
 
         var expectedDiffs = new List<int>();
@@ -158,6 +156,8 @@ internal static class TokenDiff {
 
         return tokens;
     }
+
+    public readonly record struct Result(double Similarity, SourceTextRange[] Expected, SourceTextRange[] Actual);
 
     private enum TokenKind : byte {
         Word,

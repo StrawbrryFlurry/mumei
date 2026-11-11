@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Mumei.CodeGen.Roslyn.Testing;
+namespace Mumei.CodeGen.Roslyn.Testing.Diffing;
 
 internal static class SourceDiffFormatter {
     private const string Separator = " │ ";
