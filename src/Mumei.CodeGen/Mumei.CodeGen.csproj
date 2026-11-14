@@ -3,5 +3,7 @@
         <TargetFramework>$(AnalyzerTargetFramework)</TargetFramework>
 
         <IsRoslynComponent>true</IsRoslynComponent>
+
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 </Project>

@@ -1,4 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <RootNamespace>Mumei.CodeGen.Roslyn.Testing.Tests</RootNamespace>
+    </PropertyGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\src\Mumei.CodeGen.Roslyn.Testing\Mumei.CodeGen.Roslyn.Testing.csproj"/>
     </ItemGroup>

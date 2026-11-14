@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -13,6 +14,7 @@ public sealed class TestCompilationBuilder {
 
     private readonly Dictionary<string, MetadataReference> _metadataReferences = new();
     private readonly List<SyntaxTree> _sources = new();
+    private readonly List<(CodeFragment Fragment, bool Async)> _fragments = [];
 
     private readonly List<string> _supressedDiagnosticIds = new();
 
@@ -63,6 +65,12 @@ public sealed class TestCompilationBuilder {
         return AddSource(sourceFile.ToString());
     }
 
+
+    public TestCompilationBuilder AddFragment([StringSyntax("cs")] CodeFragment fragment, bool async = false) {
+        _fragments.Add((fragment, async));
+        return this;
+    }
+
     public TestCompilationBuilder AddSource([StringSyntax("cs")] string sourceFile) {
         return AddSource($"TestSourceFile_{Guid.NewGuid():N}", sourceFile);
     }
@@ -92,6 +100,7 @@ public sealed class TestCompilationBuilder {
 
     private Compilation CreateCompilation() {
         AddGlobalUsings();
+        EmitFragmentsAsSource();
         UpdateSyntaxTreesWithParseOptions();
         IncludeAppDomainMetadataReferences();
 
@@ -174,5 +183,32 @@ public sealed class TestCompilationBuilder {
 
         var namespaces = string.Join(";", _interceptorsAllowedIn);
         return new KeyValuePair<string, string>("InterceptorsNamespaces", namespaces);
+    }
+
+    private void EmitFragmentsAsSource() {
+        if (_fragments.Count == 0) {
+            return;
+        }
+
+        var fragmentsFile = new StringBuilder();
+        fragmentsFile.AppendLine(
+            """
+            public static class __FragmentOutput {
+            """
+        );
+
+        var fragmentId = 0;
+        foreach (var codeFragment in _fragments) {
+            var asyncModifier = codeFragment.Async ? "async " : "";
+            var returnType = codeFragment.Async ? typeof(Task).FullName : "void";
+            fragmentsFile.AppendLine($$"""public static{{asyncModifier}} {{returnType}} __GeneratedFragmentMethod_{{fragmentId}}() {""");
+            fragmentsFile.AppendLine(codeFragment.Fragment.ToString());
+            fragmentsFile.AppendLine("}");
+            fragmentId++;
+        }
+
+        fragmentsFile.Append('}');
+
+        AddSource("CompilationFragments.g.cs", fragmentsFile.ToString());
     }
 }

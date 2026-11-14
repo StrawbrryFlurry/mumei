@@ -24,9 +24,9 @@
         <Project Path="src/Mumei.CodeGen.Playground/Mumei.CodeGen.Playground.csproj" />
         <Project Path="src/Mumei.CodeGen.Playground.Generator/Mumei.CodeGen.Playground.Generator.csproj" />
         <Project Path="src/Mumei.CodeGen.Roslyn.Testing/Mumei.CodeGen.Roslyn.Testing.csproj" />
-        <Project Path="test/Mumei.CodeGen.Roslyn.Testing.Tests/Mumei.CodeGen.Roslyn.Testing.Tests.csproj" />
         <Project Path="src/Mumei.CodeGen.Roslyn/Mumei.CodeGen.Roslyn.csproj" />
         <Project Path="src/Mumei.CodeGen/Mumei.CodeGen.csproj" />
+        <Project Path="test\Mumei.CodeGen.Roslyn.Tests\Mumei.CodeGen.Roslyn.Tests.csproj" />
     </Folder>
     <Folder Name="/_Playground/">
         <Project Path="src/Mumei.DependencyInjection.Playground/Mumei.DependencyInjection.Playground.csproj" />

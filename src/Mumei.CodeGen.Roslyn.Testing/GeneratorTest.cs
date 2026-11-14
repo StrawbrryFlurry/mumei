@@ -18,6 +18,15 @@ public sealed class GeneratorTest(
         return new GeneratorTest(new TestCompilationBuilder(), [new TGenerator()]);
     }
 
+    public static GeneratorTest ForAdHoc(
+        Action<TestCompilationBuilder> configureCompilation,
+        Action<IncrementalGeneratorInitializationContext> generatorImpl
+    ) {
+        var compilationBuilder = new TestCompilationBuilder();
+        configureCompilation(compilationBuilder);
+        return new GeneratorTest(compilationBuilder, [new AdHocSourceGenerator(generatorImpl)]);
+    }
+
     public static GeneratorTest For<TGenerator>(params DeclarationSourceComponent[] files)
         where TGenerator : IIncrementalGenerator, new() {
         var builder = new TestCompilationBuilder();
@@ -169,5 +178,11 @@ public sealed class GeneratorTest(
         public void UpdateCompilation(Func<Compilation, Compilation> updateCompilation) {
             _updates.Add(updateCompilation);
         }
+    }
+}
+
+internal sealed class AdHocSourceGenerator(Action<IncrementalGeneratorInitializationContext> impl) : IIncrementalGenerator {
+    public void Initialize(IncrementalGeneratorInitializationContext context) {
+        impl(context);
     }
 }
